@@ -30,8 +30,7 @@ Matthias Andreas Benkard
 [[building]]
 == Building a JAR
 
-To build an executable JAR at
-`target/aendggner-${REVISION}-shaded.jar`:
+To build an executable JAR at `target/aendggner-${REVISION}.jar`:
 
 [source,shell script]
 ----
