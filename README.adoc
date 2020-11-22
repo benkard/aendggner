@@ -1,0 +1,62 @@
+= ÄndGgner -- Programmbibliothek zur Konsolidierung von Änderungsgesetzen des Bundes und der Länder
+Matthias Andreas Benkard
+// Meta
+:experimental:
+:data-uri:
+:sectnums:
+:toc:
+:stem:
+:toclevels: 2
+:description: ÄndGgner Manual
+:keywords: mulk
+// Settings
+:icons: font
+:source-highlighter: pygments
+
+
+== Resources
+
+|===
+|Resource |Links
+
+|Public Artifact
+|https://bintray.com/mulk/maven/aendggner[Bintray]
+
+|Bug Tracker
+|MantisBT
+|===
+
+
+[[building]]
+== Building a JAR
+
+To build an executable JAR at
+`target/aendggner-${REVISION}-shaded.jar`:
+
+[source,shell script]
+----
+./mvnw package
+----
+
+`${REVISION}` defaults to `0.1.0-SNAPSHOT` unless you override it by
+passing the `-Drevision` flag to `mvnw`.
+
+
+== Running the Command Line Application
+
+To run the command line application after <<building,building>> it:
+
+[source,shell script]
+----
+./mvnw exec:java
+----
+
+
+== Running the Tests
+
+To build and run the tests:
+
+[source,shell script]
+----
+./mvnw verify
+----
