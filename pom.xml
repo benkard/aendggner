@@ -30,8 +30,12 @@
     <basic-annotations.version>0.2.0</basic-annotations.version>
     <findbugs-jsr305.version>3.0.2</findbugs-jsr305.version>
     <google.java.format.version>1.8</google.java.format.version>
+    <itext7.version>7.1.13</itext7.version>
     <kotlin-annotations.version>1.4.10</kotlin-annotations.version>
+    <lanterna.version>3.0.4</lanterna.version>
     <picocli.version>4.3.2</picocli.version>
+    <pdfocr.version>1.0.2</pdfocr.version>
+    <term4j.version>0.4.0</term4j.version>
   </properties>
 
   <dependencies>
@@ -56,10 +60,47 @@
       <scope>provided</scope>
     </dependency>
 
+    <!-- Command line parsing -->
     <dependency>
       <groupId>info.picocli</groupId>
       <artifactId>picocli</artifactId>
       <version>${picocli.version}</version>
+    </dependency>
+
+    <!-- PDF manipulation -->
+    <dependency>
+      <groupId>com.itextpdf</groupId>
+      <artifactId>itext7-core</artifactId>
+      <version>${itext7.version}</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>com.itextpdf</groupId>
+      <artifactId>pdfocr-root</artifactId>
+      <version>${pdfocr.version}</version>
+      <type>pom</type>
+    </dependency>
+    <dependency>
+      <groupId>com.itextpdf</groupId>
+      <artifactId>pdfocr-api</artifactId>
+      <version>${pdfocr.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.itextpdf</groupId>
+      <artifactId>pdfocr-tesseract4</artifactId>
+      <version>${pdfocr.version}</version>
+    </dependency>
+
+    <!-- Terminal output -->
+    <dependency>
+      <groupId>io.github.dgroup</groupId>
+      <artifactId>term4j</artifactId>
+      <version>${term4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.googlecode.lanterna</groupId>
+      <artifactId>lanterna</artifactId>
+      <version>${lanterna.version}</version>
     </dependency>
 
   </dependencies>
