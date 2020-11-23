@@ -36,6 +36,7 @@
     <picocli.version>4.3.2</picocli.version>
     <pdfocr.version>1.0.2</pdfocr.version>
     <term4j.version>0.4.0</term4j.version>
+    <tika.version>1.24.1</tika.version>
   </properties>
 
   <dependencies>
@@ -67,28 +68,31 @@
       <version>${picocli.version}</version>
     </dependency>
 
-    <!-- PDF manipulation -->
+    <!-- Document reading -->
     <dependency>
-      <groupId>com.itextpdf</groupId>
-      <artifactId>itext7-core</artifactId>
-      <version>${itext7.version}</version>
-      <type>pom</type>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-core</artifactId>
+      <version>${tika.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.itextpdf</groupId>
-      <artifactId>pdfocr-root</artifactId>
-      <version>${pdfocr.version}</version>
-      <type>pom</type>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-bundle</artifactId>
+      <version>${tika.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.itextpdf</groupId>
-      <artifactId>pdfocr-api</artifactId>
-      <version>${pdfocr.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.itextpdf</groupId>
-      <artifactId>pdfocr-tesseract4</artifactId>
-      <version>${pdfocr.version}</version>
+      <groupId>net.sourceforge.tess4j</groupId>
+      <artifactId>tess4j</artifactId>
+      <version>4.5.1</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>jcl-over-slf4j</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.slf4j</groupId>
+          <artifactId>log4j-over-slf4j</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <!-- Terminal output -->
