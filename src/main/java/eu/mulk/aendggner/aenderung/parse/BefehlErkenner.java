@@ -8,6 +8,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Neufassung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Streichung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturEinfuegung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturErsetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Umnummerierung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WoerterEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortAnker;
@@ -16,6 +17,7 @@ import eu.mulk.aendggner.aenderung.Stelle;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Erkennt einzelne Änderungsbefehle in platzhalter-substituiertem Text (siehe {@link
@@ -35,6 +37,14 @@ final class BefehlErkenner {
 
   private static final Pattern NEUFASSUNG =
       Pattern.compile("^(.+?) (?:wird|werden) wie folgt gefasst: " + Z + "\\.?$");
+
+  // „§ 2 Absatz 2 wird durch die folgenden Absätze 2 und 3 ersetzt: „…““ (neues BGBl-Format);
+  // auch „Die Überschrift wird durch die folgende Überschrift ersetzt: „…““ (Entwürfe).
+  private static final Pattern STRUKTUR_ERSETZUNG =
+      Pattern.compile(
+          "^(?:In )?(.+?) (?:wird|werden) durch (?:den |die |das )?folgende[nrs]? (.+?) ersetzt: "
+              + Z
+              + "\\.?$");
 
   private static final Pattern ERSETZUNG =
       Pattern.compile(
@@ -58,10 +68,15 @@ final class BefehlErkenner {
               + Z
               + " ersetzt\\.$");
 
+  // Auch die Verbundform „wird der Punkt am Ende durch ein Komma und die Wörter „…“ ersetzt“.
   private static final Pattern SATZZEICHEN_ERSETZUNG =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (der Punkt|das Komma|das Semikolon) am Ende durch "
-              + "(ein Komma|einen Punkt|ein Semikolon|"
+              + "(ein Komma und "
+              + WOERTER
+              + " "
+              + Z
+              + "|ein Komma|einen Punkt|ein Semikolon|"
               + WOERTER
               + " "
               + Z
@@ -91,19 +106,19 @@ final class BefehlErkenner {
 
   private static final Pattern STRUKTUR_EINFUEGUNG =
       Pattern.compile(
-          "^(Nach|Vor) (.+?) (?:wird|werden) (?:der |die |das )?folgende[rs]? (.+?) eingefügt: "
+          "^(Nach|Vor) (.+?) (?:wird|werden) (?:der |die |das )?folgende[nrs]? (.+?) eingefügt: "
               + Z
               + "\\.?$");
 
   private static final Pattern STRUKTUR_ANFUEGUNG_MIT_STELLE =
       Pattern.compile(
-          "^(?:Dem|Der) (.+?) (?:wird|werden) (?:der |die |das )?folgende[rs]? (.+?) angefügt: "
+          "^(?:Dem|Der) (.+?) (?:wird|werden) (?:der |die |das )?folgende[nrs]? (.+?) angefügt: "
               + Z
               + "\\.?$");
 
   private static final Pattern STRUKTUR_ANFUEGUNG =
       Pattern.compile(
-          "^(?:Der |Die |Das )?[Ff]olgende[rs]? (.+?) (?:wird|werden) angefügt: " + Z + "\\.?$");
+          "^(?:Der |Die |Das )?[Ff]olgende[nrs]? (.+?) (?:wird|werden) angefügt: " + Z + "\\.?$");
 
   private static final Pattern AUFHEBUNG = Pattern.compile("^(.+?) (?:wird|werden) aufgehoben\\.$");
 
@@ -120,10 +135,19 @@ final class BefehlErkenner {
               + Z
               + "\\.?$");
 
+  // Variante innerhalb eines Kontextrahmens „Die Inhaltsübersicht wird wie folgt geändert:“.
+  private static final Pattern ANGABE_EINFUEGUNG =
+      Pattern.compile(
+          "^(Nach|Vor) der Angabe zu (§ \\S+?) (?:wird|werden) "
+              + "(?:die |der |das )?folgenden? Angabe(?:n)? eingefügt: "
+              + Z
+              + "\\.?$");
+
   private static final Pattern EBENE_BEZEICHNUNG =
       Pattern.compile(
           "^(?:§ (\\d+[a-z]?)|Absatz (\\d+[a-z]?)|Satz(?: (\\d+[a-z]?))?|Sätze"
-              + "|Nummer (\\d+[a-z]?)|Buchstabe ([a-z]{1,3}))$");
+              + "|Nummer (\\d+[a-z]?)|Buchstabe ([a-z]{1,3})"
+              + "|(Absätze .+|Nummern .+|Buchstaben .+))$");
 
   private BefehlErkenner() {}
 
@@ -155,6 +179,26 @@ final class BefehlErkenner {
           .map(s -> new Neufassung(kontext.plus(s), neuerText, provenienz));
     }
 
+    if ((m = STRUKTUR_ERSETZUNG.matcher(text)).matches()) {
+      var neuerText = zitat(zitate, m.group(3));
+      var ziel = m.group(2).strip();
+      var stelle = StellenParser.parse(m.group(1));
+      if (stelle.isEmpty()) {
+        return Optional.empty();
+      }
+      // „durch die folgende Überschrift ersetzt“ ist eine Neufassung der Überschrift,
+      // „§ 19 wird durch den folgenden § 19 ersetzt“ eine Neufassung des Paragraphen.
+      if (ziel.equals("Überschrift") || ziel.matches("§\\s*\\d+[a-z]?")) {
+        return Optional.of(new Neufassung(kontext.plus(stelle.get()), neuerText, provenienz));
+      }
+      var ebene = strukturEbene(ziel);
+      if (ebene == null) {
+        return Optional.empty();
+      }
+      return Optional.of(
+          new StrukturErsetzung(kontext.plus(stelle.get()), ebene, neuerText, provenienz));
+    }
+
     if ((m = ERSETZUNG.matcher(text)).matches()) {
       var jeweils = m.group(2) != null || text.contains(" jeweils durch ");
       var alt = wortZitat(zitate, m.group(3));
@@ -179,7 +223,15 @@ final class BefehlErkenner {
 
     if ((m = SATZZEICHEN_ERSETZUNG.matcher(text)).matches()) {
       var alt = satzzeichen(m.group(2));
-      var neu = m.group(4) != null ? wortZitat(zitate, m.group(4)) : satzzeichen(m.group(3));
+      String neu;
+      if (m.group(4) != null) {
+        // „durch ein Komma und die Wörter „…“ ersetzt“
+        neu = ", " + wortZitat(zitate, m.group(4));
+      } else if (m.group(5) != null) {
+        neu = wortZitat(zitate, m.group(5));
+      } else {
+        neu = satzzeichen(m.group(3));
+      }
       var neuText = neu;
       return StellenParser.parse(m.group(1))
           .map(s -> new Ersetzung(kontext.plus(s), alt, neuText, false, true, provenienz));
@@ -205,9 +257,10 @@ final class BefehlErkenner {
                       kontext.plus(s), new WortAnker.VorKommaAmEnde(), woerter, provenienz));
     }
 
-    if ((m = INHALTSUEBERSICHT_EINFUEGUNG.matcher(text)).matches()) {
+    if ((m = INHALTSUEBERSICHT_EINFUEGUNG.matcher(text)).matches()
+        || (m = ANGABE_EINFUEGUNG.matcher(text)).matches()) {
       var anker =
-          m.group(1).equals("nach")
+          m.group(1).equalsIgnoreCase("nach")
               ? new WortAnker.NachWoertern("Angabe zu " + m.group(2))
               : new WortAnker.VorWoertern("Angabe zu " + m.group(2));
       return Optional.of(
@@ -319,8 +372,26 @@ final class BefehlErkenner {
     if (m.group(5) != null) {
       return Optional.of(new EbeneBezeichnung(Ebene.BUCHSTABE, m.group(5)));
     }
+    if (m.group(6) != null) {
+      // Pluralformen („Absätze 6 und 7“, „Nummern 4 bis 7“): Die Bezeichnungen der neuen
+      // Einheiten stehen ohnehin im zitierten Block.
+      var ebene = strukturEbene(m.group(6));
+      return ebene == null ? Optional.empty() : Optional.of(new EbeneBezeichnung(ebene, null));
+    }
     // „Satz“, „Satz 3“ oder „Sätze“.
     return Optional.of(new EbeneBezeichnung(Ebene.SATZ, m.group(3)));
+  }
+
+  /** Zielangabe einer Struktur-Ersetzung („Absätze 2 und 3“, „Sätze“, „Nummer 4a“) → Ebene. */
+  private static @Nullable Ebene strukturEbene(String ziel) {
+    var erstesWort = ziel.split("\\s+", 2)[0];
+    return switch (erstesWort) {
+      case "Absatz", "Absätze" -> Ebene.ABSATZ;
+      case "Satz", "Sätze" -> Ebene.SATZ;
+      case "Nummer", "Nummern" -> Ebene.NUMMER;
+      case "Buchstabe", "Buchstaben" -> Ebene.BUCHSTABE;
+      default -> null;
+    };
   }
 
   private static Stelle.Komponente komponenteFuer(String ebene, String nummer) {

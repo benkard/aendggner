@@ -27,6 +27,8 @@ final class GliederungsScanner {
   private static final Pattern BUCHSTABE_MARKER = Pattern.compile("^([a-z]\\d*)\\)\\s+(.*)$");
   private static final Pattern DOPPELBUCHSTABE_MARKER =
       Pattern.compile("^(([a-z])\\2\\d*)\\)\\s+(.*)$");
+  private static final Pattern DREIFACHBUCHSTABE_MARKER =
+      Pattern.compile("^(([a-z])\\2\\2\\d*)\\)\\s+(.*)$");
 
   private GliederungsScanner() {}
 
@@ -66,6 +68,10 @@ final class GliederungsScanner {
   private record Marker(String label, int ebene, String rest) {}
 
   private static Marker erkenneMarker(String zeile) {
+    var dreifach = DREIFACHBUCHSTABE_MARKER.matcher(zeile);
+    if (dreifach.matches()) {
+      return new Marker(dreifach.group(1), 4, dreifach.group(3));
+    }
     var doppel = DOPPELBUCHSTABE_MARKER.matcher(zeile);
     if (doppel.matches()) {
       return new Marker(doppel.group(1), 3, doppel.group(3));
@@ -98,6 +104,7 @@ final class GliederungsScanner {
       case 1 -> marker.label.equals("1");
       case 2 -> marker.label.equals("a");
       case 3 -> marker.label.equals("aa");
+      case 4 -> marker.label.equals("aaa");
       default -> false;
     };
   }

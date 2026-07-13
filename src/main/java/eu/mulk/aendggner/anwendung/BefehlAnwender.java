@@ -7,6 +7,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Neufassung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Streichung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturEinfuegung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturErsetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Umnummerierung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.UnbekannterBefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WoerterEinfuegung;
@@ -80,6 +81,7 @@ public final class BefehlAnwender {
         case Streichung s -> wendeStreichungAn(normen, s);
         case WoerterEinfuegung w -> wendeWoerterEinfuegungAn(normen, w);
         case Neufassung n -> wendeNeufassungAn(normen, n);
+        case StrukturErsetzung s -> wendeStrukturErsetzungAn(normen, s);
         case StrukturEinfuegung s -> wendeStrukturEinfuegungAn(normen, s);
         case Anfuegung a -> wendeAnfuegungAn(normen, a);
         case Aufhebung a -> wendeAufhebungAn(normen, a);
@@ -240,6 +242,56 @@ public final class BefehlAnwender {
 
     // Neufassung eines Satzes / einer Nummer / eines Buchstabens: Bereich ersetzen.
     return bearbeiteText(normen, befehl, text -> TextErgebnis.ok(befehl.neuerText().strip()));
+  }
+
+  /** Ein Ziel (Absatz, Satz, Nummer, Buchstabe) wird durch einen Block ersetzt (ggf. 1 → N). */
+  private static AngewandteAenderung wendeStrukturErsetzungAn(
+      List<Norm> normen, StrukturErsetzung befehl) {
+    return switch (befehl.ebene()) {
+      case ABSATZ -> {
+        var stelle = befehl.stelle();
+        if (stelle.absatz().isEmpty()) {
+          yield manuell(befehl, "Ersetzungsziel nennt keinen Absatz: " + stelle.anzeigeText());
+        }
+        var ergebnis = StellenAufloeser.aufloese(gesetzAus(normen), stelle);
+        if (ergebnis instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
+          yield manuell(befehl, nicht.begruendung());
+        }
+        var fundstelle = ((StellenAufloeser.Ergebnis.Gefunden) ergebnis).fundstelle();
+        var norm = normen.get(fundstelle.normIndex());
+        var absaetze = new ArrayList<>(norm.absaetze());
+        absaetze.remove((int) fundstelle.absatzIndex());
+        absaetze.addAll(fundstelle.absatzIndex(), parseAbsaetze(befehl.text()));
+        normen.set(fundstelle.normIndex(), norm.mitAbsaetzen(absaetze));
+        yield angewandt(befehl, norm.enbez());
+      }
+      case SATZ ->
+          bearbeiteBereich(
+              normen,
+              befehl,
+              (text, bereich) ->
+                  TextErgebnis.ok(
+                      text.substring(0, bereich.von())
+                          + befehl.text().strip().replaceAll("\\s+", " ")
+                          + text.substring(bereich.bis())));
+      case NUMMER, BUCHSTABE ->
+          bearbeiteBereich(
+              normen,
+              befehl,
+              (text, bereich) -> {
+                var einrueckung = einrueckungVon(text, bereich.von());
+                var ersatz =
+                    normalisiereZitatText(befehl.text())
+                        .lines()
+                        .map(zeile -> einrueckung + zeile.strip())
+                        .reduce((a, b) -> a + "\n" + b)
+                        .orElse("");
+                return TextErgebnis.ok(
+                    text.substring(0, bereich.von()) + ersatz + text.substring(bereich.bis()));
+              });
+      case PARAGRAPH ->
+          manuell(befehl, "Struktur-Ersetzung ganzer Paragraphen wird nicht unterstützt.");
+    };
   }
 
   private static AngewandteAenderung wendeStrukturEinfuegungAn(
@@ -609,23 +661,41 @@ public final class BefehlAnwender {
 
     var absatzStart = ABSATZ_MARKER.matcher(text);
     int erster = absatzStart.find() ? absatzStart.start() : -1;
-    var kopf = (erster >= 0 ? text.substring(0, erster) : text).strip();
-    if (!kopf.isEmpty()) {
-      titel = kopf.replaceFirst("^§\\s*\\S+\\s*", "").replaceAll("\\s+", " ").strip();
-      if (titel.isEmpty()) {
-        titel = vorlage.titel();
+
+    if (erster >= 0) {
+      var kopf = text.substring(0, erster).strip();
+      if (!kopf.isEmpty()) {
+        titel = kopf.replaceFirst("^§\\s*\\S+\\s*", "").replaceAll("\\s+", " ").strip();
+        if (titel.isEmpty()) {
+          titel = vorlage.titel();
+        }
       }
+      return new Norm(
+          enbez, titel, vorlage.gliederung(), parseAbsaetze(text.substring(erster)), false);
     }
 
-    var absaetze = erster >= 0 ? parseAbsaetze(text.substring(erster)) : List.<Absatz>of();
-    if (absaetze.isEmpty() && kopf.isEmpty()) {
-      absaetze = List.of(new Absatz(null, text));
-    } else if (absaetze.isEmpty()) {
-      // Kein Absatzmarker: gesamter Text nach der Überschrift ist ein unnummerierter Absatz.
-      absaetze = List.of();
+    // Ohne Absatzmarker (Einzelabsatz-Normen wie „§ 19 Außerkrafttreten Dieses Gesetz tritt …“):
+    // Steht „§ N“ allein auf der ersten Zeile, ist die zweite Zeile die Überschrift und der Rest
+    // der Normtext.
+    var zeilen = text.lines().map(String::strip).filter(z -> !z.isEmpty()).toList();
+    if (zeilen.size() >= 3 && zeilen.get(0).matches("§\\s*\\d+[a-z]?")) {
+      titel = zeilen.get(1);
+      var rest = String.join("\n", zeilen.subList(2, zeilen.size()));
+      return new Norm(
+          enbez,
+          titel,
+          vorlage.gliederung(),
+          List.of(new Absatz(null, normalisiereZitatText(rest))),
+          false);
     }
-
-    return new Norm(enbez, titel, vorlage.gliederung(), absaetze, false);
+    // Fallback: gesamter Text (ohne „§ N“-Präfix) als unnummerierter Absatz, Titel unverändert.
+    var inhalt = text.replaceFirst("^§\\s*\\S+\\s*", "");
+    return new Norm(
+        enbez,
+        titel,
+        vorlage.gliederung(),
+        List.of(new Absatz(null, normalisiereZitatText(inhalt))),
+        false);
   }
 
   /** Zerlegt zitierten Text in Absätze anhand der „(n)“-Marker. */

@@ -247,6 +247,106 @@ class BefehlErkennerTest {
   }
 
   @Test
+  void erkenntStrukturErsetzungEinesAbsatzes() {
+    // Neues BGBl-Format (3. UWGÄndG 2026, Artikel 1 Nummer 1).
+    var befehl =
+        erkenne(
+            "§ 2 Absatz 2 wird durch die folgenden Absätze 2 und 3 ersetzt: „(2) Im Sinne"
+                + " dieses Gesetzes ist … (3) Weiteres.“",
+            Stelle.LEER);
+
+    assertThat(befehl).containsInstanceOf(Aenderungsbefehl.StrukturErsetzung.class);
+    var ersetzung = (Aenderungsbefehl.StrukturErsetzung) befehl.orElseThrow();
+    assertThat(ersetzung.stelle().anzeigeText()).isEqualTo("§ 2 Absatz 2");
+    assertThat(ersetzung.ebene()).isEqualTo(Ebene.ABSATZ);
+    assertThat(ersetzung.text()).startsWith("(2) Im Sinne");
+  }
+
+  @Test
+  void erkenntStrukturErsetzungEinesSatzes() {
+    var befehl =
+        erkenne(
+            "Satz 3 wird durch die folgenden Sätze ersetzt: „Erster neuer Satz. Zweiter"
+                + " neuer Satz.“",
+            new Stelle(List.of(new Stelle.Paragraph("13"), new Stelle.AbsatzNr("3"))));
+
+    assertThat(befehl).containsInstanceOf(Aenderungsbefehl.StrukturErsetzung.class);
+    var ersetzung = (Aenderungsbefehl.StrukturErsetzung) befehl.orElseThrow();
+    assertThat(ersetzung.stelle().anzeigeText()).isEqualTo("§ 13 Absatz 3 Satz 3");
+    assertThat(ersetzung.ebene()).isEqualTo(Ebene.SATZ);
+  }
+
+  @Test
+  void erkenntUeberschriftErsetzungAlsNeufassung() {
+    // AGG-Regierungsentwurf 2026, Artikel 1 Nummer 4 Buchstabe a.
+    var befehl =
+        erkenne(
+            "Die Überschrift wird durch die folgende Überschrift ersetzt: „§ 10 Zulässige"
+                + " unterschiedliche Behandlung wegen des Lebensalters“.",
+            new Stelle(List.of(new Stelle.Paragraph("10"))));
+
+    assertThat(befehl).containsInstanceOf(Neufassung.class);
+    assertThat(befehl.orElseThrow().stelle().betrifftUeberschrift()).isTrue();
+  }
+
+  @Test
+  void erkenntParagraphErsetzungAlsNeufassung() {
+    // ProdHaftG-Regierungsentwurf 2025, Artikel 2.
+    var befehl =
+        erkenne(
+            "§ 19 wird durch den folgenden § 19 ersetzt: „§ 19 Außerkrafttreten Dieses"
+                + " Gesetz tritt am 9. Dezember 2026 außer Kraft.“",
+            Stelle.LEER);
+
+    assertThat(befehl).containsInstanceOf(Neufassung.class);
+    assertThat(befehl.orElseThrow().stelle().anzeigeText()).isEqualTo("§ 19");
+  }
+
+  @Test
+  void erkenntPluralEinfuegung() {
+    // AGG-Regierungsentwurf 2026: „die folgenden Absätze 6 und 7“.
+    var befehl =
+        erkenne(
+            "Nach Absatz 5 werden die folgenden Absätze 6 und 7 eingefügt: „(6) Neu."
+                + " (7) Auch neu.“",
+            new Stelle(List.of(new Stelle.Paragraph("27"))));
+
+    assertThat(befehl).containsInstanceOf(StrukturEinfuegung.class);
+    var einfuegung = (StrukturEinfuegung) befehl.orElseThrow();
+    assertThat(einfuegung.ebene()).isEqualTo(Ebene.ABSATZ);
+    assertThat(einfuegung.bezeichnung()).isNull();
+  }
+
+  @Test
+  void erkenntSatzzeichenErsetzungMitWoertern() {
+    // GEG-Novelle 2023: „durch ein Komma und die Wörter … ersetzt“.
+    var befehl =
+        erkenne(
+            "In Satz 2 wird der Punkt am Ende durch ein Komma und die Wörter „sowie neue"
+                + " Anforderungen“ ersetzt.",
+            new Stelle(List.of(new Stelle.Paragraph("47"), new Stelle.AbsatzNr("1"))));
+
+    assertThat(befehl).containsInstanceOf(Ersetzung.class);
+    var ersetzung = (Ersetzung) befehl.orElseThrow();
+    assertThat(ersetzung.alt()).isEqualTo(".");
+    assertThat(ersetzung.neu()).isEqualTo(", sowie neue Anforderungen");
+    assertThat(ersetzung.amEnde()).isTrue();
+  }
+
+  @Test
+  void erkenntAngabeEinfuegungImInhaltsuebersichtsKontext() {
+    // GEG-Novelle 2023: verschachtelt unter „Die Inhaltsübersicht wird wie folgt geändert:“.
+    var kontext = new Stelle(List.of(new Stelle.Inhaltsuebersicht()));
+    var befehl =
+        erkenne(
+            "Nach der Angabe zu § 9 wird folgende Angabe eingefügt: „§ 9a" + " Länderregelung“.",
+            kontext);
+
+    assertThat(befehl).containsInstanceOf(WoerterEinfuegung.class);
+    assertThat(befehl.orElseThrow().stelle().betrifftInhaltsuebersicht()).isTrue();
+  }
+
+  @Test
   void faelltBeiBereichsbefehlenAufUnbekanntZurueck() {
     // Bereichs- und Mehrfachbefehle sind in v1 bewusst nicht unterstützt.
     assertThat(

@@ -53,11 +53,10 @@ public final class AenderungsgesetzParser {
 
       var scan = GliederungsScanner.scanne(artikel.zeilen);
       if (scan.punkte().isEmpty()) {
-        befehle.add(
-            new UnbekannterBefehl(
-                Stelle.LEER,
-                zitate.stelleZitateWiederHer(scan.vorspann()),
-                new Provenienz(artikel.label, "", zitate.stelleZitateWiederHer(scan.vorspann()))));
+        // Artikel ohne nummerierte Punkte: Der Text nach der Änderungsformel ist ein
+        // einzelner Befehl (häufig bei kleinen Folgeänderungen, z.B. „§ 19 wird durch den
+        // folgenden § 19 ersetzt: …“).
+        befehle.add(vorspannBefehl(scan.vorspann(), artikel.label, zitate));
         continue;
       }
       for (var punkt : scan.punkte()) {
@@ -66,6 +65,28 @@ public final class AenderungsgesetzParser {
     }
 
     return new ParseErgebnis(befehle, betroffeneArtikel, zitate.warnungen());
+  }
+
+  /** Versucht, den Vorspann-Rest nach der Änderungsformel als einzelnen Befehl zu erkennen. */
+  private static Aenderungsbefehl vorspannBefehl(
+      String vorspann, String artikelLabel, ZitatExtraktor.Ergebnis zitate) {
+    var normalisiert = vorspann.replaceAll("\\s+", " ").strip();
+    var provenienz = new Provenienz(artikelLabel, "", zitate.stelleZitateWiederHer(normalisiert));
+
+    int formel = normalisiert.indexOf("wird wie folgt geändert:");
+    if (formel >= 0) {
+      var befehlsText =
+          normalisiert.substring(formel + "wird wie folgt geändert:".length()).strip();
+      if (!befehlsText.isEmpty()) {
+        var befehlsProvenienz =
+            new Provenienz(artikelLabel, "", zitate.stelleZitateWiederHer(befehlsText));
+        var befehl = BefehlErkenner.erkenne(befehlsText, Stelle.LEER, zitate, befehlsProvenienz);
+        if (befehl.isPresent()) {
+          return befehl.get();
+        }
+      }
+    }
+    return new UnbekannterBefehl(Stelle.LEER, provenienz.originalText(), provenienz);
   }
 
   private static void verarbeitePunkt(
@@ -114,6 +135,11 @@ public final class AenderungsgesetzParser {
     var aktuelleZeilen = new ArrayList<String>();
 
     for (var zeile : platzhalterText.split("\n", -1)) {
+      // Gesetzentwürfe (RefE/RegE/Drucksachen): Nach dem Gesetzestext folgt der Begründungsteil
+      // — Freitext, der keine Befehle enthält und den letzten Artikel nicht verunreinigen darf.
+      if (aktuellesLabel != null && zeile.strip().equals("Begründung")) {
+        break;
+      }
       var matcher = ARTIKEL_UEBERSCHRIFT.matcher(zeile.strip());
       if (matcher.matches()) {
         if (aktuellesLabel != null) {
@@ -134,7 +160,8 @@ public final class AenderungsgesetzParser {
   /**
    * Ein Artikel betrifft das Zielgesetz, wenn seine Einleitung (Text vor dem ersten
    * Gliederungspunkt) den Namen oder die Abkürzung des Gesetzes zusammen mit der Änderungsformel
-   * nennt.
+   * nennt. Der Vergleich ist deklinationstolerant („Das Allgemeine Gleichbehandlungsgesetz“ matcht
+   * die amtliche Bezeichnung „Allgemeines Gleichbehandlungsgesetz“).
    */
   private static boolean betrifft(
       ArtikelBlock artikel, Gesetz ziel, ZitatExtraktor.Ergebnis zitate) {
@@ -143,8 +170,30 @@ public final class AenderungsgesetzParser {
     if (!vorspann.contains("wird wie folgt geändert")) {
       return false;
     }
-    return (ziel.kurzue() != null && vorspann.contains(ziel.kurzue()))
-        || (ziel.langue() != null && vorspann.contains(ziel.langue()))
+    var vorspannStamm = stammForm(vorspann);
+    return (ziel.kurzue() != null && vorspannStamm.contains(stammForm(ziel.kurzue())))
+        || (ziel.langue() != null && vorspannStamm.contains(stammForm(ziel.langue())))
         || vorspann.matches(".*\\b" + Pattern.quote(ziel.jurabk()) + "\\b.*");
+  }
+
+  private static final List<String> STAMM_SUFFIXE = List.of("es", "er", "en", "em", "e", "s", "n");
+
+  /** Reduziert jedes Wort grob auf seinen Stamm, um Deklinationsendungen zu neutralisieren. */
+  private static String stammForm(String text) {
+    var sb = new StringBuilder();
+    for (var wort : text.split("\\s+")) {
+      var stamm = wort;
+      for (var suffix : STAMM_SUFFIXE) {
+        if (stamm.length() - suffix.length() >= 4 && stamm.endsWith(suffix)) {
+          stamm = stamm.substring(0, stamm.length() - suffix.length());
+          break;
+        }
+      }
+      if (sb.length() > 0) {
+        sb.append(' ');
+      }
+      sb.append(stamm);
+    }
+    return sb.toString();
   }
 }

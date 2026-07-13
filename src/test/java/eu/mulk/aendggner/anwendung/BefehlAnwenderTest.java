@@ -9,6 +9,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Neufassung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Streichung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturEinfuegung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturErsetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Umnummerierung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.UnbekannterBefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WoerterEinfuegung;
@@ -306,6 +307,44 @@ class BefehlAnwenderTest {
     assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.MANUELL_PRUEFEN);
     assertThat(ergebnis.anzahlManuell()).isEqualTo(1);
     assertThat(ergebnis.anzahlAngewandt()).isEqualTo(0);
+  }
+
+  @Test
+  void ersetztAbsatzDurchMehrereAbsaetze() {
+    var befehl =
+        new StrukturErsetzung(
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("1")),
+            Ebene.ABSATZ,
+            "(1) Zweck ist die Erprobung. (1a) Die Erprobung ist wichtig.",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    var norm = ergebnis.neu().norm("§ 1").orElseThrow();
+    assertThat(norm.absaetze()).hasSize(3);
+    assertThat(norm.absaetze().get(0).nummer()).isEqualTo("1");
+    assertThat(norm.absaetze().get(1).nummer()).isEqualTo("1a");
+    assertThat(norm.absaetze().get(1).text()).isEqualTo("Die Erprobung ist wichtig.");
+    assertThat(norm.absaetze().get(2).nummer()).isEqualTo("2");
+  }
+
+  @Test
+  void ersetztSatzDurchMehrereSaetze() {
+    var befehl =
+        new StrukturErsetzung(
+            stelle(new Stelle.Paragraph("2"), new Stelle.SatzNr("2")),
+            Ebene.SATZ,
+            "Die Prüfung erfolgt gewissenhaft. Sie wird dokumentiert.",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "§ 2", 0))
+        .contains(
+            "Erprobung ist die Prüfung der Tauglichkeit. Die Prüfung erfolgt gewissenhaft."
+                + " Sie wird dokumentiert. Sie endet mit einem Bericht.");
   }
 
   @Test

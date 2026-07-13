@@ -44,6 +44,13 @@ public sealed interface Aenderungsbefehl {
   record Neufassung(Stelle stelle, String neuerText, Provenienz provenienz)
       implements Aenderungsbefehl {}
 
+  /**
+   * „§ 2 Absatz 2 wird durch die folgenden Absätze 2 und 3 ersetzt: „…““ — ein Ziel wird durch
+   * einen Block ersetzt, der auch mehrere neue Einheiten enthalten darf.
+   */
+  record StrukturErsetzung(Stelle stelle, Ebene ebene, String text, Provenienz provenienz)
+      implements Aenderungsbefehl {}
+
   /** „… werden nach dem Wort „A“ die Wörter „B“ eingefügt.“ */
   record WoerterEinfuegung(Stelle stelle, WortAnker anker, String woerter, Provenienz provenienz)
       implements Aenderungsbefehl {}

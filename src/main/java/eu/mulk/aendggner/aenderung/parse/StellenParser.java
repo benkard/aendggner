@@ -17,8 +17,21 @@ import java.util.regex.Pattern;
  */
 public final class StellenParser {
 
+  // „neu“/„bisherig“ beziehen sich auf den jeweils aktuellen Zwischenstand — da die Befehle
+  // sequenziell angewandt werden, ist „die neue Nummer 11“ schlicht Nummer 11.
   private static final Set<String> FUELLWOERTER =
-      Set.of("in", "der", "die", "das", "dem", "den", "des");
+      Set.of(
+          "in",
+          "der",
+          "die",
+          "das",
+          "dem",
+          "den",
+          "des",
+          "neue",
+          "neuen",
+          "bisherige",
+          "bisherigen");
 
   private static final Pattern PARAGRAPH = Pattern.compile("§");
   private static final Pattern NUMMER_WERT = Pattern.compile("\\d+[a-z]?");

@@ -5,7 +5,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.pdfbox.Loader;
-import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.tika.Tika;
 import org.jboss.logging.Logger;
 
@@ -39,11 +38,7 @@ public final class PatchTextExtraktor {
 
   private static String extrahierePdf(Path datei) throws IOException {
     try (var dokument = Loader.loadPDF(datei.toFile())) {
-      var stripper = new PDFTextStripper();
-      stripper.setSortByPosition(false);
-      stripper.setLineSeparator("\n");
-      stripper.setParagraphEnd("\n");
-      return stripper.getText(dokument);
+      return FontgroessenFilter.extrahiere(dokument);
     }
   }
 }
