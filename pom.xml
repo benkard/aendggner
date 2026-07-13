@@ -12,61 +12,54 @@
 
   <properties>
     <maven.compiler.parameters>true</maven.compiler.parameters>
-    <maven.compiler.source>15</maven.compiler.source>
-    <maven.compiler.target>15</maven.compiler.target>
+    <maven.compiler.release>21</maven.compiler.release>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <enforced.maven-version>3.6.2</enforced.maven-version>
+    <enforced.maven-version>3.9.0</enforced.maven-version>
 
-    <antrun-plugin.version>3.0.0</antrun-plugin.version>
-    <compiler-plugin.version>3.8.1</compiler-plugin.version>
-    <enforcer-plugin.version>3.0.0-M3</enforcer-plugin.version>
-    <exec-plugin.version>3.0.0</exec-plugin.version>
-    <processor-plugin.version>4.2</processor-plugin.version>
-    <resources-plugin.version>3.2.0</resources-plugin.version>
-    <shade-plugin.version>3.2.4</shade-plugin.version>
-    <spotless-plugin.version>2.4.1</spotless-plugin.version>
+    <compiler-plugin.version>3.15.0</compiler-plugin.version>
+    <dependency-plugin.version>3.11.0</dependency-plugin.version>
+    <enforcer-plugin.version>3.6.3</enforcer-plugin.version>
+    <exec-plugin.version>3.6.3</exec-plugin.version>
+    <jar-plugin.version>3.5.0</jar-plugin.version>
+    <resources-plugin.version>3.5.0</resources-plugin.version>
+    <spotless-plugin.version>3.8.0</spotless-plugin.version>
+    <surefire-plugin.version>3.5.6</surefire-plugin.version>
 
-    <basic-annotations.version>0.2.0</basic-annotations.version>
-    <findbugs-jsr305.version>3.0.2</findbugs-jsr305.version>
-    <google.java.format.version>1.8</google.java.format.version>
-    <kotlin-annotations.version>1.4.10</kotlin-annotations.version>
-    <lanterna.version>3.0.4</lanterna.version>
-    <picocli.version>4.3.2</picocli.version>
-    <pdfocr.version>1.0.2</pdfocr.version>
-    <term4j.version>0.4.0</term4j.version>
-    <tess4j.version>4.5.1</tess4j.version>
-    <tika.version>1.25</tika.version>
-    <jbig2-imageio.version>3.0.3</jbig2-imageio.version>
-    <jai-imageio-core.version>1.4.0</jai-imageio-core.version>
-    <jai-imageio-jpeg2000.version>1.3.0</jai-imageio-jpeg2000.version>
-    <sqlite-jdbc.version>3.30.1</sqlite-jdbc.version>
-    <jboss-logging.version>3.4.1.Final</jboss-logging.version>
-    <slf4j.version>1.7.30</slf4j.version>
+    <google.java.format.version>1.28.0</google.java.format.version>
+
+    <assertj.version>3.27.7</assertj.version>
+    <java-diff-utils.version>4.17</java-diff-utils.version>
+    <jboss-logging.version>3.6.3.Final</jboss-logging.version>
+    <jspecify.version>1.0.0</jspecify.version>
+    <junit.version>5.13.4</junit.version>
+    <pdfbox.version>3.0.8</pdfbox.version>
+    <picocli.version>4.7.7</picocli.version>
+    <slf4j.version>2.0.18</slf4j.version>
+    <tika.version>3.3.1</tika.version>
   </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
   <dependencies>
 
     <!-- Annotations -->
     <dependency>
-      <groupId>pl.tlinkowski.annotation</groupId>
-      <artifactId>pl.tlinkowski.annotation.basic</artifactId>
-      <version>${basic-annotations.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.code.findbugs</groupId>
-      <artifactId>jsr305</artifactId>
-      <version>${findbugs-jsr305.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-annotations-jvm</artifactId>
-      <version>${kotlin-annotations.version}</version>
-      <scope>provided</scope>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+      <version>${jspecify.version}</version>
     </dependency>
 
     <!-- Command line parsing -->
@@ -82,53 +75,6 @@
       <artifactId>jboss-logging</artifactId>
       <version>${jboss-logging.version}</version>
     </dependency>
-
-    <!-- Document reading -->
-    <dependency>
-      <groupId>org.apache.tika</groupId>
-      <artifactId>tika-core</artifactId>
-      <version>${tika.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.tika</groupId>
-      <artifactId>tika-bundle</artifactId>
-      <version>${tika.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.tika</groupId>
-      <artifactId>tika-parsers</artifactId>
-      <version>${tika.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>jcl-over-slf4j</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>jul-to-slf4j</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.pdfbox</groupId>
-      <artifactId>jbig2-imageio</artifactId>
-      <version>${jbig2-imageio.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.github.jai-imageio</groupId>
-      <artifactId>jai-imageio-core</artifactId>
-      <version>${jai-imageio-core.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.github.jai-imageio</groupId>
-      <artifactId>jai-imageio-jpeg2000</artifactId>
-      <version>${jai-imageio-jpeg2000.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.xerial</groupId>
-      <artifactId>sqlite-jdbc</artifactId>
-      <version>${sqlite-jdbc.version}</version>
-    </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-jdk14</artifactId>
@@ -136,43 +82,42 @@
     </dependency>
     <dependency>
       <groupId>org.slf4j</groupId>
-      <artifactId>log4j-over-slf4j</artifactId>
+      <artifactId>jcl-over-slf4j</artifactId>
       <version>${slf4j.version}</version>
     </dependency>
+
+    <!-- Document type detection -->
     <dependency>
-      <groupId>net.sourceforge.tess4j</groupId>
-      <artifactId>tess4j</artifactId>
-      <version>${tess4j.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>jcl-over-slf4j</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>log4j-over-slf4j</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>jul-to-slf4j</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>ch.qos.logback</groupId>
-          <artifactId>logback-classic</artifactId>
-        </exclusion>
-      </exclusions>
+      <groupId>org.apache.tika</groupId>
+      <artifactId>tika-core</artifactId>
+      <version>${tika.version}</version>
     </dependency>
 
-    <!-- Terminal output -->
+    <!-- PDF text extraction -->
     <dependency>
-      <groupId>io.github.dgroup</groupId>
-      <artifactId>term4j</artifactId>
-      <version>${term4j.version}</version>
+      <groupId>org.apache.pdfbox</groupId>
+      <artifactId>pdfbox</artifactId>
+      <version>${pdfbox.version}</version>
+    </dependency>
+
+    <!-- Text diffing -->
+    <dependency>
+      <groupId>io.github.java-diff-utils</groupId>
+      <artifactId>java-diff-utils</artifactId>
+      <version>${java-diff-utils.version}</version>
+    </dependency>
+
+    <!-- Testing -->
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>com.googlecode.lanterna</groupId>
-      <artifactId>lanterna</artifactId>
-      <version>${lanterna.version}</version>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <version>${assertj.version}</version>
+      <scope>test</scope>
     </dependency>
 
   </dependencies>
@@ -225,6 +170,12 @@
         <version>${resources-plugin.version}</version>
       </plugin>
 
+      <!-- Tests -->
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${surefire-plugin.version}</version>
+      </plugin>
+
       <!-- Google Java Code Formatter, for enforcing style conventions -->
       <plugin>
         <groupId>com.diffplug.spotless</groupId>
@@ -242,11 +193,6 @@
             </googleJavaFormat>
           </java>
         </configuration>
-      </plugin>
-
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>${antrun-plugin.version}</version>
       </plugin>
 
       <plugin>
@@ -282,6 +228,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
+        <version>${dependency-plugin.version}</version>
         <executions>
           <execution>
             <id>copy-dependencies</id>
@@ -293,6 +240,7 @@
               <outputDirectory>
                 ${project.build.directory}/libs
               </outputDirectory>
+              <includeScope>runtime</includeScope>
             </configuration>
           </execution>
         </executions>
@@ -301,7 +249,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>3.2.0</version>
+        <version>${jar-plugin.version}</version>
         <configuration>
           <archive>
             <manifest>
