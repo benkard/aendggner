@@ -3,12 +3,14 @@ package eu.mulk.aendggner.synopse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Neufassung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.UnbekannterBefehl;
 import eu.mulk.aendggner.aenderung.Provenienz;
 import eu.mulk.aendggner.aenderung.Stelle;
 import eu.mulk.aendggner.anwendung.BefehlAnwender;
 import eu.mulk.aendggner.gesetz.Absatz;
 import eu.mulk.aendggner.gesetz.Gesetz;
+import eu.mulk.aendggner.gesetz.Gliederung;
 import eu.mulk.aendggner.gesetz.Norm;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -68,6 +70,32 @@ class HtmlRendererTest {
 
     assertThat(html).contains("Manuell prüfen");
     assertThat(html).contains("Die Nummern 1 bis 3 werden aufgehoben.");
+  }
+
+  @Test
+  void wendetGliederungsUeberschriftAnUndRendertDiff() {
+    var alt =
+        new Gesetz(
+            "TestG",
+            "Testgesetz",
+            "TestG",
+            List.of(new Norm("§ 1", "Zweck", null, List.of(new Absatz("1", "Text.")), false)),
+            List.of(new Gliederung("030", "Teil 3", "Alte Überschrift")));
+    var befehl =
+        new Neufassung(
+            new Stelle(
+                List.of(new Stelle.Ueberschrift(), new Stelle.Gliederungseinheit("Teil", "3"))),
+            "Teil 3 Neue Überschrift",
+            PROV);
+
+    var anwendung = BefehlAnwender.anwenden(alt, List.of(befehl));
+    assertThat(anwendung.protokoll().get(0).status()).isEqualTo(BefehlAnwender.Status.ANGEWANDT);
+    assertThat(anwendung.neu().gliederungen().get(0).titel()).isEqualTo("Neue Überschrift");
+
+    var html =
+        HtmlRenderer.rendere(SynopseBuilder.baue(alt, anwendung, List.of(), false), "quelle");
+    assertThat(html).contains("Geänderte Gliederungs-Überschriften");
+    assertThat(html).contains("<del>Alte</del>").contains("<ins>Neue</ins>");
   }
 
   @Test

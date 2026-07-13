@@ -50,7 +50,21 @@ public final class SynopseBuilder {
     var manuell =
         anwendung.protokoll().stream().filter(a -> a.status() == Status.MANUELL_PRUEFEN).toList();
 
-    return new Synopse(alt, neu, eintraege, manuell, parseWarnungen);
+    return new Synopse(alt, neu, eintraege, gliederungsAenderungen(alt, neu), manuell, parseWarnungen);
+  }
+
+  /** Paart die Gliederungseinheiten nach Kennzahl und sammelt die mit geänderter Überschrift. */
+  private static List<Synopse.GliederungsAenderung> gliederungsAenderungen(Gesetz alt, Gesetz neu) {
+    var aenderungen = new ArrayList<Synopse.GliederungsAenderung>();
+    for (var neuG : neu.gliederungen()) {
+      alt.gliederungen().stream()
+          .filter(a -> java.util.Objects.equals(a.kennzahl(), neuG.kennzahl()))
+          .filter(a -> a.kennzahl() != null)
+          .findFirst()
+          .filter(a -> !java.util.Objects.equals(a.titel(), neuG.titel()))
+          .ifPresent(a -> aenderungen.add(new Synopse.GliederungsAenderung(a, neuG)));
+    }
+    return aenderungen;
   }
 
   private static boolean gleicherInhalt(

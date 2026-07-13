@@ -17,6 +17,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortlautZuAbsatz;
 import eu.mulk.aendggner.aenderung.Stelle;
 import eu.mulk.aendggner.gesetz.Absatz;
 import eu.mulk.aendggner.gesetz.Gesetz;
+import eu.mulk.aendggner.gesetz.Gliederung;
 import eu.mulk.aendggner.gesetz.Norm;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -60,16 +61,19 @@ public final class BefehlAnwender {
 
   public static AnwendungsErgebnis anwenden(Gesetz alt, List<Aenderungsbefehl> befehle) {
     var normen = new ArrayList<>(alt.normen());
+    var gliederungen = new ArrayList<>(alt.gliederungen());
     var protokoll = new ArrayList<AngewandteAenderung>();
 
     for (var befehl : befehle) {
-      protokoll.add(wendeAn(normen, befehl));
+      protokoll.add(wendeAn(normen, gliederungen, befehl));
     }
 
-    return new AnwendungsErgebnis(alt.mitNormen(normen), protokoll);
+    return new AnwendungsErgebnis(
+        alt.mitNormen(normen).mitGliederungen(gliederungen), protokoll);
   }
 
-  private static AngewandteAenderung wendeAn(List<Norm> normen, Aenderungsbefehl befehl) {
+  private static AngewandteAenderung wendeAn(
+      List<Norm> normen, List<Gliederung> gliederungen, Aenderungsbefehl befehl) {
     if (befehl instanceof UnbekannterBefehl) {
       return manuell(befehl, "Befehl nicht erkannt.");
     }
@@ -78,6 +82,14 @@ public final class BefehlAnwender {
           befehl, "Änderungen an der Inhaltsübersicht werden nicht automatisch angewandt.");
     }
     try {
+      // Änderungen an Gliederungs-Überschriften (Teil/Abschnitt/…) wirken auf den Gliederungsbaum.
+      if (befehl.stelle().betrifftGliederung()) {
+        return switch (befehl) {
+          case Neufassung n -> wendeGliederungNeufassungAn(gliederungen, n);
+          case Aufhebung a -> wendeGliederungStreichungAn(gliederungen, a);
+          default -> manuell(befehl, "Strukturänderung wird nicht automatisch angewandt.");
+        };
+      }
       return switch (befehl) {
         case Ersetzung e -> wendeErsetzungAn(normen, e);
         case Streichung s -> wendeStreichungAn(normen, s);
@@ -89,12 +101,72 @@ public final class BefehlAnwender {
         case Aufhebung a -> wendeAufhebungAn(normen, a);
         case Umnummerierung u -> wendeUmnummerierungAn(normen, u);
         case WortlautZuAbsatz w -> wendeWortlautZuAbsatzAn(normen, w);
-        case Sammelbefehl s -> wendeSammelAn(normen, s);
+        case Sammelbefehl s -> wendeSammelAn(normen, gliederungen, s);
         case UnbekannterBefehl u -> manuell(befehl, "Befehl nicht erkannt.");
       };
     } catch (RuntimeException e) {
       return manuell(befehl, "Anwendung fehlgeschlagen: " + e);
     }
+  }
+
+  // --- Gliederungs-Überschriften -------------------------------------------------------------
+
+  private static AngewandteAenderung wendeGliederungNeufassungAn(
+      List<Gliederung> gliederungen, Neufassung befehl) {
+    int idx = findeGliederung(gliederungen, befehl.stelle().gliederungsPfad());
+    if (idx < 0) {
+      return manuell(befehl, "Gliederungseinheit nicht gefunden.");
+    }
+    var alt = gliederungen.get(idx);
+    var titel = befehl.neuerText().replaceAll("\\s+", " ").strip();
+    if (titel.startsWith(alt.bezeichnung())) {
+      titel = titel.substring(alt.bezeichnung().length()).strip();
+    }
+    gliederungen.set(idx, alt.mitTitel(titel.isEmpty() ? null : titel));
+    return angewandt(befehl, alt.bezeichnung());
+  }
+
+  private static AngewandteAenderung wendeGliederungStreichungAn(
+      List<Gliederung> gliederungen, Aufhebung befehl) {
+    int idx = findeGliederung(gliederungen, befehl.stelle().gliederungsPfad());
+    if (idx < 0) {
+      return manuell(befehl, "Gliederungseinheit nicht gefunden.");
+    }
+    var alt = gliederungen.get(idx);
+    gliederungen.set(idx, alt.mitTitel("(weggefallen)"));
+    return angewandt(befehl, alt.bezeichnung());
+  }
+
+  /**
+   * Findet die Gliederungseinheit zum Pfad („Teil 3 Abschnitt 2“): jede Ebene wird per Bezeichnung
+   * innerhalb des Kennzahl-Präfixes der übergeordneten Ebene aufgelöst.
+   */
+  private static int findeGliederung(
+      List<Gliederung> gliederungen, List<Stelle.Gliederungseinheit> pfad) {
+    if (pfad.isEmpty()) {
+      return -1;
+    }
+    String praefix = "";
+    int gefunden = -1;
+    for (var einheit : pfad) {
+      gefunden = -1;
+      for (int i = 0; i < gliederungen.size(); i++) {
+        var g = gliederungen.get(i);
+        if (g.bezeichnung().equals(einheit.bezeichnung())
+            && (g.kennzahl() == null || g.kennzahl().startsWith(praefix))) {
+          gefunden = i;
+          break;
+        }
+      }
+      if (gefunden < 0) {
+        return -1;
+      }
+      var kennzahl = gliederungen.get(gefunden).kennzahl();
+      if (kennzahl != null) {
+        praefix = kennzahl;
+      }
+    }
+    return gefunden;
   }
 
   // --- Wortweise Textoperationen -------------------------------------------------------------
@@ -401,6 +473,24 @@ public final class BefehlAnwender {
   private static AngewandteAenderung wendeAufhebungAn(List<Norm> normen, Aufhebung befehl) {
     var stelle = befehl.stelle();
 
+    if (stelle.absatzbezeichnung().isPresent()) {
+      var aufloesung = loeseNormAuf(normen, stelle);
+      if (aufloesung.fehler() != null) {
+        return manuell(befehl, aufloesung.fehler());
+      }
+      var norm = normen.get(aufloesung.normIndex());
+      var nummer = stelle.absatzbezeichnung().get().nummer();
+      var absaetze = new ArrayList<>(norm.absaetze());
+      for (int i = 0; i < absaetze.size(); i++) {
+        if (nummer.equals(absaetze.get(i).nummer())) {
+          absaetze.set(i, new Absatz(null, absaetze.get(i).text()));
+          normen.set(aufloesung.normIndex(), norm.mitAbsaetzen(absaetze));
+          return angewandt(befehl, norm.enbez());
+        }
+      }
+      return manuell(befehl, "Absatz (" + nummer + ") nicht gefunden.");
+    }
+
     if (nurParagraph(stelle)) {
       var aufloesung = loeseNormAuf(normen, stelle);
       if (aufloesung.fehler() != null) {
@@ -497,12 +587,13 @@ public final class BefehlAnwender {
    * zusammen. Nur wenn alle Teile gelingen, gilt der Befehl als angewandt; sonst wird er zur
    * manuellen Prüfung markiert (bereits angewandte Teile bleiben wirksam).
    */
-  private static AngewandteAenderung wendeSammelAn(List<Norm> normen, Sammelbefehl befehl) {
+  private static AngewandteAenderung wendeSammelAn(
+      List<Norm> normen, List<Gliederung> gliederungen, Sammelbefehl befehl) {
     var betroffene = new LinkedHashSet<String>();
     var fehler = new ArrayList<String>();
     int i = 1;
     for (var teil : befehl.teilbefehle()) {
-      var ergebnis = wendeAn(normen, teil);
+      var ergebnis = wendeAn(normen, gliederungen, teil);
       betroffene.addAll(ergebnis.betroffeneEnbez());
       if (ergebnis.status() != Status.ANGEWANDT) {
         fehler.add("Teil " + i + " (" + teil.stelle().anzeigeText() + "): " + ergebnis.begruendung());

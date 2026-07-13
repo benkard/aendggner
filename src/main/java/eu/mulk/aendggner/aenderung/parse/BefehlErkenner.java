@@ -128,6 +128,26 @@ final class BefehlErkenner {
 
   private static final Pattern AUFHEBUNG = Pattern.compile("^(.+?) (?:wird|werden) aufgehoben\\.$");
 
+  // „Die Überschrift von Teil 3 Abschnitt 2 wird gestrichen.“ — Streichung einer Gliederungs-
+  // Überschrift (die Wörter-Streichung STREICHUNG erfordert dagegen ein Zitat).
+  private static final Pattern UEBERSCHRIFT_STREICHUNG =
+      Pattern.compile("^(Die Überschrift (?:von|des|der|zu) .+?) wird gestrichen\\.$");
+
+  // „Die Absatzbezeichnung „(2)“ wird gestrichen.“
+  private static final Pattern ABSATZBEZEICHNUNG_STREICHUNG =
+      Pattern.compile("^Die Absatzbezeichnung " + Z + " wird gestrichen\\.$");
+
+  // Inhaltsübersicht: „Die Angabe(n) zu <…> wird/werden wie folgt gefasst / durch … ersetzt /
+  // gestrichen.“ Wird als Änderung der Inhaltsübersicht typisiert (Anwendung erfolgt gesondert).
+  private static final Pattern INHALTSUEBERSICHT_ANGABE =
+      Pattern.compile(
+          "^Die Angaben? (?:zu|zur) .+? (?:wird|werden) "
+              + "(?:wie folgt gefasst: "
+              + Z
+              + "|durch (?:die )?folgende[nrs]? Angaben? ersetzt: "
+              + Z
+              + "|gestrichen)\\.?$");
+
   private static final Pattern STREICHUNG =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?" + WOERTER + " " + Z + " gestrichen\\.$");
@@ -283,6 +303,19 @@ final class BefehlErkenner {
       String text, Stelle kontext, ZitatExtraktor.Ergebnis zitate, Provenienz provenienz) {
 
     Matcher m;
+
+    // Inhaltsübersichts-Angaben zuerst prüfen, bevor NEUFASSUNG/STRUKTUR_ERSETZUNG die Phrase
+    // strukturell (aber mit unparsbarer Stelle) an sich ziehen.
+    if ((m = INHALTSUEBERSICHT_ANGABE.matcher(text)).matches()) {
+      var stelle = kontext.plus(new Stelle(List.of(new Stelle.Inhaltsuebersicht())));
+      if (m.group(1) != null) {
+        return Optional.of(new Neufassung(stelle, zitat(zitate, m.group(1)), provenienz));
+      }
+      if (m.group(2) != null) {
+        return Optional.of(new Neufassung(stelle, zitat(zitate, m.group(2)), provenienz));
+      }
+      return Optional.of(new Aufhebung(stelle, provenienz));
+    }
 
     if ((m = PARAGRAPH_BEREICH_NEUFASSUNG.matcher(text)).matches()) {
       return paragraphBereichNeufassung(zitat(zitate, m.group(3)), kontext, provenienz);
@@ -495,6 +528,17 @@ final class BefehlErkenner {
 
     if ((m = AUFHEBUNG.matcher(text)).matches()) {
       return ausStellen(m.group(1), s -> new Aufhebung(kontext.plus(s), provenienz));
+    }
+
+    if ((m = UEBERSCHRIFT_STREICHUNG.matcher(text)).matches()) {
+      return StellenParser.parse(m.group(1))
+          .map(s -> new Aufhebung(kontext.plus(s), provenienz));
+    }
+
+    if ((m = ABSATZBEZEICHNUNG_STREICHUNG.matcher(text)).matches()) {
+      var nummer = zitat(zitate, m.group(1)).replaceAll("[^0-9a-z]", "");
+      var stelle = new Stelle(List.of(new Stelle.Absatzbezeichnung(nummer)));
+      return Optional.of(new Aufhebung(kontext.plus(stelle), provenienz));
     }
 
     if ((m = STREICHUNG.matcher(text)).matches()) {

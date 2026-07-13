@@ -67,4 +67,25 @@ class StellenParserTest {
     assertThat(stellen).extracting(Stelle::anzeigeText)
         .containsExactly("Absatz 1 Satz 1", "Absatz 1 Satz 2");
   }
+
+  @Test
+  void parstGliederungspfad() {
+    assertThat(StellenParser.parse("Teil 3 Abschnitt 2").orElseThrow().anzeigeText())
+        .isEqualTo("Teil 3 Abschnitt 2");
+  }
+
+  @Test
+  void parstUeberschriftVonGliederung() {
+    var stelle = StellenParser.parse("Die Überschrift von Teil 3 Abschnitt 2").orElseThrow();
+    assertThat(stelle.betrifftUeberschrift()).isTrue();
+    assertThat(stelle.gliederungsPfad()).hasSize(2);
+    assertThat(stelle.anzeigeText()).isEqualTo("Überschrift Teil 3 Abschnitt 2");
+  }
+
+  @Test
+  void ignoriertChapeauZusatz() {
+    // „in der Angabe vor Nummer 1“ ist ein verfeinernder Zusatz ohne eigene Komponente.
+    assertThat(StellenParser.parse("Absatz 1 in der Angabe vor Nummer 1").orElseThrow().anzeigeText())
+        .isEqualTo("Absatz 1");
+  }
 }

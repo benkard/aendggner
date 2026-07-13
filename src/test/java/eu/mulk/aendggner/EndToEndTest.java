@@ -110,10 +110,18 @@ class EndToEndTest {
     assertThat(parseErgebnis.artikel()).contains("1");
     assertThat(parseErgebnis.befehle().size()).isGreaterThanOrEqualTo(100);
 
+    // Der Großteil der Befehle wird erkannt; nur einige Spezialfälle (Mehrquell-Ersetzungen,
+    // §§-Bereiche, Chapeau-Angaben) bleiben unbekannt.
+    var unbekannt =
+        parseErgebnis.befehle().stream().filter(b -> b instanceof UnbekannterBefehl).count();
+    assertThat(unbekannt).isLessThanOrEqualTo(8);
+
     // Das XML ist bereits konsolidiert; entscheidend ist, dass die Anwendung sauber terminiert
     // und jeden Befehl protokolliert.
     var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
     assertThat(anwendung.protokoll()).hasSameSizeAs(parseErgebnis.befehle());
+    // Gliederungs-Überschriften (Teil/Abschnitt) werden als Befehle erkannt und angewandt.
+    assertThat(anwendung.anzahlAngewandt()).isGreaterThanOrEqualTo(50);
     var synopse = SynopseBuilder.baue(gesetz, anwendung, parseErgebnis.warnungen(), false);
     assertThat(HtmlRenderer.rendere(synopse, "E2E-Test")).contains("Manuell prüfen");
   }

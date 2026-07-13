@@ -519,6 +519,43 @@ class BefehlErkennerTest {
   }
 
   @Test
+  void gliederungsUeberschriftNeufassung() {
+    var befehl =
+        erkenne(
+            "Die Überschrift von Teil 3 wird wie folgt gefasst: „Teil 3 Anforderungen an"
+                + " bestehende Gebäude“.",
+            Stelle.LEER);
+    assertThat(befehl).get().isInstanceOf(Neufassung.class);
+    assertThat(befehl.orElseThrow().stelle().betrifftGliederung()).isTrue();
+  }
+
+  @Test
+  void gliederungsUeberschriftStreichung() {
+    var befehl = erkenne("Die Überschrift von Teil 2 Abschnitt 4 wird gestrichen.", Stelle.LEER);
+    assertThat(befehl).get().isInstanceOf(Aufhebung.class);
+    assertThat(befehl.orElseThrow().stelle().gliederungsPfad()).hasSize(2);
+  }
+
+  @Test
+  void absatzbezeichnungStreichung() {
+    var befehl =
+        erkenne(
+            "Die Absatzbezeichnung „(2)“ wird gestrichen.",
+            new Stelle(List.of(new Stelle.Paragraph("64"))));
+    var b = befehl.orElseThrow();
+    assertThat(b).isInstanceOf(Aufhebung.class);
+    assertThat(b.stelle().absatzbezeichnung()).get().extracting(Stelle.Absatzbezeichnung::nummer)
+        .isEqualTo("2");
+  }
+
+  @Test
+  void inhaltsuebersichtAngabeWirdTypisiert() {
+    var befehl = erkenne("Die Angabe zu Teil 3 wird wie folgt gefasst: „Teil 3 Neu“.", Stelle.LEER);
+    assertThat(befehl).get().isInstanceOf(Neufassung.class);
+    assertThat(befehl.orElseThrow().stelle().betrifftInhaltsuebersicht()).isTrue();
+  }
+
+  @Test
   void mehrfachErsetzungWirdSammelbefehl() {
     // Mehrere Ersetzungspaare unter einem gemeinsamen „ersetzt“.
     var befehl =

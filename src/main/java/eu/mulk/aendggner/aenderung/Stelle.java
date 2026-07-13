@@ -17,10 +17,28 @@ public record Stelle(List<Komponente> komponenten) {
   }
 
   public sealed interface Komponente
-      permits Paragraph, AbsatzNr, SatzNr, NummerNr, BuchstabeNr, Ueberschrift, Inhaltsuebersicht {}
+      permits Paragraph,
+          AbsatzNr,
+          SatzNr,
+          NummerNr,
+          BuchstabeNr,
+          Ueberschrift,
+          Inhaltsuebersicht,
+          Gliederungseinheit,
+          Absatzbezeichnung {}
 
   /** „§ 5“, „§ 28a“ — die Paragraphennummer ohne „§ “. */
   public record Paragraph(String nummer) implements Komponente {}
+
+  /** Eine Gliederungseinheit oberhalb des Paragraphen: „Teil 2“, „Abschnitt 3“, „Anlage 8“. */
+  public record Gliederungseinheit(String art, String nummer) implements Komponente {
+    public String bezeichnung() {
+      return nummer.isEmpty() ? art : art + " " + nummer;
+    }
+  }
+
+  /** „Die Absatzbezeichnung „(2)““ — die reine Absatznummer als Ziel einer Streichung. */
+  public record Absatzbezeichnung(String nummer) implements Komponente {}
 
   /** „Absatz 2“ */
   public record AbsatzNr(String nummer) implements Komponente {}
@@ -75,6 +93,24 @@ public record Stelle(List<Komponente> komponenten) {
     return komponenten.stream().anyMatch(Ueberschrift.class::isInstance);
   }
 
+  public List<Gliederungseinheit> gliederungsPfad() {
+    return komponenten.stream()
+        .filter(Gliederungseinheit.class::isInstance)
+        .map(Gliederungseinheit.class::cast)
+        .toList();
+  }
+
+  public boolean betrifftGliederung() {
+    return komponenten.stream().anyMatch(Gliederungseinheit.class::isInstance);
+  }
+
+  public Optional<Absatzbezeichnung> absatzbezeichnung() {
+    return komponenten.stream()
+        .filter(Absatzbezeichnung.class::isInstance)
+        .map(Absatzbezeichnung.class::cast)
+        .findFirst();
+  }
+
   public String anzeigeText() {
     if (komponenten.isEmpty()) {
       return "(gesamtes Gesetz)";
@@ -93,6 +129,8 @@ public record Stelle(List<Komponente> komponenten) {
             case BuchstabeNr b -> "Buchstabe " + b.kennung();
             case Ueberschrift u -> "Überschrift";
             case Inhaltsuebersicht i -> "Inhaltsübersicht";
+            case Gliederungseinheit g -> g.bezeichnung();
+            case Absatzbezeichnung a -> "Absatzbezeichnung (" + a.nummer() + ")";
           });
     }
     return sb.toString();

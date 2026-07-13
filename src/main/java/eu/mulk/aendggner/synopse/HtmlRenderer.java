@@ -25,6 +25,8 @@ public final class HtmlRenderer {
 
     rendereKopf(sb, synopse, quelleBeschreibung);
 
+    rendereGliederungsAenderungen(sb, synopse);
+
     for (var eintrag : synopse.eintraege()) {
       rendereEintrag(sb, eintrag);
     }
@@ -56,6 +58,22 @@ public final class HtmlRenderer {
         .append(" manuell zu prüfende Befehle</p>\n");
     sb.append("<div class=\"spaltenkopf\"><div>Alte Fassung</div><div>Neue Fassung</div></div>\n");
     sb.append("</header>\n");
+  }
+
+  private static void rendereGliederungsAenderungen(StringBuilder sb, Synopse synopse) {
+    if (synopse.gliederungsAenderungen().isEmpty()) {
+      return;
+    }
+    sb.append("<section class=\"gliederung-aenderungen\">\n<h2>Geänderte Gliederungs-Überschriften</h2>\n");
+    for (var aenderung : synopse.gliederungsAenderungen()) {
+      var spalten = WortDiff.vergleiche(aenderung.alt().anzeigeText(), aenderung.neu().anzeigeText());
+      sb.append("<div class=\"vergleich\">\n<div class=\"alt\">")
+          .append(spalten.altHtml())
+          .append("</div>\n<div class=\"neu\">")
+          .append(spalten.neuHtml())
+          .append("</div>\n</div>\n");
+    }
+    sb.append("</section>\n");
   }
 
   private static void rendereEintrag(StringBuilder sb, Synopse.Eintrag eintrag) {

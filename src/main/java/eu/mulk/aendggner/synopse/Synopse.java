@@ -2,6 +2,7 @@ package eu.mulk.aendggner.synopse;
 
 import eu.mulk.aendggner.anwendung.BefehlAnwender.AngewandteAenderung;
 import eu.mulk.aendggner.gesetz.Gesetz;
+import eu.mulk.aendggner.gesetz.Gliederung;
 import eu.mulk.aendggner.gesetz.Norm;
 import java.util.List;
 import org.jspecify.annotations.Nullable;
@@ -11,8 +12,12 @@ public record Synopse(
     Gesetz alt,
     Gesetz neu,
     List<Eintrag> eintraege,
+    List<GliederungsAenderung> gliederungsAenderungen,
     List<AngewandteAenderung> manuellZuPruefen,
     List<String> warnungen) {
+
+  /** Eine geänderte Gliederungs-Überschrift (Teil/Abschnitt/…). */
+  public record GliederungsAenderung(Gliederung alt, Gliederung neu) {}
 
   public enum Aenderungsart {
     UNVERAENDERT,

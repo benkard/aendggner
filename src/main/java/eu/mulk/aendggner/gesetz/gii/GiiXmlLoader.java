@@ -39,6 +39,7 @@ public final class GiiXmlLoader {
     String langue = null;
     String kurzue = null;
     var normen = new ArrayList<Norm>();
+    var gliederungen = new ArrayList<Gliederung>();
     Gliederung aktuelleGliederung = null;
 
     for (var normElement : kindElemente(wurzel, "norm")) {
@@ -55,10 +56,12 @@ public final class GiiXmlLoader {
 
       var gliederungselement = erstesKind(metadaten, "gliederungseinheit");
       if (gliederungselement != null) {
+        var kennzahl = kindText(gliederungselement, "gliederungskennzahl");
         var bez = kindText(gliederungselement, "gliederungsbez");
         var titel = kindText(gliederungselement, "gliederungstitel");
         if (bez != null) {
-          aktuelleGliederung = new Gliederung(bez, titel);
+          aktuelleGliederung = new Gliederung(kennzahl, bez, titel);
+          gliederungen.add(aktuelleGliederung);
         }
       }
 
@@ -79,7 +82,7 @@ public final class GiiXmlLoader {
     if (jurabk == null) {
       throw new SAXException("Keine <norm>-Elemente mit Metadaten gefunden: " + datei);
     }
-    return new Gesetz(jurabk, langue, kurzue, normen);
+    return new Gesetz(jurabk, langue, kurzue, normen, gliederungen);
   }
 
   private static ArrayList<Absatz> leseAbsaetze(Element normElement) {

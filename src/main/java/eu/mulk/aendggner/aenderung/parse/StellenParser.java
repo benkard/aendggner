@@ -30,6 +30,9 @@ public final class StellenParser {
           "dem",
           "den",
           "des",
+          "von",
+          "zu",
+          "zur",
           "neue",
           "neuen",
           "bisherige",
@@ -41,7 +44,15 @@ public final class StellenParser {
 
   private StellenParser() {}
 
+  // „in dem Satzteil vor Nummer 1“, „in der Angabe vor Nummer 1“ — verfeinernde Chapeau-Angaben
+  // ohne eigene Stelle-Komponente; die Ersetzung sucht ohnehin im Text der umgebenden Stelle.
+  private static final Pattern CHAPEAU_QUALIFIER =
+      Pattern.compile(
+          "(?i)(?:in dem |im |in der )?(?:Satzteil|Angabe) vor "
+              + "(?:Nummer|Buchstabe|Satz|Absatz) \\S+");
+
   public static Optional<Stelle> parse(String phrase) {
+    phrase = CHAPEAU_QUALIFIER.matcher(phrase).replaceAll(" ").strip();
     var woerter = phrase.strip().split("\\s+");
     var komponenten = new ArrayList<Stelle.Komponente>();
 
@@ -91,6 +102,16 @@ public final class StellenParser {
           komponenten.add(new Stelle.BuchstabeNr(wert));
           i++;
         }
+        case "Teil", "Teils", "Buch", "Buches", "Kapitel", "Kapitels", "Abschnitt", "Abschnitts",
+            "Unterabschnitt", "Unterabschnitts", "Anlage", "Anlagen" -> {
+          var wert = naechstesWort(woerter, i);
+          if (wert == null || !NUMMER_WERT.matcher(wert).matches()) {
+            return Optional.empty();
+          }
+          komponenten.add(new Stelle.Gliederungseinheit(gliederungsArt(wort), wert));
+          i++;
+        }
+        case "Anhang" -> komponenten.add(new Stelle.Gliederungseinheit("Anhang", ""));
         case "Inhaltsübersicht" -> komponenten.add(new Stelle.Inhaltsuebersicht());
         case "Überschrift" -> komponenten.add(new Stelle.Ueberschrift());
         default -> {
@@ -251,8 +272,10 @@ public final class StellenParser {
       case Stelle.SatzNr s -> new Stelle.SatzNr(label);
       case Stelle.NummerNr n -> new Stelle.NummerNr(label);
       case Stelle.BuchstabeNr b -> new Stelle.BuchstabeNr(label);
+      case Stelle.Gliederungseinheit g -> new Stelle.Gliederungseinheit(g.art(), label);
       case Stelle.Ueberschrift u -> null;
       case Stelle.Inhaltsuebersicht i -> null;
+      case Stelle.Absatzbezeichnung a -> null;
     };
   }
 
@@ -303,6 +326,19 @@ public final class StellenParser {
     var komponenten = new ArrayList<>(vorKomp.subList(0, ankerIndex));
     komponenten.addAll(segment.komponenten());
     return Optional.of(new Stelle(komponenten));
+  }
+
+  /** Normalisiert Genitiv-/Pluralformen der Gliederungsart auf den Nominativ Singular. */
+  private static String gliederungsArt(String wort) {
+    return switch (wort) {
+      case "Teils" -> "Teil";
+      case "Buches" -> "Buch";
+      case "Kapitels" -> "Kapitel";
+      case "Abschnitts" -> "Abschnitt";
+      case "Unterabschnitts" -> "Unterabschnitt";
+      case "Anlagen" -> "Anlage";
+      default -> wort;
+    };
   }
 
   private static String naechstesWort(String[] woerter, int i) {
