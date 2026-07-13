@@ -14,6 +14,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Umnummerierung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WoerterEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortAnker;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortlautZuAbsatz;
 import eu.mulk.aendggner.aenderung.Provenienz;
 import eu.mulk.aendggner.aenderung.Stelle;
 import java.util.List;
@@ -448,6 +449,73 @@ class BefehlErkennerTest {
                     + " „(2) Text.“",
                 Stelle.LEER))
         .isEmpty();
+  }
+
+  @Test
+  void bereichsAufhebungWirdSammelbefehl() {
+    var teile =
+        ((Sammelbefehl) erkenne("Die Nummern 1 bis 3 werden aufgehoben.", Stelle.LEER).orElseThrow())
+            .teilbefehle();
+    assertThat(teile).hasSize(3).allMatch(t -> t instanceof Aufhebung);
+    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+        .containsExactly("Nummer 1", "Nummer 2", "Nummer 3");
+  }
+
+  @Test
+  void koordinierteAufhebungWirdSammelbefehl() {
+    var teile =
+        ((Sammelbefehl) erkenne("Die Absätze 4 und 5 werden aufgehoben.", Stelle.LEER).orElseThrow())
+            .teilbefehle();
+    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+        .containsExactly("Absatz 4", "Absatz 5");
+  }
+
+  @Test
+  void bereichsUmnummerierungNummernOhneZuDen() {
+    var teile =
+        ((Sammelbefehl)
+                erkenne("Die bisherigen Nummern 4 bis 6 werden die Nummern 8 bis 10.", Stelle.LEER)
+                    .orElseThrow())
+            .teilbefehle();
+    assertThat(teile).hasSize(3).allMatch(t -> t instanceof Umnummerierung);
+    // Absteigend: 6→10, 5→9, 4→8.
+    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+        .containsExactly("Nummer 6", "Nummer 5", "Nummer 4");
+    assertThat(teile).extracting(t -> ((Umnummerierung) t).neu().anzeigeText())
+        .containsExactly("Nummer 10", "Nummer 9", "Nummer 8");
+  }
+
+  @Test
+  void paragraphBereichNeufassungWirdSammelbefehl() {
+    var teile =
+        ((Sammelbefehl)
+                erkenne(
+                        "Die §§ 52 bis 56 werden wie folgt gefasst: „§ 52 (weggefallen) § 53"
+                            + " (weggefallen) § 54 (weggefallen)“.",
+                        Stelle.LEER)
+                    .orElseThrow())
+            .teilbefehle();
+    assertThat(teile).hasSize(3).allMatch(t -> t instanceof Neufassung);
+    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+        .containsExactly("§ 52", "§ 53", "§ 54");
+  }
+
+  @Test
+  void wortlautWirdAbsatz() {
+    var befehl =
+        erkenne("Der Wortlaut wird Absatz 1.", new Stelle(List.of(new Stelle.Paragraph("5"))));
+    assertThat(befehl).get().isInstanceOf(WortlautZuAbsatz.class);
+    assertThat(((WortlautZuAbsatz) befehl.orElseThrow()).nummer()).isEqualTo("1");
+  }
+
+  @Test
+  void wortDurchSatzzeichen() {
+    var befehl =
+        erkenne("In Nummer 7 wird das Wort „oder“ am Ende durch ein Komma ersetzt.", Stelle.LEER);
+    var e = (Ersetzung) befehl.orElseThrow();
+    assertThat(e.alt()).isEqualTo("oder");
+    assertThat(e.neu()).isEqualTo(",");
+    assertThat(e.amEnde()).isTrue();
   }
 
   @Test

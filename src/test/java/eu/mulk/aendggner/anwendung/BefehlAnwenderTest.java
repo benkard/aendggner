@@ -459,6 +459,44 @@ class BefehlAnwenderTest {
                 false)));
   }
 
+  @Test
+  void wendetWortlautZuAbsatzAn() {
+    // § 2 hat einen unnummerierten Wortlaut, der zu Absatz 1 wird.
+    var befehl =
+        new eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortlautZuAbsatz(
+            stelle(new Stelle.Paragraph("2")), "1", PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    var norm = ergebnis.neu().norm("§ 2").orElseThrow();
+    assertThat(norm.absaetze()).hasSize(1);
+    assertThat(norm.absaetze().get(0).nummer()).isEqualTo("1");
+    assertThat(norm.absaetze().get(0).anzeigeText()).startsWith("(1) Erprobung ist");
+  }
+
+  @Test
+  void wendetBereichsAufhebungAn() {
+    // „Die Nummern 1 bis 3 werden aufgehoben.“ innerhalb von § 1 Absatz 2.
+    var teile =
+        List.<eu.mulk.aendggner.aenderung.Aenderungsbefehl>of(
+            new Aufhebung(
+                stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("1")),
+                PROV),
+            new Aufhebung(
+                stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("2")),
+                PROV),
+            new Aufhebung(
+                stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("3")),
+                PROV));
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(new Sammelbefehl(teile)));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    var text = absatzText(ergebnis.neu(), "§ 1", 1);
+    assertThat(text).contains("1. (weggefallen)").contains("2. (weggefallen)").contains("3. (weggefallen)");
+  }
+
   private static String absatzText(Gesetz gesetz, String enbez, int index) {
     return gesetz.norm(enbez).orElseThrow().absaetze().get(index).text();
   }

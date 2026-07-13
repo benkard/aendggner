@@ -89,6 +89,13 @@ public sealed interface Aenderungsbefehl {
       implements Aenderungsbefehl {}
 
   /**
+   * „Der Wortlaut wird Absatz 1.“ — der bisher unnummerierte Normtext erhält die Absatznummer, wird
+   * also zum ersten Absatz (Vorbereitung für das Anfügen weiterer Absätze).
+   */
+  record WortlautZuAbsatz(Stelle stelle, String nummer, Provenienz provenienz)
+      implements Aenderungsbefehl {}
+
+  /**
    * „In A und B wird jeweils …“ — ein Befehl, der dieselbe Operation auf mehrere, per „und“
    * koordinierte Stellen anwendet. Die Teilbefehle teilen sich Provenienz und Befehlszeile; der
    * Applier fasst sie zu einem Protokolleintrag zusammen.

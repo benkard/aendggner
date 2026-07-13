@@ -13,6 +13,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Umnummerierung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.UnbekannterBefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WoerterEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortAnker;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortlautZuAbsatz;
 import eu.mulk.aendggner.aenderung.Stelle;
 import eu.mulk.aendggner.gesetz.Absatz;
 import eu.mulk.aendggner.gesetz.Gesetz;
@@ -87,6 +88,7 @@ public final class BefehlAnwender {
         case Anfuegung a -> wendeAnfuegungAn(normen, a);
         case Aufhebung a -> wendeAufhebungAn(normen, a);
         case Umnummerierung u -> wendeUmnummerierungAn(normen, u);
+        case WortlautZuAbsatz w -> wendeWortlautZuAbsatzAn(normen, w);
         case Sammelbefehl s -> wendeSammelAn(normen, s);
         case UnbekannterBefehl u -> manuell(befehl, "Befehl nicht erkannt.");
       };
@@ -467,6 +469,26 @@ public final class BefehlAnwender {
     }
     // Satz-Umnummerierungen ändern den Text nicht (Sätze sind unnummeriert).
     return angewandt(befehl, "(keine Textänderung nötig)");
+  }
+
+  private static AngewandteAenderung wendeWortlautZuAbsatzAn(
+      List<Norm> normen, WortlautZuAbsatz befehl) {
+    var aufloesung = loeseNormAuf(normen, befehl.stelle());
+    if (aufloesung.fehler() != null) {
+      return manuell(befehl, aufloesung.fehler());
+    }
+    var norm = normen.get(aufloesung.normIndex());
+    var sb = new StringBuilder();
+    for (var absatz : norm.absaetze()) {
+      if (sb.length() > 0) {
+        sb.append("\n\n");
+      }
+      sb.append(absatz.text());
+    }
+    normen.set(
+        aufloesung.normIndex(),
+        norm.mitAbsaetzen(List.of(new Absatz(befehl.nummer(), sb.toString()))));
+    return angewandt(befehl, norm.enbez());
   }
 
   /**

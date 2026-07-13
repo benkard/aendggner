@@ -13,6 +13,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturErsetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Umnummerierung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WoerterEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortAnker;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortlautZuAbsatz;
 import eu.mulk.aendggner.aenderung.Provenienz;
 import eu.mulk.aendggner.aenderung.Stelle;
 import java.util.ArrayList;
@@ -132,14 +133,61 @@ final class BefehlErkenner {
           "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?" + WOERTER + " " + Z + " gestrichen\\.$");
 
   private static final Pattern UMNUMMERIERUNG =
-      Pattern.compile("^(?:Der bisherige )?(.+?) wird (?:zu )?(Absatz|Satz) (\\d+[a-z]?)\\.$");
+      Pattern.compile(
+          "^(?:Der bisherige |Die bisherige |Das bisherige )?(.+?) wird (?:zu )?"
+              + "(Absatz|Satz|Nummer|Buchstabe) (\\d+[a-z]?)\\.$");
 
-  // „Die bisherigen Absätze 2 bis 4 werden zu den Absätzen 3 bis 5.“ (Entwürfe) — Bereichs-
-  // Umnummerierung, die in einzelne Umnummerierungen aufgelöst wird.
+  // „Die bisherigen Absätze 2 bis 4 werden zu den Absätzen 3 bis 5.“ bzw. „Die bisherigen Nummern 4
+  // bis 6 werden die Nummern 8 bis 10.“ — Bereichs-Umnummerierung, in Einzelbefehle aufgelöst.
   private static final Pattern UMNUMMERIERUNG_BEREICH =
       Pattern.compile(
-          "^Die bisherigen (?:Absätze|Sätze) (\\d+) bis (\\d+) "
-              + "werden zu den (Absätzen|Sätzen) (\\d+) bis (\\d+)\\.$");
+          "^Die bisherigen (?:Absätze|Sätze|Nummern|Buchstaben) (\\d+) bis (\\d+) "
+              + "werden (?:zu den |die )?(Absätzen|Sätzen|Nummern|Buchstaben|Absätze|Sätze) "
+              + "(\\d+) bis (\\d+)\\.$");
+
+  // „Die §§ 52 bis 56 werden wie folgt gefasst: „§ 52 (weggefallen) …““ — Neufassung eines §-Bereichs;
+  // der Zitatblock wird an „§ N“-Grenzen in Einzel-Neufassungen zerlegt.
+  private static final Pattern PARAGRAPH_BEREICH_NEUFASSUNG =
+      Pattern.compile(
+          "^Die §§ (\\d+[a-z]?) bis (\\d+[a-z]?) (?:wird|werden) wie folgt gefasst: " + Z + "\\.?$");
+
+  // „Der Wortlaut wird Absatz 1.“
+  private static final Pattern WORTLAUT_ZU_ABSATZ =
+      Pattern.compile("^Der Wortlaut wird Absatz (\\d+[a-z]?)\\.$");
+
+  // „In Nummer 7 wird das Wort «1» am Ende durch ein Komma ersetzt.“
+  private static final Pattern WORT_ZU_SATZZEICHEN =
+      Pattern.compile(
+          "^(?:In )?(.+?) (?:wird|werden) "
+              + WOERTER
+              + " "
+              + Z
+              + "(?: am Ende)? durch (ein Komma|ein Semikolon|einen Punkt) ersetzt\\.$");
+
+  // „In Satz 2 wird nach dem Wort «1» ein Komma und werden die Wörter «2» eingefügt.“
+  private static final Pattern KOMMA_UND_WOERTER_EINFUEGUNG =
+      Pattern.compile(
+          "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?(nach|vor) "
+              + "(?:dem Wort|den Wörtern|der Angabe|der Zahl) "
+              + Z
+              + " ein Komma und (?:wird|werden) "
+              + WOERTER
+              + " "
+              + Z
+              + " eingefügt\\.$");
+
+  // „In § 74 werden die Wörter «1» durch ein Komma und die Wörter «2» ersetzt.“
+  private static final Pattern ERSETZUNG_DURCH_KOMMA_UND_WOERTER =
+      Pattern.compile(
+          "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?"
+              + WOERTER
+              + " "
+              + Z
+              + " durch ein Komma und "
+              + WOERTER
+              + " "
+              + Z
+              + " ersetzt\\.$");
 
   private static final Pattern INHALTSUEBERSICHT_EINFUEGUNG =
       Pattern.compile(
@@ -236,10 +284,18 @@ final class BefehlErkenner {
 
     Matcher m;
 
+    if ((m = PARAGRAPH_BEREICH_NEUFASSUNG.matcher(text)).matches()) {
+      return paragraphBereichNeufassung(zitat(zitate, m.group(3)), kontext, provenienz);
+    }
+
     if ((m = NEUFASSUNG.matcher(text)).matches()) {
       var neuerText = zitat(zitate, m.group(2));
       return StellenParser.parse(m.group(1))
           .map(s -> new Neufassung(kontext.plus(s), neuerText, provenienz));
+    }
+
+    if ((m = WORTLAUT_ZU_ABSATZ.matcher(text)).matches()) {
+      return Optional.of(new WortlautZuAbsatz(kontext, m.group(1), provenienz));
     }
 
     if ((m = STRUKTUR_ERSETZUNG.matcher(text)).matches()) {
@@ -260,6 +316,21 @@ final class BefehlErkenner {
       }
       return Optional.of(
           new StrukturErsetzung(kontext.plus(stelle.get()), ebene, neuerText, provenienz));
+    }
+
+    if ((m = WORT_ZU_SATZZEICHEN.matcher(text)).matches()) {
+      var alt = wortZitat(zitate, m.group(2));
+      var neu = satzzeichen(m.group(3));
+      var amEnde = text.contains(" am Ende ");
+      return ausStellen(
+          m.group(1), s -> new Ersetzung(kontext.plus(s), alt, neu, false, amEnde, provenienz));
+    }
+
+    if ((m = ERSETZUNG_DURCH_KOMMA_UND_WOERTER.matcher(text)).matches()) {
+      var alt = wortZitat(zitate, m.group(2));
+      var neu = ", " + wortZitat(zitate, m.group(3));
+      return ausStellen(
+          m.group(1), s -> new Ersetzung(kontext.plus(s), alt, neu, false, false, provenienz));
     }
 
     if ((m = ERSETZUNG.matcher(text)).matches()) {
@@ -325,6 +396,17 @@ final class BefehlErkenner {
               ? new WortAnker.NachWoertern(ankerWoerter)
               : new WortAnker.VorWoertern(ankerWoerter);
       var woerter = satzzeichen(m.group(4));
+      return ausStellen(
+          m.group(1), s -> new WoerterEinfuegung(kontext.plus(s), anker, woerter, provenienz));
+    }
+
+    if ((m = KOMMA_UND_WOERTER_EINFUEGUNG.matcher(text)).matches()) {
+      var ankerWoerter = wortZitat(zitate, m.group(3));
+      var anker =
+          m.group(2).equals("nach")
+              ? new WortAnker.NachWoertern(ankerWoerter)
+              : new WortAnker.VorWoertern(ankerWoerter);
+      var woerter = ", " + wortZitat(zitate, m.group(4));
       return ausStellen(
           m.group(1), s -> new WoerterEinfuegung(kontext.plus(s), anker, woerter, provenienz));
     }
@@ -412,7 +494,7 @@ final class BefehlErkenner {
     }
 
     if ((m = AUFHEBUNG.matcher(text)).matches()) {
-      return StellenParser.parse(m.group(1)).map(s -> new Aufhebung(kontext.plus(s), provenienz));
+      return ausStellen(m.group(1), s -> new Aufhebung(kontext.plus(s), provenienz));
     }
 
     if ((m = STREICHUNG.matcher(text)).matches()) {
@@ -571,7 +653,10 @@ final class BefehlErkenner {
       String neuBis,
       Stelle kontext,
       Provenienz provenienz) {
-    var ebene = ebeneWort.equals("Absätzen") ? "Absatz" : "Satz";
+    var ebene = ebeneAusWort(ebeneWort);
+    if (ebene == null) {
+      return Optional.empty();
+    }
     int av = Integer.parseInt(altVon);
     int ab = Integer.parseInt(altBis);
     int nv = Integer.parseInt(neuVon);
@@ -654,8 +739,47 @@ final class BefehlErkenner {
     return switch (ebene) {
       case "Absatz" -> new Stelle.AbsatzNr(nummer);
       case "Satz" -> new Stelle.SatzNr(nummer);
+      case "Nummer" -> new Stelle.NummerNr(nummer);
+      case "Buchstabe" -> new Stelle.BuchstabeNr(nummer);
       default -> throw new IllegalArgumentException("Unbekannte Ebene: " + ebene);
     };
+  }
+
+  /** Normalisiert die Ebenenwörter (auch Dativ-/Pluralformen) auf den Basisnamen. */
+  private static @Nullable String ebeneAusWort(String wort) {
+    return switch (wort) {
+      case "Absatz", "Absätze", "Absätzen" -> "Absatz";
+      case "Satz", "Sätze", "Sätzen" -> "Satz";
+      case "Nummer", "Nummern" -> "Nummer";
+      case "Buchstabe", "Buchstaben" -> "Buchstabe";
+      default -> null;
+    };
+  }
+
+  /**
+   * Zerlegt den Zitatblock einer §-Bereichs-Neufassung („§ 52 (weggefallen) § 53 (weggefallen) …“)
+   * an den „§ N“-Grenzen und erzeugt je eine {@link Neufassung} für den betroffenen Paragraphen.
+   */
+  private static Optional<Aenderungsbefehl> paragraphBereichNeufassung(
+      String block, Stelle kontext, Provenienz provenienz) {
+    var teile = new ArrayList<Aenderungsbefehl>();
+    var stuecke = block.strip().split("(?=§\\s*\\d)");
+    for (var stueck : stuecke) {
+      var s = stueck.strip();
+      if (s.isEmpty()) {
+        continue;
+      }
+      var pm = Pattern.compile("^§\\s*(\\d+[a-z]?)\\b").matcher(s);
+      if (!pm.find()) {
+        return Optional.empty();
+      }
+      var stelle = kontext.plus(new Stelle(List.of(new Stelle.Paragraph(pm.group(1)))));
+      teile.add(new Neufassung(stelle, s, provenienz));
+    }
+    if (teile.isEmpty()) {
+      return Optional.empty();
+    }
+    return Optional.of(teile.size() == 1 ? teile.get(0) : new Sammelbefehl(teile));
   }
 
   /** Zitat für Textblöcke (Neufassung, Einfügung ganzer Einheiten): Zeilenstruktur erhalten. */

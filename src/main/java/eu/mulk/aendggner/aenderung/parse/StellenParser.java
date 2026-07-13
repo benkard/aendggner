@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Parst Stellenangaben wie „§ 5a Absatz 2 Satz 1 Nummer 4 Buchstabe c“, „der Inhaltsübersicht“ oder
@@ -58,7 +59,7 @@ public final class StellenParser {
           komponenten.add(new Stelle.Paragraph(wert));
           i++;
         }
-        case "Absatz", "Abs." -> {
+        case "Absatz", "Abs.", "Absätze" -> {
           var wert = naechstesWort(woerter, i);
           if (wert == null || !NUMMER_WERT.matcher(wert).matches()) {
             return Optional.empty();
@@ -66,7 +67,7 @@ public final class StellenParser {
           komponenten.add(new Stelle.AbsatzNr(wert));
           i++;
         }
-        case "Satz" -> {
+        case "Satz", "Sätze" -> {
           var wert = naechstesWort(woerter, i);
           if (wert == null || !NUMMER_WERT.matcher(wert).matches()) {
             return Optional.empty();
@@ -74,7 +75,7 @@ public final class StellenParser {
           komponenten.add(new Stelle.SatzNr(wert));
           i++;
         }
-        case "Nummer", "Nr." -> {
+        case "Nummer", "Nr.", "Nummern" -> {
           var wert = naechstesWort(woerter, i);
           if (wert == null || !NUMMER_WERT.matcher(wert).matches()) {
             return Optional.empty();
@@ -82,7 +83,7 @@ public final class StellenParser {
           komponenten.add(new Stelle.NummerNr(wert));
           i++;
         }
-        case "Buchstabe", "Buchst.", "Doppelbuchstabe" -> {
+        case "Buchstabe", "Buchst.", "Doppelbuchstabe", "Buchstaben" -> {
           var wert = naechstesWort(woerter, i);
           if (wert == null || !BUCHSTABE_WERT.matcher(wert).matches()) {
             return Optional.empty();
@@ -119,15 +120,20 @@ public final class StellenParser {
    */
   public static List<Stelle> parseMehrfach(String phrase) {
     var segmente = KOORDINATION.split(phrase.strip());
-    if (segmente.length <= 1) {
-      return parse(phrase).map(List::of).orElseGet(List::of);
-    }
-
     var ergebnis = new ArrayList<Stelle>();
     Stelle vorige = null;
     for (var segment : segmente) {
       if (segment.isBlank()) {
         return List.of();
+      }
+      var bereich = entfalteBereich(segment, vorige);
+      if (bereich != null) {
+        if (bereich.isEmpty()) {
+          return List.of();
+        }
+        ergebnis.addAll(bereich);
+        vorige = bereich.get(bereich.size() - 1);
+        continue;
       }
       Stelle voll;
       var teil = parse(segment);
@@ -162,22 +168,118 @@ public final class StellenParser {
   /** Ersetzt die letzte Komponente von {@code vorige} durch dieselbe Komponentenart mit neuem Label. */
   private static Optional<Stelle> mitGeerbtemLabel(Stelle vorige, String label) {
     var komponenten = new ArrayList<>(vorige.komponenten());
-    var letzte = komponenten.get(komponenten.size() - 1);
-    Stelle.Komponente neu =
-        switch (letzte) {
-          case Stelle.Paragraph p -> new Stelle.Paragraph(label);
-          case Stelle.AbsatzNr a -> new Stelle.AbsatzNr(label);
-          case Stelle.SatzNr s -> new Stelle.SatzNr(label);
-          case Stelle.NummerNr n -> new Stelle.NummerNr(label);
-          case Stelle.BuchstabeNr b -> new Stelle.BuchstabeNr(label);
-          case Stelle.Ueberschrift u -> null;
-          case Stelle.Inhaltsuebersicht i -> null;
-        };
+    var neu = mitLabel(komponenten.get(komponenten.size() - 1), label);
     if (neu == null) {
       return Optional.empty();
     }
     komponenten.set(komponenten.size() - 1, neu);
     return Optional.of(new Stelle(komponenten));
+  }
+
+  private static final Pattern BEREICH =
+      Pattern.compile(
+          "(?:(§§?|Absätze|Absatz|Sätze|Satz|Nummern|Nummer|Buchstaben|Buchstabe)\\s+)?"
+              + "(\\d+|[a-z])\\s+bis\\s+(\\d+|[a-z])");
+
+  /**
+   * Entfaltet einen {@code X bis Y}-Bereich (ganzzahlig oder Einzelbuchstabe) in Einzelstellen. Die
+   * Komponentenart stammt aus der Bereichsangabe („Nummern 1 bis 3“) oder — bei bloßem „1 bis 3“ —
+   * aus der letzten Komponente der vorigen Stelle. Liefert {@code null}, wenn {@code segment} kein
+   * Bereich ist, und eine leere Liste, wenn er unauflösbar ist (z.B. absteigend, gemischt).
+   */
+  private static @Nullable List<Stelle> entfalteBereich(String segment, @Nullable Stelle vorige) {
+    var ohneArtikel = segment.strip().replaceFirst("^(?:[Dd]ie|[Dd]er|[Dd]as|[Dd]en) ", "");
+    var m = BEREICH.matcher(ohneArtikel);
+    if (!m.matches()) {
+      return null;
+    }
+    var art = m.group(1);
+    var von = m.group(2);
+    var bis = m.group(3);
+    boolean numerisch = von.matches("\\d+") && bis.matches("\\d+");
+    boolean alpha = von.matches("[a-z]") && bis.matches("[a-z]");
+    if (!numerisch && !alpha) {
+      return List.of();
+    }
+    var praefix = new ArrayList<Stelle.Komponente>();
+    Stelle.Komponente muster;
+    if (art != null) {
+      muster = komponenteFuerArt(art, von);
+      if (muster == null) {
+        return List.of();
+      }
+    } else {
+      // Bloßer Bereich „1 bis 3“: Art und Präfix von der vorigen Stelle erben.
+      if (vorige == null || vorige.komponenten().isEmpty()) {
+        return List.of();
+      }
+      praefix.addAll(vorige.komponenten().subList(0, vorige.komponenten().size() - 1));
+      muster = vorige.komponenten().get(vorige.komponenten().size() - 1);
+    }
+    var labels = numerisch ? zahlenBereich(von, bis) : buchstabenBereich(von, bis);
+    if (labels.isEmpty()) {
+      return List.of();
+    }
+    var stellen = new ArrayList<Stelle>();
+    for (var label : labels) {
+      var komponenten = new ArrayList<>(praefix);
+      var neu = mitLabel(muster, label);
+      if (neu == null) {
+        return List.of();
+      }
+      komponenten.add(neu);
+      stellen.add(new Stelle(komponenten));
+    }
+    return stellen;
+  }
+
+  private static Stelle.@Nullable Komponente komponenteFuerArt(String art, String label) {
+    return switch (art) {
+      case "§", "§§" -> new Stelle.Paragraph(label);
+      case "Absatz", "Absätze" -> new Stelle.AbsatzNr(label);
+      case "Satz", "Sätze" -> new Stelle.SatzNr(label);
+      case "Nummer", "Nummern" -> new Stelle.NummerNr(label);
+      case "Buchstabe", "Buchstaben" -> new Stelle.BuchstabeNr(label);
+      default -> null;
+    };
+  }
+
+  private static Stelle.@Nullable Komponente mitLabel(Stelle.Komponente muster, String label) {
+    return switch (muster) {
+      case Stelle.Paragraph p -> new Stelle.Paragraph(label);
+      case Stelle.AbsatzNr a -> new Stelle.AbsatzNr(label);
+      case Stelle.SatzNr s -> new Stelle.SatzNr(label);
+      case Stelle.NummerNr n -> new Stelle.NummerNr(label);
+      case Stelle.BuchstabeNr b -> new Stelle.BuchstabeNr(label);
+      case Stelle.Ueberschrift u -> null;
+      case Stelle.Inhaltsuebersicht i -> null;
+    };
+  }
+
+  private static List<String> zahlenBereich(String von, String bis) {
+    int a = Integer.parseInt(von);
+    int b = Integer.parseInt(bis);
+    if (b < a) {
+      return List.of();
+    }
+    var labels = new ArrayList<String>();
+    for (int k = a; k <= b; k++) {
+      labels.add(String.valueOf(k));
+    }
+    return labels;
+  }
+
+  private static List<String> buchstabenBereich(String von, String bis) {
+    char a = von.charAt(0);
+    char b = bis.charAt(0);
+    if (b < a) {
+      return List.of();
+    }
+    var labels = new ArrayList<String>();
+    for (char c = a; c <= b; c++) {
+      labels.add(String.valueOf(c));
+    }
+    return labels;
   }
 
   /**
