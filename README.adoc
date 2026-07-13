@@ -51,6 +51,46 @@ To run the command line application after <<building,building>> it:
 ----
 
 
+[[usage]]
+== Usage
+
+ÄndGgner erzeugt aus einem Stammgesetz und einem Änderungsgesetz eine
+zweispaltige HTML-Synopse (alte Fassung links, neue rechts, Änderungen
+wortweise hervorgehoben).
+
+Eingaben:
+
+* Stammgesetz: XML im gii-norm-Format von
+  https://www.gesetze-im-internet.de/[gesetze-im-internet.de]
+* Änderungsgesetz: BGBl-PDF oder Klartext
+
+[source,shell script]
+----
+java -jar target/aendggner-0.1.0-SNAPSHOT.jar \
+  stammgesetz.xml aenderungsgesetz.pdf -o synopse.html
+----
+
+Wichtige Optionen:
+
+`-o, --output <file>`::
+  Ausgabedatei (Default `synopse.html`; `-` = Standardausgabe).
+`--vollstaendig`::
+  Auch unveränderte Normen in die Synopse aufnehmen.
+`--artikel <n>`::
+  Nur diesen Artikel des Änderungsgesetzes anwenden (Default: alle
+  Artikel, deren Einleitung das Stammgesetz nennt).
+`--extract-only`::
+  Nur den bereinigten Lineartext des Änderungsgesetzes ausgeben. Nützlich,
+  wenn die PDF-Extraktion fehlerhaft ist: Text prüfen, von Hand
+  korrigieren und als Klartextdatei wieder einspeisen.
+
+Erkannt werden die gebräuchlichsten Änderungsbefehle des Handbuchs der
+Rechtsförmlichkeit (Ersetzen, Neufassung, Einfügen, Anfügen, Aufheben,
+Streichen, Umnummerierung). Alles andere — etwa Bereichsbefehle wie
+„Die Absätze 2 bis 4 werden …“ — landet mit Begründung im Abschnitt
+*Manuell prüfen* der Synopse und wird niemals stillschweigend verworfen.
+
+
 == Running the Tests
 
 To build and run the tests:

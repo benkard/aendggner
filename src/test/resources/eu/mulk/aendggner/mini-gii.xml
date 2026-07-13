@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE dokumente SYSTEM "http://www.gesetze-im-internet.de/dtd/1.01/gii-norm.dtd">
+<dokumente builddate="20201120213007" doknr="BJNR000000000">
+  <norm builddate="20201120213007" doknr="BJNR000000000">
+    <metadaten>
+      <jurabk>TestG</jurabk>
+      <amtabk>TestG</amtabk>
+      <kurzue>Testgesetz</kurzue>
+      <langue>Gesetz zur Erprobung des ÄndGgners</langue>
+    </metadaten>
+    <textdaten>
+      <fussnoten>
+        <Content>
+          <P>Fußnote, die keine Einzelnorm ist.</P>
+        </Content>
+      </fussnoten>
+    </textdaten>
+  </norm>
+  <norm builddate="20201120213007" doknr="BJNR000000000BJNE000100000">
+    <metadaten>
+      <jurabk>TestG</jurabk>
+      <enbez>Inhaltsübersicht</enbez>
+    </metadaten>
+    <textdaten>
+      <text format="XML">
+        <Content>
+          <P>
+            <table frame="none">
+              <tgroup cols="2">
+                <tbody valign="top">
+                  <row>
+                    <entry colname="col1">§ 1</entry>
+                    <entry colname="col2">Zweck des Gesetzes</entry>
+                  </row>
+                  <row>
+                    <entry colname="col1">§ 2</entry>
+                    <entry colname="col2">Begriffsbestimmungen</entry>
+                  </row>
+                </tbody>
+              </tgroup>
+            </table>
+          </P>
+        </Content>
+      </text>
+    </textdaten>
+  </norm>
+  <norm builddate="20201120213007" doknr="BJNR000000000BJNE000200000">
+    <metadaten>
+      <jurabk>TestG</jurabk>
+      <gliederungseinheit>
+        <gliederungskennzahl>010</gliederungskennzahl>
+        <gliederungsbez>1. Abschnitt</gliederungsbez>
+        <gliederungstitel>Allgemeine Vorschriften</gliederungstitel>
+      </gliederungseinheit>
+      <enbez>§ 1</enbez>
+      <titel format="XML">Zweck des Gesetzes</titel>
+    </metadaten>
+    <textdaten>
+      <text format="XML">
+        <Content>
+          <P>(1) Zweck dieses Gesetzes ist die Erprobung. Die Erprobung erfolgt sorgfältig.</P>
+          <P>(2) Die Erprobung umfasst <DL Font="normal" Type="arabic"><DT>1.</DT><DD Font="normal"><LA Size="normal">das Einlesen von Gesetzen und</LA></DD><DT>2.</DT><DD Font="normal"><LA Size="normal">die Anwendung von Änderungsbefehlen, insbesondere<DL Font="normal" Type="alpha"><DT>a)</DT><DD Font="normal"><LA Size="normal">Ersetzungen und</LA></DD><DT>b)</DT><DD Font="normal"><LA Size="normal">Einfügungen.</LA></DD></DL></LA></DD></DL>Weitere Einzelheiten regelt die Rechtsverordnung.</P>
+        </Content>
+      </text>
+    </textdaten>
+  </norm>
+  <norm builddate="20201120213007" doknr="BJNR000000000BJNE000300000">
+    <metadaten>
+      <jurabk>TestG</jurabk>
+      <enbez>§ 2</enbez>
+      <titel format="XML">(weggefallen)</titel>
+    </metadaten>
+    <textdaten>
+      <text format="XML">
+        <Content>
+          <P>(weggefallen)</P>
+        </Content>
+      </text>
+    </textdaten>
+  </norm>
+</dokumente>

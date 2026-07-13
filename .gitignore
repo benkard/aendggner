@@ -39,3 +39,6 @@ target/
 
 # Unknown
 out/
+
+# Claude Code
+.claude/
