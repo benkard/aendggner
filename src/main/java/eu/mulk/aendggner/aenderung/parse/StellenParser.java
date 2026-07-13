@@ -129,24 +129,55 @@ public final class StellenParser {
       if (segment.isBlank()) {
         return List.of();
       }
-      var teil = parse(segment);
-      if (teil.isEmpty()) {
-        return List.of();
-      }
       Stelle voll;
-      if (vorige == null) {
-        voll = teil.get();
-      } else {
-        var gemergt = mitGemeinsamemPraefix(vorige, teil.get());
-        if (gemergt.isEmpty()) {
+      var teil = parse(segment);
+      if (teil.isPresent()) {
+        if (vorige == null) {
+          voll = teil.get();
+        } else {
+          var gemergt = mitGemeinsamemPraefix(vorige, teil.get());
+          if (gemergt.isEmpty()) {
+            return List.of();
+          }
+          voll = gemergt.get();
+        }
+      } else if (vorige != null && BLOSSES_LABEL.matcher(segment).matches()) {
+        // Bloße Nummer/Buchstabe („Absatz 1 und 5“ → das „5“): Typ der letzten Komponente erben.
+        var geerbt = mitGeerbtemLabel(vorige, segment);
+        if (geerbt.isEmpty()) {
           return List.of();
         }
-        voll = gemergt.get();
+        voll = geerbt.get();
+      } else {
+        return List.of();
       }
       ergebnis.add(voll);
       vorige = voll;
     }
     return ergebnis;
+  }
+
+  private static final Pattern BLOSSES_LABEL = Pattern.compile("\\d+[a-z]?|[a-z]{1,3}");
+
+  /** Ersetzt die letzte Komponente von {@code vorige} durch dieselbe Komponentenart mit neuem Label. */
+  private static Optional<Stelle> mitGeerbtemLabel(Stelle vorige, String label) {
+    var komponenten = new ArrayList<>(vorige.komponenten());
+    var letzte = komponenten.get(komponenten.size() - 1);
+    Stelle.Komponente neu =
+        switch (letzte) {
+          case Stelle.Paragraph p -> new Stelle.Paragraph(label);
+          case Stelle.AbsatzNr a -> new Stelle.AbsatzNr(label);
+          case Stelle.SatzNr s -> new Stelle.SatzNr(label);
+          case Stelle.NummerNr n -> new Stelle.NummerNr(label);
+          case Stelle.BuchstabeNr b -> new Stelle.BuchstabeNr(label);
+          case Stelle.Ueberschrift u -> null;
+          case Stelle.Inhaltsuebersicht i -> null;
+        };
+    if (neu == null) {
+      return Optional.empty();
+    }
+    komponenten.set(komponenten.size() - 1, neu);
+    return Optional.of(new Stelle(komponenten));
   }
 
   /**

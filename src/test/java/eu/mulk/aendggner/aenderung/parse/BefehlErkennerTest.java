@@ -412,32 +412,55 @@ class BefehlErkennerTest {
   }
 
   @Test
-  void verbundZweierBefehleBleibtUnbekannt() {
+  void verbundZweierBefehleWirdSammelbefehl() {
     // „… wird zu Absatz 2 und nach Satz 2 werden … eingefügt“ verbindet zwei verschiedene
-    // Befehle per „und“ — bewusst nicht unterstützt.
-    assertThat(
-            erkenne(
-                "Der bisherige Absatz 1 wird zu Absatz 2 und nach Satz 2 werden die folgenden"
-                    + " Sätze eingefügt: „Ein Satz.“",
-                Stelle.LEER))
-        .isEmpty();
+    // Befehle per „und“ → Sammelbefehl aus Umnummerierung und Struktureinfügung.
+    var befehl =
+        erkenne(
+            "Der bisherige Absatz 1 wird zu Absatz 2 und nach Satz 2 werden die folgenden"
+                + " Sätze eingefügt: „Ein Satz.“",
+            Stelle.LEER);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile).hasSize(2);
+    assertThat(teile.get(0)).isInstanceOf(Umnummerierung.class);
+    assertThat(teile.get(1)).isInstanceOf(StrukturEinfuegung.class);
   }
 
   @Test
-  void faelltBeiBereichsbefehlenAufUnbekanntZurueck() {
-    // Bereichs- und Mehrfachbefehle sind in v1 bewusst nicht unterstützt.
+  void koordinierteStelleErsetzungWirdSammelbefehl() {
+    // „In Absatz 1 Satz 1 und 2 …“ — koordinierte Stelle (das „2“ erbt „Satz“).
+    var befehl =
+        erkenne(
+            "In Absatz 1 Satz 1 und 2 werden die Wörter „alt“ durch die Wörter „neu“ ersetzt.",
+            Stelle.LEER);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile).hasSize(2).allMatch(t -> t instanceof Ersetzung);
+    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+        .containsExactly("Absatz 1 Satz 1", "Absatz 1 Satz 2");
+  }
+
+  @Test
+  void faelltBeiBisBereichenAufUnbekanntZurueck() {
+    // „bis“-Bereiche über Struktureinheiten sind hier (Phase 1) noch nicht unterstützt.
     assertThat(
             erkenne(
                 "Die Absätze 2 bis 4 werden durch die folgenden Absätze 2 bis 6 ersetzt:"
                     + " „(2) Text.“",
                 Stelle.LEER))
         .isEmpty();
-    assertThat(erkenne("Die Nummern 1 bis 3 werden aufgehoben.", Stelle.LEER)).isEmpty();
-    assertThat(
-            erkenne(
-                "In Absatz 1 Satz 1 und 2 werden die Wörter „alt“ durch die Wörter „neu“"
-                    + " ersetzt.",
-                Stelle.LEER))
-        .isEmpty();
+  }
+
+  @Test
+  void mehrfachErsetzungWirdSammelbefehl() {
+    // Mehrere Ersetzungspaare unter einem gemeinsamen „ersetzt“.
+    var befehl =
+        erkenne(
+            "In Satz 1 werden die Wörter „a“ durch die Wörter „b“ und die Angabe „c“ durch die"
+                + " Wörter „d“ ersetzt.",
+            Stelle.LEER);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile).hasSize(2).allMatch(t -> t instanceof Ersetzung);
+    assertThat(teile).extracting(t -> ((Ersetzung) t).alt()).containsExactly("a", "c");
+    assertThat(teile).extracting(t -> ((Ersetzung) t).neu()).containsExactly("b", "d");
   }
 }

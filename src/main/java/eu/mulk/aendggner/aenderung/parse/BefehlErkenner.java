@@ -162,6 +162,41 @@ final class BefehlErkenner {
               + "|Nummer (\\d+[a-z]?)|Buchstabe ([a-z]{1,3})"
               + "|(Absätze .+|Nummern .+|Buchstaben .+))$");
 
+  // „In <Stelle> werden die Wörter «1» durch die Wörter «2» und die Angabe «3» durch die Wörter «4»
+  // ersetzt.“ — mehrere Ersetzungspaare unter einem gemeinsamen „ersetzt“. Die Mitte (Gruppe 2)
+  // wird an „ und “ in Einzelpaare zerlegt und je gegen EIN_ERSETZUNGS_PAAR validiert.
+  private static final Pattern PAAR_ERSETZUNG =
+      Pattern.compile("^(?:In )?(.+?) (?:wird|werden) (.+ und .+) ersetzt\\.$");
+  private static final Pattern EIN_ERSETZUNGS_PAAR =
+      Pattern.compile(
+          "^(?:jeweils )?" + WOERTER + " " + Z + " (?:jeweils )?durch " + WOERTER + " " + Z + "$");
+
+  // „… ein Komma eingefügt und werden …“: Trennstellen eines Verbundbefehls sind „ und “ (ggf. mit
+  // Komma) bzw. „, “ direkt vor „wird/werden“. Innerhalb von Zitaten steht „ und “ als «n» maskiert.
+  private static final Pattern VERBUND_SEP =
+      Pattern.compile(",? und |, (?=wird\\b|werden\\b)");
+  private static final Pattern WIRD_WERDEN = Pattern.compile(" (?:wird|werden) ");
+
+  // „In <Stelle> wird nach den Wörtern «1» ein Komma eingefügt.“ (Satzzeichen statt Wörter einfügen)
+  private static final Pattern KOMMA_EINFUEGUNG =
+      Pattern.compile(
+          "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?(nach|vor) "
+              + "(?:dem Wort|den Wörtern|der Angabe|der Zahl) "
+              + Z
+              + " (ein Komma|ein Semikolon|einen Punkt) eingefügt\\.$");
+
+  // „Nach der Angabe «1» wird die Angabe «2» eingefügt.“ — Anker zuerst, ohne eigene Stelle (nutzt
+  // den Kontext). Tritt vor allem als rechte Klausel eines Verbundbefehls auf.
+  private static final Pattern EINFUEGUNG_ANKER_ZUERST =
+      Pattern.compile(
+          "^(Nach|Vor) (?:dem Wort|den Wörtern|der Angabe|der Zahl) "
+              + Z
+              + " (?:wird|werden) (?:"
+              + WOERTER
+              + " "
+              + Z
+              + "|(ein Komma|ein Semikolon)) eingefügt\\.$");
+
   private BefehlErkenner() {}
 
   /** Prüft, ob der Text ein Kontextrahmen („§ X wird wie folgt geändert:“) ist. */
@@ -174,7 +209,9 @@ final class BefehlErkenner {
   }
 
   /**
-   * Versucht, den Text als Änderungsbefehl zu erkennen.
+   * Versucht, den Text als Änderungsbefehl zu erkennen. Zuerst als Einzelbefehl ({@link
+   * #erkenneEinzeln}); schlägt das fehl (kein Muster passt oder die Stelle ist unparsbar), wird der
+   * Text als Mehrfach-Ersetzung bzw. Verbundbefehl gedeutet.
    *
    * @param text platzhalter-substituierter, whitespace-normalisierter Befehlstext.
    * @param kontext die aus umgebenden Kontextrahmen geerbte Stelle.
@@ -182,6 +219,19 @@ final class BefehlErkenner {
    * @param provenienz Herkunftsangabe für den Befehl.
    */
   static Optional<Aenderungsbefehl> erkenne(
+      String text, Stelle kontext, ZitatExtraktor.Ergebnis zitate, Provenienz provenienz) {
+    var einzeln = erkenneEinzeln(text, kontext, zitate, provenienz);
+    if (einzeln.isPresent()) {
+      return einzeln;
+    }
+    var paare = erkennePaarErsetzung(text, kontext, zitate, provenienz);
+    if (paare.isPresent()) {
+      return paare;
+    }
+    return erkenneVerbund(text, kontext, zitate, provenienz);
+  }
+
+  private static Optional<Aenderungsbefehl> erkenneEinzeln(
       String text, Stelle kontext, ZitatExtraktor.Ergebnis zitate, Provenienz provenienz) {
 
     Matcher m;
@@ -266,6 +316,27 @@ final class BefehlErkenner {
               s ->
                   new WoerterEinfuegung(
                       kontext.plus(s), new WortAnker.VorKommaAmEnde(), woerter, provenienz));
+    }
+
+    if ((m = KOMMA_EINFUEGUNG.matcher(text)).matches()) {
+      var ankerWoerter = wortZitat(zitate, m.group(3));
+      var anker =
+          m.group(2).equals("nach")
+              ? new WortAnker.NachWoertern(ankerWoerter)
+              : new WortAnker.VorWoertern(ankerWoerter);
+      var woerter = satzzeichen(m.group(4));
+      return ausStellen(
+          m.group(1), s -> new WoerterEinfuegung(kontext.plus(s), anker, woerter, provenienz));
+    }
+
+    if ((m = EINFUEGUNG_ANKER_ZUERST.matcher(text)).matches()) {
+      var ankerWoerter = wortZitat(zitate, m.group(2));
+      var anker =
+          m.group(1).equalsIgnoreCase("nach")
+              ? new WortAnker.NachWoertern(ankerWoerter)
+              : new WortAnker.VorWoertern(ankerWoerter);
+      var woerter = m.group(3) != null ? wortZitat(zitate, m.group(3)) : satzzeichen(m.group(4));
+      return Optional.of(new WoerterEinfuegung(kontext, anker, woerter, provenienz));
     }
 
     if ((m = INHALTSUEBERSICHT_EINFUEGUNG.matcher(text)).matches()
@@ -364,6 +435,127 @@ final class BefehlErkenner {
     }
 
     return Optional.empty();
+  }
+
+  /**
+   * „In <Stelle> werden die Wörter «1» durch «2» und die Angabe «3» durch «4» ersetzt.“ — mehrere
+   * Ersetzungspaare unter einem gemeinsamen „ersetzt“. Bei koordinierter Stelle („Absatz 1 und 5“)
+   * wird das Kreuzprodukt aus Stellen und Paaren gebildet. Ergebnis ist ein {@link Sammelbefehl}
+   * (bzw. ein einzelner Befehl, falls nur eine Kombination entsteht).
+   */
+  private static Optional<Aenderungsbefehl> erkennePaarErsetzung(
+      String text, Stelle kontext, ZitatExtraktor.Ergebnis zitate, Provenienz provenienz) {
+    var m = PAAR_ERSETZUNG.matcher(text);
+    if (!m.matches()) {
+      return Optional.empty();
+    }
+    var stellen = StellenParser.parseMehrfach(m.group(1));
+    if (stellen.isEmpty()) {
+      return Optional.empty();
+    }
+    var segmente = m.group(2).split(" und ");
+    if (segmente.length < 2) {
+      return Optional.empty();
+    }
+    var jeweils = text.contains("jeweils");
+    record Paar(String alt, String neu) {}
+    var paareListe = new ArrayList<Paar>();
+    for (var segment : segmente) {
+      var pm = EIN_ERSETZUNGS_PAAR.matcher(segment.strip());
+      if (!pm.matches()) {
+        return Optional.empty();
+      }
+      paareListe.add(new Paar(wortZitat(zitate, pm.group(1)), wortZitat(zitate, pm.group(2))));
+    }
+    var teile = new ArrayList<Aenderungsbefehl>();
+    for (var stelle : stellen) {
+      for (var paar : paareListe) {
+        teile.add(
+            new Ersetzung(
+                kontext.plus(stelle), paar.alt(), paar.neu(), jeweils, false, provenienz));
+      }
+    }
+    return Optional.of(teile.size() == 1 ? teile.get(0) : new Sammelbefehl(teile));
+  }
+
+  /**
+   * Verbundbefehl: mehrere per „und“ (bzw. „, wird/werden“) verkettete Einzelbefehle. Der Text wird
+   * an jeder Trennstelle probeweise gespalten; sobald beide Hälften als eigenständige Befehle
+   * erkannt werden, entsteht ein {@link Sammelbefehl}. Nur wenn <em>alle</em> Klauseln erkannt
+   * werden, greift die Zerlegung — sonst bleibt der Befehl unbekannt (konservativ).
+   */
+  private static Optional<Aenderungsbefehl> erkenneVerbund(
+      String text, Stelle kontext, ZitatExtraktor.Ergebnis zitate, Provenienz provenienz) {
+    var sep = VERBUND_SEP.matcher(text);
+    while (sep.find()) {
+      var links = text.substring(0, sep.start()).strip();
+      var rechts = text.substring(sep.end()).strip();
+      if (links.isEmpty() || rechts.isEmpty()) {
+        continue;
+      }
+      var linksBefehl = erkenneAlsSatz(links, kontext, zitate, provenienz);
+      if (linksBefehl.isEmpty()) {
+        continue;
+      }
+      var rechtsBefehl = erkenneRechteKlausel(links, rechts, kontext, zitate, provenienz);
+      if (rechtsBefehl.isEmpty()) {
+        continue;
+      }
+      var teile = new ArrayList<Aenderungsbefehl>();
+      flatten(linksBefehl.get(), teile);
+      flatten(rechtsBefehl.get(), teile);
+      return Optional.of(new Sammelbefehl(teile));
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * Versucht die rechte Klausel eines Verbunds zu erkennen: (1) unverändert, (2) mit großem
+   * Anfangsbuchstaben (eigenständiger Befehl wie „nach …“ → „Nach …“), (3) mit vorangestelltem
+   * lokativem Präfix der linken Klausel („In <Stelle> “).
+   */
+  private static Optional<Aenderungsbefehl> erkenneRechteKlausel(
+      String links,
+      String rechts,
+      Stelle kontext,
+      ZitatExtraktor.Ergebnis zitate,
+      Provenienz provenienz) {
+    var direkt = erkenneAlsSatz(rechts, kontext, zitate, provenienz);
+    if (direkt.isPresent()) {
+      return direkt;
+    }
+    var gross = Character.toUpperCase(rechts.charAt(0)) + rechts.substring(1);
+    if (!gross.equals(rechts)) {
+      var alsBefehl = erkenneAlsSatz(gross, kontext, zitate, provenienz);
+      if (alsBefehl.isPresent()) {
+        return alsBefehl;
+      }
+    }
+    var praefix = lokativerPraefix(links);
+    if (praefix != null) {
+      return erkenneAlsSatz(praefix + " " + rechts, kontext, zitate, provenienz);
+    }
+    return Optional.empty();
+  }
+
+  private static Optional<Aenderungsbefehl> erkenneAlsSatz(
+      String klausel, Stelle kontext, ZitatExtraktor.Ergebnis zitate, Provenienz provenienz) {
+    var satz = klausel.endsWith(".") ? klausel : klausel + ".";
+    return erkenne(satz, kontext, zitate, provenienz);
+  }
+
+  /** Der Teil einer Klausel vor dem ersten „wird“/„werden“ („In § 3 Absatz 1“). */
+  private static @Nullable String lokativerPraefix(String klausel) {
+    var m = WIRD_WERDEN.matcher(klausel);
+    return m.find() ? klausel.substring(0, m.start()) : null;
+  }
+
+  private static void flatten(Aenderungsbefehl befehl, List<Aenderungsbefehl> ziel) {
+    if (befehl instanceof Sammelbefehl s) {
+      ziel.addAll(s.teilbefehle());
+    } else {
+      ziel.add(befehl);
+    }
   }
 
   /**

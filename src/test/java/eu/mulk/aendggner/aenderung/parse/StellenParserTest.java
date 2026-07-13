@@ -52,4 +52,19 @@ class StellenParserTest {
   void unparsbaresSegmentLiefertLeereListe() {
     assertThat(StellenParser.parseMehrfach("§ 5 Absatz 2 und Kauderwelsch")).isEmpty();
   }
+
+  @Test
+  void bloßeNummerErbtKomponentenart() {
+    // „Absatz 1 und 5“: das „5“ erbt die Komponentenart „Absatz“ der letzten Komponente.
+    var stellen = StellenParser.parseMehrfach("§ 7 Absatz 1 und 5");
+    assertThat(stellen).extracting(Stelle::anzeigeText)
+        .containsExactly("§ 7 Absatz 1", "§ 7 Absatz 5");
+  }
+
+  @Test
+  void bloßeNummerNachSatz() {
+    var stellen = StellenParser.parseMehrfach("Absatz 1 Satz 1 und 2");
+    assertThat(stellen).extracting(Stelle::anzeigeText)
+        .containsExactly("Absatz 1 Satz 1", "Absatz 1 Satz 2");
+  }
 }
