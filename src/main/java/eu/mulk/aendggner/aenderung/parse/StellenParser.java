@@ -2,6 +2,7 @@ package eu.mulk.aendggner.aenderung.parse;
 
 import eu.mulk.aendggner.aenderung.Stelle;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -100,6 +101,74 @@ public final class StellenParser {
     if (komponenten.isEmpty()) {
       return Optional.empty();
     }
+    return Optional.of(new Stelle(komponenten));
+  }
+
+  private static final Pattern KOORDINATION = Pattern.compile(",\\s*|\\s+und\\s+|\\s+sowie\\s+");
+
+  /**
+   * Parst eine ggf. per „und“/„sowie“/Komma koordinierte Stellenangabe in eine Liste von Stellen.
+   * Nachfolgende Segmente teilen sich den gemeinsamen Präfix des vorigen Segments: „§ 3 Absatz 1
+   * Satz 2 und Absatz 4“ → [§ 3 Absatz 1 Satz 2, § 3 Absatz 4].
+   *
+   * <p>Für eine einfache (nicht koordinierte) Angabe liefert die Methode genau ein Element (bzw.
+   * eine leere Liste, wenn {@link #parse} sie ablehnt) und ist damit ein Drop-in für {@code
+   * parse(...).map(List::of)}. Kann ein Segment nicht geparst werden oder findet der Präfix-Merge
+   * keine Anknüpfung, wird eine leere Liste geliefert — der Aufrufer stuft den Befehl dann als
+   * unbekannt ein (konservativ: lieber manuell prüfen als falsch anwenden).
+   */
+  public static List<Stelle> parseMehrfach(String phrase) {
+    var segmente = KOORDINATION.split(phrase.strip());
+    if (segmente.length <= 1) {
+      return parse(phrase).map(List::of).orElseGet(List::of);
+    }
+
+    var ergebnis = new ArrayList<Stelle>();
+    Stelle vorige = null;
+    for (var segment : segmente) {
+      if (segment.isBlank()) {
+        return List.of();
+      }
+      var teil = parse(segment);
+      if (teil.isEmpty()) {
+        return List.of();
+      }
+      Stelle voll;
+      if (vorige == null) {
+        voll = teil.get();
+      } else {
+        var gemergt = mitGemeinsamemPraefix(vorige, teil.get());
+        if (gemergt.isEmpty()) {
+          return List.of();
+        }
+        voll = gemergt.get();
+      }
+      ergebnis.add(voll);
+      vorige = voll;
+    }
+    return ergebnis;
+  }
+
+  /**
+   * Ergänzt {@code segment} um die Präfix-Komponenten von {@code vorige}, die feiner-granular als
+   * die führende Komponente des Segments sind. Die führende Komponentenklasse des Segments wird in
+   * {@code vorige} gesucht; alle davor stehenden Komponenten bilden den gemeinsamen Präfix.
+   */
+  private static Optional<Stelle> mitGemeinsamemPraefix(Stelle vorige, Stelle segment) {
+    var fuehrende = segment.komponenten().get(0).getClass();
+    var vorKomp = vorige.komponenten();
+    int ankerIndex = -1;
+    for (int i = 0; i < vorKomp.size(); i++) {
+      if (vorKomp.get(i).getClass().equals(fuehrende)) {
+        ankerIndex = i;
+        break;
+      }
+    }
+    if (ankerIndex < 0) {
+      return Optional.empty();
+    }
+    var komponenten = new ArrayList<>(vorKomp.subList(0, ankerIndex));
+    komponenten.addAll(segment.komponenten());
     return Optional.of(new Stelle(komponenten));
   }
 

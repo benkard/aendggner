@@ -8,6 +8,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Aufhebung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ebene;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Neufassung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Sammelbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Streichung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Umnummerierung;
@@ -344,6 +345,82 @@ class BefehlErkennerTest {
 
     assertThat(befehl).containsInstanceOf(WoerterEinfuegung.class);
     assertThat(befehl.orElseThrow().stelle().betrifftInhaltsuebersicht()).isTrue();
+  }
+
+  @Test
+  void erkenntMehrfachzielStreichung() {
+    var befehl =
+        erkenne(
+            "In § 3 Absatz 1 Satz 2 und Absatz 4 wird jeweils die Angabe „in Bezug auf § 2 Abs."
+                + " 1 Nr. 1 bis 4“ gestrichen.",
+            Stelle.LEER);
+
+    assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile).hasSize(2).allMatch(t -> t instanceof Streichung);
+    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+        .containsExactly("§ 3 Absatz 1 Satz 2", "§ 3 Absatz 4");
+    assertThat(((Streichung) teile.get(0)).woerter()).isEqualTo("in Bezug auf § 2 Abs. 1 Nr. 1 bis 4");
+  }
+
+  @Test
+  void erkenntMehrfachzielErsetzung() {
+    var befehl =
+        erkenne(
+            "In § 20 Absatz 1 Satz 1 und Absatz 2 Satz 2 wird jeweils die Angabe „Alters“ durch"
+                + " die Angabe „Lebensalters“ ersetzt.",
+            Stelle.LEER);
+
+    assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile).hasSize(2).allMatch(t -> t instanceof Ersetzung);
+    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+        .containsExactly("§ 20 Absatz 1 Satz 1", "§ 20 Absatz 2 Satz 2");
+    assertThat(((Ersetzung) teile.get(0)).neu()).isEqualTo("Lebensalters");
+  }
+
+  @Test
+  void erkenntMehrfachzielEinfuegung() {
+    var befehl =
+        erkenne(
+            "In § 30 Absatz 2 Satz 1 und Absatz 3 wird jeweils vor der Angabe „Familie“ die"
+                + " Angabe „Bildung,“ eingefügt.",
+            Stelle.LEER);
+
+    assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile).hasSize(2).allMatch(t -> t instanceof WoerterEinfuegung);
+    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+        .containsExactly("§ 30 Absatz 2 Satz 1", "§ 30 Absatz 3");
+  }
+
+  @Test
+  void erkenntBereichsUmnummerierungAbsteigend() {
+    var befehl =
+        erkenne(
+            "Die bisherigen Absätze 2 bis 4 werden zu den Absätzen 3 bis 5.",
+            new Stelle(List.of(new Stelle.Paragraph("5"))));
+
+    assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile).hasSize(3).allMatch(t -> t instanceof Umnummerierung);
+    // Absteigend, damit die Anwendung keine Labels kollidieren lässt: 4→5, 3→4, 2→3.
+    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+        .containsExactly("§ 5 Absatz 4", "§ 5 Absatz 3", "§ 5 Absatz 2");
+    assertThat(teile).extracting(t -> ((Umnummerierung) t).neu().anzeigeText())
+        .containsExactly("§ 5 Absatz 5", "§ 5 Absatz 4", "§ 5 Absatz 3");
+  }
+
+  @Test
+  void verbundZweierBefehleBleibtUnbekannt() {
+    // „… wird zu Absatz 2 und nach Satz 2 werden … eingefügt“ verbindet zwei verschiedene
+    // Befehle per „und“ — bewusst nicht unterstützt.
+    assertThat(
+            erkenne(
+                "Der bisherige Absatz 1 wird zu Absatz 2 und nach Satz 2 werden die folgenden"
+                    + " Sätze eingefügt: „Ein Satz.“",
+                Stelle.LEER))
+        .isEmpty();
   }
 
   @Test

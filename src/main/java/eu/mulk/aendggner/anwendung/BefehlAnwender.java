@@ -5,6 +5,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Anfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Aufhebung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Neufassung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Sammelbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Streichung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturErsetzung;
@@ -86,6 +87,7 @@ public final class BefehlAnwender {
         case Anfuegung a -> wendeAnfuegungAn(normen, a);
         case Aufhebung a -> wendeAufhebungAn(normen, a);
         case Umnummerierung u -> wendeUmnummerierungAn(normen, u);
+        case Sammelbefehl s -> wendeSammelAn(normen, s);
         case UnbekannterBefehl u -> manuell(befehl, "Befehl nicht erkannt.");
       };
     } catch (RuntimeException e) {
@@ -465,6 +467,31 @@ public final class BefehlAnwender {
     }
     // Satz-Umnummerierungen ändern den Text nicht (Sätze sind unnummeriert).
     return angewandt(befehl, "(keine Textänderung nötig)");
+  }
+
+  /**
+   * Ein Mehrfachziel-Befehl („In A und B wird jeweils …“): wendet jeden Teilbefehl nacheinander an
+   * (jeder mutiert den fortlaufenden Zwischenstand) und fasst sie zu einem Protokolleintrag
+   * zusammen. Nur wenn alle Teile gelingen, gilt der Befehl als angewandt; sonst wird er zur
+   * manuellen Prüfung markiert (bereits angewandte Teile bleiben wirksam).
+   */
+  private static AngewandteAenderung wendeSammelAn(List<Norm> normen, Sammelbefehl befehl) {
+    var betroffene = new LinkedHashSet<String>();
+    var fehler = new ArrayList<String>();
+    int i = 1;
+    for (var teil : befehl.teilbefehle()) {
+      var ergebnis = wendeAn(normen, teil);
+      betroffene.addAll(ergebnis.betroffeneEnbez());
+      if (ergebnis.status() != Status.ANGEWANDT) {
+        fehler.add("Teil " + i + " (" + teil.stelle().anzeigeText() + "): " + ergebnis.begruendung());
+      }
+      i++;
+    }
+    if (fehler.isEmpty()) {
+      return new AngewandteAenderung(befehl, Status.ANGEWANDT, "", betroffene);
+    }
+    return new AngewandteAenderung(
+        befehl, Status.MANUELL_PRUEFEN, String.join(" ", fehler), betroffene);
   }
 
   // --- Gemeinsame Helfer ---------------------------------------------------------------------

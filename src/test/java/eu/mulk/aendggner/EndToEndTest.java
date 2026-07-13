@@ -140,13 +140,27 @@ class EndToEndTest {
     assertThat(parseErgebnis.befehle().size()).isBetween(15, 40);
 
     var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
-    assertThat(anwendung.anzahlAngewandt()).isGreaterThan(10);
+    // Inkl. der Mehrfachziel-„jeweils“-Befehle (§ 3, § 20, § 30) werden hier ~22 Befehle
+    // angewandt; nur die zwei Sonderfälle (positionaler Lokator, Verbundbefehl) bleiben manuell.
+    assertThat(anwendung.anzahlAngewandt()).isGreaterThanOrEqualTo(20);
+    assertThat(anwendung.anzahlManuell()).isLessThanOrEqualTo(3);
 
     var synopse = SynopseBuilder.baue(gesetz, anwendung, parseErgebnis.warnungen(), false);
     var html = HtmlRenderer.rendere(synopse, "E2E-Test");
     assertThat(html).contains("<del>").contains("<ins>");
     // Stichprobe aus Artikel 1 Nummer 1: „Alters“ → „Lebensalters“ in § 1.
     assertThat(html).contains("<ins>Lebensalters</ins>");
+    // Mehrfachziel-Einfügung (§ 30 Absatz 2 Satz 1 und Absatz 3): „Bildung,“ vor „Familie“.
+    assertThat(html).contains("<ins>Bildung,");
+    // Mehrfachziel-Streichung (§ 3 Absatz 1 Satz 2 und Absatz 4): gezielt entfernt — der
+    // untargetierte Absatz 5 behält die Angabe.
+    var norm3 = anwendung.neu().norm("§ 3").orElseThrow();
+    var absatz1 =
+        norm3.absaetze().stream().filter(a -> "1".equals(a.nummer())).findFirst().orElseThrow();
+    assertThat(absatz1.text()).doesNotContain("in Bezug auf § 2 Abs. 1 Nr. 1 bis 4");
+    var absatz5 =
+        norm3.absaetze().stream().filter(a -> "5".equals(a.nummer())).findFirst().orElseThrow();
+    assertThat(absatz5.text()).contains("in Bezug auf § 2 Abs. 1 Nr. 1 bis 4");
   }
 
   /**

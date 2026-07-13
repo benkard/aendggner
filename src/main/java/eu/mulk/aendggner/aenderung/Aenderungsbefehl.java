@@ -88,6 +88,28 @@ public sealed interface Aenderungsbefehl {
   record Umnummerierung(Stelle stelle, Stelle neu, Provenienz provenienz)
       implements Aenderungsbefehl {}
 
+  /**
+   * „In A und B wird jeweils …“ — ein Befehl, der dieselbe Operation auf mehrere, per „und“
+   * koordinierte Stellen anwendet. Die Teilbefehle teilen sich Provenienz und Befehlszeile; der
+   * Applier fasst sie zu einem Protokolleintrag zusammen.
+   */
+  record Sammelbefehl(java.util.List<Aenderungsbefehl> teilbefehle) implements Aenderungsbefehl {
+
+    public Sammelbefehl {
+      teilbefehle = java.util.List.copyOf(teilbefehle);
+    }
+
+    @Override
+    public Stelle stelle() {
+      return teilbefehle.get(0).stelle();
+    }
+
+    @Override
+    public Provenienz provenienz() {
+      return teilbefehle.get(0).provenienz();
+    }
+  }
+
   /** Fallback für alles, was der Parser nicht versteht — muss manuell geprüft werden. */
   record UnbekannterBefehl(Stelle stelle, String originalText, Provenienz provenienz)
       implements Aenderungsbefehl {}

@@ -6,6 +6,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Aufhebung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ebene;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Neufassung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Sammelbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Streichung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturErsetzung;
@@ -14,7 +15,10 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WoerterEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortAnker;
 import eu.mulk.aendggner.aenderung.Provenienz;
 import eu.mulk.aendggner.aenderung.Stelle;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jspecify.annotations.Nullable;
@@ -84,7 +88,8 @@ final class BefehlErkenner {
 
   private static final Pattern WOERTER_EINFUEGUNG =
       Pattern.compile(
-          "^(?:In )?(.+?) (?:wird|werden) (nach|vor) (?:dem Wort|den Wörtern|der Angabe|der Zahl) "
+          "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?(nach|vor) "
+              + "(?:dem Wort|den Wörtern|der Angabe|der Zahl) "
               + Z
               + " "
               + WOERTER
@@ -123,10 +128,18 @@ final class BefehlErkenner {
   private static final Pattern AUFHEBUNG = Pattern.compile("^(.+?) (?:wird|werden) aufgehoben\\.$");
 
   private static final Pattern STREICHUNG =
-      Pattern.compile("^(?:In )?(.+?) (?:wird|werden) " + WOERTER + " " + Z + " gestrichen\\.$");
+      Pattern.compile(
+          "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?" + WOERTER + " " + Z + " gestrichen\\.$");
 
   private static final Pattern UMNUMMERIERUNG =
-      Pattern.compile("^(?:Der bisherige )?(.+?) wird (Absatz|Satz) (\\d+[a-z]?)\\.$");
+      Pattern.compile("^(?:Der bisherige )?(.+?) wird (?:zu )?(Absatz|Satz) (\\d+[a-z]?)\\.$");
+
+  // „Die bisherigen Absätze 2 bis 4 werden zu den Absätzen 3 bis 5.“ (Entwürfe) — Bereichs-
+  // Umnummerierung, die in einzelne Umnummerierungen aufgelöst wird.
+  private static final Pattern UMNUMMERIERUNG_BEREICH =
+      Pattern.compile(
+          "^Die bisherigen (?:Absätze|Sätze) (\\d+) bis (\\d+) "
+              + "werden zu den (Absätzen|Sätzen) (\\d+) bis (\\d+)\\.$");
 
   private static final Pattern INHALTSUEBERSICHT_EINFUEGUNG =
       Pattern.compile(
@@ -203,10 +216,8 @@ final class BefehlErkenner {
       var jeweils = m.group(2) != null || text.contains(" jeweils durch ");
       var alt = wortZitat(zitate, m.group(3));
       var neu = wortZitat(zitate, m.group(4));
-      var stelle = StellenParser.parse(m.group(1));
-      var effektivesJeweils = jeweils;
-      return stelle.map(
-          s -> new Ersetzung(kontext.plus(s), alt, neu, effektivesJeweils, false, provenienz));
+      return ausStellen(
+          m.group(1), s -> new Ersetzung(kontext.plus(s), alt, neu, jeweils, false, provenienz));
     }
 
     if ((m = ERSETZUNG_OHNE_STELLE.matcher(text)).matches()) {
@@ -244,8 +255,8 @@ final class BefehlErkenner {
               ? new WortAnker.NachWoertern(ankerWoerter)
               : new WortAnker.VorWoertern(ankerWoerter);
       var woerter = wortZitat(zitate, m.group(4));
-      return StellenParser.parse(m.group(1))
-          .map(s -> new WoerterEinfuegung(kontext.plus(s), anker, woerter, provenienz));
+      return ausStellen(
+          m.group(1), s -> new WoerterEinfuegung(kontext.plus(s), anker, woerter, provenienz));
     }
 
     if ((m = WOERTER_EINFUEGUNG_VOR_KOMMA.matcher(text)).matches()) {
@@ -335,8 +346,12 @@ final class BefehlErkenner {
 
     if ((m = STREICHUNG.matcher(text)).matches()) {
       var woerter = wortZitat(zitate, m.group(2));
-      return StellenParser.parse(m.group(1))
-          .map(s -> new Streichung(kontext.plus(s), woerter, provenienz));
+      return ausStellen(m.group(1), s -> new Streichung(kontext.plus(s), woerter, provenienz));
+    }
+
+    if ((m = UMNUMMERIERUNG_BEREICH.matcher(text)).matches()) {
+      return bereichsUmnummerierung(
+          m.group(3), m.group(1), m.group(2), m.group(4), m.group(5), kontext, provenienz);
     }
 
     if ((m = UMNUMMERIERUNG.matcher(text)).matches()) {
@@ -345,12 +360,61 @@ final class BefehlErkenner {
           .map(
               alt ->
                   new Umnummerierung(
-                      kontext.plus(alt),
-                      kontext.plus(new Stelle(java.util.List.of(neu))),
-                      provenienz));
+                      kontext.plus(alt), kontext.plus(new Stelle(List.of(neu))), provenienz));
     }
 
     return Optional.empty();
+  }
+
+  /**
+   * Löst „Die bisherigen Absätze X bis Y werden zu den Absätzen X′ bis Y′.“ in einzelne
+   * Umnummerierungen auf, angewandt in absteigender Reihenfolge (Y→Y′ zuerst), damit die
+   * sequenzielle Anwendung keine Labels kollidieren lässt.
+   */
+  private static Optional<Aenderungsbefehl> bereichsUmnummerierung(
+      String ebeneWort,
+      String altVon,
+      String altBis,
+      String neuVon,
+      String neuBis,
+      Stelle kontext,
+      Provenienz provenienz) {
+    var ebene = ebeneWort.equals("Absätzen") ? "Absatz" : "Satz";
+    int av = Integer.parseInt(altVon);
+    int ab = Integer.parseInt(altBis);
+    int nv = Integer.parseInt(neuVon);
+    int nb = Integer.parseInt(neuBis);
+    if (ab - av != nb - nv || ab < av) {
+      return Optional.empty();
+    }
+    var teile = new ArrayList<Aenderungsbefehl>();
+    for (int k = ab - av; k >= 0; k--) {
+      var alt = komponenteFuer(ebene, String.valueOf(av + k));
+      var neu = komponenteFuer(ebene, String.valueOf(nv + k));
+      teile.add(
+          new Umnummerierung(
+              kontext.plus(new Stelle(List.of(alt))),
+              kontext.plus(new Stelle(List.of(neu))),
+              provenienz));
+    }
+    return Optional.of(new Sammelbefehl(teile));
+  }
+
+  /**
+   * Wendet einen Stellen-basierten Befehlsbauer auf eine (ggf. koordinierte) Stellenangabe an: bei
+   * einer einzelnen Stelle das gewohnte Verhalten, bei mehreren per „und“ verbundenen Stellen ein
+   * {@link Sammelbefehl}, der die Operation auf jede Stelle anwendet.
+   */
+  private static Optional<Aenderungsbefehl> ausStellen(
+      String phrase, Function<Stelle, Aenderungsbefehl> bauer) {
+    var stellen = StellenParser.parseMehrfach(phrase);
+    if (stellen.isEmpty()) {
+      return Optional.empty();
+    }
+    if (stellen.size() == 1) {
+      return Optional.of(bauer.apply(stellen.get(0)));
+    }
+    return Optional.of(new Sammelbefehl(stellen.stream().map(bauer).toList()));
   }
 
   private record EbeneBezeichnung(Ebene ebene, String bezeichnung) {}

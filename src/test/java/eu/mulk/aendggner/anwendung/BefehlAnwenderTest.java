@@ -7,6 +7,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Aufhebung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ebene;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Neufassung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Sammelbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Streichung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturErsetzung;
@@ -368,6 +369,58 @@ class BefehlAnwenderTest {
   }
 
   // --- Helfer --------------------------------------------------------------------------------
+
+  @Test
+  void wendetSammelbefehlAlsEinenEintragAn() {
+    var teil1 =
+        new Ersetzung(
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("1")),
+            "Erprobung",
+            "Prüfung",
+            false,
+            false,
+            PROV);
+    var teil2 =
+        new Ersetzung(
+            stelle(new Stelle.Paragraph("2")), "Erprobung", "Prüfung", false, false, PROV);
+    var sammel = new Sammelbefehl(List.of(teil1, teil2));
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(sammel));
+
+    // Ein Befehl → genau ein Protokolleintrag, aber beide Teiledits wirken.
+    assertThat(ergebnis.protokoll()).hasSize(1);
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(ergebnis.protokoll().get(0).betroffeneEnbez()).containsExactlyInAnyOrder("§ 1", "§ 2");
+    assertThat(absatzText(ergebnis.neu(), "§ 1", 0))
+        .isEqualTo("Zweck dieses Gesetzes ist die Prüfung.");
+    assertThat(absatzText(ergebnis.neu(), "§ 2", 0)).startsWith("Prüfung ist die Prüfung");
+  }
+
+  @Test
+  void sammelbefehlMitFehlschlagendemTeilWirdManuell() {
+    var teil1 =
+        new Ersetzung(
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("1")),
+            "Erprobung",
+            "Prüfung",
+            false,
+            false,
+            PROV);
+    var teil2 =
+        new Ersetzung(
+            stelle(new Stelle.Paragraph("2")), "gibt es nicht", "egal", false, false, PROV);
+    var sammel = new Sammelbefehl(List.of(teil1, teil2));
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(sammel));
+
+    assertThat(ergebnis.protokoll()).hasSize(1);
+    var eintrag = ergebnis.protokoll().get(0);
+    assertThat(eintrag.status()).isEqualTo(Status.MANUELL_PRUEFEN);
+    assertThat(eintrag.begruendung()).contains("Teil 2");
+    // Der gelungene Teil bleibt trotzdem wirksam.
+    assertThat(absatzText(ergebnis.neu(), "§ 1", 0))
+        .isEqualTo("Zweck dieses Gesetzes ist die Prüfung.");
+  }
 
   private static Gesetz gesetz() {
     return new Gesetz(
