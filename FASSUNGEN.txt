@@ -1,0 +1,134 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║                                                                                ║
+║   V E R Z E I C H N I S   D E R   F A S S U N G E N                            ║
+║   des Softwareerzeugnisses „ÄndGgner“                                          ║
+║   (Werkzeug zur Erstellung von Synopsen für Änderungsgesetze)                  ║
+║                                                                                ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+Vorbemerkung zur Führung dieses Verzeichnisses
+──────────────────────────────────────────────
+(1) Dieses Verzeichnis dokumentiert nach Maßgabe der nachstehenden Bestimmungen
+    den jeweiligen Stand des Quelltextes des vorbezeichneten Erzeugnisses.
+(2) Für jeden Kalendertag, an dem Änderungen am Quelltext vorgenommen werden, ist
+    ein gesonderter Abschnitt nach dem Muster der nachfolgenden Fassungen anzu-
+    legen; die Abschnitte sind in absteigender zeitlicher Reihenfolge (jüngste
+    Fassung zuerst) zu führen.
+(3) Die Änderungen sind in sachlich gegliederter Form, unter fortlaufender
+    Nummerierung und unter Angabe der betroffenen Bestandteile (Klassen, Dateien)
+    zu bezeichnen. Maßgeblich ist die im Handbuch der Rechtsförmlichkeit nieder-
+    gelegte Ausdrucksweise entsprechend.
+
+
+════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 13. Juli 2026,
+ zuletzt geändert durch die am 13. Juli 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Auf Grund der fortdauernden Ertüchtigung des Befehlserkenners werden die bis zu
+diesem Tage nicht selbsttätig verarbeitbaren Änderungsanweisungen nach näherer
+Maßgabe der nachstehenden Abschnitte einer Verarbeitung zugänglich gemacht. Die
+Zahl der nicht erkannten Anweisungen (nachfolgend: „unbekannte Befehle“) ver-
+ringert sich hierdurch nach den vorliegenden Feststellungen wie folgt: im
+Datensatz GEG von fünfzig (50) auf fünf (5), im Datensatz IfSG von elf (11) auf
+drei (3), im Datensatz AGG von zwei (2) auf null (0) sowie im Datensatz UWG von
+zwei (2) auf null (0).
+
+
+Artikel 1
+Übernahme des vorbefindlichen Bearbeitungsstandes
+
+Der zum Stichtag im Arbeitsverzeichnis vorgehaltene, noch nicht in die Versions-
+verwaltung überführte Bearbeitungsstand wird eingecheckt. Erfasst werden ins-
+besondere der Sammelbefehl (mehrere Teilbefehle als ein Protokolleintrag), die
+mehrfache Stellenauflösung (StellenParser.parseMehrfach) sowie die Auflösung von
+Bereichs-Umnummerierungen in absteigender Reihenfolge.
+
+
+Artikel 2
+Erkennung verbundener und mehrgliedriger Ersetzungsanweisungen
+
+Der Befehlserkenner (BefehlErkenner) wird wie folgt geändert:
+
+1.  Die Erkennung wird in eine Einzelbefehls-Stufe (erkenneEinzeln) und eine nach-
+    geordnete Auffangstufe (erkennePaarErsetzung, erkenneVerbund) gegliedert. Trifft
+    ein Muster zwar auf den Wortlaut, nicht aber auf eine auflösbare Stelle zu, so
+    steht dies der Prüfung der nachfolgenden Muster und Auffangstufen nicht mehr
+    entgegen.
+
+2.  Anweisungen der Form „In <Stelle> werden die Wörter „A“ durch die Wörter „B“
+    und die Angabe „C“ durch die Wörter „D“ ersetzt“ werden erkannt; für jedes
+    Ersetzungspaar wird eine Ersetzung gebildet und, im Falle koordinierter Stellen,
+    das Kreuzprodukt aus Stellen und Paaren gebildet.
+
+3.  Anweisungen der Form „... und wird/werden ...“ werden an der Verbindungsstelle
+    versuchsweise zerlegt; wird jede Teilklausel als eigenständiger Befehl erkannt –
+    unverändert, mit großem Anfangsbuchstaben oder unter Voranstellung des lokativen
+    Präfixes der linken Klausel –, so entsteht ein Sammelbefehl.
+
+4.  Ergänzend werden die Einfügung eines Satzzeichens („... ein Komma eingefügt“)
+    sowie die anker-voranstehende Einfügung („Nach der Angabe „...“ wird ...
+    eingefügt“) als Muster aufgenommen.
+
+Der Stellenparser (StellenParser) wird dahin geändert, dass eine bloße Nummer oder
+ein bloßer Buchstabe die Komponentenart der jeweils vorangehenden Stelle erbt
+(„Absatz 1 und 5“).
+
+
+Artikel 3
+Erkennung von Bereichs-, Wortlaut- und Satzzeichenanweisungen
+
+1.  Der Stellenparser wird um die Entfaltung von „bis“-Bereichen (ganzzahlig sowie
+    für Einzelbuchstaben) und um die Pluralformen der Komponentenbezeichnungen
+    (Absätze, Sätze, Nummern, Buchstaben) ergänzt.
+
+2.  Die Aufhebung wird auf bereichs- und koordinierte Angaben erstreckt („Die
+    Nummern 1 bis 3 werden aufgehoben“, „Die Absätze 4 und 5 werden aufgehoben“).
+
+3.  Die Bereichs-Umnummerierung wird auf Nummern und Buchstaben sowie auf die Form
+    ohne „zu den“ erstreckt („Die bisherigen Nummern 4 bis 6 werden die Nummern
+    8 bis 10“); die Einzel-Umnummerierung wird auf Nummern und Buchstaben sowie auf
+    die Einleitung „Die bisherige“ erstreckt.
+
+4.  Die Neufassung eines Paragraphen-Bereichs („Die §§ 52 bis 56 werden wie folgt
+    gefasst: ...“) wird durch Zerlegung des zitierten Blocks an den „§ N“-Grenzen
+    erkannt.
+
+5.  Es wird der Befehl „WortlautZuAbsatz“ eingeführt; die Anweisung „Der Wortlaut
+    wird Absatz N“ versieht den bislang unnummerierten Normtext mit der Absatznummer.
+
+6.  Die Ersetzung eines Wortes durch ein Satzzeichen („... das Wort „oder“ am Ende
+    durch ein Komma ersetzt“) sowie die zusammengesetzten Kommaformen werden erkannt.
+
+
+Artikel 4
+Aufnahme der Gliederungs- und Inhaltsübersichts-Anweisungen
+
+1.  Das Datenmodell wird wie folgt geändert:
+    a)  Die Gliederung (Gliederung) wird um die Gliederungskennzahl ergänzt.
+    b)  Das Gesetz (Gesetz) führt fortan die geordnete Liste der Gliederungs-
+        einheiten mit; der Lader (GiiXmlLoader) erhebt diese aus dem gii-XML.
+
+2.  Die Stelle (Stelle) wird um die Komponenten „Gliederungseinheit“ (Teil,
+    Abschnitt, Unterabschnitt, Anlage und dergleichen) sowie „Absatzbezeichnung“
+    ergänzt. Der Stellenparser erkennt diese Komponenten, ferner die Wendung
+    „Überschrift von <Gliederung>“, und lässt die verfeinernden Zusätze „Satzteil
+    vor Nummer N“ und „Angabe vor Nummer N“ außer Betracht.
+
+3.  Die Neufassung sowie die Streichung von Gliederungs-Überschriften werden auf den
+    Gliederungsbaum angewandt und in der Synopse als gesonderter Abschnitt
+    „Geänderte Gliederungs-Überschriften“ dargestellt. Die Streichung einer
+    Absatzbezeichnung entfernt die betreffende Absatznummer. Die die Inhaltsübersicht
+    betreffenden Anweisungen („Die Angabe(n) zu ...“) werden erkannt.
+
+
+Schlussbestimmung
+
+Die vorstehenden Änderungen sind durch die Prüfung sämtlicher Testfälle
+(einhundertneunzehn an der Zahl) sowie durch die vollständige Erstellung (mvnw
+verify) bestätigt worden. Nicht selbsttätig verarbeitbar bleiben einstweilen die
+mehrquelligen Struktur-Ersetzungen, die Einfügung und Bereichsersetzung ganzer
+Paragraphenfolgen (§§), die Neufassung von Satzbereichen sowie die stellenlosen
+Chapeau-Anweisungen; diese werden dem Abschnitt „Manuell prüfen“ zugewiesen. Die
+Unterstützung des bayerischen Landesrechts bleibt einem späteren Zeitpunkt
+vorbehalten.
