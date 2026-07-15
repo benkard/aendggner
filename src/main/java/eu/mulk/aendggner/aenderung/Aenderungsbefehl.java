@@ -47,9 +47,20 @@ public sealed interface Aenderungsbefehl {
   /**
    * „§ 2 Absatz 2 wird durch die folgenden Absätze 2 und 3 ersetzt: „…““ — ein Ziel wird durch
    * einen Block ersetzt, der auch mehrere neue Einheiten enthalten darf.
+   *
+   * @param stelle das (erste) zu ersetzende Ziel.
+   * @param bisStelle bei einem zusammenhängenden Bereich („Die Absätze 8 und 9 …“, „Die Sätze 4 bis
+   *     5 …“) das letzte Ziel; {@code null} bei einem Einzelziel.
    */
-  record StrukturErsetzung(Stelle stelle, Ebene ebene, String text, Provenienz provenienz)
-      implements Aenderungsbefehl {}
+  record StrukturErsetzung(
+      Stelle stelle, @Nullable Stelle bisStelle, Ebene ebene, String text, Provenienz provenienz)
+      implements Aenderungsbefehl {
+
+    /** Einzelziel-Konstruktor (kein Bereich). */
+    public StrukturErsetzung(Stelle stelle, Ebene ebene, String text, Provenienz provenienz) {
+      this(stelle, null, ebene, text, provenienz);
+    }
+  }
 
   /** „… werden nach dem Wort „A“ die Wörter „B“ eingefügt.“ */
   record WoerterEinfuegung(Stelle stelle, WortAnker anker, String woerter, Provenienz provenienz)

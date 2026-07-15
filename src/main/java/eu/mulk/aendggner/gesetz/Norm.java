@@ -31,6 +31,10 @@ public record Norm(
     return new Norm(enbez, neuerTitel, gliederung, absaetze, weggefallen);
   }
 
+  public Norm mitEnbez(String neuerEnbez) {
+    return new Norm(neuerEnbez, titel, gliederung, absaetze, weggefallen);
+  }
+
   public Norm alsWeggefallen() {
     return new Norm(enbez, titel, gliederung, List.of(new Absatz(null, "(weggefallen)")), true);
   }

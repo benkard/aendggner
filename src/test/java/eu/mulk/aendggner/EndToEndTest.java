@@ -110,11 +110,11 @@ class EndToEndTest {
     assertThat(parseErgebnis.artikel()).contains("1");
     assertThat(parseErgebnis.befehle().size()).isGreaterThanOrEqualTo(100);
 
-    // Der Großteil der Befehle wird erkannt; nur einige Spezialfälle (Mehrquell-Ersetzungen,
-    // §§-Bereiche, Chapeau-Angaben) bleiben unbekannt.
+    // Im BGBl-Format werden inzwischen alle Befehle typisiert (Bereichs-/Struktur-Ersetzungen,
+    // §-Blöcke, Chapeau-Lokatoren, strukturelle Streichungen usw.).
     var unbekannt =
         parseErgebnis.befehle().stream().filter(b -> b instanceof UnbekannterBefehl).count();
-    assertThat(unbekannt).isLessThanOrEqualTo(8);
+    assertThat(unbekannt).isZero();
 
     // Das XML ist bereits konsolidiert; entscheidend ist, dass die Anwendung sauber terminiert
     // und jeden Befehl protokolliert.

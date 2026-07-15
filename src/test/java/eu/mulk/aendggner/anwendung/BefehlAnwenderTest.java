@@ -20,6 +20,7 @@ import eu.mulk.aendggner.aenderung.Stelle;
 import eu.mulk.aendggner.anwendung.BefehlAnwender.Status;
 import eu.mulk.aendggner.gesetz.Absatz;
 import eu.mulk.aendggner.gesetz.Gesetz;
+import eu.mulk.aendggner.gesetz.Gliederung;
 import eu.mulk.aendggner.gesetz.Norm;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -349,6 +350,44 @@ class BefehlAnwenderTest {
   }
 
   @Test
+  void ersetztAbsatzBereichDurchBlock() {
+    // „Die Absätze 1 und 2 werden durch die folgenden Absätze 1 bis 3 ersetzt: „…““
+    var befehl =
+        new StrukturErsetzung(
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("1")),
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2")),
+            Ebene.ABSATZ,
+            "(1) Neu eins. (2) Neu zwei. (3) Neu drei.",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    var norm = ergebnis.neu().norm("§ 1").orElseThrow();
+    assertThat(norm.absaetze()).hasSize(3);
+    assertThat(norm.absaetze()).extracting(Absatz::nummer).containsExactly("1", "2", "3");
+    assertThat(norm.absaetze().get(0).text()).isEqualTo("Neu eins.");
+  }
+
+  @Test
+  void ersetztSatzBereichDurchBlock() {
+    // „Die Sätze 1 und 2 werden wie folgt gefasst: „…““ in § 2 (3 Sätze).
+    var befehl =
+        new StrukturErsetzung(
+            stelle(new Stelle.Paragraph("2"), new Stelle.SatzNr("1")),
+            stelle(new Stelle.Paragraph("2"), new Stelle.SatzNr("2")),
+            Ebene.SATZ,
+            "Neuer Satz eins. Neuer Satz zwei.",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "§ 2", 0))
+        .isEqualTo("Neuer Satz eins. Neuer Satz zwei. Sie endet mit einem Bericht.");
+  }
+
+  @Test
   void fuegtSatzNachSatzEin() {
     var befehl =
         new StrukturEinfuegung(
@@ -420,6 +459,112 @@ class BefehlAnwenderTest {
     // Der gelungene Teil bleibt trotzdem wirksam.
     assertThat(absatzText(ergebnis.neu(), "§ 1", 0))
         .isEqualTo("Zweck dieses Gesetzes ist die Prüfung.");
+  }
+
+  @Test
+  void nummeriertParagraphUm() {
+    var befehl =
+        new Umnummerierung(stelle(new Stelle.Paragraph("3")), stelle(new Stelle.Paragraph("4")), PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    var enbezListe = ergebnis.neu().normen().stream().map(Norm::enbez).toList();
+    assertThat(enbezListe).containsExactly("§ 1", "§ 2", "§ 4");
+    assertThat(ergebnis.neu().norm("§ 4").orElseThrow().titel()).isEqualTo("Schlussvorschriften");
+  }
+
+  @Test
+  void paragraphUmnummerierungUeberschreibtWeggefalleneZielnorm() {
+    // § 2 aufheben, dann § 3 → § 2: die weggefallene Zielnorm wird ersetzt.
+    var befehle =
+        List.<eu.mulk.aendggner.aenderung.Aenderungsbefehl>of(
+            new Aufhebung(stelle(new Stelle.Paragraph("2")), PROV),
+            new Umnummerierung(
+                stelle(new Stelle.Paragraph("3")), stelle(new Stelle.Paragraph("2")), PROV));
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), befehle);
+
+    assertThat(ergebnis.protokoll()).allMatch(a -> a.status() == Status.ANGEWANDT);
+    var enbezListe = ergebnis.neu().normen().stream().map(Norm::enbez).toList();
+    assertThat(enbezListe).containsExactly("§ 1", "§ 2");
+    assertThat(ergebnis.neu().norm("§ 2").orElseThrow().titel()).isEqualTo("Schlussvorschriften");
+  }
+
+  @Test
+  void meldetKonfliktBeiParagraphUmnummerierung() {
+    var befehl =
+        new Umnummerierung(stelle(new Stelle.Paragraph("3")), stelle(new Stelle.Paragraph("1")), PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.MANUELL_PRUEFEN);
+    assertThat(ergebnis.protokoll().get(0).begruendung()).contains("existiert bereits");
+  }
+
+  @Test
+  void fuegtParagraphenBlockEin() {
+    // „Nach § 1 werden die folgenden §§ 1a und 1b eingefügt: „…““ (bezeichnung == null).
+    var befehl =
+        new StrukturEinfuegung(
+            stelle(new Stelle.Paragraph("1")),
+            false,
+            Ebene.PARAGRAPH,
+            null,
+            "§ 1a Erstes Neu (1) Inhalt eins. § 1b Zweites Neu (1) Inhalt zwei.",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    var enbezListe = ergebnis.neu().normen().stream().map(Norm::enbez).toList();
+    assertThat(enbezListe).containsExactly("§ 1", "§ 1a", "§ 1b", "§ 2", "§ 3");
+    assertThat(ergebnis.neu().norm("§ 1a").orElseThrow().titel()).isEqualTo("Erstes Neu");
+    assertThat(ergebnis.neu().norm("§ 1b").orElseThrow().titel()).isEqualTo("Zweites Neu");
+  }
+
+  @Test
+  void ersetztParagraphBlock() {
+    // „§ 2 wird durch die folgenden §§ 2 und 2a ersetzt: „…““ — § 2 wird durch zwei §§ ersetzt.
+    // Der Querverweis „§ 1 Absatz 1“ im Text darf NICHT als Grenze zerteilt werden.
+    var befehl =
+        new StrukturErsetzung(
+            stelle(new Stelle.Paragraph("2")),
+            null,
+            Ebene.PARAGRAPH,
+            "§ 2 Begriffe (1) Erprobung nach § 1 Absatz 1 ist die Prüfung. § 2a Weiteres (1) Mehr.",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    var enbezListe = ergebnis.neu().normen().stream().map(Norm::enbez).toList();
+    assertThat(enbezListe).containsExactly("§ 1", "§ 2", "§ 2a", "§ 3");
+    assertThat(ergebnis.neu().norm("§ 2").orElseThrow().absaetze().get(0).text())
+        .isEqualTo("Erprobung nach § 1 Absatz 1 ist die Prüfung.");
+    assertThat(ergebnis.neu().norm("§ 2a").orElseThrow().titel()).isEqualTo("Weiteres");
+  }
+
+  @Test
+  void nummeriertGliederungUm() {
+    var gesetz =
+        new Gesetz(
+            "TestG",
+            "Gesetz",
+            "Test",
+            List.of(new Norm("§ 1", "Zweck", null, List.of(new Absatz("1", "Text.")), false)),
+            List.of(new Gliederung("010020", "Abschnitt 2", "Früherkennung")));
+    var befehl =
+        new Umnummerierung(
+            stelle(new Stelle.Gliederungseinheit("Abschnitt", "2")),
+            stelle(new Stelle.Gliederungseinheit("Abschnitt", "3")),
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz, List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(ergebnis.neu().gliederungen().get(0).bezeichnung()).isEqualTo("Abschnitt 3");
+    assertThat(ergebnis.neu().gliederungen().get(0).titel()).isEqualTo("Früherkennung");
   }
 
   private static Gesetz gesetz() {

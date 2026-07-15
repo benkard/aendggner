@@ -45,9 +45,23 @@ final class BefehlErkenner {
 
   // „§ 2 Absatz 2 wird durch die folgenden Absätze 2 und 3 ersetzt: „…““ (neues BGBl-Format);
   // auch „Die Überschrift wird durch die folgende Überschrift ersetzt: „…““ (Entwürfe).
+  // Der optionale Enumerator-Präfix („3. “, „a) “) fängt die Entwurfs-/Drucksachenform ab, bei der
+  // die Aufzählungsbezeichnung außerhalb des Zitats steht („… ersetzt: 3. „…““); er wird dem
+  // Ersatztext wieder vorangestellt, da das Label sonst verloren ginge.
   private static final Pattern STRUKTUR_ERSETZUNG =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) durch (?:den |die |das )?folgende[nrs]? (.+?) ersetzt: "
+              + "((?:\\d+[a-z]?\\.|[a-z]{1,3}\\))\\s*)?"
+              + Z
+              + "\\.?$");
+
+  // „In Anlage 7 wird die Überschrift durch die folgende Überschrift ersetzt: „…““ — Neufassung der
+  // Überschrift einer benannten Einheit (Anlage/Gliederung/Paragraph); das „die Überschrift“-Objekt
+  // steht hier zwischen Stelle und „durch“, weshalb STRUKTUR_ERSETZUNG nicht greift.
+  private static final Pattern UEBERSCHRIFT_ERSETZUNG =
+      Pattern.compile(
+          "^(?:In )?(.+?) (?:wird|werden) die Überschrift durch "
+              + "(?:die |den |das )?folgende[nrs]? Überschrift ersetzt: "
               + Z
               + "\\.?$");
 
@@ -152,18 +166,30 @@ final class BefehlErkenner {
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?" + WOERTER + " " + Z + " gestrichen\\.$");
 
+  // „§ 9 wird gestrichen.“, „Absatz 3 wird gestrichen.“, „Die §§ 34 bis 39 werden gestrichen.“,
+  // „Der bisherige Teil 3 wird gestrichen.“ — Streichung ganzer Struktureinheiten (semantisch eine
+  // Aufhebung). Greift erst, wenn die Wörter-Streichung STREICHUNG (die ein Zitat verlangt) und die
+  // Überschrift-/Absatzbezeichnungs-Streichungen nicht passen.
+  private static final Pattern STRUKTUR_STREICHUNG =
+      Pattern.compile("^(.+?) (?:wird|werden) gestrichen\\.$");
+
   private static final Pattern UMNUMMERIERUNG =
       Pattern.compile(
           "^(?:Der bisherige |Die bisherige |Das bisherige )?(.+?) wird (?:zu )?"
-              + "(Absatz|Satz|Nummer|Buchstabe) (\\d+[a-z]?)\\.$");
+              + "(§|Absatz|Satz|Nummer|Buchstabe|Teil|Abschnitt|Unterabschnitt|Buch|Kapitel|Anlage) "
+              + "(\\d+[a-z]?)\\.$");
 
   // „Die bisherigen Absätze 2 bis 4 werden zu den Absätzen 3 bis 5.“ bzw. „Die bisherigen Nummern 4
   // bis 6 werden die Nummern 8 bis 10.“ — Bereichs-Umnummerierung, in Einzelbefehle aufgelöst.
   private static final Pattern UMNUMMERIERUNG_BEREICH =
       Pattern.compile(
-          "^Die bisherigen (?:Absätze|Sätze|Nummern|Buchstaben) (\\d+) bis (\\d+) "
+          "^Die (?:bisherigen )?(?:Absätze|Sätze|Nummern|Buchstaben) (\\d+) bis (\\d+) "
               + "werden (?:zu den |die )?(Absätzen|Sätzen|Nummern|Buchstaben|Absätze|Sätze) "
               + "(\\d+) bis (\\d+)\\.$");
+
+  // „Die §§ 46 und 47 werden zu den §§ 34 und 35.“ — paarweise §-Umnummerierung (auch Bereiche).
+  private static final Pattern UMNUMMERIERUNG_PARAGRAPHEN =
+      Pattern.compile("^Die §§ (.+?) werden (?:zu den §§ |zu §§ |die §§ )(.+?)\\.$");
 
   // „Die §§ 52 bis 56 werden wie folgt gefasst: „§ 52 (weggefallen) …““ — Neufassung eines §-Bereichs;
   // der Zitatblock wird an „§ N“-Grenzen in Einzel-Neufassungen zerlegt.
@@ -323,32 +349,77 @@ final class BefehlErkenner {
 
     if ((m = NEUFASSUNG.matcher(text)).matches()) {
       var neuerText = zitat(zitate, m.group(2));
-      return StellenParser.parse(m.group(1))
-          .map(s -> new Neufassung(kontext.plus(s), neuerText, provenienz));
+      var stellen = StellenParser.parseMehrfach(m.group(1));
+      if (stellen.size() == 1) {
+        return Optional.of(new Neufassung(kontext.plus(stellen.get(0)), neuerText, provenienz));
+      }
+      if (stellen.size() > 1) {
+        // „Die bisherigen Sätze 4 und 5 werden wie folgt gefasst: „…““ — ein zusammenhängender
+        // Bereich wird durch einen Block ersetzt (Ebene aus dem Ziel abgeleitet).
+        return koordinierteErsetzung(stellen, null, kontext, neuerText, provenienz);
+      }
+      return Optional.empty();
     }
 
     if ((m = WORTLAUT_ZU_ABSATZ.matcher(text)).matches()) {
       return Optional.of(new WortlautZuAbsatz(kontext, m.group(1), provenienz));
     }
 
+    if ((m = UEBERSCHRIFT_ERSETZUNG.matcher(text)).matches()) {
+      var neuerText = zitat(zitate, m.group(2));
+      return StellenParser.parse(m.group(1))
+          .map(
+              s ->
+                  new Neufassung(
+                      kontext.plus(s).plus(new Stelle(List.of(new Stelle.Ueberschrift()))),
+                      neuerText,
+                      provenienz));
+    }
+
     if ((m = STRUKTUR_ERSETZUNG.matcher(text)).matches()) {
-      var neuerText = zitat(zitate, m.group(3));
+      var enumerator = m.group(3);
+      var rohText = zitat(zitate, m.group(4));
+      // Entwurfsform „… ersetzt: 3. „…““: das außerhalb des Zitats stehende Label wieder anfügen.
+      var neuerText = enumerator != null ? enumerator.strip() + " " + rohText.strip() : rohText;
       var ziel = m.group(2).strip();
-      var stelle = StellenParser.parse(m.group(1));
-      if (stelle.isEmpty()) {
+      var stellen = StellenParser.parseMehrfach(m.group(1));
+      if (stellen.isEmpty()) {
         return Optional.empty();
       }
       // „durch die folgende Überschrift ersetzt“ ist eine Neufassung der Überschrift,
-      // „§ 19 wird durch den folgenden § 19 ersetzt“ eine Neufassung des Paragraphen.
-      if (ziel.equals("Überschrift") || ziel.matches("§\\s*\\d+[a-z]?")) {
-        return Optional.of(new Neufassung(kontext.plus(stelle.get()), neuerText, provenienz));
+      // „§ 19 wird durch den folgenden § 19 ersetzt“ eine Neufassung des Paragraphen,
+      // „Die Inhaltsübersicht wird durch die folgende Inhaltsübersicht ersetzt“ eine Neufassung der
+      // Inhaltsübersicht (die der Applier stets zur manuellen Prüfung markiert).
+      if (stellen.size() == 1
+          && (ziel.equals("Überschrift")
+              || ziel.equals("Inhaltsübersicht")
+              || ziel.matches("§\\s*\\d+[a-z]?"))) {
+        return Optional.of(new Neufassung(kontext.plus(stellen.get(0)), neuerText, provenienz));
       }
       var ebene = strukturEbene(ziel);
       if (ebene == null) {
         return Optional.empty();
       }
-      return Optional.of(
-          new StrukturErsetzung(kontext.plus(stelle.get()), ebene, neuerText, provenienz));
+      if (ebene == Ebene.PARAGRAPH) {
+        // „§ 71 wird durch die folgenden §§ 71 bis 71p ersetzt: „…““ bzw. „Die §§ 42 bis 45 werden
+        // durch die folgenden §§ 42 bis 45 ersetzt: „…““ — ein §-Bereich wird durch einen §-Block
+        // ersetzt.
+        var first = stellen.get(0);
+        var last = stellen.get(stellen.size() - 1);
+        return Optional.of(
+            new StrukturErsetzung(
+                kontext.plus(first),
+                stellen.size() > 1 ? kontext.plus(last) : null,
+                Ebene.PARAGRAPH,
+                neuerText,
+                provenienz));
+      }
+      if (stellen.size() == 1) {
+        return Optional.of(
+            new StrukturErsetzung(kontext.plus(stellen.get(0)), ebene, neuerText, provenienz));
+      }
+      // „Die Absätze 8 und 9 werden durch die folgenden Absätze 8 bis 10 ersetzt: „…““
+      return koordinierteErsetzung(stellen, ebene, kontext, neuerText, provenienz);
     }
 
     if ((m = WORT_ZU_SATZZEICHEN.matcher(text)).matches()) {
@@ -471,9 +542,25 @@ final class BefehlErkenner {
     if ((m = STRUKTUR_EINFUEGUNG.matcher(text)).matches()) {
       var vorher = m.group(1).equals("Vor");
       var stelle = StellenParser.parse(m.group(2));
-      var ebeneBez = ebeneUndBezeichnung(m.group(3));
       var textInhalt = zitat(zitate, m.group(4));
-      if (stelle.isEmpty() || ebeneBez.isEmpty()) {
+      if (stelle.isEmpty()) {
+        return Optional.empty();
+      }
+      var ebeneBez = ebeneUndBezeichnung(m.group(3));
+      if (ebeneBez.isEmpty()) {
+        // „Nach § 60a werden die folgenden §§ 60b und 60c eingefügt: „…““ — Block mehrerer
+        // Paragraphen (Aufteilung an den §-Überschriften erfolgt beim Anwenden). Signal:
+        // Ebene PARAGRAPH mit bezeichnung == null.
+        if (m.group(3).strip().matches("§§\\s*\\d.*")) {
+          return Optional.of(
+              new StrukturEinfuegung(
+                  kontext.plus(stelle.get()),
+                  vorher,
+                  Ebene.PARAGRAPH,
+                  null,
+                  textInhalt,
+                  provenienz));
+        }
         return Optional.empty();
       }
       return Optional.of(
@@ -544,6 +631,14 @@ final class BefehlErkenner {
     if ((m = STREICHUNG.matcher(text)).matches()) {
       var woerter = wortZitat(zitate, m.group(2));
       return ausStellen(m.group(1), s -> new Streichung(kontext.plus(s), woerter, provenienz));
+    }
+
+    if ((m = STRUKTUR_STREICHUNG.matcher(text)).matches()) {
+      return ausStellen(m.group(1), s -> new Aufhebung(kontext.plus(s), provenienz));
+    }
+
+    if ((m = UMNUMMERIERUNG_PARAGRAPHEN.matcher(text)).matches()) {
+      return paragraphenUmnummerierung(m.group(1), m.group(2), kontext, provenienz);
     }
 
     if ((m = UMNUMMERIERUNG_BEREICH.matcher(text)).matches()) {
@@ -685,6 +780,24 @@ final class BefehlErkenner {
   }
 
   /**
+   * Löst „Die §§ 46 und 47 werden zu den §§ 34 und 35.“ (auch Bereiche) in paarweise
+   * §-Umnummerierungen auf. Beide Seiten werden zu Paragraphenlisten expandiert und zusammengeführt.
+   */
+  private static Optional<Aenderungsbefehl> paragraphenUmnummerierung(
+      String altPhrase, String neuPhrase, Stelle kontext, Provenienz provenienz) {
+    var alt = StellenParser.parseMehrfach("§ " + altPhrase);
+    var neu = StellenParser.parseMehrfach("§ " + neuPhrase);
+    if (alt.isEmpty() || alt.size() != neu.size()) {
+      return Optional.empty();
+    }
+    var teile = new ArrayList<Aenderungsbefehl>();
+    for (int i = 0; i < alt.size(); i++) {
+      teile.add(new Umnummerierung(kontext.plus(alt.get(i)), kontext.plus(neu.get(i)), provenienz));
+    }
+    return Optional.of(teile.size() == 1 ? teile.get(0) : new Sammelbefehl(teile));
+  }
+
+  /**
    * Löst „Die bisherigen Absätze X bis Y werden zu den Absätzen X′ bis Y′.“ in einzelne
    * Umnummerierungen auf, angewandt in absteigender Reihenfolge (Y→Y′ zuerst), damit die
    * sequenzielle Anwendung keine Labels kollidieren lässt.
@@ -730,12 +843,57 @@ final class BefehlErkenner {
       String phrase, Function<Stelle, Aenderungsbefehl> bauer) {
     var stellen = StellenParser.parseMehrfach(phrase);
     if (stellen.isEmpty()) {
+      // „Im Satzteil vor Nummer 1 …“, „In der Angabe vor Nummer 1 …“ — reiner Chapeau-Qualifier
+      // ohne eigene Stelle: die Operation bezieht sich auf die Kontextstelle.
+      if (StellenParser.istNurChapeau(phrase)) {
+        return Optional.of(bauer.apply(Stelle.LEER));
+      }
       return Optional.empty();
     }
     if (stellen.size() == 1) {
       return Optional.of(bauer.apply(stellen.get(0)));
     }
     return Optional.of(new Sammelbefehl(stellen.stream().map(bauer).toList()));
+  }
+
+  /**
+   * Baut aus einem zusammenhängenden, koordinierten Ziel-Bereich („Die Absätze 8 und 9 …“, „Die
+   * bisherigen Sätze 4 und 5 …“) eine bereichsbezogene {@link StrukturErsetzung}: erstes und letztes
+   * Ziel spannen den zu ersetzenden Bereich auf; der zitierte Block ersetzt ihn. Nur für Absatz- und
+   * Satz-Bereiche (die der Applier auflösen kann); andere Ebenen bleiben unbekannt.
+   */
+  private static Optional<Aenderungsbefehl> koordinierteErsetzung(
+      List<Stelle> stellen,
+      @Nullable Ebene ebeneHint,
+      Stelle kontext,
+      String block,
+      Provenienz provenienz) {
+    var first = stellen.get(0);
+    var last = stellen.get(stellen.size() - 1);
+    var ebene = ebeneHint != null ? ebeneHint : ebeneAusStelle(first);
+    if (ebene != Ebene.ABSATZ && ebene != Ebene.SATZ) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        new StrukturErsetzung(
+            kontext.plus(first), kontext.plus(last), ebene, block, provenienz));
+  }
+
+  /** Die Ebene der feinsten Komponente einer Stelle (Buchstabe < Nummer < Satz < Absatz < §). */
+  private static @Nullable Ebene ebeneAusStelle(Stelle stelle) {
+    Ebene ebene = null;
+    for (var komponente : stelle.komponenten()) {
+      ebene =
+          switch (komponente) {
+            case Stelle.Paragraph p -> Ebene.PARAGRAPH;
+            case Stelle.AbsatzNr a -> Ebene.ABSATZ;
+            case Stelle.SatzNr s -> Ebene.SATZ;
+            case Stelle.NummerNr n -> Ebene.NUMMER;
+            case Stelle.BuchstabeNr b -> Ebene.BUCHSTABE;
+            default -> ebene;
+          };
+    }
+    return ebene;
   }
 
   private record EbeneBezeichnung(Ebene ebene, String bezeichnung) {}
@@ -771,6 +929,7 @@ final class BefehlErkenner {
   private static @Nullable Ebene strukturEbene(String ziel) {
     var erstesWort = ziel.split("\\s+", 2)[0];
     return switch (erstesWort) {
+      case "§", "§§" -> Ebene.PARAGRAPH;
       case "Absatz", "Absätze" -> Ebene.ABSATZ;
       case "Satz", "Sätze" -> Ebene.SATZ;
       case "Nummer", "Nummern" -> Ebene.NUMMER;
@@ -781,10 +940,13 @@ final class BefehlErkenner {
 
   private static Stelle.Komponente komponenteFuer(String ebene, String nummer) {
     return switch (ebene) {
+      case "§" -> new Stelle.Paragraph(nummer);
       case "Absatz" -> new Stelle.AbsatzNr(nummer);
       case "Satz" -> new Stelle.SatzNr(nummer);
       case "Nummer" -> new Stelle.NummerNr(nummer);
       case "Buchstabe" -> new Stelle.BuchstabeNr(nummer);
+      case "Teil", "Abschnitt", "Unterabschnitt", "Buch", "Kapitel", "Anlage" ->
+          new Stelle.Gliederungseinheit(ebene, nummer);
       default -> throw new IllegalArgumentException("Unbekannte Ebene: " + ebene);
     };
   }

@@ -441,14 +441,47 @@ class BefehlErkennerTest {
   }
 
   @Test
-  void faelltBeiBisBereichenAufUnbekanntZurueck() {
-    // „bis“-Bereiche über Struktureinheiten sind hier (Phase 1) noch nicht unterstützt.
-    assertThat(
-            erkenne(
-                "Die Absätze 2 bis 4 werden durch die folgenden Absätze 2 bis 6 ersetzt:"
-                    + " „(2) Text.“",
-                Stelle.LEER))
-        .isEmpty();
+  void bereichsErsetzungAbsaetzeWirdStrukturErsetzung() {
+    // „bis“-Bereich über Absätze: das erste und letzte Ziel spannen den zu ersetzenden Bereich auf.
+    var befehl =
+        erkenne(
+            "Die Absätze 2 bis 4 werden durch die folgenden Absätze 2 bis 6 ersetzt:"
+                + " „(2) Text.“",
+            new Stelle(List.of(new Stelle.Paragraph("5"))));
+    assertThat(befehl).containsInstanceOf(Aenderungsbefehl.StrukturErsetzung.class);
+    var e = (Aenderungsbefehl.StrukturErsetzung) befehl.orElseThrow();
+    assertThat(e.ebene()).isEqualTo(Ebene.ABSATZ);
+    assertThat(e.stelle().anzeigeText()).isEqualTo("§ 5 Absatz 2");
+    assertThat(e.bisStelle().anzeigeText()).isEqualTo("§ 5 Absatz 4");
+  }
+
+  @Test
+  void koordinierteAbsatzErsetzungWirdBereich() {
+    // IfSG: „Die Absätze 8 und 9 werden durch die folgenden Absätze 8 bis 10 ersetzt: „…““
+    var befehl =
+        erkenne(
+            "Die Absätze 8 und 9 werden durch die folgenden Absätze 8 bis 10 ersetzt:"
+                + " „(8) Erstes. (9) Zweites. (10) Drittes.“",
+            new Stelle(List.of(new Stelle.Paragraph("14"))));
+    assertThat(befehl).containsInstanceOf(Aenderungsbefehl.StrukturErsetzung.class);
+    var e = (Aenderungsbefehl.StrukturErsetzung) befehl.orElseThrow();
+    assertThat(e.stelle().anzeigeText()).isEqualTo("§ 14 Absatz 8");
+    assertThat(e.bisStelle().anzeigeText()).isEqualTo("§ 14 Absatz 9");
+  }
+
+  @Test
+  void mehrSatzNeufassungWirdStrukturErsetzung() {
+    // IfSG: „Die bisherigen Sätze 4 und 5 werden wie folgt gefasst: „…““
+    var befehl =
+        erkenne(
+            "Die bisherigen Sätze 4 und 5 werden wie folgt gefasst: „Erster neuer Satz."
+                + " Zweiter neuer Satz.“",
+            new Stelle(List.of(new Stelle.Paragraph("14"), new Stelle.AbsatzNr("2"))));
+    assertThat(befehl).containsInstanceOf(Aenderungsbefehl.StrukturErsetzung.class);
+    var e = (Aenderungsbefehl.StrukturErsetzung) befehl.orElseThrow();
+    assertThat(e.ebene()).isEqualTo(Ebene.SATZ);
+    assertThat(e.stelle().anzeigeText()).isEqualTo("§ 14 Absatz 2 Satz 4");
+    assertThat(e.bisStelle().anzeigeText()).isEqualTo("§ 14 Absatz 2 Satz 5");
   }
 
   @Test
@@ -551,6 +584,162 @@ class BefehlErkennerTest {
   @Test
   void inhaltsuebersichtAngabeWirdTypisiert() {
     var befehl = erkenne("Die Angabe zu Teil 3 wird wie folgt gefasst: „Teil 3 Neu“.", Stelle.LEER);
+    assertThat(befehl).get().isInstanceOf(Neufassung.class);
+    assertThat(befehl.orElseThrow().stelle().betrifftInhaltsuebersicht()).isTrue();
+  }
+
+  @Test
+  void strukturStreichungGanzerEinheit() {
+    // „§ 9 wird gestrichen.“ — Streichung einer ganzen Einheit ist semantisch eine Aufhebung.
+    var befehl = erkenne("§ 9 wird gestrichen.", Stelle.LEER);
+    assertThat(befehl).get().isInstanceOf(Aufhebung.class);
+    assertThat(befehl.orElseThrow().stelle().anzeigeText()).isEqualTo("§ 9");
+  }
+
+  @Test
+  void strukturStreichungMitKontext() {
+    var befehl =
+        erkenne("Absatz 3 wird gestrichen.", new Stelle(List.of(new Stelle.Paragraph("102"))));
+    assertThat(befehl).get().isInstanceOf(Aufhebung.class);
+    assertThat(befehl.orElseThrow().stelle().anzeigeText()).isEqualTo("§ 102 Absatz 3");
+  }
+
+  @Test
+  void strukturStreichungBereichWirdSammelbefehl() {
+    var teile =
+        ((Sammelbefehl) erkenne("Die §§ 34 bis 39 werden gestrichen.", Stelle.LEER).orElseThrow())
+            .teilbefehle();
+    assertThat(teile).hasSize(6).allMatch(t -> t instanceof Aufhebung);
+    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+        .containsExactly("§ 34", "§ 35", "§ 36", "§ 37", "§ 38", "§ 39");
+  }
+
+  @Test
+  void strukturStreichungGliederung() {
+    var befehl = erkenne("Der bisherige Teil 3 wird gestrichen.", Stelle.LEER);
+    assertThat(befehl).get().isInstanceOf(Aufhebung.class);
+    assertThat(befehl.orElseThrow().stelle().betrifftGliederung()).isTrue();
+  }
+
+  @Test
+  void chapeauLokatorBeziehtSichAufKontext() {
+    // „In der Angabe vor Nummer 1 …“ / „Im Satzteil vor Nummer 1 …“ tragen keine eigene Stelle;
+    // die Operation bezieht sich auf die Kontextstelle.
+    var kontext = new Stelle(List.of(new Stelle.Paragraph("48"), new Stelle.AbsatzNr("1")));
+    var befehl =
+        erkenne(
+            "In der Angabe vor Nummer 1 wird die Angabe „2025“ durch die Angabe „2030“ ersetzt.",
+            kontext);
+    assertThat(befehl).get().isInstanceOf(Ersetzung.class);
+    var e = (Ersetzung) befehl.orElseThrow();
+    assertThat(e.stelle().anzeigeText()).isEqualTo("§ 48 Absatz 1");
+    assertThat(e.alt()).isEqualTo("2025");
+    assertThat(e.neu()).isEqualTo("2030");
+  }
+
+  @Test
+  void bereichsUmnummerierungOhneBisherigen() {
+    var teile =
+        ((Sammelbefehl)
+                erkenne(
+                        "Die Absätze 4 bis 7 werden zu den Absätzen 3 bis 6.",
+                        new Stelle(List.of(new Stelle.Paragraph("108"))))
+                    .orElseThrow())
+            .teilbefehle();
+    assertThat(teile).hasSize(4).allMatch(t -> t instanceof Umnummerierung);
+    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+        .containsExactly("§ 108 Absatz 7", "§ 108 Absatz 6", "§ 108 Absatz 5", "§ 108 Absatz 4");
+  }
+
+  @Test
+  void strukturErsetzungMitEnumeratorPraefix() {
+    // Entwurfs-/Drucksachenform: das Aufzählungslabel steht außerhalb des Zitats.
+    var befehl =
+        erkenne(
+            "Nummer 3 wird durch die folgende Nummer 3 ersetzt: 3. „ die Maßgaben der §§ 42 bis 45"
+                + " entsprechend eingehalten werden.“",
+            new Stelle(List.of(new Stelle.Paragraph("10"), new Stelle.AbsatzNr("2"))));
+    assertThat(befehl).containsInstanceOf(Aenderungsbefehl.StrukturErsetzung.class);
+    var e = (Aenderungsbefehl.StrukturErsetzung) befehl.orElseThrow();
+    assertThat(e.ebene()).isEqualTo(Ebene.NUMMER);
+    assertThat(e.stelle().anzeigeText()).isEqualTo("§ 10 Absatz 2 Nummer 3");
+    // Das Label „3.“ wird dem Ersatztext wieder vorangestellt.
+    assertThat(e.text()).startsWith("3. die Maßgaben");
+  }
+
+  @Test
+  void paragraphUmnummerierung() {
+    var befehl = erkenne("§ 9a wird zu § 9.", Stelle.LEER);
+    assertThat(befehl).get().isInstanceOf(Umnummerierung.class);
+    var u = (Umnummerierung) befehl.orElseThrow();
+    assertThat(u.stelle().anzeigeText()).isEqualTo("§ 9a");
+    assertThat(u.neu().anzeigeText()).isEqualTo("§ 9");
+  }
+
+  @Test
+  void koordinierteParagraphUmnummerierung() {
+    var teile =
+        ((Sammelbefehl) erkenne("Die §§ 46 und 47 werden zu den §§ 34 und 35.", Stelle.LEER).orElseThrow())
+            .teilbefehle();
+    assertThat(teile).hasSize(2).allMatch(t -> t instanceof Umnummerierung);
+    assertThat(teile).extracting(t -> t.stelle().anzeigeText()).containsExactly("§ 46", "§ 47");
+    assertThat(teile).extracting(t -> ((Umnummerierung) t).neu().anzeigeText())
+        .containsExactly("§ 34", "§ 35");
+  }
+
+  @Test
+  void gliederungsUmnummerierung() {
+    var befehl = erkenne("Der bisherige Abschnitt 2 wird zu Abschnitt 3.", Stelle.LEER);
+    assertThat(befehl).get().isInstanceOf(Umnummerierung.class);
+    assertThat(befehl.orElseThrow().stelle().betrifftGliederung()).isTrue();
+  }
+
+  @Test
+  void paragraphenBlockEinfuegung() {
+    var befehl =
+        erkenne(
+            "Nach § 60a werden die folgenden §§ 60b und 60c eingefügt: „§ 60b Prüfung (1) Text."
+                + " § 60c Optimierung (1) Mehr.“",
+            Stelle.LEER);
+    assertThat(befehl).containsInstanceOf(StrukturEinfuegung.class);
+    var e = (StrukturEinfuegung) befehl.orElseThrow();
+    assertThat(e.ebene()).isEqualTo(Ebene.PARAGRAPH);
+    assertThat(e.bezeichnung()).isNull();
+    assertThat(e.stelle().anzeigeText()).isEqualTo("§ 60a");
+  }
+
+  @Test
+  void paragraphBlockErsetzung() {
+    var befehl =
+        erkenne(
+            "Die §§ 42 bis 45 werden durch die folgenden §§ 42 bis 45 ersetzt: „§ 42 Grundsatz"
+                + " (1) Text.“",
+            Stelle.LEER);
+    assertThat(befehl).containsInstanceOf(Aenderungsbefehl.StrukturErsetzung.class);
+    var e = (Aenderungsbefehl.StrukturErsetzung) befehl.orElseThrow();
+    assertThat(e.ebene()).isEqualTo(Ebene.PARAGRAPH);
+    assertThat(e.stelle().anzeigeText()).isEqualTo("§ 42");
+    assertThat(e.bisStelle().anzeigeText()).isEqualTo("§ 45");
+  }
+
+  @Test
+  void ueberschriftErsetzungMitStelle() {
+    var befehl =
+        erkenne(
+            "In Anlage 7 wird die Überschrift durch die folgende Überschrift ersetzt: „Anlage 7"
+                + " (zu § 36) Höchstwerte“.",
+            Stelle.LEER);
+    assertThat(befehl).get().isInstanceOf(Neufassung.class);
+    assertThat(befehl.orElseThrow().stelle().betrifftGliederung()).isTrue();
+  }
+
+  @Test
+  void inhaltsuebersichtErsetzung() {
+    var befehl =
+        erkenne(
+            "Die Inhaltsübersicht wird durch die folgende Inhaltsübersicht ersetzt: „Inhaltsübersicht"
+                + " § 1 Zweck § 2 Begriffe“.",
+            Stelle.LEER);
     assertThat(befehl).get().isInstanceOf(Neufassung.class);
     assertThat(befehl.orElseThrow().stelle().betrifftInhaltsuebersicht()).isTrue();
   }

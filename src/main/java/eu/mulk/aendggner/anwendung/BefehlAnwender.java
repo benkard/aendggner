@@ -87,6 +87,7 @@ public final class BefehlAnwender {
         return switch (befehl) {
           case Neufassung n -> wendeGliederungNeufassungAn(gliederungen, n);
           case Aufhebung a -> wendeGliederungStreichungAn(gliederungen, a);
+          case Umnummerierung u -> wendeGliederungUmnummerierungAn(gliederungen, u);
           default -> manuell(befehl, "Strukturänderung wird nicht automatisch angewandt.");
         };
       }
@@ -135,6 +136,23 @@ public final class BefehlAnwender {
     var alt = gliederungen.get(idx);
     gliederungen.set(idx, alt.mitTitel("(weggefallen)"));
     return angewandt(befehl, alt.bezeichnung());
+  }
+
+  /** „Der bisherige Abschnitt 2 wird zu Abschnitt 3.“ — Bezeichnung der Gliederungseinheit umsetzen. */
+  private static AngewandteAenderung wendeGliederungUmnummerierungAn(
+      List<Gliederung> gliederungen, Umnummerierung befehl) {
+    int idx = findeGliederung(gliederungen, befehl.stelle().gliederungsPfad());
+    if (idx < 0) {
+      return manuell(befehl, "Gliederungseinheit nicht gefunden: " + befehl.stelle().anzeigeText());
+    }
+    var neuPfad = befehl.neu().gliederungsPfad();
+    if (neuPfad.isEmpty()) {
+      return manuell(befehl, "Neue Gliederungsbezeichnung fehlt.");
+    }
+    var neueBezeichnung = neuPfad.get(neuPfad.size() - 1).bezeichnung();
+    var alt = gliederungen.get(idx);
+    gliederungen.set(idx, alt.mitBezeichnung(neueBezeichnung));
+    return angewandt(befehl, neueBezeichnung);
   }
 
   /**
@@ -335,14 +353,34 @@ public final class BefehlAnwender {
         }
         var fundstelle = ((StellenAufloeser.Ergebnis.Gefunden) ergebnis).fundstelle();
         var norm = normen.get(fundstelle.normIndex());
+        int vonIndex = fundstelle.absatzIndex();
+        int bisIndex = vonIndex;
+        // Bereich („Die Absätze 8 und 9 werden … ersetzt“): das letzte Ziel bestimmt das Ende.
+        if (befehl.bisStelle() != null) {
+          var e2 = StellenAufloeser.aufloese(gesetzAus(normen), befehl.bisStelle());
+          if (e2 instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
+            yield manuell(befehl, nicht.begruendung());
+          }
+          var f2 = ((StellenAufloeser.Ergebnis.Gefunden) e2).fundstelle();
+          if (f2.normIndex() != fundstelle.normIndex() || f2.absatzIndex() == null) {
+            yield manuell(befehl, "Ersetzungsbereich liegt nicht in einer einzigen Norm.");
+          }
+          bisIndex = f2.absatzIndex();
+        }
+        if (bisIndex < vonIndex) {
+          yield manuell(befehl, "Ersetzungsbereich ist leer oder absteigend.");
+        }
         var absaetze = new ArrayList<>(norm.absaetze());
-        absaetze.remove((int) fundstelle.absatzIndex());
-        absaetze.addAll(fundstelle.absatzIndex(), parseAbsaetze(befehl.text()));
+        for (int k = bisIndex; k >= vonIndex; k--) {
+          absaetze.remove(k);
+        }
+        absaetze.addAll(vonIndex, parseAbsaetze(befehl.text()));
         normen.set(fundstelle.normIndex(), norm.mitAbsaetzen(absaetze));
         yield angewandt(befehl, norm.enbez());
       }
-      case SATZ ->
-          bearbeiteBereich(
+      case SATZ -> {
+        if (befehl.bisStelle() == null) {
+          yield bearbeiteBereich(
               normen,
               befehl,
               (text, bereich) ->
@@ -350,6 +388,9 @@ public final class BefehlAnwender {
                       text.substring(0, bereich.von())
                           + befehl.text().strip().replaceAll("\\s+", " ")
                           + text.substring(bereich.bis())));
+        }
+        yield wendeSatzBereichsErsetzungAn(normen, befehl);
+      }
       case NUMMER, BUCHSTABE ->
           bearbeiteBereich(
               normen,
@@ -365,30 +406,116 @@ public final class BefehlAnwender {
                 return TextErgebnis.ok(
                     text.substring(0, bereich.von()) + ersatz + text.substring(bereich.bis()));
               });
-      case PARAGRAPH ->
-          manuell(befehl, "Struktur-Ersetzung ganzer Paragraphen wird nicht unterstützt.");
+      case PARAGRAPH -> {
+        // „§ 71 wird durch die folgenden §§ 71 bis 71p ersetzt: „…““ — der adressierte §-Bereich
+        // wird entfernt und durch die Paragraphen des Blocks ersetzt.
+        var aufloesung = loeseNormAuf(normen, befehl.stelle());
+        if (aufloesung.fehler() != null) {
+          yield manuell(befehl, aufloesung.fehler());
+        }
+        int vonIndex = aufloesung.normIndex();
+        int bisIndex = vonIndex;
+        if (befehl.bisStelle() != null) {
+          var a2 = loeseNormAuf(normen, befehl.bisStelle());
+          if (a2.fehler() != null) {
+            yield manuell(befehl, a2.fehler());
+          }
+          bisIndex = a2.normIndex();
+        }
+        if (bisIndex < vonIndex) {
+          yield manuell(befehl, "Ersetzungsbereich ist leer oder absteigend.");
+        }
+        var neue = parseNormenBlock(befehl.text(), normen.get(vonIndex).gliederung());
+        if (neue.isEmpty()) {
+          yield manuell(befehl, "Im Ersetzungsblock wurde kein Paragraph erkannt.");
+        }
+        for (int k = bisIndex; k >= vonIndex; k--) {
+          normen.remove(k);
+        }
+        normen.addAll(vonIndex, neue);
+        yield angewandt(befehl, neue.stream().map(Norm::enbez).toList());
+      }
     };
+  }
+
+  /**
+   * Ersetzt einen zusammenhängenden Satz-Bereich („Die Sätze 4 und 5 werden … gefasst“) durch einen
+   * Block: vom Anfang des ersten bis zum Ende des letzten adressierten Satzes (beide müssen im
+   * selben Absatz derselben Norm liegen).
+   */
+  private static AngewandteAenderung wendeSatzBereichsErsetzungAn(
+      List<Norm> normen, StrukturErsetzung befehl) {
+    var e1 = StellenAufloeser.aufloese(gesetzAus(normen), befehl.stelle());
+    if (e1 instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
+      return manuell(befehl, nicht.begruendung());
+    }
+    var e2 = StellenAufloeser.aufloese(gesetzAus(normen), befehl.bisStelle());
+    if (e2 instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
+      return manuell(befehl, nicht.begruendung());
+    }
+    var f1 = ((StellenAufloeser.Ergebnis.Gefunden) e1).fundstelle();
+    var f2 = ((StellenAufloeser.Ergebnis.Gefunden) e2).fundstelle();
+    if (f1.normIndex() != f2.normIndex()
+        || f1.absatzIndex() == null
+        || !f1.absatzIndex().equals(f2.absatzIndex())
+        || f1.bereich() == null
+        || f2.bereich() == null) {
+      return manuell(befehl, "Satz-Bereich liegt nicht in einem einzigen Absatz.");
+    }
+    int von = f1.bereich().von();
+    int bis = f2.bereich().bis();
+    if (bis < von) {
+      return manuell(befehl, "Satz-Bereich ist leer oder absteigend.");
+    }
+    var norm = normen.get(f1.normIndex());
+    var absaetze = new ArrayList<>(norm.absaetze());
+    var absatz = absaetze.get(f1.absatzIndex());
+    var text = absatz.text();
+    var neu =
+        text.substring(0, von)
+            + befehl.text().strip().replaceAll("\\s+", " ")
+            + text.substring(bis);
+    absaetze.set(f1.absatzIndex(), absatz.mitText(neu));
+    normen.set(f1.normIndex(), norm.mitAbsaetzen(absaetze));
+    return angewandt(befehl, norm.enbez());
   }
 
   private static AngewandteAenderung wendeStrukturEinfuegungAn(
       List<Norm> normen, StrukturEinfuegung befehl) {
     return switch (befehl.ebene()) {
       case PARAGRAPH -> {
-        var enbezNeu = "§ " + befehl.bezeichnung();
-        if (StellenAufloeser.normIndex(gesetzAus(normen), enbezNeu) >= 0) {
-          yield manuell(befehl, enbezNeu + " existiert bereits im Stammgesetz.");
-        }
         var aufloesung = loeseNormAuf(normen, befehl.stelle());
         if (aufloesung.fehler() != null) {
           yield manuell(befehl, aufloesung.fehler());
         }
         var anker = normen.get(aufloesung.normIndex());
+        int position = aufloesung.normIndex() + (befehl.vorher() ? 0 : 1);
+
+        // „Nach § 60a werden die folgenden §§ 60b und 60c eingefügt: „…““ — Block mehrerer §§.
+        if (befehl.bezeichnung() == null) {
+          var neue = parseNormenBlock(befehl.text(), anker.gliederung());
+          if (neue.isEmpty()) {
+            yield manuell(befehl, "Im Einfügeblock wurde kein Paragraph erkannt.");
+          }
+          for (var n : neue) {
+            if (StellenAufloeser.normIndex(gesetzAus(normen), n.enbez()) >= 0) {
+              yield manuell(befehl, n.enbez() + " existiert bereits im Stammgesetz.");
+            }
+          }
+          normen.addAll(position, neue);
+          yield angewandt(befehl, neue.stream().map(Norm::enbez).toList());
+        }
+
+        var enbezNeu = "§ " + befehl.bezeichnung();
+        if (StellenAufloeser.normIndex(gesetzAus(normen), enbezNeu) >= 0) {
+          yield manuell(befehl, enbezNeu + " existiert bereits im Stammgesetz.");
+        }
         var neueNorm =
             parseNorm(
                 befehl.text(),
                 enbezNeu,
                 new Norm(enbezNeu, null, anker.gliederung(), List.of(), false));
-        normen.add(aufloesung.normIndex() + (befehl.vorher() ? 0 : 1), neueNorm);
+        normen.add(position, neueNorm);
         yield angewandt(befehl, enbezNeu);
       }
       case ABSATZ -> {
@@ -542,6 +669,31 @@ public final class BefehlAnwender {
 
   private static AngewandteAenderung wendeUmnummerierungAn(
       List<Norm> normen, Umnummerierung befehl) {
+    // „§ 9a wird zu § 9.“ — Umbenennung einer ganzen Norm.
+    if (nurParagraph(befehl.stelle()) && nurParagraph(befehl.neu())) {
+      var enbezAlt = "§ " + befehl.stelle().paragraph().get().nummer();
+      var enbezNeu = "§ " + befehl.neu().paragraph().get().nummer();
+      int idx = StellenAufloeser.normIndex(gesetzAus(normen), enbezAlt);
+      if (idx < 0) {
+        return manuell(befehl, enbezAlt + " existiert nicht im Gesetz.");
+      }
+      if (!enbezNeu.equals(enbezAlt)) {
+        int zielIdx = StellenAufloeser.normIndex(gesetzAus(normen), enbezNeu);
+        if (zielIdx >= 0 && !normen.get(zielIdx).weggefallen()) {
+          return manuell(befehl, enbezNeu + " existiert bereits im Gesetz.");
+        }
+        // Eine bereits weggefallene Zielnorm wird durch die Umnummerierung überschrieben.
+        if (zielIdx >= 0) {
+          normen.remove(zielIdx);
+          if (zielIdx < idx) {
+            idx--;
+          }
+        }
+      }
+      normen.set(idx, normen.get(idx).mitEnbez(enbezNeu));
+      return angewandt(befehl, enbezNeu);
+    }
+
     var altAbsatz = befehl.stelle().absatz();
     var neuAbsatz = befehl.neu().absatz();
     if (altAbsatz.isPresent() && neuAbsatz.isPresent()) {
@@ -794,6 +946,34 @@ public final class BefehlAnwender {
     return anzahl;
   }
 
+  // Eine §-Überschrift beginnt mit „§ N“, gefolgt von einem großgeschriebenen Titelwort — im
+  // Gegensatz zu Querverweisen wie „§ 71 Absatz 1“ oder „§§ 42 bis 45“. Die Negativliste schließt
+  // die Untergliederungs- und Verbindungswörter aus, sodass an solchen Stellen nicht getrennt wird.
+  private static final Pattern PARAGRAPH_UEBERSCHRIFT =
+      Pattern.compile(
+          "(?=§\\s*\\d+[a-z]?\\s+"
+              + "(?!Absatz|Absätze|Abs|Satz|Sätze|Nummer|Nummern|Nr|Buchstabe|Buchstaben|Buchst"
+              + "|und|bis|oder|sowie|des|der|dieses|genannten)"
+              + "\\p{Lu})");
+
+  /**
+   * Zerlegt einen Zitatblock mehrerer Paragraphen an den §-Überschriften (nicht an Querverweisen)
+   * und parst jeden Abschnitt zu einer {@link Norm}. Die Gliederung wird von der Vorlage übernommen.
+   */
+  private static List<Norm> parseNormenBlock(String block, @Nullable Gliederung gliederung) {
+    var normen = new ArrayList<Norm>();
+    for (var stueck : PARAGRAPH_UEBERSCHRIFT.split(block.strip())) {
+      var s = stueck.strip();
+      var m = Pattern.compile("^§\\s*(\\d+[a-z]?)\\b").matcher(s);
+      if (s.isEmpty() || !m.find()) {
+        continue;
+      }
+      var enbez = "§ " + m.group(1);
+      normen.add(parseNorm(s, enbez, new Norm(enbez, null, gliederung, List.of(), false)));
+    }
+    return normen;
+  }
+
   /** Zerlegt einen zitierten Normtext („§ 28a Titel (1) … (2) …“) in Titel und Absätze. */
   private static Norm parseNorm(String zitat, String enbez, Norm vorlage) {
     var text = zitat.strip();
@@ -887,6 +1067,10 @@ public final class BefehlAnwender {
   private static AngewandteAenderung angewandt(Aenderungsbefehl befehl, String enbez) {
     return new AngewandteAenderung(
         befehl, Status.ANGEWANDT, "", new LinkedHashSet<>(List.of(enbez)));
+  }
+
+  private static AngewandteAenderung angewandt(Aenderungsbefehl befehl, List<String> enbezliste) {
+    return new AngewandteAenderung(befehl, Status.ANGEWANDT, "", new LinkedHashSet<>(enbezliste));
   }
 
   private static AngewandteAenderung manuell(Aenderungsbefehl befehl, String begruendung) {

@@ -24,4 +24,8 @@ public record Gliederung(@Nullable String kennzahl, String bezeichnung, @Nullabl
   public Gliederung mitTitel(@Nullable String neuerTitel) {
     return new Gliederung(kennzahl, bezeichnung, neuerTitel);
   }
+
+  public Gliederung mitBezeichnung(String neueBezeichnung) {
+    return new Gliederung(kennzahl, neueBezeichnung, titel);
+  }
 }

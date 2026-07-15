@@ -21,6 +21,87 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 15. Juli 2026,
+ zuletzt geändert durch die am 15. Juli 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Auf Grund der weiteren Ertüchtigung des Befehlserkenners und des Befehlsanwenders
+werden Bereichs- und Koordinationsziele bei Struktur-Ersetzungen, die Streichung
+und Umnummerierung ganzer Struktureinheiten (Paragraphen und Gliederungs-
+einheiten) sowie das Einfügen und Ersetzen ganzer Paragraphenblöcke einer
+Verarbeitung zugänglich gemacht.
+
+
+Artikel 1
+Erweiterung der Struktur-Ersetzung um Ziel-Bereiche
+
+Der Aenderungsbefehl (Aenderungsbefehl.StrukturErsetzung) wird um das Feld
+„bisStelle“ ergänzt, welches bei einem zusammenhängenden, koordinierten Ziel-
+Bereich („Die Absätze 8 und 9 werden durch die folgenden Absätze 8 bis 10
+ersetzt: „…““, „Die bisherigen Sätze 4 und 5 werden wie folgt gefasst: „…““)
+das letzte Ziel bezeichnet; bei einem Einzelziel bleibt es unbesetzt. Der
+Befehlsanwender (BefehlAnwender) löst den Bereich für Absätze, Sätze und
+Paragraphen auf und ersetzt ihn durch den zitierten Block.
+
+
+Artikel 2
+Aufnahme struktureller Streichungen und Umnummerierungen
+
+Der Befehlserkenner wird wie folgt geändert:
+
+1.  Die Streichung ganzer Struktureinheiten („§ 9 wird gestrichen.“, „Die §§ 34
+    bis 39 werden gestrichen.“, „Der bisherige Teil 3 wird gestrichen.“) wird als
+    Aufhebung erkannt.
+
+2.  Die Umnummerierung wird auf Paragraphen und Gliederungseinheiten (Teil,
+    Abschnitt, Unterabschnitt, Buch, Kapitel, Anlage) erstreckt sowie um die
+    paarweise §-Umnummerierung („Die §§ 46 und 47 werden zu den §§ 34 und 35.“)
+    ergänzt. Der Befehlsanwender benennt hierbei die betroffene Norm oder
+    Gliederungseinheit um; eine bereits weggefallene Zielnorm wird überschrieben.
+
+3.  Die Neufassung eines §-Bereichs wird auf die Form ohne „bisherige“ erstreckt
+    und liefert bei mehrgliedrigem Ziel nunmehr eine bereichsbezogene Struktur-
+    Ersetzung statt eines Einzelbefehls.
+
+4.  Die Neufassung der Überschrift einer benannten Einheit („In Anlage 7 wird die
+    Überschrift durch die folgende Überschrift ersetzt: „…““) sowie der Inhalts-
+    übersicht werden erkannt; letztere wird stets der manuellen Prüfung
+    zugewiesen.
+
+5.  Die Entwurfsform der Struktur-Ersetzung, bei der die Aufzählungsbezeichnung
+    außerhalb des Zitats steht („… ersetzt: 3. „…““), wird abgefangen und dem
+    Ersatztext wieder vorangestellt.
+
+6.  Der Chapeau-Qualifier („Im Satzteil vor Nummer 1 …“, „In der Angabe vor
+    Nummer 1 …“) wird auf weitere Einleitungen erstreckt; steht er allein, ohne
+    eigene Stelle, so bezieht sich die Operation auf die Kontextstelle.
+
+
+Artikel 3
+Einfügung und Ersetzung ganzer Paragraphenblöcke
+
+1.  Die Einfügung mehrerer Paragraphen in einem Zuge („Nach § 60a werden die
+    folgenden §§ 60b und 60c eingefügt: „…““) sowie die Ersetzung eines §-Bereichs
+    durch einen §-Block werden erkannt.
+
+2.  Der Befehlsanwender zerlegt den zitierten Block anhand der §-Überschriften
+    (unter Ausschluss bloßer Querverweise wie „§ 71 Absatz 1“) in die einzelnen
+    Paragraphen und fügt sie geschlossen ein oder setzt sie an die Stelle des
+    ersetzten Bereichs.
+
+
+Schlussbestimmung
+
+Die vorstehenden Änderungen sind durch die Prüfung sämtlicher Testfälle
+(einhundertvierundvierzig an der Zahl) sowie durch die vollständige Erstellung
+(mvnw verify) bestätigt worden. Nicht selbsttätig verarbeitbar bleiben
+einstweilen die mehrquellige Struktur-Ersetzung über mehrere Gesetze hinweg
+sowie vereinzelte Sonderfälle der Entwurfsfassung (Drucksachen); diese werden
+dem Abschnitt „Manuell prüfen“ zugewiesen. Die Unterstützung des bayerischen
+Landesrechts bleibt einem späteren Zeitpunkt vorbehalten.
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 13. Juli 2026,
  zuletzt geändert durch die am 13. Juli 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

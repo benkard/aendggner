@@ -86,9 +86,16 @@ Wichtige Optionen:
 
 Erkannt werden die gebräuchlichsten Änderungsbefehle des Handbuchs der
 Rechtsförmlichkeit (Ersetzen, Neufassung, Einfügen, Anfügen, Aufheben,
-Streichen, Umnummerierung). Alles andere — etwa Bereichsbefehle wie
-„Die Absätze 2 bis 4 werden …“ — landet mit Begründung im Abschnitt
-*Manuell prüfen* der Synopse und wird niemals stillschweigend verworfen.
+Streichen, Umnummerierung) einschließlich zahlreicher Sonderformen:
+Bereichs- und Koordinationsziele („Die Absätze 8 und 9 werden durch die
+folgenden Absätze 8 bis 10 ersetzt“), strukturelle Streichungen ganzer
+Einheiten („§ 9 wird gestrichen“), §- und Gliederungs-Umnummerierungen
+(„§ 9a wird zu § 9“, „Der bisherige Abschnitt 2 wird zu Abschnitt 3“),
+das Einfügen/Ersetzen ganzer §-Blöcke sowie Chapeau-Lokatoren („Im
+Satzteil vor Nummer 1 …“). Im amtlichen BGBl-Format werden damit
+praktisch alle Befehle typisiert; Entwürfe (Drucksachen) enthalten
+vereinzelt Sonderfälle, die mit Begründung im Abschnitt *Manuell prüfen*
+der Synopse landen und niemals stillschweigend verworfen werden.
 
 
 == Running the Tests

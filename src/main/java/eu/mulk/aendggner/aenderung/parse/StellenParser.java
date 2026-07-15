@@ -48,8 +48,18 @@ public final class StellenParser {
   // ohne eigene Stelle-Komponente; die Ersetzung sucht ohnehin im Text der umgebenden Stelle.
   private static final Pattern CHAPEAU_QUALIFIER =
       Pattern.compile(
-          "(?i)(?:in dem |im |in der )?(?:Satzteil|Angabe) vor "
+          "(?i)(?:im |in dem |in der |dem |der )?(?:Satzteil|Angabe) vor "
               + "(?:Nummer|Buchstabe|Satz|Absatz) \\S+");
+
+  /**
+   * Wahr, wenn die Phrase ausschließlich aus einem Chapeau-Qualifier besteht (z.B. „im Satzteil
+   * vor Nummer 1“, „in der Angabe vor Nummer 1“) und daher keine eigene Stelle-Komponente trägt.
+   * Die Operation bezieht sich dann auf die Kontextstelle (den umgebenden Änderungsrahmen).
+   */
+  public static boolean istNurChapeau(String phrase) {
+    var rest = CHAPEAU_QUALIFIER.matcher(phrase.strip()).replaceAll(" ").strip();
+    return rest.isEmpty() && !phrase.isBlank();
+  }
 
   public static Optional<Stelle> parse(String phrase) {
     phrase = CHAPEAU_QUALIFIER.matcher(phrase).replaceAll(" ").strip();
@@ -62,7 +72,7 @@ public final class StellenParser {
         continue;
       }
       switch (wort) {
-        case "§" -> {
+        case "§", "§§" -> {
           var wert = naechstesWort(woerter, i);
           if (wert == null || !NUMMER_WERT.matcher(wert).matches()) {
             return Optional.empty();
