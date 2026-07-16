@@ -5,6 +5,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Anfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Aufhebung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ebene;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.GliederungsUeberschriften;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Neufassung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Sammelbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Streichung;
@@ -37,11 +38,16 @@ final class BefehlErkenner {
   private static final String WOERTER = "(?:die Wörter|das Wort|die Angabe|die Zahl)";
   private static final String Z = "«(\\d+)»";
 
+  // Der Doppelpunkt fehlt gelegentlich (Seitenumbruch-Artefakt); für einen Punkt mit Unterpunkten
+  // ist die Rahmenform trotzdem eindeutig.
   private static final Pattern KONTEXT =
-      Pattern.compile("^(?:In )?(.+?) (?:wird|werden) wie folgt geändert:$");
+      Pattern.compile("^(?:In )?(.+?) (?:wird|werden) wie folgt geändert:?$");
+
+  // Aufzählungslabel, das in Entwürfen/Drucksachen vor dem Zitat steht („… gefasst: 3. „…““).
+  private static final String ENUM = "((?:\\d+[a-z]?\\.|[a-z]{1,3}\\))\\s*)?";
 
   private static final Pattern NEUFASSUNG =
-      Pattern.compile("^(.+?) (?:wird|werden) wie folgt gefasst: " + Z + "\\.?$");
+      Pattern.compile("^(.+?) (?:wird|werden) wie folgt gefasst: " + ENUM + Z + "\\.?$");
 
   // „§ 2 Absatz 2 wird durch die folgenden Absätze 2 und 3 ersetzt: „…““ (neues BGBl-Format);
   // auch „Die Überschrift wird durch die folgende Überschrift ersetzt: „…““ (Entwürfe).
@@ -51,7 +57,25 @@ final class BefehlErkenner {
   private static final Pattern STRUKTUR_ERSETZUNG =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) durch (?:den |die |das )?folgende[nrs]? (.+?) ersetzt: "
-              + "((?:\\d+[a-z]?\\.|[a-z]{1,3}\\))\\s*)?"
+              + ENUM
+              + Z
+              + "\\.?$");
+
+  // „Nach § 33 werden die folgenden Überschriften zu Teil 3 und zu Teil 3 Abschnitt 1 eingefügt:
+  // „…““ — neue Gliederungs-Überschriften hinter einem Anker-§.
+  private static final Pattern GLIEDERUNG_UEBERSCHRIFT_EINFUEGUNG =
+      Pattern.compile(
+          "^Nach (§ \\S+) (?:wird|werden) (?:die |der |das )?folgenden? Überschrift(?:en)? "
+              + "zu (.+?) (?:ein|an)gefügt: "
+              + Z
+              + "\\.?$");
+
+  // „Die bisherigen Überschriften zu Teil 4 und Teil 4 Abschnitt 1 werden durch die folgende
+  // Überschrift zu Abschnitt 2 ersetzt: „…““.
+  private static final Pattern GLIEDERUNG_UEBERSCHRIFT_ERSETZUNG =
+      Pattern.compile(
+          "^Die bisherigen? Überschrift(?:en)? zu (.+?) (?:wird|werden) durch "
+              + "(?:die |der |das )?folgenden? Überschrift(?:en)? zu (.+?) ersetzt: "
               + Z
               + "\\.?$");
 
@@ -65,15 +89,16 @@ final class BefehlErkenner {
               + Z
               + "\\.?$");
 
+  // Das Objekt nach „durch“ darf verkürzt sein („… durch „Y“ ersetzt“, BR-Drucksachen).
   private static final Pattern ERSETZUNG =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (jeweils )?"
               + WOERTER
               + " "
               + Z
-              + " (?:jeweils )?durch "
+              + " (?:jeweils )?durch (?:"
               + WOERTER
-              + " "
+              + " )?"
               + Z
               + " ersetzt\\.$");
 
@@ -86,6 +111,45 @@ final class BefehlErkenner {
               + " "
               + Z
               + " ersetzt\\.$");
+
+  // „In Nummer 2 werden nach den Wörtern «1» die Wörter «2» durch die Wörter «3» ersetzt.“ —
+  // Ersetzung mit Positionsanker; der Anker präzisiert nur die Fundstelle, die Eindeutigkeits-
+  // prüfung des Anwenders schützt vor Fehlgriffen.
+  private static final Pattern ERSETZUNG_MIT_ANKER =
+      Pattern.compile(
+          "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?nach "
+              + "(?:dem Wort|den Wörtern|der Angabe|der Zahl) "
+              + Z
+              + " "
+              + WOERTER
+              + " "
+              + Z
+              + " durch (?:"
+              + WOERTER
+              + " )?"
+              + Z
+              + " ersetzt\\.$");
+
+  // „… wird dem Wort „Anforderungen“ das Wort „dortigen“ vorangestellt.“
+  private static final Pattern WORT_VORANSTELLUNG =
+      Pattern.compile(
+          "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?"
+              + "(?:dem Wort|den Wörtern|der Angabe|der Zahl) "
+              + Z
+              + " "
+              + WOERTER
+              + " "
+              + Z
+              + " vorangestellt\\.$");
+
+  // „In Absatz 1 Satz 2 wird der Punkt am Ende durch folgende Wörter / den folgenden Wortlaut
+  // ersetzt: „…““ — der Ersatz steht als Zitatblock hinter dem Doppelpunkt.
+  private static final Pattern PUNKT_DURCH_WORTLAUT =
+      Pattern.compile(
+          "^(?:In )?(.+?) (?:wird|werden) (der Punkt|das Komma|das Semikolon) am Ende durch "
+              + "(?:die |den )?folgende[n]? (?:Wörter|Wortlaut) ersetzt: "
+              + Z
+              + "\\.?$");
 
   // Auch die Verbundform „wird der Punkt am Ende durch ein Komma und die Wörter „…“ ersetzt“.
   private static final Pattern SATZZEICHEN_ERSETZUNG =
@@ -110,7 +174,7 @@ final class BefehlErkenner {
               + WOERTER
               + " "
               + Z
-              + " eingefügt\\.$");
+              + " (?:ein|an)gefügt\\.$");
 
   private static final Pattern WOERTER_EINFUEGUNG_VOR_KOMMA =
       Pattern.compile(
@@ -126,19 +190,56 @@ final class BefehlErkenner {
 
   private static final Pattern STRUKTUR_EINFUEGUNG =
       Pattern.compile(
-          "^(Nach|Vor) (.+?) (?:wird|werden) (?:der |die |das )?folgende[nrs]? (.+?) eingefügt: "
+          "^(Nach|Vor) (.+?) (?:wird|werden) (?:der |die |das )?folgende[nrs]? (.+?) "
+              + "(?:ein|an)gefügt: "
+              + ENUM
               + Z
               + "\\.?$");
 
+  // Auch mit Artefakt-Toleranz: verdoppeltes „wird“ und Leerzeichen vor dem Doppelpunkt
+  // („In § 51 Absatz 1 wird folgender Satz wird angefügt : „…““, BR-Drs).
   private static final Pattern STRUKTUR_ANFUEGUNG_MIT_STELLE =
       Pattern.compile(
-          "^(?:Dem|Der) (.+?) (?:wird|werden) (?:der |die |das )?folgende[nrs]? (.+?) angefügt: "
+          "^(?:Dem|Der|In) (.+?) (?:wird|werden) (?:der |die |das )?folgende[nrs]? (.+?)"
+              + "(?: wird| werden)? angefügt ?: "
+              + ENUM
               + Z
               + "\\.?$");
 
   private static final Pattern STRUKTUR_ANFUEGUNG =
       Pattern.compile(
-          "^(?:Der |Die |Das )?[Ff]olgende[nrs]? (.+?) (?:wird|werden) angefügt: " + Z + "\\.?$");
+          "^(?:Der |Die |Das )?[Ff]olgende[nrs]? (.+?) (?:wird|werden) angefügt ?: "
+              + ENUM
+              + Z
+              + "\\.?$");
+
+  // „Der Nummer 1 wird folgende Nummer 1 vorangestellt: „…““ bzw. (im Kontextrahmen)
+  // „Folgende Nummer 1 wird vorangestellt: „…““ — Einfügung vor der genannten Einheit.
+  private static final Pattern VORANSTELLUNG_MIT_STELLE =
+      Pattern.compile(
+          "^(?:Dem|Der) (.+?) (?:wird|werden) (?:der |die |das )?folgende[nrs]? (.+?) "
+              + "vorangestellt: "
+              + ENUM
+              + Z
+              + "\\.?$");
+
+  private static final Pattern VORANSTELLUNG =
+      Pattern.compile(
+          "^(?:Der |Die |Das )?[Ff]olgende[nrs]? (.+?) (?:wird|werden) vorangestellt: "
+              + ENUM
+              + Z
+              + "\\.?$");
+
+  // „Folgender Absatz 2 wird eingefügt: „…““ — ohne Anker; die Position ergibt sich aus der
+  // Bezeichnung (nach dem Vorgänger, hier Absatz 1).
+  private static final Pattern EINFUEGUNG_OHNE_ANKER =
+      Pattern.compile(
+          "^(?:Der |Die |Das )?[Ff]olgende[nrs]? "
+              + "(Absatz \\d+[a-z]?|Nummer \\d+[a-z]?|Buchstabe [a-z]{1,3}) "
+              + "(?:wird|werden) eingefügt: "
+              + ENUM
+              + Z
+              + "\\.?$");
 
   private static final Pattern AUFHEBUNG = Pattern.compile("^(.+?) (?:wird|werden) aufgehoben\\.$");
 
@@ -152,15 +253,22 @@ final class BefehlErkenner {
       Pattern.compile("^Die Absatzbezeichnung " + Z + " wird gestrichen\\.$");
 
   // Inhaltsübersicht: „Die Angabe(n) zu <…> wird/werden wie folgt gefasst / durch … ersetzt /
-  // gestrichen.“ Wird als Änderung der Inhaltsübersicht typisiert (Anwendung erfolgt gesondert).
+  // gestrichen.“ Das Ziel (Gruppe 1) benennt die Angabe-Zeile(n); der Lookahead (?!«) verhindert,
+  // dass zitierte Wort-Angaben („Die Angabe „X“ wird gestrichen“) hier hängen bleiben.
   private static final Pattern INHALTSUEBERSICHT_ANGABE =
       Pattern.compile(
-          "^Die Angaben? (?:zu|zur) .+? (?:wird|werden) "
+          "^Die Angaben? (?:zu den |zu der |zu |zur |zum |von )?(?!«)(.+?) (?:wird|werden) "
               + "(?:wie folgt gefasst: "
               + Z
               + "|durch (?:die )?folgende[nrs]? Angaben? ersetzt: "
               + Z
               + "|gestrichen)\\.?$");
+
+  // „In der Inhaltsübersicht wird die Angabe zu § 5a gestrichen.“
+  private static final Pattern INHALTSUEBERSICHT_STREICHUNG =
+      Pattern.compile(
+          "^In der Inhaltsübersicht (?:wird|werden) die Angaben? "
+              + "(?:zu den |zu der |zu |zur |zum |von )?(?!«)(.+?) gestrichen\\.$");
 
   private static final Pattern STREICHUNG =
       Pattern.compile(
@@ -237,16 +345,17 @@ final class BefehlErkenner {
 
   private static final Pattern INHALTSUEBERSICHT_EINFUEGUNG =
       Pattern.compile(
-          "^In der Inhaltsübersicht (?:wird|werden) (nach|vor) der Angabe zu (§ \\S+?) "
-              + "(?:die |der |das )?folgende Angabe(?:n)? eingefügt: "
+          "^In der Inhaltsübersicht (?:wird|werden) (nach|vor) der Angabe "
+              + "(?:zu |zur |zum |von )?(.+?) "
+              + "(?:die |der |das )?folgende[nrs]? Angabe(?:n)?(?: zu .+?)? (?:ein|an)gefügt: "
               + Z
               + "\\.?$");
 
   // Variante innerhalb eines Kontextrahmens „Die Inhaltsübersicht wird wie folgt geändert:“.
   private static final Pattern ANGABE_EINFUEGUNG =
       Pattern.compile(
-          "^(Nach|Vor) der Angabe zu (§ \\S+?) (?:wird|werden) "
-              + "(?:die |der |das )?folgenden? Angabe(?:n)? eingefügt: "
+          "^(Nach|Vor) der Angabe (?:zu |zur |zum |von )?(.+?) (?:wird|werden) "
+              + "(?:die |der |das )?folgende[nrs]? Angabe(?:n)?(?: zu .+?)? (?:ein|an)gefügt: "
               + Z
               + "\\.?$");
 
@@ -260,10 +369,55 @@ final class BefehlErkenner {
   // ersetzt.“ — mehrere Ersetzungspaare unter einem gemeinsamen „ersetzt“. Die Mitte (Gruppe 2)
   // wird an „ und “ in Einzelpaare zerlegt und je gegen EIN_ERSETZUNGS_PAAR validiert.
   private static final Pattern PAAR_ERSETZUNG =
-      Pattern.compile("^(?:In )?(.+?) (?:wird|werden) (.+ und .+) ersetzt\\.$");
+      Pattern.compile("^(?:In )?(.+?) (?:wird|werden) (.+(?: und |, ).+) ersetzt\\.$");
   private static final Pattern EIN_ERSETZUNGS_PAAR =
       Pattern.compile(
-          "^(?:jeweils )?" + WOERTER + " " + Z + " (?:jeweils )?durch " + WOERTER + " " + Z + "$");
+          "^(?:jeweils )?"
+              + WOERTER
+              + " "
+              + Z
+              + " (?:jeweils )?durch (?:"
+              + WOERTER
+              + " )?"
+              + Z
+              + "$");
+  // Paare trennen sich an „ und “ sowie an Kommata vor dem nächsten Wörter-Objekt.
+  private static final Pattern PAAR_SEP =
+      Pattern.compile(" und |,\\s+(?=(?:die Wörter|das Wort|die Angabe|die Zahl) )");
+
+  // „Die bisherigen Absätze 6 und 7 werden die Absätze 1 und 2.“ — koordinierte Umnummerierung.
+  private static final Pattern UMNUMMERIERUNG_KOORDINIERT =
+      Pattern.compile(
+          "^Die (?:bisherigen )?(Absätze|Sätze|Nummern|Buchstaben) (\\d+[a-z]?) und (\\d+[a-z]?) "
+              + "werden (?:zu den |die )?(?:Absätze[n]?|Sätze[n]?|Nummern|Buchstaben) "
+              + "(\\d+[a-z]?) und (\\d+[a-z]?)\\.$");
+
+  // „In Absatz 3 Satz 1 wird vor dem Punkt am Ende ein Komma und werden die Wörter „…“
+  // eingefügt.“ — läuft auf eine Ersetzung des Schlusspunkts durch „, … .“ hinaus.
+  private static final Pattern KOMMA_UND_WOERTER_VOR_PUNKT =
+      Pattern.compile(
+          "^(?:In )?(.+?) (?:wird|werden) vor dem Punkt am Ende ein Komma und "
+              + "(?:wird|werden) "
+              + WOERTER
+              + " "
+              + Z
+              + " eingefügt\\.$");
+
+  // „In Nummer 24 werden nach den Wörtern «1» die Wörter «2» und nach der Angabe «3» ein Komma
+  // und die Angabe «4» eingefügt.“ — mehrere Einfügepaare unter einem gemeinsamen „eingefügt“.
+  private static final Pattern EINFUEGUNGS_PAARE =
+      Pattern.compile(
+          "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?((?:nach|vor) .+) eingefügt\\.$");
+  private static final Pattern EINFUEGUNGS_PAAR_SEP = Pattern.compile(" und (?=nach |vor )");
+  private static final Pattern EIN_EINFUEGUNGS_PAAR =
+      Pattern.compile(
+          "^(nach|vor) (?:dem Wort|den Wörtern|der Angabe|der Zahl) "
+              + Z
+              + " (?:(ein Komma und )?(?:wird |werden )?"
+              + WOERTER
+              + " "
+              + Z
+              + "|(ein Komma|ein Semikolon))$");
 
   // „… ein Komma eingefügt und werden …“: Trennstellen eines Verbundbefehls sind „ und “ (ggf. mit
   // Komma) bzw. „, “ direkt vor „wird/werden“. Innerhalb von Zitaten steht „ und “ als «n» maskiert.
@@ -302,6 +456,40 @@ final class BefehlErkenner {
     return StellenParser.parse(matcher.group(1));
   }
 
+  // „§ 50 wird zu § 38 und wird wie folgt geändert:“ — Umnummerierung als Begleitbefehl eines
+  // Kontextrahmens; die Folgebefehle beziehen sich auf die neue Bezeichnung.
+  private static final Pattern UMNUMMERIERUNGS_RAHMEN =
+      Pattern.compile(
+          "^(?:Der bisherige |Die bisherige |Das bisherige )?(.+?) wird (?:zu )?"
+              + "(§|Absatz|Satz|Nummer|Buchstabe|Teil|Abschnitt|Unterabschnitt|Buch|Kapitel|Anlage)"
+              + " (\\d+[a-z]?) und wird wie folgt geändert:$");
+
+  /** Ein Kontextrahmen samt optionalem Begleitbefehl (Umnummerierung des Rahmens selbst). */
+  record Rahmen(Stelle stelle, @Nullable Aenderungsbefehl begleitbefehl) {}
+
+  /**
+   * Wie {@link #kontextRahmen}, erkennt zusätzlich den Verbund „<alt> wird zu <neu> und wird wie
+   * folgt geändert:“ — die Umnummerierung wird als Begleitbefehl geliefert, der Rahmen zeigt auf
+   * die neue Bezeichnung.
+   */
+  static Optional<Rahmen> rahmenMitBefehl(String text, Stelle kontext, Provenienz provenienz) {
+    var einfach = kontextRahmen(text);
+    if (einfach.isPresent()) {
+      return Optional.of(new Rahmen(einfach.get(), null));
+    }
+    var m = UMNUMMERIERUNGS_RAHMEN.matcher(text);
+    if (m.matches()) {
+      var alt = StellenParser.parse(m.group(1));
+      if (alt.isPresent()) {
+        var neu = new Stelle(List.of(komponenteFuer(m.group(2), m.group(3))));
+        var befehl =
+            new Umnummerierung(kontext.plus(alt.get()), kontext.plus(neu), provenienz);
+        return Optional.of(new Rahmen(neu, befehl));
+      }
+    }
+    return Optional.empty();
+  }
+
   /**
    * Versucht, den Text als Änderungsbefehl zu erkennen. Zuerst als Einzelbefehl ({@link
    * #erkenneEinzeln}); schlägt das fehl (kein Muster passt oder die Stelle ist unparsbar), wird der
@@ -312,8 +500,18 @@ final class BefehlErkenner {
    * @param zitate die extrahierten Zitate zur Auflösung der Platzhalter.
    * @param provenienz Herkunftsangabe für den Befehl.
    */
+  /**
+   * Obergrenze für die Mustersuche: Zitate sind zu Platzhaltern maskiert, echte Befehlssätze
+   * deshalb kurz. Ein Riesentext ist ein Extraktionsschaden (verschluckte Zitate) — er bliebe
+   * ohnehin unbekannt, würde die Backtracking-Muster aber quadratisch teuer machen.
+   */
+  private static final int MAX_BEFEHLSLAENGE = 4000;
+
   static Optional<Aenderungsbefehl> erkenne(
       String text, Stelle kontext, ZitatExtraktor.Ergebnis zitate, Provenienz provenienz) {
+    if (text.length() > MAX_BEFEHLSLAENGE) {
+      return Optional.empty();
+    }
     var einzeln = erkenneEinzeln(text, kontext, zitate, provenienz);
     if (einzeln.isPresent()) {
       return einzeln;
@@ -321,6 +519,10 @@ final class BefehlErkenner {
     var paare = erkennePaarErsetzung(text, kontext, zitate, provenienz);
     if (paare.isPresent()) {
       return paare;
+    }
+    var einfuegungen = erkenneEinfuegungsPaare(text, kontext, zitate, provenienz);
+    if (einfuegungen.isPresent()) {
+      return einfuegungen;
     }
     return erkenneVerbund(text, kontext, zitate, provenienz);
   }
@@ -333,14 +535,49 @@ final class BefehlErkenner {
     // Inhaltsübersichts-Angaben zuerst prüfen, bevor NEUFASSUNG/STRUKTUR_ERSETZUNG die Phrase
     // strukturell (aber mit unparsbarer Stelle) an sich ziehen.
     if ((m = INHALTSUEBERSICHT_ANGABE.matcher(text)).matches()) {
-      var stelle = kontext.plus(new Stelle(List.of(new Stelle.Inhaltsuebersicht())));
-      if (m.group(1) != null) {
-        return Optional.of(new Neufassung(stelle, zitat(zitate, m.group(1)), provenienz));
+      var basis = mitInhaltsuebersicht(kontext);
+      var stellen = StellenParser.parseMehrfach(angabenZiel(m.group(1)));
+      var zitatIndex = m.group(2) != null ? m.group(2) : m.group(3);
+      if (zitatIndex == null) {
+        // „… gestrichen.“
+        if (stellen.isEmpty()) {
+          return Optional.empty();
+        }
+        var teile =
+            stellen.stream()
+                .map(s -> (Aenderungsbefehl) new Aufhebung(basis.plus(s), provenienz))
+                .toList();
+        return Optional.of(teile.size() == 1 ? teile.get(0) : new Sammelbefehl(teile));
       }
-      if (m.group(2) != null) {
-        return Optional.of(new Neufassung(stelle, zitat(zitate, m.group(2)), provenienz));
+      var neuerText = zitat(zitate, zitatIndex);
+      if (stellen.isEmpty()) {
+        // Ziel unparsbar: als Neufassung der Inhaltsübersicht typisieren (Anwendung: manuell).
+        return Optional.of(new Neufassung(basis, neuerText, provenienz));
       }
-      return Optional.of(new Aufhebung(stelle, provenienz));
+      if (stellen.size() == 1) {
+        return Optional.of(new Neufassung(basis.plus(stellen.get(0)), neuerText, provenienz));
+      }
+      // Bereich („Die Angaben zu den §§ 34 bis 45 …“): erster/letzter bestimmen die Spanne.
+      return Optional.of(
+          new StrukturErsetzung(
+              basis.plus(stellen.get(0)),
+              basis.plus(stellen.get(stellen.size() - 1)),
+              Ebene.PARAGRAPH,
+              neuerText,
+              provenienz));
+    }
+
+    if ((m = INHALTSUEBERSICHT_STREICHUNG.matcher(text)).matches()) {
+      var basis = mitInhaltsuebersicht(kontext);
+      var stellen = StellenParser.parseMehrfach(angabenZiel(m.group(1)));
+      if (stellen.isEmpty()) {
+        return Optional.empty();
+      }
+      var teile =
+          stellen.stream()
+              .map(s -> (Aenderungsbefehl) new Aufhebung(basis.plus(s), provenienz))
+              .toList();
+      return Optional.of(teile.size() == 1 ? teile.get(0) : new Sammelbefehl(teile));
     }
 
     if ((m = PARAGRAPH_BEREICH_NEUFASSUNG.matcher(text)).matches()) {
@@ -348,8 +585,8 @@ final class BefehlErkenner {
     }
 
     if ((m = NEUFASSUNG.matcher(text)).matches()) {
-      var neuerText = zitat(zitate, m.group(2));
       var stellen = StellenParser.parseMehrfach(m.group(1));
+      var neuerText = mitEnumerator(m.group(2), stellen, zitat(zitate, m.group(3)));
       if (stellen.size() == 1) {
         return Optional.of(new Neufassung(kontext.plus(stellen.get(0)), neuerText, provenienz));
       }
@@ -376,16 +613,44 @@ final class BefehlErkenner {
                       provenienz));
     }
 
+    if ((m = GLIEDERUNG_UEBERSCHRIFT_EINFUEGUNG.matcher(text)).matches()) {
+      var anker = StellenParser.parse(m.group(1));
+      var neue = gliederungsPfade(m.group(2));
+      if (anker.isEmpty() || neue.isEmpty()) {
+        return Optional.empty();
+      }
+      return Optional.of(
+          new GliederungsUeberschriften(
+              kontext.plus(anker.get()),
+              neue.stream().map(pfad -> pfad.get(pfad.size() - 1)).toList(),
+              List.of(),
+              zitat(zitate, m.group(3)),
+              provenienz));
+    }
+
+    if ((m = GLIEDERUNG_UEBERSCHRIFT_ERSETZUNG.matcher(text)).matches()) {
+      var alte = gliederungsPfade(m.group(1));
+      var neue = gliederungsPfade(m.group(2));
+      if (alte.isEmpty() || neue.isEmpty()) {
+        return Optional.empty();
+      }
+      return Optional.of(
+          new GliederungsUeberschriften(
+              kontext,
+              neue.stream().map(pfad -> pfad.get(pfad.size() - 1)).toList(),
+              alte,
+              zitat(zitate, m.group(3)),
+              provenienz));
+    }
+
     if ((m = STRUKTUR_ERSETZUNG.matcher(text)).matches()) {
-      var enumerator = m.group(3);
-      var rohText = zitat(zitate, m.group(4));
-      // Entwurfsform „… ersetzt: 3. „…““: das außerhalb des Zitats stehende Label wieder anfügen.
-      var neuerText = enumerator != null ? enumerator.strip() + " " + rohText.strip() : rohText;
       var ziel = m.group(2).strip();
       var stellen = StellenParser.parseMehrfach(m.group(1));
       if (stellen.isEmpty()) {
         return Optional.empty();
       }
+      // Entwurfsform „… ersetzt: 3. „…““: das außerhalb des Zitats stehende Label wieder anfügen.
+      var neuerText = mitEnumerator(m.group(3), stellen, zitat(zitate, m.group(4)));
       // „durch die folgende Überschrift ersetzt“ ist eine Neufassung der Überschrift,
       // „§ 19 wird durch den folgenden § 19 ersetzt“ eine Neufassung des Paragraphen,
       // „Die Inhaltsübersicht wird durch die folgende Inhaltsübersicht ersetzt“ eine Neufassung der
@@ -443,6 +708,27 @@ final class BefehlErkenner {
       var neu = wortZitat(zitate, m.group(4));
       return ausStellen(
           m.group(1), s -> new Ersetzung(kontext.plus(s), alt, neu, jeweils, false, provenienz));
+    }
+
+    if ((m = ERSETZUNG_MIT_ANKER.matcher(text)).matches()) {
+      var alt = wortZitat(zitate, m.group(3));
+      var neu = wortZitat(zitate, m.group(4));
+      return ausStellen(
+          m.group(1), s -> new Ersetzung(kontext.plus(s), alt, neu, false, false, provenienz));
+    }
+
+    if ((m = WORT_VORANSTELLUNG.matcher(text)).matches()) {
+      var anker = new WortAnker.VorWoertern(wortZitat(zitate, m.group(2)));
+      var woerter = wortZitat(zitate, m.group(3));
+      return ausStellen(
+          m.group(1), s -> new WoerterEinfuegung(kontext.plus(s), anker, woerter, provenienz));
+    }
+
+    if ((m = PUNKT_DURCH_WORTLAUT.matcher(text)).matches()) {
+      var alt = satzzeichen(m.group(2));
+      var neu = wortZitat(zitate, m.group(3));
+      return ausStellen(
+          m.group(1), s -> new Ersetzung(kontext.plus(s), alt, neu, false, true, provenienz));
     }
 
     if ((m = ERSETZUNG_OHNE_STELLE.matcher(text)).matches()) {
@@ -527,26 +813,34 @@ final class BefehlErkenner {
 
     if ((m = INHALTSUEBERSICHT_EINFUEGUNG.matcher(text)).matches()
         || (m = ANGABE_EINFUEGUNG.matcher(text)).matches()) {
-      var anker =
-          m.group(1).equalsIgnoreCase("nach")
-              ? new WortAnker.NachWoertern("Angabe zu " + m.group(2))
-              : new WortAnker.VorWoertern("Angabe zu " + m.group(2));
+      var vorher = m.group(1).equalsIgnoreCase("vor");
+      var anker = StellenParser.parse(angabenZiel(m.group(2)));
+      if (anker.isEmpty()) {
+        return Optional.empty();
+      }
+      var basis = mitInhaltsuebersicht(kontext);
       return Optional.of(
-          new WoerterEinfuegung(
-              kontext.plus(new Stelle(java.util.List.of(new Stelle.Inhaltsuebersicht()))),
-              anker,
-              wortZitat(zitate, m.group(3)),
+          new StrukturEinfuegung(
+              basis.plus(anker.get()),
+              vorher,
+              Ebene.PARAGRAPH,
+              null,
+              zitat(zitate, m.group(3)),
               provenienz));
     }
 
     if ((m = STRUKTUR_EINFUEGUNG.matcher(text)).matches()) {
       var vorher = m.group(1).equals("Vor");
       var stelle = StellenParser.parse(m.group(2));
-      var textInhalt = zitat(zitate, m.group(4));
       if (stelle.isEmpty()) {
         return Optional.empty();
       }
       var ebeneBez = ebeneUndBezeichnung(m.group(3));
+      var textInhalt =
+          mitEnumerator(
+              m.group(4),
+              ebeneBez.map(e -> labelFuer(e.ebene(), e.bezeichnung())).orElse(null),
+              zitat(zitate, m.group(5)));
       if (ebeneBez.isEmpty()) {
         // „Nach § 60a werden die folgenden §§ 60b und 60c eingefügt: „…““ — Block mehrerer
         // Paragraphen (Aufteilung an den §-Überschriften erfolgt beim Anwenden). Signal:
@@ -573,13 +867,71 @@ final class BefehlErkenner {
               provenienz));
     }
 
-    if ((m = STRUKTUR_ANFUEGUNG_MIT_STELLE.matcher(text)).matches()) {
-      var stelle = StellenParser.parse(m.group(1));
-      var ebeneBez = ebeneUndBezeichnung(m.group(2));
-      var textInhalt = zitat(zitate, m.group(3));
+    if ((m = VORANSTELLUNG_MIT_STELLE.matcher(text)).matches()
+        || (m = VORANSTELLUNG.matcher(text)).matches()) {
+      // Bei der stellenlosen Form ist die neue Einheit zugleich der Anker (sie tritt vor die
+      // gleichnamige bestehende Einheit).
+      boolean mitStelle = m.pattern() == VORANSTELLUNG_MIT_STELLE;
+      var ankerPhrase = m.group(1);
+      var ebeneBez = ebeneUndBezeichnung(mitStelle ? m.group(2) : m.group(1));
+      var stelle = StellenParser.parse(ankerPhrase);
       if (stelle.isEmpty() || ebeneBez.isEmpty()) {
         return Optional.empty();
       }
+      var textInhalt =
+          mitEnumerator(
+              m.group(mitStelle ? 3 : 2),
+              labelFuer(ebeneBez.get().ebene(), ebeneBez.get().bezeichnung()),
+              zitat(zitate, m.group(mitStelle ? 4 : 3)));
+      return Optional.of(
+          new StrukturEinfuegung(
+              kontext.plus(stelle.get()),
+              true,
+              ebeneBez.get().ebene(),
+              ebeneBez.get().bezeichnung(),
+              textInhalt,
+              provenienz));
+    }
+
+    if ((m = EINFUEGUNG_OHNE_ANKER.matcher(text)).matches()) {
+      var ebeneBez = ebeneUndBezeichnung(m.group(1));
+      if (ebeneBez.isEmpty() || ebeneBez.get().bezeichnung() == null) {
+        return Optional.empty();
+      }
+      var vorgaenger = vorgaengerLabel(ebeneBez.get().bezeichnung());
+      if (vorgaenger == null) {
+        return Optional.empty();
+      }
+      var textInhalt =
+          mitEnumerator(
+              m.group(2),
+              labelFuer(ebeneBez.get().ebene(), ebeneBez.get().bezeichnung()),
+              zitat(zitate, m.group(3)));
+      var anker = komponenteFuerEbene(ebeneBez.get().ebene(), vorgaenger);
+      if (anker == null) {
+        return Optional.empty();
+      }
+      return Optional.of(
+          new StrukturEinfuegung(
+              kontext.plus(new Stelle(List.of(anker))),
+              false,
+              ebeneBez.get().ebene(),
+              ebeneBez.get().bezeichnung(),
+              textInhalt,
+              provenienz));
+    }
+
+    if ((m = STRUKTUR_ANFUEGUNG_MIT_STELLE.matcher(text)).matches()) {
+      var stelle = StellenParser.parse(m.group(1));
+      var ebeneBez = ebeneUndBezeichnung(m.group(2));
+      if (stelle.isEmpty() || ebeneBez.isEmpty()) {
+        return Optional.empty();
+      }
+      var textInhalt =
+          mitEnumerator(
+              m.group(3),
+              labelFuer(ebeneBez.get().ebene(), ebeneBez.get().bezeichnung()),
+              zitat(zitate, m.group(4)));
       return Optional.of(
           new Anfuegung(
               kontext.plus(stelle.get()),
@@ -591,10 +943,14 @@ final class BefehlErkenner {
 
     if ((m = STRUKTUR_ANFUEGUNG.matcher(text)).matches()) {
       var ebeneBez = ebeneUndBezeichnung(m.group(1));
-      var textInhalt = zitat(zitate, m.group(2));
       if (ebeneBez.isEmpty()) {
         return Optional.empty();
       }
+      var textInhalt =
+          mitEnumerator(
+              m.group(2),
+              labelFuer(ebeneBez.get().ebene(), erstesLabel(m.group(1))),
+              zitat(zitate, m.group(3)));
       return Optional.of(
           new Anfuegung(
               kontext,
@@ -602,6 +958,13 @@ final class BefehlErkenner {
               ebeneBez.get().bezeichnung(),
               textInhalt,
               provenienz));
+    }
+
+    if ((m = KOMMA_UND_WOERTER_VOR_PUNKT.matcher(text)).matches()) {
+      // Der Schlusspunkt wird durch „, <Wörter>.“ ersetzt.
+      var neu = ", " + wortZitat(zitate, m.group(2)) + ".";
+      return ausStellen(
+          m.group(1), s -> new Ersetzung(kontext.plus(s), ".", neu, false, true, provenienz));
     }
 
     if ((m = WOERTER_ANFUEGUNG.matcher(text)).matches()) {
@@ -646,6 +1009,18 @@ final class BefehlErkenner {
           m.group(3), m.group(1), m.group(2), m.group(4), m.group(5), kontext, provenienz);
     }
 
+    if ((m = UMNUMMERIERUNG_KOORDINIERT.matcher(text)).matches()) {
+      var ebene = ebeneAusWort(m.group(1));
+      if (ebene == null) {
+        return Optional.empty();
+      }
+      // Absteigend anwenden (zweites Paar zuerst), damit sequenziell keine Labels kollidieren.
+      var teile = new ArrayList<Aenderungsbefehl>();
+      teile.add(paarUmnummerierung(ebene, m.group(3), m.group(5), kontext, provenienz));
+      teile.add(paarUmnummerierung(ebene, m.group(2), m.group(4), kontext, provenienz));
+      return Optional.of(new Sammelbefehl(teile));
+    }
+
     if ((m = UMNUMMERIERUNG.matcher(text)).matches()) {
       var neu = komponenteFuer(m.group(2), m.group(3));
       return StellenParser.parse(m.group(1))
@@ -674,7 +1049,7 @@ final class BefehlErkenner {
     if (stellen.isEmpty()) {
       return Optional.empty();
     }
-    var segmente = m.group(2).split(" und ");
+    var segmente = PAAR_SEP.split(m.group(2));
     if (segmente.length < 2) {
       return Optional.empty();
     }
@@ -700,6 +1075,61 @@ final class BefehlErkenner {
   }
 
   /**
+   * „In <Stelle> werden nach X die Wörter «1» und nach Y ein Komma und die Angabe «2» eingefügt.“
+   * — mehrere Einfügepaare unter einem gemeinsamen „eingefügt“, aufgelöst in einen {@link
+   * Sammelbefehl} von {@link WoerterEinfuegung}en (Kreuzprodukt mit koordinierter Stelle).
+   */
+  private static Optional<Aenderungsbefehl> erkenneEinfuegungsPaare(
+      String text, Stelle kontext, ZitatExtraktor.Ergebnis zitate, Provenienz provenienz) {
+    var m = EINFUEGUNGS_PAARE.matcher(text);
+    if (!m.matches()) {
+      return Optional.empty();
+    }
+    var segmente = EINFUEGUNGS_PAAR_SEP.split(m.group(2));
+    if (segmente.length < 2) {
+      return Optional.empty();
+    }
+    var stellen = StellenParser.parseMehrfach(m.group(1));
+    if (stellen.isEmpty()) {
+      if (!StellenParser.istNurChapeau(m.group(1))) {
+        return Optional.empty();
+      }
+      stellen = List.of(Stelle.LEER);
+    }
+    record Einfuegung(WortAnker anker, String woerter) {}
+    var einfuegungen = new ArrayList<Einfuegung>();
+    for (var segment : segmente) {
+      var pm = EIN_EINFUEGUNGS_PAAR.matcher(segment.strip());
+      if (!pm.matches()) {
+        return Optional.empty();
+      }
+      var ankerWoerter = wortZitat(zitate, pm.group(2));
+      var anker =
+          pm.group(1).equals("nach")
+              ? (WortAnker) new WortAnker.NachWoertern(ankerWoerter)
+              : new WortAnker.VorWoertern(ankerWoerter);
+      String woerter;
+      if (pm.group(5) != null) {
+        woerter = satzzeichen(pm.group(5));
+      } else if (pm.group(3) != null) {
+        woerter = ", " + wortZitat(zitate, pm.group(4));
+      } else {
+        woerter = wortZitat(zitate, pm.group(4));
+      }
+      einfuegungen.add(new Einfuegung(anker, woerter));
+    }
+    var teile = new ArrayList<Aenderungsbefehl>();
+    for (var stelle : stellen) {
+      for (var einfuegung : einfuegungen) {
+        teile.add(
+            new WoerterEinfuegung(
+                kontext.plus(stelle), einfuegung.anker(), einfuegung.woerter(), provenienz));
+      }
+    }
+    return Optional.of(teile.size() == 1 ? teile.get(0) : new Sammelbefehl(teile));
+  }
+
+  /**
    * Verbundbefehl: mehrere per „und“ (bzw. „, wird/werden“) verkettete Einzelbefehle. Der Text wird
    * an jeder Trennstelle probeweise gespalten; sobald beide Hälften als eigenständige Befehle
    * erkannt werden, entsteht ein {@link Sammelbefehl}. Nur wenn <em>alle</em> Klauseln erkannt
@@ -718,7 +1148,8 @@ final class BefehlErkenner {
       if (linksBefehl.isEmpty()) {
         continue;
       }
-      var rechtsBefehl = erkenneRechteKlausel(links, rechts, kontext, zitate, provenienz);
+      var rechtsBefehl =
+          erkenneRechteKlausel(links, linksBefehl.get(), rechts, kontext, zitate, provenienz);
       if (rechtsBefehl.isEmpty()) {
         continue;
       }
@@ -732,31 +1163,92 @@ final class BefehlErkenner {
 
   /**
    * Versucht die rechte Klausel eines Verbunds zu erkennen: (1) unverändert, (2) mit großem
-   * Anfangsbuchstaben (eigenständiger Befehl wie „nach …“ → „Nach …“), (3) mit vorangestelltem
-   * lokativem Präfix der linken Klausel („In <Stelle> “).
+   * Anfangsbuchstaben (eigenständiger Befehl wie „nach …“ → „Nach …“), (3) nach einer
+   * Umnummerierung mit aufgelöstem Rückbezug („… wird Nummer 2 und in ihr werden …“ / „… und wie
+   * folgt gefasst: …“), (4) mit vorangestelltem lokativem Präfix der linken Klausel („In
+   * <Stelle> “).
    */
   private static Optional<Aenderungsbefehl> erkenneRechteKlausel(
       String links,
+      Aenderungsbefehl linksBefehl,
       String rechts,
       Stelle kontext,
       ZitatExtraktor.Ergebnis zitate,
       Provenienz provenienz) {
+    var gross = Character.toUpperCase(rechts.charAt(0)) + rechts.substring(1);
+    // Nach einer Umnummerierung beziehen sich explizit lokative Folgeklauseln („… und in Satz 3
+    // wird …“) auf die umnummerierte Einheit — deren neue Stelle wird zum Kontext der rechten
+    // Klausel (nur wenn die Klausel nicht ihrerseits einen § nennt; Zitate sind bereits maskiert).
+    if (linksBefehl instanceof Umnummerierung um
+        && um.neu().paragraph().isPresent()
+        && rechts.startsWith("in ")
+        && !rechts.matches(".*§\\s*\\d.*")) {
+      var imNeuen = erkenneAlsSatz(gross, um.neu(), zitate, provenienz);
+      if (imNeuen.isPresent()) {
+        return imNeuen;
+      }
+    }
     var direkt = erkenneAlsSatz(rechts, kontext, zitate, provenienz);
     if (direkt.isPresent()) {
       return direkt;
     }
-    var gross = Character.toUpperCase(rechts.charAt(0)) + rechts.substring(1);
     if (!gross.equals(rechts)) {
       var alsBefehl = erkenneAlsSatz(gross, kontext, zitate, provenienz);
       if (alsBefehl.isPresent()) {
         return alsBefehl;
       }
     }
+    if (linksBefehl instanceof Umnummerierung u) {
+      var relativ = relativeStelle(u.neu(), kontext);
+      if (!relativ.istLeer()) {
+        // „Die bisherige Nummer 1 wird Nummer 2 und in ihr werden … ersetzt.“
+        for (var pronomen : List.of("in ihr ", "in ihm ", "darin ")) {
+          if (rechts.startsWith(pronomen)) {
+            return erkenneAlsSatz(
+                "In " + relativ.anzeigeText() + " " + rechts.substring(pronomen.length()),
+                kontext,
+                zitate,
+                provenienz);
+          }
+        }
+        // „Die bisherige Nummer 3 wird Nummer 4 und (wird) wie folgt gefasst: „…““
+        if (rechts.startsWith("wie folgt ")) {
+          return erkenneAlsSatz(
+              relativ.anzeigeText() + " wird " + rechts, kontext, zitate, provenienz);
+        }
+        if (rechts.startsWith("wird wie folgt ") || rechts.startsWith("werden wie folgt ")) {
+          return erkenneAlsSatz(
+              relativ.anzeigeText() + " " + rechts, kontext, zitate, provenienz);
+        }
+      }
+    }
     var praefix = lokativerPraefix(links);
     if (praefix != null) {
-      return erkenneAlsSatz(praefix + " " + rechts, kontext, zitate, provenienz);
+      var mitPraefix = erkenneAlsSatz(praefix + " " + rechts, kontext, zitate, provenienz);
+      if (mitPraefix.isPresent()) {
+        return mitPraefix;
+      }
+      // Verb-Ellipse („… ersetzt und die Angabe „X“ gestrichen.“): das geteilte „wird/werden“
+      // wieder einsetzen.
+      if (!WIRD_WERDEN.matcher(rechts).find()) {
+        for (var verb : List.of(" wird ", " werden ")) {
+          var ergaenzt = erkenneAlsSatz(praefix + verb + rechts, kontext, zitate, provenienz);
+          if (ergaenzt.isPresent()) {
+            return ergaenzt;
+          }
+        }
+      }
     }
     return Optional.empty();
+  }
+
+  /** Die Komponenten von {@code voll} hinter dem Kontext-Präfix (leer, wenn nichts übrig bleibt). */
+  private static Stelle relativeStelle(Stelle voll, Stelle kontext) {
+    int praefix = kontext.komponenten().size();
+    if (voll.komponenten().size() <= praefix) {
+      return Stelle.LEER;
+    }
+    return new Stelle(voll.komponenten().subList(praefix, voll.komponenten().size()));
   }
 
   private static Optional<Aenderungsbefehl> erkenneAlsSatz(
@@ -834,6 +1326,14 @@ final class BefehlErkenner {
     return Optional.of(new Sammelbefehl(teile));
   }
 
+  private static Umnummerierung paarUmnummerierung(
+      String ebene, String alt, String neu, Stelle kontext, Provenienz provenienz) {
+    return new Umnummerierung(
+        kontext.plus(new Stelle(List.of(komponenteFuer(ebene, alt)))),
+        kontext.plus(new Stelle(List.of(komponenteFuer(ebene, neu)))),
+        provenienz);
+  }
+
   /**
    * Wendet einen Stellen-basierten Befehlsbauer auf eine (ggf. koordinierte) Stellenangabe an: bei
    * einer einzelnen Stelle das gewohnte Verhalten, bei mehreren per „und“ verbundenen Stellen ein
@@ -859,8 +1359,8 @@ final class BefehlErkenner {
   /**
    * Baut aus einem zusammenhängenden, koordinierten Ziel-Bereich („Die Absätze 8 und 9 …“, „Die
    * bisherigen Sätze 4 und 5 …“) eine bereichsbezogene {@link StrukturErsetzung}: erstes und letztes
-   * Ziel spannen den zu ersetzenden Bereich auf; der zitierte Block ersetzt ihn. Nur für Absatz- und
-   * Satz-Bereiche (die der Applier auflösen kann); andere Ebenen bleiben unbekannt.
+   * Ziel spannen den zu ersetzenden Bereich auf; der zitierte Block ersetzt ihn (Absatz-, Satz-,
+   * Nummer- und Buchstaben-Bereiche; §-Bereiche laufen über den PARAGRAPH-Zweig).
    */
   private static Optional<Aenderungsbefehl> koordinierteErsetzung(
       List<Stelle> stellen,
@@ -871,7 +1371,7 @@ final class BefehlErkenner {
     var first = stellen.get(0);
     var last = stellen.get(stellen.size() - 1);
     var ebene = ebeneHint != null ? ebeneHint : ebeneAusStelle(first);
-    if (ebene != Ebene.ABSATZ && ebene != Ebene.SATZ) {
+    if (ebene == null || ebene == Ebene.PARAGRAPH) {
       return Optional.empty();
     }
     return Optional.of(
@@ -986,6 +1486,133 @@ final class BefehlErkenner {
       return Optional.empty();
     }
     return Optional.of(teile.size() == 1 ? teile.get(0) : new Sammelbefehl(teile));
+  }
+
+  /**
+   * Stellt dem Zitat das außerhalb stehende Aufzählungslabel („3. “, „a) “) wieder voran — aber
+   * nur, wenn das Zitat es nicht schon trägt und es zum Ziel passt. Ein fremdes Label (die Zählung
+   * des Änderungsdokuments selbst, das der Extraktor fälschlich vor das Zitat gezogen hat) wird
+   * verworfen.
+   */
+  private static String mitEnumerator(
+      @Nullable String enumerator, List<Stelle> stellen, String zitat) {
+    return mitEnumerator(
+        enumerator, stellen.isEmpty() ? null : erwartetesLabel(stellen.get(0)), zitat);
+  }
+
+  private static String mitEnumerator(
+      @Nullable String enumerator, @Nullable String erwartet, String zitat) {
+    if (enumerator == null) {
+      return zitat;
+    }
+    var label = enumerator.strip();
+    if (zitat.strip().startsWith(label)) {
+      return zitat;
+    }
+    if (erwartet == null || erwartet.equals(label)) {
+      return label + " " + zitat.strip();
+    }
+    return zitat;
+  }
+
+  /** Das Aufzählungslabel einer neuen Einheit („3.“, „a)“); {@code null} für andere Ebenen. */
+  private static @Nullable String labelFuer(Ebene ebene, @Nullable String bezeichnung) {
+    if (bezeichnung == null) {
+      return null;
+    }
+    return switch (ebene) {
+      case NUMMER -> bezeichnung + ".";
+      case BUCHSTABE -> bezeichnung + ")";
+      default -> null;
+    };
+  }
+
+  /** Die erste Bezeichnung einer Pluralphrase („Nummern 9 bis 11“ → „9“). */
+  private static @Nullable String erstesLabel(String phrase) {
+    var m = Pattern.compile("\\b(\\d+[a-z]?|[a-z]{1,3})\\b").matcher(phrase);
+    return m.find() ? m.group(1) : null;
+  }
+
+  /**
+   * Die Bezeichnung des Vorgängers einer Einheit („2“ → „1“, „2a“ → „2“, „5c“ → „5b“); {@code
+   * null}, wenn es keinen gibt (erste Einheit).
+   */
+  private static @Nullable String vorgaengerLabel(String bezeichnung) {
+    var m = Pattern.compile("^(\\d+)([a-z])?$").matcher(bezeichnung);
+    if (m.matches()) {
+      if (m.group(2) == null) {
+        int n = Integer.parseInt(m.group(1));
+        return n > 1 ? String.valueOf(n - 1) : null;
+      }
+      char buchstabe = m.group(2).charAt(0);
+      return buchstabe == 'a' ? m.group(1) : m.group(1) + (char) (buchstabe - 1);
+    }
+    if (bezeichnung.matches("^[b-z]$")) {
+      return String.valueOf((char) (bezeichnung.charAt(0) - 1));
+    }
+    return null;
+  }
+
+  private static Stelle.@Nullable Komponente komponenteFuerEbene(Ebene ebene, String nummer) {
+    return switch (ebene) {
+      case PARAGRAPH -> new Stelle.Paragraph(nummer);
+      case ABSATZ -> new Stelle.AbsatzNr(nummer);
+      case SATZ -> new Stelle.SatzNr(nummer);
+      case NUMMER -> new Stelle.NummerNr(nummer);
+      case BUCHSTABE -> new Stelle.BuchstabeNr(nummer);
+    };
+  }
+
+  /** Das Aufzählungslabel der feinsten Nummer/Buchstabe-Komponente („3.“, „a)“). */
+  private static @Nullable String erwartetesLabel(Stelle stelle) {
+    for (var komponente : stelle.komponenten().reversed()) {
+      if (komponente instanceof Stelle.NummerNr n) {
+        return n.nummer() + ".";
+      }
+      if (komponente instanceof Stelle.BuchstabeNr b) {
+        return b.kennung() + ")";
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Zerlegt eine koordinierte Gliederungsphrase („Teil 3 und zu Teil 3 Abschnitt 1“) in Pfade
+   * ([Teil 3], [Teil 3, Abschnitt 1]). Liefert die leere Liste, wenn ein Segment nicht
+   * ausschließlich aus Gliederungseinheiten besteht.
+   */
+  private static List<List<Stelle.Gliederungseinheit>> gliederungsPfade(String phrase) {
+    var pfade = new ArrayList<List<Stelle.Gliederungseinheit>>();
+    for (var segment : phrase.split(" und |, ")) {
+      var bereinigt = segment.strip().replaceFirst("^(?:zu|zur|zum) ", "");
+      var stelle = StellenParser.parse(bereinigt);
+      if (stelle.isEmpty()
+          || stelle.get().komponenten().isEmpty()
+          || !stelle.get().komponenten().stream()
+              .allMatch(Stelle.Gliederungseinheit.class::isInstance)) {
+        return List.of();
+      }
+      pfade.add(stelle.get().gliederungsPfad());
+    }
+    return pfade;
+  }
+
+  /** Markiert die Stelle als Inhaltsübersichts-Ziel (idempotent bei IU-Kontextrahmen). */
+  private static Stelle mitInhaltsuebersicht(Stelle kontext) {
+    return kontext.betrifftInhaltsuebersicht()
+        ? kontext
+        : kontext.plus(new Stelle(List.of(new Stelle.Inhaltsuebersicht())));
+  }
+
+  /**
+   * Normalisiert die Zielphrase einer Angabe für den StellenParser: Artikel entfernen, redundante
+   * §-Zeichen in Bereichen glätten („den §§ 34 bis § 45“ → „§§ 34 bis 45“).
+   */
+  private static String angabenZiel(String phrase) {
+    return phrase
+        .strip()
+        .replaceFirst("^(?:[Dd]en|[Dd]ie|[Dd]er|[Dd]as) ", "")
+        .replace(" bis § ", " bis ");
   }
 
   /** Zitat für Textblöcke (Neufassung, Einfügung ganzer Einheiten): Zeilenstruktur erhalten. */

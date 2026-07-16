@@ -107,6 +107,32 @@ public sealed interface Aenderungsbefehl {
       implements Aenderungsbefehl {}
 
   /**
+   * „Nach § 33 werden die folgenden Überschriften zu Teil 3 und zu Teil 3 Abschnitt 1 eingefügt:
+   * „…““ bzw. „Die bisherigen Überschriften zu Teil 4 und Teil 4 Abschnitt 1 werden durch die
+   * folgende Überschrift zu Abschnitt 2 ersetzt: „…““ — neue Gliederungs-Überschriften im
+   * Gliederungsbaum.
+   *
+   * @param stelle der Anker-§ („Nach § 33“); leer bei der Ersetzungsform.
+   * @param neue die neuen Einheiten in Zitatreihenfolge (Titel stehen im Zitat).
+   * @param ersetzte die zu ersetzenden bisherigen Einheiten (leer bei der Einfügeform); jede als
+   *     Pfad („Teil 4 Abschnitt 1“ → [Teil 4, Abschnitt 1]).
+   * @param text das Zitat mit den Überschriften.
+   */
+  record GliederungsUeberschriften(
+      Stelle stelle,
+      java.util.List<Stelle.Gliederungseinheit> neue,
+      java.util.List<java.util.List<Stelle.Gliederungseinheit>> ersetzte,
+      String text,
+      Provenienz provenienz)
+      implements Aenderungsbefehl {
+
+    public GliederungsUeberschriften {
+      neue = java.util.List.copyOf(neue);
+      ersetzte = java.util.List.copyOf(ersetzte);
+    }
+  }
+
+  /**
    * „In A und B wird jeweils …“ — ein Befehl, der dieselbe Operation auf mehrere, per „und“
    * koordinierte Stellen anwendet. Die Teilbefehle teilen sich Provenienz und Befehlszeile; der
    * Applier fasst sie zu einem Protokolleintrag zusammen.

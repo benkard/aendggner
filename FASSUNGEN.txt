@@ -21,6 +21,96 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 16. Juli 2026,
+ zuletzt geändert durch die am 16. Juli 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Auf Grund der vierten Ertüchtigungswelle werden Anhänge und Anlagen als Norm-Ziele,
+die Angabe-Befehle der Inhaltsübersicht sowie die Einfügung und Ersetzung von
+Gliederungs-Überschriften einer Verarbeitung zugänglich gemacht; ferner wird der
+Befehlserkenner um weitere Verbund- und Bereichsformen sowie die Neufassung der
+Gesetzesüberschrift ergänzt und die Brotschriftbestimmung des PDF-Vorverarbeiters
+seitenweise gefasst.
+
+
+Artikel 1
+Anhänge und Anlagen als Norm-Ziele
+
+Die Stelle (Stelle) wird um die Unterscheidung zwischen echten Gliederungseinheiten
+(Teil, Abschnitt, Unterabschnitt und dergleichen) und Anhängen/Anlagen ergänzt
+(betrifftEchteGliederung, anlagenEnbez); Anhänge und Anlagen sind im gii-XML eigene
+Normen mit Text und werden fortan wie Paragraphen behandelt. Der Stellenaufloeser
+löst hierbei Nummer- und Buchstabe-Ketten verschachtelt und blockweise auf: die
+Aufzählungszeile einer Nummer oder eines Buchstabens wird um ihre tiefer
+eingerückten Kindzeilen erweitert, und eine Angabe ohne Absatzbezeichnung wird
+norm-weit gesucht, sofern sie in genau einem Absatz auffindbar ist.
+
+
+Artikel 2
+Selbsttätige Anwendung der Inhaltsübersichts-Angaben
+
+Es wird der Anwender InhaltsuebersichtAnwender eingeführt, der die Angabe-Befehle
+(gefasst, ersetzt, eingefügt, gestrichen sowie die Neufassung der gesamten
+Übersicht) auf das Zeilenmodell der Inhaltsübersichts-Norm anwendet. Eine adressierte
+Zeile wird anhand der Gliederungs- und Paragraphen-Kette der Stelle verschachtelt
+gesucht, wobei gleichrangige Gliederungseinheiten als Fenstergrenzen dienen. Bei der
+Neufassung der gesamten Übersicht schützt eine Plausibilitätssperre vor der
+Übernahme eines Zitats, das durch ein unbalanciertes Anführungszeichen Befehlssprache
+nachfolgender Anweisungen mitgerissen hat; ein solcher Fall wird dem Abschnitt
+„Manuell prüfen“ zugewiesen.
+
+
+Artikel 3
+Einfügung und Ersetzung von Gliederungs-Überschriften
+
+Es wird der Befehl „GliederungsUeberschriften“ eingeführt; die Anweisungen „Nach
+§ N werden die folgenden Überschriften zu ... eingefügt: „…““ sowie „Die bisherigen
+Überschriften zu ... werden durch die folgende Überschrift zu ... ersetzt: „…““
+legen neue Einheiten im Gliederungsbaum an beziehungsweise ersetzen bisherige
+Einheiten durch neue. Der Befehlsanwender (BefehlAnwender.wendeGliederungsUeberschriftenAn)
+zieht die Titel der neuen Einheiten aus dem Zitat und ordnet sie an der Stelle der
+ersetzten Einheiten beziehungsweise hinter dem Einfügeanker ein. Ferner wird die
+Neufassung der Gesetzesüberschrift selbst („Die Überschrift wird wie folgt gefasst“
+ohne weitere Stellenangabe) erkannt und auf den Langtitel des Gesetzes angewandt.
+
+
+Artikel 4
+Weitere Erweiterungen des Befehlserkenners
+
+Der Befehlserkenner (BefehlErkenner) wird um Voranstellungen, Mehrfach-Ersetzungs-
+und -Einfügepaare, Bereichsziele auf Nummern und Buchstaben, zusammengesetzte
+Komma-Mehrfachpaare sowie Umnummerierungs-Verbünde („§ 50 wird zu § 38 und wird wie
+folgt geändert: ...“) ergänzt.
+
+
+Artikel 5
+Seitenweise Brotschriftbestimmung
+
+Der Fontgrößenfilter (FontgroessenFilter) bestimmt die Brotschrift fortan seitenweise
+statt dokumentweit: Auf jeder Seite gilt die größte Fontgröße mit mindestens 25 vom
+Hundert Seitenanteil als Brotschrift, wobei eine absolute Mehrheit ab 60 vom Hundert
+sofort entscheidet; Fußnoten werden als Kleingedrucktes unterhalb der letzten
+Brotschriftzeile erkannt, Seitenfüße bleiben hiervon ausgenommen. Der Textbereiniger
+(TextBereiniger) wird um die Toleranz weiterer Drucksachen-Artefakte (Seitenköpfe
+und -füße, Vorabfassungs-Wasserzeichen, vertauschte oder gerade Anführungszeichen,
+verklebte Wortgrenzen) ergänzt.
+
+
+Schlussbestimmung
+
+Die vorstehenden Änderungen sind durch die Prüfung sämtlicher Testfälle (einhundert-
+dreiundsiebzig an der Zahl) sowie durch die vollständige Erstellung (mvnw verify)
+bestätigt worden. Auf den Beispieldaten werden nunmehr sämtliche Befehle der
+BGBl-Fassungen sowie der geprüften Entwürfe angewandt (UWG, AGG und ProdHaftG:
+0 manuell). Nicht selbsttätig verarbeitbar bleiben einstweilen Befehle gegen eine
+ältere, im XML-Bestand nicht mehr vorhandene Gesetzesfassung sowie vereinzelte,
+durch Extraktionsverluste im Quell-PDF verursachte Zitatlücken; diese werden
+weiterhin, mit Begründung versehen, dem Abschnitt „Manuell prüfen“ zugewiesen. Die
+Unterstützung des bayerischen Landesrechts bleibt einem späteren Zeitpunkt
+vorbehalten.
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 15. Juli 2026,
  zuletzt geändert durch die am 15. Juli 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

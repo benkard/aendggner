@@ -4,6 +4,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Anfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Aufhebung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.GliederungsUeberschriften;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Neufassung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Sammelbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Streichung;
@@ -63,13 +64,29 @@ public final class BefehlAnwender {
     var normen = new ArrayList<>(alt.normen());
     var gliederungen = new ArrayList<>(alt.gliederungen());
     var protokoll = new ArrayList<AngewandteAenderung>();
+    String neuerLangtitel = null;
 
     for (var befehl : befehle) {
+      // „Die Überschrift wird wie folgt gefasst / durch die folgende Überschrift ersetzt“ auf
+      // oberster Ebene meint die Überschrift des Gesetzes selbst.
+      if (befehl instanceof Neufassung n && istNurUeberschrift(n.stelle())) {
+        neuerLangtitel = n.neuerText().replaceAll("\\s+", " ").strip();
+        protokoll.add(angewandt(befehl, "(Gesetzesüberschrift)"));
+        continue;
+      }
       protokoll.add(wendeAn(normen, gliederungen, befehl));
     }
 
-    return new AnwendungsErgebnis(
-        alt.mitNormen(normen).mitGliederungen(gliederungen), protokoll);
+    var neu = alt.mitNormen(normen).mitGliederungen(gliederungen);
+    if (neuerLangtitel != null) {
+      neu = neu.mitLangue(neuerLangtitel);
+    }
+    return new AnwendungsErgebnis(neu, protokoll);
+  }
+
+  private static boolean istNurUeberschrift(Stelle stelle) {
+    return stelle.komponenten().size() == 1
+        && stelle.komponenten().get(0) instanceof Stelle.Ueberschrift;
   }
 
   private static AngewandteAenderung wendeAn(
@@ -77,13 +94,22 @@ public final class BefehlAnwender {
     if (befehl instanceof UnbekannterBefehl) {
       return manuell(befehl, "Befehl nicht erkannt.");
     }
-    if (befehl.stelle().betrifftInhaltsuebersicht()) {
-      return manuell(
-          befehl, "Änderungen an der Inhaltsübersicht werden nicht automatisch angewandt.");
+    // Sammelbefehle vor den Spezialweichen dispatchen (jeder Teil wird einzeln geroutet).
+    if (befehl instanceof Sammelbefehl s) {
+      return wendeSammelAn(normen, gliederungen, s);
     }
     try {
+      if (befehl.stelle().betrifftInhaltsuebersicht()) {
+        var speziell = InhaltsuebersichtAnwender.wendeAn(normen, befehl);
+        if (speziell != null) {
+          return speziell;
+        }
+        // Wortweise Operationen laufen durch die normalen Zweige — die Inhaltsübersicht ist eine
+        // gewöhnliche Norm, deren enbez der StellenAufloeser bereits auflöst.
+      }
       // Änderungen an Gliederungs-Überschriften (Teil/Abschnitt/…) wirken auf den Gliederungsbaum.
-      if (befehl.stelle().betrifftGliederung()) {
+      // Anhänge/Anlagen sind dagegen eigene Normen und laufen durch die normalen Zweige.
+      else if (befehl.stelle().betrifftEchteGliederung()) {
         return switch (befehl) {
           case Neufassung n -> wendeGliederungNeufassungAn(gliederungen, n);
           case Aufhebung a -> wendeGliederungStreichungAn(gliederungen, a);
@@ -102,6 +128,8 @@ public final class BefehlAnwender {
         case Aufhebung a -> wendeAufhebungAn(normen, a);
         case Umnummerierung u -> wendeUmnummerierungAn(normen, u);
         case WortlautZuAbsatz w -> wendeWortlautZuAbsatzAn(normen, w);
+        case GliederungsUeberschriften g ->
+            wendeGliederungsUeberschriftenAn(normen, gliederungen, g);
         case Sammelbefehl s -> wendeSammelAn(normen, gliederungen, s);
         case UnbekannterBefehl u -> manuell(befehl, "Befehl nicht erkannt.");
       };
@@ -120,7 +148,13 @@ public final class BefehlAnwender {
     }
     var alt = gliederungen.get(idx);
     var titel = befehl.neuerText().replaceAll("\\s+", " ").strip();
-    if (titel.startsWith(alt.bezeichnung())) {
+    // Führende Eigenbezeichnung („Abschnitt 2 …“ oder „2. Abschnitt …“) aus dem Zitat entfernen.
+    var label = Pattern.compile("^(\\d+[a-z]?\\.\\s+\\S+|\\S+\\s+\\d+[a-z]?)\\s+").matcher(titel);
+    if (label.find()
+        && kanonischeBezeichnung(label.group(1))
+            .equals(kanonischeBezeichnung(alt.bezeichnung()))) {
+      titel = titel.substring(label.end()).strip();
+    } else if (titel.startsWith(alt.bezeichnung())) {
       titel = titel.substring(alt.bezeichnung().length()).strip();
     }
     gliederungen.set(idx, alt.mitTitel(titel.isEmpty() ? null : titel));
@@ -156,6 +190,92 @@ public final class BefehlAnwender {
   }
 
   /**
+   * „Nach § 33 werden die folgenden Überschriften zu Teil 3 und zu Teil 3 Abschnitt 1 eingefügt“
+   * bzw. „Die bisherigen Überschriften zu X werden durch die folgende Überschrift zu Y ersetzt“:
+   * neue Gliederungen entstehen im Gliederungsbaum, und die Normen des betroffenen Blocks werden
+   * der (innersten) neuen Einheit zugeordnet.
+   */
+  private static AngewandteAenderung wendeGliederungsUeberschriftenAn(
+      List<Norm> normen, List<Gliederung> gliederungen, GliederungsUeberschriften befehl) {
+    // Titel der neuen Einheiten aus dem Zitat ziehen: das Zitat reiht „<Bezeichnung> <Titel>“
+    // in Befehlreihenfolge aneinander.
+    var flach = befehl.text().replaceAll("\\s+", " ").strip();
+    var starts = new int[befehl.neue().size()];
+    int suchAb = 0;
+    for (int i = 0; i < befehl.neue().size(); i++) {
+      var bezeichnung = befehl.neue().get(i).bezeichnung();
+      starts[i] = flach.indexOf(bezeichnung, suchAb);
+      if (starts[i] < 0) {
+        return manuell(befehl, "Die Überschrift zu „" + bezeichnung + "“ fehlt im Zitat.");
+      }
+      suchAb = starts[i] + bezeichnung.length();
+    }
+    var neueGliederungen = new ArrayList<Gliederung>();
+    for (int i = 0; i < befehl.neue().size(); i++) {
+      var bezeichnung = befehl.neue().get(i).bezeichnung();
+      int titelVon = starts[i] + bezeichnung.length();
+      int titelBis = i + 1 < starts.length ? starts[i + 1] : flach.length();
+      var titel = flach.substring(titelVon, titelBis).strip();
+      neueGliederungen.add(new Gliederung(bezeichnung, titel.isEmpty() ? null : titel));
+    }
+    var ziel = neueGliederungen.get(neueGliederungen.size() - 1);
+
+    if (!befehl.ersetzte().isEmpty()) {
+      // Ersetzungsform: die bisherigen Einheiten weichen den neuen.
+      var indizes = new ArrayList<Integer>();
+      for (var pfad : befehl.ersetzte()) {
+        int idx = findeGliederung(gliederungen, List.copyOf(pfad));
+        if (idx < 0) {
+          return manuell(
+              befehl,
+              "Gliederungseinheit nicht gefunden: "
+                  + pfad.get(pfad.size() - 1).bezeichnung());
+        }
+        indizes.add(idx);
+      }
+      var alte = indizes.stream().map(gliederungen::get).collect(java.util.stream.Collectors.toSet());
+      int einfuegePos = java.util.Collections.min(indizes);
+      indizes.sort(java.util.Comparator.reverseOrder());
+      for (int idx : indizes) {
+        gliederungen.remove(idx);
+      }
+      gliederungen.addAll(einfuegePos, neueGliederungen);
+      for (int k = 0; k < normen.size(); k++) {
+        var g = normen.get(k).gliederung();
+        if (g != null && alte.contains(g)) {
+          normen.set(k, normen.get(k).mitGliederung(ziel));
+        }
+      }
+      return angewandt(befehl, neueGliederungen.stream().map(Gliederung::bezeichnung).toList());
+    }
+
+    // Einfügeform: hinter dem Anker-§.
+    var aufloesung = loeseNormAuf(normen, befehl.stelle());
+    if (aufloesung.fehler() != null) {
+      return manuell(befehl, aufloesung.fehler());
+    }
+    var anker = normen.get(aufloesung.normIndex());
+    int gliederungsPos =
+        anker.gliederung() != null ? gliederungen.indexOf(anker.gliederung()) + 1 : gliederungen.size();
+    if (gliederungsPos == 0) {
+      gliederungsPos = gliederungen.size();
+    }
+    gliederungen.addAll(gliederungsPos, neueGliederungen);
+    int normPos = aufloesung.normIndex() + 1;
+    if (normPos < normen.size()) {
+      // Der zusammenhängende Block mit unveränderter bisheriger Gliederung wird umgehängt;
+      // spätere Überschriften-Befehle ordnen ihre Abschnitte ihrerseits neu zu.
+      var bisherige = normen.get(normPos).gliederung();
+      for (int k = normPos;
+          k < normen.size() && java.util.Objects.equals(normen.get(k).gliederung(), bisherige);
+          k++) {
+        normen.set(k, normen.get(k).mitGliederung(ziel));
+      }
+    }
+    return angewandt(befehl, neueGliederungen.stream().map(Gliederung::bezeichnung).toList());
+  }
+
+  /**
    * Findet die Gliederungseinheit zum Pfad („Teil 3 Abschnitt 2“): jede Ebene wird per Bezeichnung
    * innerhalb des Kennzahl-Präfixes der übergeordneten Ebene aufgelöst.
    */
@@ -170,7 +290,7 @@ public final class BefehlAnwender {
       gefunden = -1;
       for (int i = 0; i < gliederungen.size(); i++) {
         var g = gliederungen.get(i);
-        if (g.bezeichnung().equals(einheit.bezeichnung())
+        if (kanonischeBezeichnung(g.bezeichnung()).equals(kanonischeBezeichnung(einheit.bezeichnung()))
             && (g.kennzahl() == null || g.kennzahl().startsWith(praefix))) {
           gefunden = i;
           break;
@@ -185,6 +305,11 @@ public final class BefehlAnwender {
       }
     }
     return gefunden;
+  }
+
+  /** Normalisiert Gliederungsbezeichnungen: „2. Abschnitt“ und „Abschnitt 2“ sind dieselbe. */
+  static String kanonischeBezeichnung(String bezeichnung) {
+    return bezeichnung.strip().replaceFirst("^(\\d+[a-z]?)\\.\\s+(\\S+)$", "$2 $1");
   }
 
   // --- Wortweise Textoperationen -------------------------------------------------------------
@@ -299,7 +424,7 @@ public final class BefehlAnwender {
       return angewandt(befehl, norm.enbez());
     }
 
-    if (nurParagraph(stelle)) {
+    if (nurNorm(stelle)) {
       var aufloesung = loeseNormAuf(normen, stelle);
       if (aufloesung.fehler() != null) {
         return manuell(befehl, aufloesung.fehler());
@@ -391,21 +516,25 @@ public final class BefehlAnwender {
         }
         yield wendeSatzBereichsErsetzungAn(normen, befehl);
       }
-      case NUMMER, BUCHSTABE ->
-          bearbeiteBereich(
-              normen,
-              befehl,
-              (text, bereich) -> {
-                var einrueckung = einrueckungVon(text, bereich.von());
-                var ersatz =
-                    normalisiereZitatText(befehl.text())
-                        .lines()
-                        .map(zeile -> einrueckung + zeile.strip())
-                        .reduce((a, b) -> a + "\n" + b)
-                        .orElse("");
-                return TextErgebnis.ok(
-                    text.substring(0, bereich.von()) + ersatz + text.substring(bereich.bis()));
-              });
+      case NUMMER, BUCHSTABE -> {
+        if (befehl.bisStelle() != null) {
+          yield wendeZeilenBereichsErsetzungAn(normen, befehl);
+        }
+        yield bearbeiteBereich(
+            normen,
+            befehl,
+            (text, bereich) -> {
+              var einrueckung = einrueckungVon(text, bereich.von());
+              var ersatz =
+                  normalisiereZitatText(befehl.text())
+                      .lines()
+                      .map(zeile -> einrueckung + zeile.strip())
+                      .reduce((a, b) -> a + "\n" + b)
+                      .orElse("");
+              return TextErgebnis.ok(
+                  text.substring(0, bereich.von()) + ersatz + text.substring(bereich.bis()));
+            });
+      }
       case PARAGRAPH -> {
         // „§ 71 wird durch die folgenden §§ 71 bis 71p ersetzt: „…““ — der adressierte §-Bereich
         // wird entfernt und durch die Paragraphen des Blocks ersetzt.
@@ -476,6 +605,51 @@ public final class BefehlAnwender {
             + befehl.text().strip().replaceAll("\\s+", " ")
             + text.substring(bis);
     absaetze.set(f1.absatzIndex(), absatz.mitText(neu));
+    normen.set(f1.normIndex(), norm.mitAbsaetzen(absaetze));
+    return angewandt(befehl, norm.enbez());
+  }
+
+  /**
+   * Ersetzt einen zusammenhängenden Nummern-/Buchstaben-Bereich („Nummer 3 bis 6 wird durch die
+   * folgenden Nummern 3 und 4 ersetzt“) durch den zitierten Block: vom Zeilenanfang der ersten bis
+   * zum Zeilenende der letzten Einheit (beide im selben Absatz derselben Norm).
+   */
+  private static AngewandteAenderung wendeZeilenBereichsErsetzungAn(
+      List<Norm> normen, StrukturErsetzung befehl) {
+    var e1 = StellenAufloeser.aufloese(gesetzAus(normen), befehl.stelle());
+    if (e1 instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
+      return manuell(befehl, nicht.begruendung());
+    }
+    var e2 = StellenAufloeser.aufloese(gesetzAus(normen), befehl.bisStelle());
+    if (e2 instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
+      return manuell(befehl, nicht.begruendung());
+    }
+    var f1 = ((StellenAufloeser.Ergebnis.Gefunden) e1).fundstelle();
+    var f2 = ((StellenAufloeser.Ergebnis.Gefunden) e2).fundstelle();
+    if (f1.normIndex() != f2.normIndex()
+        || f1.absatzIndex() == null
+        || !f1.absatzIndex().equals(f2.absatzIndex())
+        || f1.bereich() == null
+        || f2.bereich() == null) {
+      return manuell(befehl, "Ersetzungsbereich liegt nicht in einem einzigen Absatz.");
+    }
+    int von = f1.bereich().von();
+    int bis = f2.bereich().bis();
+    if (bis < von) {
+      return manuell(befehl, "Ersetzungsbereich ist leer oder absteigend.");
+    }
+    var norm = normen.get(f1.normIndex());
+    var absaetze = new ArrayList<>(norm.absaetze());
+    var absatz = absaetze.get(f1.absatzIndex());
+    var text = absatz.text();
+    var einrueckung = einrueckungVon(text, von);
+    var ersatz =
+        normalisiereZitatText(befehl.text())
+            .lines()
+            .map(zeile -> einrueckung + zeile.strip())
+            .reduce((a, b) -> a + "\n" + b)
+            .orElse("");
+    absaetze.set(f1.absatzIndex(), absatz.mitText(text.substring(0, von) + ersatz + text.substring(bis)));
     normen.set(f1.normIndex(), norm.mitAbsaetzen(absaetze));
     return angewandt(befehl, norm.enbez());
   }
@@ -557,11 +731,18 @@ public final class BefehlAnwender {
               (text, bereich) -> {
                 var einrueckung = einrueckungVon(text, bereich.von());
                 int position = befehl.vorher() ? bereich.von() : bereich.bis();
-                var zeile = einrueckung + befehl.text().strip().replaceAll("\\s+", " ");
+                // Der Einfügeblock darf mehrere Einheiten enthalten („die Nummern 4a bis 4c“);
+                // jede Aufzählungszeile des Zitats bleibt eine eigene Zeile.
+                var block =
+                    normalisiereZitatText(befehl.text())
+                        .lines()
+                        .map(zeile -> einrueckung + zeile.strip())
+                        .reduce((a, b) -> a + "\n" + b)
+                        .orElse("");
                 return TextErgebnis.ok(
                     befehl.vorher()
-                        ? text.substring(0, position) + zeile + "\n" + text.substring(position)
-                        : text.substring(0, position) + "\n" + zeile + text.substring(position));
+                        ? text.substring(0, position) + block + "\n" + text.substring(position)
+                        : text.substring(0, position) + "\n" + block + text.substring(position));
               });
     };
   }
@@ -588,11 +769,17 @@ public final class BefehlAnwender {
           bearbeiteText(
               normen,
               befehl,
-              text ->
-                  TextErgebnis.ok(
-                      text.stripTrailing()
-                          + "\n  "
-                          + befehl.text().strip().replaceAll("\\s+", " ")));
+              text -> {
+                // Auch Blöcke mehrerer Einheiten („Die folgenden Nummern 9 bis 11 werden
+                // angefügt“): jede Aufzählungszeile des Zitats bleibt eine eigene Zeile.
+                var block =
+                    normalisiereZitatText(befehl.text())
+                        .lines()
+                        .map(zeile -> "  " + zeile.strip())
+                        .reduce((a, b) -> a + "\n" + b)
+                        .orElse("");
+                return TextErgebnis.ok(text.stripTrailing() + "\n" + block);
+              });
       case PARAGRAPH -> manuell(befehl, "Anfügen ganzer Paragraphen wird nicht unterstützt.");
     };
   }
@@ -618,14 +805,15 @@ public final class BefehlAnwender {
       return manuell(befehl, "Absatz (" + nummer + ") nicht gefunden.");
     }
 
-    if (nurParagraph(stelle)) {
+    if (nurNorm(stelle)) {
       var aufloesung = loeseNormAuf(normen, stelle);
       if (aufloesung.fehler() != null) {
         return manuell(befehl, aufloesung.fehler());
       }
       var norm = normen.get(aufloesung.normIndex());
       if (norm.weggefallen()) {
-        return manuell(befehl, norm.enbez() + " ist bereits weggefallen.");
+        // Idempotent: Die Aufhebung einer bereits weggefallenen Norm ist bereits vollzogen.
+        return angewandt(befehl, norm.enbez());
       }
       normen.set(aufloesung.normIndex(), norm.alsWeggefallen());
       return angewandt(befehl, norm.enbez());
@@ -786,6 +974,24 @@ public final class BefehlAnwender {
    */
   private static AngewandteAenderung bearbeiteText(
       List<Norm> normen, Aenderungsbefehl befehl, TextOperation operation) {
+    // „In der Überschrift …“: die Operation wirkt auf den Titel der Norm, nicht auf ihren Text.
+    if (befehl.stelle().betrifftUeberschrift()) {
+      var aufloesung = loeseNormAuf(normen, befehl.stelle());
+      if (aufloesung.fehler() != null) {
+        return manuell(befehl, aufloesung.fehler());
+      }
+      var norm = normen.get(aufloesung.normIndex());
+      if (norm.titel() == null) {
+        return manuell(befehl, norm.enbez() + " hat keine Überschrift.");
+      }
+      var titelErgebnis = operation.wende(norm.titel());
+      if (titelErgebnis.fehler() != null) {
+        return manuell(befehl, titelErgebnis.fehler());
+      }
+      normen.set(aufloesung.normIndex(), norm.mitTitel(titelErgebnis.text()));
+      return angewandt(befehl, norm.enbez());
+    }
+
     var ergebnis = StellenAufloeser.aufloese(gesetzAus(normen), befehl.stelle());
     if (ergebnis instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
       return manuell(befehl, nicht.begruendung());
@@ -873,10 +1079,14 @@ public final class BefehlAnwender {
   private record NormAufloesung(int normIndex, @Nullable String fehler) {}
 
   private static NormAufloesung loeseNormAuf(List<Norm> normen, Stelle stelle) {
-    if (stelle.paragraph().isEmpty()) {
+    String enbez;
+    if (stelle.paragraph().isPresent()) {
+      enbez = "§ " + stelle.paragraph().get().nummer();
+    } else if (stelle.anlagenEnbez().isPresent()) {
+      enbez = stelle.anlagenEnbez().get();
+    } else {
       return new NormAufloesung(-1, "Stelle nennt keinen Paragraphen: " + stelle.anzeigeText());
     }
-    var enbez = "§ " + stelle.paragraph().get().nummer();
     int index = StellenAufloeser.normIndex(gesetzAus(normen), enbez);
     if (index < 0) {
       return new NormAufloesung(-1, enbez + " existiert nicht im Gesetz.");
@@ -887,6 +1097,13 @@ public final class BefehlAnwender {
   private static boolean nurParagraph(Stelle stelle) {
     return stelle.komponenten().size() == 1
         && stelle.komponenten().get(0) instanceof Stelle.Paragraph;
+  }
+
+  /** Wahr, wenn die Stelle als Ganzes eine Norm meint: ein einzelner § oder ein Anhang/Anlage. */
+  private static boolean nurNorm(Stelle stelle) {
+    return stelle.komponenten().size() == 1
+        && (stelle.komponenten().get(0) instanceof Stelle.Paragraph
+            || stelle.anlagenEnbez().isPresent());
   }
 
   private static boolean feinsteIstAbsatz(Stelle stelle) {

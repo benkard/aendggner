@@ -11,6 +11,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Neufassung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Sammelbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Streichung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturEinfuegung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturErsetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Umnummerierung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WoerterEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortAnker;
@@ -222,8 +223,12 @@ class BefehlErkennerTest {
                 + " „§ 28a Besondere Schutzmaßnahmen“.",
             Stelle.LEER);
 
-    assertThat(befehl).containsInstanceOf(WoerterEinfuegung.class);
-    assertThat(befehl.orElseThrow().stelle().betrifftInhaltsuebersicht()).isTrue();
+    assertThat(befehl).containsInstanceOf(StrukturEinfuegung.class);
+    var einfuegung = (StrukturEinfuegung) befehl.orElseThrow();
+    assertThat(einfuegung.stelle().betrifftInhaltsuebersicht()).isTrue();
+    assertThat(einfuegung.stelle().anzeigeText()).isEqualTo("Inhaltsübersicht § 28");
+    assertThat(einfuegung.vorher()).isFalse();
+    assertThat(einfuegung.text()).isEqualTo("§ 28a Besondere Schutzmaßnahmen");
   }
 
   @Test
@@ -344,8 +349,11 @@ class BefehlErkennerTest {
             "Nach der Angabe zu § 9 wird folgende Angabe eingefügt: „§ 9a" + " Länderregelung“.",
             kontext);
 
-    assertThat(befehl).containsInstanceOf(WoerterEinfuegung.class);
-    assertThat(befehl.orElseThrow().stelle().betrifftInhaltsuebersicht()).isTrue();
+    assertThat(befehl).containsInstanceOf(StrukturEinfuegung.class);
+    var einfuegung = (StrukturEinfuegung) befehl.orElseThrow();
+    assertThat(einfuegung.stelle().betrifftInhaltsuebersicht()).isTrue();
+    assertThat(einfuegung.stelle().anzeigeText()).isEqualTo("Inhaltsübersicht § 9");
+    assertThat(einfuegung.text()).isEqualTo("§ 9a Länderregelung");
   }
 
   @Test
@@ -756,5 +764,266 @@ class BefehlErkennerTest {
     assertThat(teile).hasSize(2).allMatch(t -> t instanceof Ersetzung);
     assertThat(teile).extracting(t -> ((Ersetzung) t).alt()).containsExactly("a", "c");
     assertThat(teile).extracting(t -> ((Ersetzung) t).neu()).containsExactly("b", "d");
+  }
+  // --- Welle-4-Formen --------------------------------------------------------------------------
+
+  @Test
+  void erkenntAngabenBereichsErsetzungInDerInhaltsuebersicht() {
+    var kontext = new Stelle(List.of(new Stelle.Inhaltsuebersicht()));
+    var befehl =
+        erkenne(
+            "Die Angaben zu den §§ 34 bis § 45 werden durch die folgenden Angaben ersetzt:"
+                + " „§ 34 (weggefallen) § 35 (weggefallen)“.",
+            kontext);
+
+    assertThat(befehl).containsInstanceOf(StrukturErsetzung.class);
+    var ersetzung = (StrukturErsetzung) befehl.orElseThrow();
+    assertThat(ersetzung.stelle().anzeigeText()).isEqualTo("Inhaltsübersicht § 34");
+    assertThat(ersetzung.bisStelle().anzeigeText()).isEqualTo("Inhaltsübersicht § 45");
+  }
+
+  @Test
+  void erkenntAngabeStreichungInDerInhaltsuebersicht() {
+    var befehl =
+        erkenne("In der Inhaltsübersicht wird die Angabe zu § 5a gestrichen.", Stelle.LEER);
+
+    assertThat(befehl).containsInstanceOf(Aufhebung.class);
+    assertThat(befehl.orElseThrow().stelle().anzeigeText()).isEqualTo("Inhaltsübersicht § 5a");
+  }
+
+  @Test
+  void erkenntAngabeMitOrdinalerGliederung() {
+    var kontext = new Stelle(List.of(new Stelle.Inhaltsuebersicht()));
+    var befehl =
+        erkenne(
+            "Die Angabe zum zweiten Abschnitt wird wie folgt gefasst: „2. Abschnitt"
+                + " Koordinierung und epidemische Lage von nationaler Tragweite“.",
+            kontext);
+
+    assertThat(befehl).containsInstanceOf(Neufassung.class);
+    assertThat(befehl.orElseThrow().stelle().anzeigeText()).isEqualTo("Inhaltsübersicht Abschnitt 2");
+  }
+
+  @Test
+  void erkenntVoranstellung() {
+    var befehl =
+        erkenne(
+            "Der Nummer 1 wird folgende Nummer 1 vorangestellt: „1. eine Umwälzpumpe nach § 64"
+                + " Absatz 2 auszutauschen ist,“.",
+            new Stelle(List.of(new Stelle.Paragraph("64"))));
+
+    assertThat(befehl).containsInstanceOf(StrukturEinfuegung.class);
+    var einfuegung = (StrukturEinfuegung) befehl.orElseThrow();
+    assertThat(einfuegung.vorher()).isTrue();
+    assertThat(einfuegung.ebene()).isEqualTo(Ebene.NUMMER);
+    assertThat(einfuegung.stelle().anzeigeText()).isEqualTo("§ 64 Nummer 1");
+  }
+
+  @Test
+  void erkenntVoranstellungOhneAnker() {
+    var befehl =
+        erkenne(
+            "Folgende Nummer 1 wird vorangestellt: „1. einer vollziehbaren Anordnung nach § 5"
+                + " Absatz 2 Nummer 1 oder 2 zuwiderhandelt,“.",
+            Stelle.LEER);
+
+    assertThat(befehl).containsInstanceOf(StrukturEinfuegung.class);
+    assertThat(((StrukturEinfuegung) befehl.orElseThrow()).vorher()).isTrue();
+  }
+
+  @Test
+  void erkenntNummernBereichsErsetzungMitKardinalitaetswechsel() {
+    var befehl =
+        erkenne(
+            "Satz 1 Nummer 3 bis 6 wird durch die folgenden Nummern 3 und 4 ersetzt: 3. „ bei"
+                + " Wärmeverteilungs- und Warmwasserleitungen die Wärmeabgabe begrenzt ist und"
+                + " 4. die Anforderungen eingehalten werden.“.",
+            new Stelle(List.of(new Stelle.Paragraph("61"))));
+
+    assertThat(befehl).containsInstanceOf(StrukturErsetzung.class);
+    var ersetzung = (StrukturErsetzung) befehl.orElseThrow();
+    assertThat(ersetzung.ebene()).isEqualTo(Ebene.NUMMER);
+    assertThat(ersetzung.stelle().anzeigeText()).isEqualTo("§ 61 Satz 1 Nummer 3");
+    assertThat(ersetzung.bisStelle().anzeigeText()).isEqualTo("§ 61 Satz 1 Nummer 6");
+    assertThat(ersetzung.text()).startsWith("3. ");
+  }
+
+  @Test
+  void erkenntKommaMehrfachErsetzung() {
+    var befehl =
+        erkenne(
+            "In Satz 1 wird die Angabe „2025“ durch die Angabe „2030“, die Angabe „§ 50 Absatz 1"
+                + " in Verbindung mit § 48“ durch die Angabe „§ 38 Absatz 1 in Verbindung mit"
+                + " § 36“ und die Angabe „§ 50 Absatz 1“ durch die Angabe „§ 38 Absatz 1“"
+                + " ersetzt.",
+            new Stelle(List.of(new Stelle.Paragraph("109"))));
+
+    assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile).hasSize(3).allMatch(t -> t instanceof Ersetzung);
+    assertThat(((Ersetzung) teile.get(0)).alt()).isEqualTo("2025");
+    assertThat(((Ersetzung) teile.get(0)).neu()).isEqualTo("2030");
+  }
+
+  @Test
+  void erkenntMehrfachEinfuegepaare() {
+    var befehl =
+        erkenne(
+            "In Nummer 24 werden nach den Wörtern „einer Rechtsverordnung nach“ die Wörter"
+                + " „§ 5 Absatz 2 Nummer 4,“ und nach der Angabe „§ 23 Absatz 8 Satz 1“ ein"
+                + " Komma und die Angabe „§ 32 Satz 1“ eingefügt.",
+            new Stelle(List.of(new Stelle.Paragraph("73"))));
+
+    assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile).hasSize(2).allMatch(t -> t instanceof WoerterEinfuegung);
+    assertThat(((WoerterEinfuegung) teile.get(1)).woerter()).isEqualTo(", § 32 Satz 1");
+  }
+
+  @Test
+  void erkenntKommaUndWoerterVorDemPunktAmEnde() {
+    var befehl =
+        erkenne(
+            "In Absatz 3 Satz 1 wird vor dem Punkt am Ende ein Komma und werden die Wörter"
+                + " „oder wenn der Nachweis erfolgt ist“ eingefügt.",
+            new Stelle(List.of(new Stelle.Paragraph("8"))));
+
+    assertThat(befehl).containsInstanceOf(Ersetzung.class);
+    var ersetzung = (Ersetzung) befehl.orElseThrow();
+    assertThat(ersetzung.alt()).isEqualTo(".");
+    assertThat(ersetzung.neu()).isEqualTo(", oder wenn der Nachweis erfolgt ist.");
+    assertThat(ersetzung.amEnde()).isTrue();
+  }
+
+  @Test
+  void erkenntKoordinierteUmnummerierung() {
+    var befehl =
+        erkenne(
+            "Die bisherigen Absätze 6 und 7 werden die Absätze 1 und 2.",
+            new Stelle(List.of(new Stelle.Paragraph("5"))));
+
+    assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile).hasSize(2).allMatch(t -> t instanceof Umnummerierung);
+    // Absteigend: 7 → 2 zuerst, damit die Labels nicht kollidieren.
+    assertThat(teile.get(0).stelle().anzeigeText()).isEqualTo("§ 5 Absatz 7");
+  }
+
+  @Test
+  void erkenntVerbundMitUmnummerierungUndRueckbezug() {
+    var befehl =
+        erkenne(
+            "Die bisherige Nummer 1 wird Nummer 2 und in ihr werden die Wörter „§ 72 Absatz 1"
+                + " bis 3,“ durch die Wörter „Ablauf der Übergangsfristen,“ ersetzt.",
+            new Stelle(List.of(new Stelle.Paragraph("96"))));
+
+    assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile).hasSize(2);
+    assertThat(teile.get(0)).isInstanceOf(Umnummerierung.class);
+    assertThat(teile.get(1)).isInstanceOf(Ersetzung.class);
+    assertThat(teile.get(1).stelle().anzeigeText()).isEqualTo("§ 96 Nummer 2");
+  }
+
+  @Test
+  void erkenntVerbundMitUmnummerierungUndNeufassung() {
+    var befehl =
+        erkenne(
+            "Die bisherige Nummer 3 wird Nummer 4 und wird wie folgt gefasst: 4. „ die"
+                + " Abrechnungen und Bestätigungen nach § 96 Absatz 5 vorliegen.“",
+            new Stelle(List.of(new Stelle.Paragraph("96"))));
+
+    assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile.get(0)).isInstanceOf(Umnummerierung.class);
+    assertThat(teile.get(1)).isInstanceOf(Neufassung.class);
+    assertThat(((Neufassung) teile.get(1)).neuerText()).startsWith("4. ");
+  }
+
+  @Test
+  void erkenntParagraphAnfuegungNachAnker() {
+    var befehl =
+        erkenne(
+            "Nach § 114 wird folgender § 115 angefügt: „§ 115 Übergangsvorschriften für"
+                + " Geldbußen Text.“",
+            Stelle.LEER);
+
+    assertThat(befehl).containsInstanceOf(StrukturEinfuegung.class);
+    var einfuegung = (StrukturEinfuegung) befehl.orElseThrow();
+    assertThat(einfuegung.ebene()).isEqualTo(Ebene.PARAGRAPH);
+    assertThat(einfuegung.bezeichnung()).isEqualTo("115");
+  }
+
+  @Test
+  void erkenntAnkerloseAbsatzEinfuegung() {
+    var befehl =
+        erkenne(
+            "Folgender Absatz 2 wird eingefügt: „(2) In einem Wohngebäude gilt dies nicht.“",
+            new Stelle(List.of(new Stelle.Paragraph("72"))));
+
+    assertThat(befehl).containsInstanceOf(StrukturEinfuegung.class);
+    var einfuegung = (StrukturEinfuegung) befehl.orElseThrow();
+    assertThat(einfuegung.vorher()).isFalse();
+    assertThat(einfuegung.stelle().anzeigeText()).isEqualTo("§ 72 Absatz 1");
+  }
+
+  @Test
+  void erkenntNummernBlockAnfuegung() {
+    var befehl =
+        erkenne(
+            "Die folgenden Nummern 9 bis 11 werden angefügt: 9. „ Durchführung hydraulischer"
+                + " Abgleiche, 10. Einbau von Messausstattungen, 11. Sonstiges.“",
+            new Stelle(List.of(new Stelle.Paragraph("60"))));
+
+    assertThat(befehl).containsInstanceOf(Anfuegung.class);
+    var anfuegung = (Anfuegung) befehl.orElseThrow();
+    assertThat(anfuegung.ebene()).isEqualTo(Ebene.NUMMER);
+    assertThat(anfuegung.text()).startsWith("9. ");
+  }
+
+  @Test
+  void erkenntPunktErsetzungDurchFolgendeWoerter() {
+    var befehl =
+        erkenne(
+            "In Absatz 1 Satz 2 wird der Punkt am Ende durch folgende Wörter ersetzt: „, das"
+                + " heißt, wenn die Investitionen unangemessen sind.“",
+            new Stelle(List.of(new Stelle.Paragraph("102"))));
+
+    assertThat(befehl).containsInstanceOf(Ersetzung.class);
+    var ersetzung = (Ersetzung) befehl.orElseThrow();
+    assertThat(ersetzung.alt()).isEqualTo(".");
+    assertThat(ersetzung.amEnde()).isTrue();
+  }
+
+  @Test
+  void erkenntWortVoranstellungImVerbund() {
+    var befehl =
+        erkenne(
+            "In Buchstabe a werden die Wörter „des § 10“ durch die Wörter „der §§ 71 bis 71h“"
+                + " ersetzt, wird dem Wort „Anforderungen“ das Wort „dortigen“ vorangestellt und"
+                + " werden die Wörter „nach den §§ 35 bis 41“ gestrichen.",
+            new Stelle(List.of(new Stelle.Paragraph("105"))));
+
+    assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile).hasSize(3);
+    assertThat(teile.get(1)).isInstanceOf(WoerterEinfuegung.class);
+    assertThat(((WoerterEinfuegung) teile.get(1)).woerter()).isEqualTo("dortigen");
+    assertThat(teile.get(2)).isInstanceOf(Streichung.class);
+  }
+
+  @Test
+  void erkenntErsetzungMitPositionsanker() {
+    var befehl =
+        erkenne(
+            "In Nummer 2 werden nach den Wörtern „jeweils auch in Verbindung mit“ die Wörter"
+                + " „einer Rechtsverordnung nach § 14,“ durch die Wörter „§ 14 Absatz 8,“"
+                + " ersetzt.",
+            new Stelle(List.of(new Stelle.Paragraph("73"))));
+
+    assertThat(befehl).containsInstanceOf(Ersetzung.class);
+    var ersetzung = (Ersetzung) befehl.orElseThrow();
+    assertThat(ersetzung.alt()).isEqualTo("einer Rechtsverordnung nach § 14,");
+    assertThat(ersetzung.neu()).isEqualTo("§ 14 Absatz 8,");
   }
 }

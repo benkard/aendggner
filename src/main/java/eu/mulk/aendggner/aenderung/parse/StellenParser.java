@@ -33,6 +33,8 @@ public final class StellenParser {
           "von",
           "zu",
           "zur",
+          "zum",
+          "im",
           "neue",
           "neuen",
           "bisherige",
@@ -125,6 +127,14 @@ public final class StellenParser {
         case "Inhaltsübersicht" -> komponenten.add(new Stelle.Inhaltsuebersicht());
         case "Überschrift" -> komponenten.add(new Stelle.Ueberschrift());
         default -> {
+          // Ordinal vor der Gliederungsart: „zum zweiten Abschnitt“, „des 2. Abschnitts“.
+          var ordinal = ordinalZahl(wort);
+          var art = ordinal != null ? naechstesWort(woerter, i) : null;
+          if (art != null && istGliederungsArt(art)) {
+            komponenten.add(new Stelle.Gliederungseinheit(gliederungsArt(art), ordinal));
+            i++;
+            continue;
+          }
           return Optional.empty();
         }
       }
@@ -221,8 +231,19 @@ public final class StellenParser {
   private static @Nullable List<Stelle> entfalteBereich(String segment, @Nullable Stelle vorige) {
     var ohneArtikel = segment.strip().replaceFirst("^(?:[Dd]ie|[Dd]er|[Dd]as|[Dd]en) ", "");
     var m = BEREICH.matcher(ohneArtikel);
+    var praefixKomponenten = new ArrayList<Stelle.Komponente>();
     if (!m.matches()) {
-      return null;
+      // Bereich mit vorangestellter Stelle („Satz 1 Nummer 3 bis 6“): Präfix separat parsen.
+      var amEnde = BEREICH.matcher(ohneArtikel);
+      if (!amEnde.find() || amEnde.end() != ohneArtikel.length() || amEnde.start() == 0) {
+        return null;
+      }
+      var praefix = parse(ohneArtikel.substring(0, amEnde.start()).strip());
+      if (praefix.isEmpty()) {
+        return List.of();
+      }
+      praefixKomponenten.addAll(praefix.get().komponenten());
+      m = amEnde;
     }
     var art = m.group(1);
     var von = m.group(2);
@@ -232,7 +253,7 @@ public final class StellenParser {
     if (!numerisch && !alpha) {
       return List.of();
     }
-    var praefix = new ArrayList<Stelle.Komponente>();
+    var praefix = new ArrayList<Stelle.Komponente>(praefixKomponenten);
     Stelle.Komponente muster;
     if (art != null) {
       muster = komponenteFuerArt(art, von);
@@ -240,6 +261,10 @@ public final class StellenParser {
         return List.of();
       }
     } else {
+      if (!praefixKomponenten.isEmpty()) {
+        // Präfix ohne Bereichsart („Satz 1 3 bis 6“) ist nicht deutbar.
+        return List.of();
+      }
       // Bloßer Bereich „1 bis 3“: Art und Präfix von der vorigen Stelle erben.
       if (vorige == null || vorige.komponenten().isEmpty()) {
         return List.of();
@@ -336,6 +361,41 @@ public final class StellenParser {
     var komponenten = new ArrayList<>(vorKomp.subList(0, ankerIndex));
     komponenten.addAll(segment.komponenten());
     return Optional.of(new Stelle(komponenten));
+  }
+
+  private static final java.util.Map<String, String> ORDINALE =
+      java.util.Map.ofEntries(
+          java.util.Map.entry("erste", "1"),
+          java.util.Map.entry("zweite", "2"),
+          java.util.Map.entry("dritte", "3"),
+          java.util.Map.entry("vierte", "4"),
+          java.util.Map.entry("fünfte", "5"),
+          java.util.Map.entry("sechste", "6"),
+          java.util.Map.entry("siebte", "7"),
+          java.util.Map.entry("siebente", "7"),
+          java.util.Map.entry("achte", "8"),
+          java.util.Map.entry("neunte", "9"),
+          java.util.Map.entry("zehnte", "10"),
+          java.util.Map.entry("elfte", "11"),
+          java.util.Map.entry("zwölfte", "12"));
+
+  /**
+   * Liest ein Ordinal („zweiten“, „2.“) als Nummer („2“); {@code null}, wenn das Wort keines ist.
+   */
+  private static @Nullable String ordinalZahl(String wort) {
+    if (wort.matches("\\d+\\.")) {
+      return wort.substring(0, wort.length() - 1);
+    }
+    var klein = wort.toLowerCase().replaceFirst("[nm]$", "");
+    return ORDINALE.get(klein);
+  }
+
+  private static boolean istGliederungsArt(String wort) {
+    return switch (wort) {
+      case "Teil", "Teils", "Buch", "Buches", "Kapitel", "Kapitels", "Abschnitt", "Abschnitts",
+          "Unterabschnitt", "Unterabschnitts", "Anlage", "Anlagen" -> true;
+      default -> false;
+    };
   }
 
   /** Normalisiert Genitiv-/Pluralformen der Gliederungsart auf den Nominativ Singular. */

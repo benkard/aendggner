@@ -30,4 +30,8 @@ public record Gesetz(
   public Gesetz mitGliederungen(List<Gliederung> neueGliederungen) {
     return new Gesetz(jurabk, langue, kurzue, normen, neueGliederungen);
   }
+
+  public Gesetz mitLangue(String neuerLangtitel) {
+    return new Gesetz(jurabk, neuerLangtitel, kurzue, normen, gliederungen);
+  }
 }

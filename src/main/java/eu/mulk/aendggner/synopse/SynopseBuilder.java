@@ -53,13 +53,22 @@ public final class SynopseBuilder {
     return new Synopse(alt, neu, eintraege, gliederungsAenderungen(alt, neu), manuell, parseWarnungen);
   }
 
-  /** Paart die Gliederungseinheiten nach Kennzahl und sammelt die mit geänderter Überschrift. */
+  /**
+   * Paart die Gliederungseinheiten nach Kennzahl und sammelt die mit geänderter Überschrift.
+   * Neu eingefügte Einheiten (ohne Kennzahl und ohne Alt-Pendant) erscheinen mit {@code alt ==
+   * null}.
+   */
   private static List<Synopse.GliederungsAenderung> gliederungsAenderungen(Gesetz alt, Gesetz neu) {
     var aenderungen = new ArrayList<Synopse.GliederungsAenderung>();
     for (var neuG : neu.gliederungen()) {
+      if (neuG.kennzahl() == null) {
+        if (!alt.gliederungen().contains(neuG)) {
+          aenderungen.add(new Synopse.GliederungsAenderung(null, neuG));
+        }
+        continue;
+      }
       alt.gliederungen().stream()
           .filter(a -> java.util.Objects.equals(a.kennzahl(), neuG.kennzahl()))
-          .filter(a -> a.kennzahl() != null)
           .findFirst()
           .filter(a -> !java.util.Objects.equals(a.titel(), neuG.titel()))
           .ifPresent(a -> aenderungen.add(new Synopse.GliederungsAenderung(a, neuG)));

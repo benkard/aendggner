@@ -35,6 +35,10 @@ public record Norm(
     return new Norm(neuerEnbez, titel, gliederung, absaetze, weggefallen);
   }
 
+  public Norm mitGliederung(@Nullable Gliederung neueGliederung) {
+    return new Norm(enbez, titel, neueGliederung, absaetze, weggefallen);
+  }
+
   public Norm alsWeggefallen() {
     return new Norm(enbez, titel, gliederung, List.of(new Absatz(null, "(weggefallen)")), true);
   }

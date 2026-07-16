@@ -16,8 +16,8 @@ public record Synopse(
     List<AngewandteAenderung> manuellZuPruefen,
     List<String> warnungen) {
 
-  /** Eine geänderte Gliederungs-Überschrift (Teil/Abschnitt/…). */
-  public record GliederungsAenderung(Gliederung alt, Gliederung neu) {}
+  /** Eine geänderte Gliederungs-Überschrift (Teil/Abschnitt/…); {@code alt == null} bei neuen. */
+  public record GliederungsAenderung(@Nullable Gliederung alt, Gliederung neu) {}
 
   public enum Aenderungsart {
     UNVERAENDERT,

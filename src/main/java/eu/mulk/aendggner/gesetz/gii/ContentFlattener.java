@@ -16,7 +16,7 @@ final class ContentFlattener {
 
   static String flatten(Element p) {
     var sb = new StringBuilder();
-    flattenKinder(p, sb, 0);
+    flattenKnoten(p, sb, 0);
     return normalisiere(sb.toString());
   }
 
@@ -40,6 +40,7 @@ final class ContentFlattener {
       case "DL" -> flattenListe(element, sb, einrueckung);
       case "pre" -> sb.append(element.getTextContent());
       case "table" -> flattenTabelle(element, sb);
+      case "TOC" -> flattenToc(element, sb);
       default -> flattenKinder(element, sb, einrueckung);
     }
   }
@@ -68,6 +69,45 @@ final class ContentFlattener {
         default -> {}
       }
     }
+  }
+
+  /**
+   * Flattet ein {@code <TOC>}-Element (Inhaltsübersicht): {@code <Ident>}/{@code <Title>}-Paare
+   * werden zu Überschriftszeilen („Teil 1 | Allgemeiner Teil“), Tabellen zu Angabe-Zeilen.
+   */
+  private static void flattenToc(Element toc, StringBuilder sb) {
+    String ident = null;
+    for (var kind = toc.getFirstChild(); kind != null; kind = kind.getNextSibling()) {
+      if (kind.getNodeType() != Node.ELEMENT_NODE) {
+        continue;
+      }
+      var kindElement = (Element) kind;
+      switch (kindElement.getNodeName()) {
+        case "Ident" -> {
+          if (ident != null && !ident.isEmpty()) {
+            tocZeile(sb, ident);
+          }
+          ident = kindElement.getTextContent().strip();
+        }
+        case "Title" -> {
+          var titel = kindElement.getTextContent().strip();
+          tocZeile(sb, ident != null && !ident.isEmpty() ? ident + " | " + titel : titel);
+          ident = null;
+        }
+        case "table" -> flattenTabelle(kindElement, sb);
+        case "TOC" -> flattenToc(kindElement, sb);
+        default -> {}
+      }
+    }
+    if (ident != null && !ident.isEmpty()) {
+      tocZeile(sb, ident);
+    }
+  }
+
+  private static void tocZeile(StringBuilder sb, String zeile) {
+    neueZeile(sb);
+    sb.append(zeile);
+    sb.append('\n');
   }
 
   private static void flattenTabelle(Element table, StringBuilder sb) {

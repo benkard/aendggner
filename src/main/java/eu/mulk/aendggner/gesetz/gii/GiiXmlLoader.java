@@ -100,7 +100,7 @@ public final class GiiXmlLoader {
       return absaetze;
     }
 
-    for (var p : kindElemente(content, "P")) {
+    for (var p : kindElemente(content, "P", "TOC")) {
       var geflattet = ContentFlattener.flatten(p).strip();
       if (geflattet.isEmpty()) {
         continue;
@@ -132,10 +132,11 @@ public final class GiiXmlLoader {
     }
   }
 
-  private static Iterable<Element> kindElemente(Element parent, String name) {
+  private static Iterable<Element> kindElemente(Element parent, String... namen) {
     var ergebnis = new ArrayList<Element>();
     for (var kind = parent.getFirstChild(); kind != null; kind = kind.getNextSibling()) {
-      if (kind.getNodeType() == Node.ELEMENT_NODE && kind.getNodeName().equals(name)) {
+      if (kind.getNodeType() == Node.ELEMENT_NODE
+          && java.util.Arrays.asList(namen).contains(kind.getNodeName())) {
         ergebnis.add((Element) kind);
       }
     }

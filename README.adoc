@@ -91,11 +91,26 @@ Bereichs- und Koordinationsziele („Die Absätze 8 und 9 werden durch die
 folgenden Absätze 8 bis 10 ersetzt“), strukturelle Streichungen ganzer
 Einheiten („§ 9 wird gestrichen“), §- und Gliederungs-Umnummerierungen
 („§ 9a wird zu § 9“, „Der bisherige Abschnitt 2 wird zu Abschnitt 3“),
-das Einfügen/Ersetzen ganzer §-Blöcke sowie Chapeau-Lokatoren („Im
-Satzteil vor Nummer 1 …“). Im amtlichen BGBl-Format werden damit
-praktisch alle Befehle typisiert; Entwürfe (Drucksachen) enthalten
-vereinzelt Sonderfälle, die mit Begründung im Abschnitt *Manuell prüfen*
-der Synopse landen und niemals stillschweigend verworfen werden.
+das Einfügen/Ersetzen ganzer §-Blöcke, Chapeau-Lokatoren („Im
+Satzteil vor Nummer 1 …“), Änderungen an Anhängen und Anlagen („Der
+Anhang wird wie folgt geändert: … Nach Nummer 2 wird die folgende
+Nummer 2a eingefügt“), Angabe-Befehle auf die Inhaltsübersicht (gefasst,
+ersetzt, eingefügt, gestrichen — sie werden auf die
+Inhaltsübersichts-Norm angewandt), das Einfügen und Ersetzen von
+Gliederungs-Überschriften („Nach § 33 werden die folgenden Überschriften
+zu Teil 3 … eingefügt“), Voranstellungen, Mehrfach-Ersetzungs- und
+-Einfügepaare, Verbünde aus Umnummerierung und Folgeänderung („§ 50 wird
+zu § 38 und wird wie folgt geändert“) sowie die Neufassung der
+Gesetzesüberschrift. Die PDF-Aufbereitung toleriert dabei
+Drucksachen-Artefakte (Seitenköpfe und -füße, Vorabfassungs-Wasserzeichen,
+vertauschte oder gerade Anführungszeichen, verklebte Wortgrenzen) und
+bestimmt die Brotschrift seitenweise, sodass auch Ministeriumsentwürfe
+mit gemischten Layouts vollständig extrahiert werden. Auf den
+Beispieldaten werden damit alle Befehle der BGBl-Fassungen und der
+aktuellen Entwürfe angewandt (UWG/AGG/ProdHaftG: 0 manuell); was
+unsicher bleibt — etwa Befehle gegen eine ältere Gesetzesfassung, deren
+Zieltext nicht mehr existiert — landet mit Begründung im Abschnitt
+*Manuell prüfen* der Synopse und wird niemals stillschweigend verworfen.
 
 
 == Running the Tests

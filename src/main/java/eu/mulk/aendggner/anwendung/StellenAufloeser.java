@@ -40,6 +40,8 @@ final class StellenAufloeser {
       enbez = "Inhaltsübersicht";
     } else if (stelle.paragraph().isPresent()) {
       enbez = "§ " + stelle.paragraph().get().nummer();
+    } else if (stelle.anlagenEnbez().isPresent()) {
+      enbez = stelle.anlagenEnbez().get();
     } else {
       return new Ergebnis.NichtGefunden("Stelle nennt keinen Paragraphen: " + stelle.anzeigeText());
     }
@@ -59,9 +61,8 @@ final class StellenAufloeser {
       }
     }
 
-    // 3. Feinste Komponente (Buchstabe > Nummer > Satz) als Textbereich auflösen.
-    var feinste = feinsteKomponente(stelle);
-    if (feinste == null) {
+    // 3. Feinere Komponenten (Satz bzw. Nummer/Buchstabe-Kette) als Textbereich auflösen.
+    if (!hatFeinKomponente(stelle)) {
       return new Ergebnis.Gefunden(new Fundstelle(normIndex, absatzIndex, null));
     }
 
@@ -69,18 +70,36 @@ final class StellenAufloeser {
       if (norm.absaetze().size() == 1) {
         absatzIndex = 0;
       } else {
-        return new Ergebnis.NichtGefunden(
-            enbez
-                + " hat "
-                + norm.absaetze().size()
-                + " Absätze; „"
-                + stelle.anzeigeText()
-                + "“ ist ohne Absatzangabe nicht eindeutig.");
+        // Ohne Absatzangabe (z.B. „Anhang Nummer 2“): die Komponente muss norm-weit in genau
+        // einem Absatz auffindbar sein.
+        Integer trefferAbsatz = null;
+        SatzTeiler.SatzBereich trefferBereich = null;
+        for (int i = 0; i < norm.absaetze().size(); i++) {
+          var kandidat = loeseFeinKomponentenAuf(stelle, norm.absaetze().get(i).text());
+          if (kandidat != null) {
+            if (trefferAbsatz != null) {
+              return new Ergebnis.NichtGefunden(
+                  enbez
+                      + " hat "
+                      + norm.absaetze().size()
+                      + " Absätze; „"
+                      + stelle.anzeigeText()
+                      + "“ ist ohne Absatzangabe nicht eindeutig.");
+            }
+            trefferAbsatz = i;
+            trefferBereich = kandidat;
+          }
+        }
+        if (trefferAbsatz == null) {
+          return new Ergebnis.NichtGefunden(
+              "„" + stelle.anzeigeText() + "“ ist im Text von " + enbez + " nicht auffindbar.");
+        }
+        return new Ergebnis.Gefunden(new Fundstelle(normIndex, trefferAbsatz, trefferBereich));
       }
     }
 
     var text = norm.absaetze().get(absatzIndex).text();
-    var bereich = loeseKomponenteAuf(feinste, text);
+    var bereich = loeseFeinKomponentenAuf(stelle, text);
     if (bereich == null) {
       return new Ergebnis.NichtGefunden(
           "„" + stelle.anzeigeText() + "“ ist im Text von " + enbez + " nicht auffindbar.");
@@ -112,63 +131,98 @@ final class StellenAufloeser {
     return -1;
   }
 
-  private static Stelle.@Nullable Komponente feinsteKomponente(Stelle stelle) {
-    Stelle.Komponente feinste = null;
+  private static boolean hatFeinKomponente(Stelle stelle) {
+    return stelle.komponenten().stream()
+        .anyMatch(
+            k ->
+                k instanceof Stelle.SatzNr
+                    || k instanceof Stelle.NummerNr
+                    || k instanceof Stelle.BuchstabeNr);
+  }
+
+  /**
+   * Löst die feineren Komponenten der Stelle zu einem Textbereich auf. Nummern/Buchstaben werden
+   * als Kette verschachtelt gesucht („Nummer 31 Buchstabe b“: erst der Block der Nummer 31, darin
+   * der Buchstabe b) — der Bereich einer Einheit umfasst ihre Aufzählungszeile samt der tiefer
+   * eingerückten Kindzeilen. Ohne Nummern/Buchstaben zählt eine Satzangabe. Liefert {@code null},
+   * wenn ein Glied nicht oder nicht eindeutig auffindbar ist.
+   */
+  private static SatzTeiler.@Nullable SatzBereich loeseFeinKomponentenAuf(
+      Stelle stelle, String text) {
+    SatzTeiler.SatzBereich bereich = null;
+    boolean zeilenKette = false;
     for (var komponente : stelle.komponenten()) {
-      switch (komponente) {
-        case Stelle.SatzNr s -> feinste = besser(feinste, s, 1);
-        case Stelle.NummerNr n -> feinste = besser(feinste, n, 2);
-        case Stelle.BuchstabeNr b -> feinste = besser(feinste, b, 3);
-        default -> {}
+      String labelRegex =
+          switch (komponente) {
+            case Stelle.NummerNr nummer -> Pattern.quote(nummer.nummer()) + "\\.";
+            case Stelle.BuchstabeNr buchstabe -> Pattern.quote(buchstabe.kennung()) + "\\)";
+            default -> null;
+          };
+      if (labelRegex == null) {
+        continue;
       }
+      bereich =
+          zeilenBlock(
+              text, labelRegex, bereich != null ? bereich : new SatzTeiler.SatzBereich(0, text.length()));
+      if (bereich == null) {
+        return null;
+      }
+      zeilenKette = true;
     }
-    return feinste;
-  }
-
-  private static Stelle.Komponente besser(
-      Stelle.@Nullable Komponente bisher, Stelle.Komponente neu, int rang) {
-    if (bisher == null) {
-      return neu;
+    if (zeilenKette) {
+      return bereich;
     }
-    return rang(bisher) >= rang ? bisher : neu;
-  }
-
-  private static int rang(Stelle.Komponente komponente) {
-    return switch (komponente) {
-      case Stelle.SatzNr s -> 1;
-      case Stelle.NummerNr n -> 2;
-      case Stelle.BuchstabeNr b -> 3;
-      default -> 0;
-    };
-  }
-
-  private static SatzTeiler.@Nullable SatzBereich loeseKomponenteAuf(
-      Stelle.Komponente komponente, String text) {
-    return switch (komponente) {
-      case Stelle.SatzNr satz -> {
+    for (var komponente : stelle.komponenten()) {
+      if (komponente instanceof Stelle.SatzNr satz) {
         int index = Integer.parseInt(satz.nummer().replaceAll("[a-z]$", "")) - 1;
         var saetze = SatzTeiler.teile(text);
-        yield index >= 0 && index < saetze.size() ? saetze.get(index) : null;
+        return index >= 0 && index < saetze.size() ? saetze.get(index) : null;
       }
-      case Stelle.NummerNr nummer -> zeilenBereich(text, Pattern.quote(nummer.nummer()) + "\\.");
-      case Stelle.BuchstabeNr buchstabe ->
-          zeilenBereich(text, Pattern.quote(buchstabe.kennung()) + "\\)");
-      default -> null;
-    };
+    }
+    return null;
   }
 
-  /** Findet die (eindeutige) Aufzählungszeile, die mit dem gegebenen Label beginnt. */
-  private static SatzTeiler.@Nullable SatzBereich zeilenBereich(String text, String labelRegex) {
-    var muster = Pattern.compile("(?m)^[ \\t]*" + labelRegex + "[ \\t].*$");
-    var matcher = muster.matcher(text);
+  /**
+   * Findet die (im Suchbereich eindeutige) Aufzählungszeile, die mit dem gegebenen Label beginnt,
+   * und dehnt den Bereich auf die tiefer eingerückten Kindzeilen der Einheit aus.
+   */
+  private static SatzTeiler.@Nullable SatzBereich zeilenBlock(
+      String text, String labelRegex, SatzTeiler.SatzBereich suchbereich) {
+    var muster = Pattern.compile("(?m)^([ \\t]*)" + labelRegex + "[ \\t].*$");
+    var matcher = muster.matcher(text).region(suchbereich.von(), suchbereich.bis());
     SatzTeiler.SatzBereich gefunden = null;
+    int einrueckung = 0;
     while (matcher.find()) {
       if (gefunden != null) {
         return null; // mehrdeutig (z.B. gleiche Buchstaben in mehreren Nummern)
       }
       gefunden = new SatzTeiler.SatzBereich(matcher.start(), matcher.end());
+      einrueckung = matcher.group(1).length();
     }
-    return gefunden;
+    if (gefunden == null) {
+      return null;
+    }
+    int ende = gefunden.bis();
+    while (ende < suchbereich.bis() && text.charAt(ende) == '\n') {
+      int naechsteEnde = text.indexOf('\n', ende + 1);
+      if (naechsteEnde < 0 || naechsteEnde > suchbereich.bis()) {
+        naechsteEnde = suchbereich.bis();
+      }
+      var zeile = text.substring(ende + 1, naechsteEnde);
+      if (zeile.isBlank() || fuehrendeBreite(zeile) <= einrueckung) {
+        break;
+      }
+      ende = naechsteEnde;
+    }
+    return new SatzTeiler.SatzBereich(gefunden.von(), ende);
+  }
+
+  private static int fuehrendeBreite(String zeile) {
+    int i = 0;
+    while (i < zeile.length() && (zeile.charAt(i) == ' ' || zeile.charAt(i) == '\t')) {
+      i++;
+    }
+    return i;
   }
 
   static List<Stelle.Komponente> komponenten(Stelle stelle) {

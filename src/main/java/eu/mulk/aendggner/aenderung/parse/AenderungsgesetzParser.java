@@ -102,11 +102,15 @@ public final class AenderungsgesetzParser {
     var provenienz = new Provenienz(artikelLabel, eigenerPfad, zitate.stelleZitateWiederHer(text));
 
     if (!punkt.kinder().isEmpty()) {
-      // Ein Punkt mit Unterpunkten muss ein Kontextrahmen sein („§ X wird wie folgt geändert:“).
-      var rahmen = BefehlErkenner.kontextRahmen(text);
+      // Ein Punkt mit Unterpunkten muss ein Kontextrahmen sein („§ X wird wie folgt geändert:“,
+      // auch als Verbund „§ 50 wird zu § 38 und wird wie folgt geändert:“).
+      var rahmen = BefehlErkenner.rahmenMitBefehl(text, kontext, provenienz);
       var neuerKontext = kontext;
       if (rahmen.isPresent()) {
-        neuerKontext = kontext.plus(rahmen.get());
+        if (rahmen.get().begleitbefehl() != null) {
+          befehle.add(rahmen.get().begleitbefehl());
+        }
+        neuerKontext = kontext.plus(rahmen.get().stelle());
       } else {
         befehle.add(new UnbekannterBefehl(kontext, provenienz.originalText(), provenienz));
       }

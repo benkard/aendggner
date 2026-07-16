@@ -23,8 +23,44 @@ public final class TextBereiniger {
   private static final Pattern BUNDESANZEIGER =
       Pattern.compile(
           "^\\s*(Das Bundesgesetzblatt im Internet:|Ein Service des Bundesanzeiger).*$");
-  // Referenten-/Regierungsentwürfe: „ - 10 - “.
-  private static final Pattern SEITENMARKER = Pattern.compile("^\\s*[-–]\\s*\\d+\\s*[-–]\\s*$");
+  // Referenten-/Regierungsentwürfe: „ - 10 - “ bzw. „ - 5 - Bearbeitungsstand: 05.05.2026 16:18“.
+  private static final Pattern SEITENMARKER =
+      Pattern.compile("^\\s*[-–]\\s*\\d+\\s*[-–]\\s*(Bearbeitungsstand: .*)?$");
+  // Bundesrats-Drucksachen: „- 2 -Drucksache 170/23“, „Drucksache 170/23 - 3 -“ oder die
+  // Drucksachennummer allein als Kolumnentitel.
+  private static final Pattern BUNDESRAT_KOPF =
+      Pattern.compile(
+          "^\\s*(?:[-–]\\s*\\d+\\s*[-–]\\s*)?Drucksache \\d+/\\d+(?:\\s*[-–]\\s*\\d+\\s*[-–])?\\s*$");
+  // Wasserzeichen der Bundestags-Vorabfassungen: senkrecht gesetzt, extrahiert deshalb mit
+  // Zeilenumbrüchen an beliebigen Stellen („V\norabfassung - w\nird durch …“). Das Muster
+  // erlaubt Whitespace zwischen allen Zeichen der festen Phrase.
+  private static final Pattern VORABFASSUNG =
+      Pattern.compile(
+          gesperrt("Vorabfassung - wird durch die lektorierte ")
+              + "(?:"
+              + gesperrt("Fassung")
+              + "|"
+              + gesperrt("Version")
+              + ")"
+              + gesperrt(" ersetzt."));
+
+  /** Regex für eine Phrase, deren Zeichen durch beliebigen Whitespace getrennt sein dürfen. */
+  private static String gesperrt(String phrase) {
+    var sb = new StringBuilder();
+    for (char c : phrase.toCharArray()) {
+      if (c == ' ') {
+        sb.append("\\s*[-–]?\\s*");
+      } else if (c == '-') {
+        sb.append("[-–]\\s*");
+      } else {
+        sb.append(Pattern.quote(String.valueOf(c))).append("\\s*");
+      }
+    }
+    return sb.toString();
+  }
+
+  // Verirrte „Anlage N“-Marke unmittelbar vor einem Seitenkopf (Lesereihenfolge-Artefakt).
+  private static final Pattern ANLAGE_MARKE = Pattern.compile("^\\s*Anlage \\d+\\s*$");
   // Bundestags-Drucksachen: „Drucksache 21/6178 – 2 – Deutscher Bundestag – 21. Wahlperiode“
   // bzw. gespiegelt auf geraden Seiten.
   private static final Pattern DRUCKSACHE_KOPF =
@@ -44,6 +80,11 @@ public final class TextBereiniger {
       Pattern.compile("(?m)^(\\s*)\\((\\d+[a-z]?)\\) „\\s*");
   private static final Pattern INVERTIERTES_PARAGRAPH_ZITAT =
       Pattern.compile("(?m)^(\\s*)(§\\s*\\d+[a-z]?)„[ \\t]*");
+  // Dieselbe Vertauschung bei Aufzählungslabeln: „3. „ mit Vorteilen …“ statt „„3. mit Vorteilen“.
+  // Das Leerzeichen NACH dem „ ist das Artefakt-Signal — echte Binnenzitate („13a. „größere
+  // Renovierung““) kleben direkt am Inhalt und bleiben unangetastet.
+  private static final Pattern INVERTIERTES_LISTEN_ZITAT =
+      Pattern.compile("(?m)^(\\s*)(\\d+[a-z]?\\.|[a-z]{1,3}\\))[ \\t]+„[ \\t]+");
 
   private TextBereiniger() {}
 
@@ -51,9 +92,14 @@ public final class TextBereiniger {
     var text = normalisiereAnfuehrungszeichen(rohText);
     text = INVERTIERTES_ZITAT.matcher(text).replaceAll("$1„($2) ");
     text = INVERTIERTES_PARAGRAPH_ZITAT.matcher(text).replaceAll("$1„$2");
+    text = INVERTIERTES_LISTEN_ZITAT.matcher(text).replaceAll("$1„$2 ");
+    text = trenneVerklebteZitatgrenzen(text);
+    text = VORABFASSUNG.matcher(text).replaceAll("\n");
     var zeilen = entferneKolumnentitel(text);
     var verbunden = verbindeUmbrueche(zeilen);
-    return strippeZeilenenden(verbunden);
+    // Falsch-positive markerlose Zusammenzüge („durch“ + „die“ → „durchdie“) reparieren — die
+    // Befehlsvokabeln sind nie Kompositum-Bestandteile.
+    return trenneVerklebteZitatgrenzen(strippeZeilenenden(verbunden));
   }
 
   /**
@@ -66,24 +112,64 @@ public final class TextBereiniger {
         .replace('‚', '‘') // ‚ bleibt einfaches öffnendes Zitat
         .replace("‟", "“") // ‟ → “
         .replace("«", "„") // « → „ (selten, aus Fremdsatz)
-        .replace("»", "“"); // » → “
+        .replace("»", "“") // » → “
+        // Gerade und englische schließende Anführungszeichen: in BGBl-/Drucksachentexten öffnet
+        // stets „, also sind diese Glyphen (fast immer Satz-/OCR-Fehler) schließend zu lesen.
+        .replace("”", "“")
+        .replace("\"", "“");
+  }
+
+  /** Verklebte Zitatgrenzen wieder trennen („§ 9“ersetzt → „§ 9“ ersetzt) — erst nach den
+   * Invertiertes-Zitat-Fixes, die auf die verklebte Form angewiesen sind. */
+  private static String trenneVerklebteZitatgrenzen(String text) {
+    return text
+        .replaceAll("“(\\p{L})", "“ $1")
+        .replaceAll("(\\p{L})„", "$1 „")
+        // Verklebte Befehlsvokabeln (Zusammenzug über Zeilengrenzen ohne Leerzeichen).
+        .replace("durchdie ", "durch die ")
+        .replace("undwerden ", "und werden ")
+        .replace("undwird ", "und wird ")
+        .replace("Kommaeingefügt", "Komma eingefügt")
+        .replace("Kommaersetzt", "Komma ersetzt")
+        // Kontextrahmen, an den der folgende Unterpunkt geklebt wurde („geändertaa) In …“).
+        .replaceAll("(wie folgt geändert:?)(?=[a-z]{1,3}\\)|\\d+[a-z]?\\.)", "$1\n");
   }
 
   /** Entfernt Seitenkopf-/Fußzeilen. Trailing-Whitespace der übrigen Zeilen bleibt erhalten! */
   private static ArrayList<String> entferneKolumnentitel(String text) {
+    var roh = text.split("\n", -1);
+    var kolumnentitel = new boolean[roh.length];
+    for (int i = 0; i < roh.length; i++) {
+      kolumnentitel[i] = istKolumnentitel(roh[i]);
+    }
     var ergebnis = new ArrayList<String>();
-    for (var zeile : text.split("\n", -1)) {
-      if (KOPFZEILE.matcher(zeile).matches()
-          || SEITENZAHL.matcher(zeile).matches()
-          || BUNDESANZEIGER.matcher(zeile).matches()
-          || SEITENMARKER.matcher(zeile).matches()
-          || DRUCKSACHE_KOPF.matcher(zeile).matches()
-          || BUNDESTAG_KOPF.matcher(zeile).matches()) {
+    for (int i = 0; i < roh.length; i++) {
+      if (kolumnentitel[i]) {
         continue;
       }
-      ergebnis.add(zeile);
+      // Eine verirrte „Anlage N“-Marke direkt vor einem Seitenkopf gehört zum Seitenmöbel.
+      if (ANLAGE_MARKE.matcher(roh[i]).matches()) {
+        int j = i + 1;
+        while (j < roh.length && roh[j].isBlank()) {
+          j++;
+        }
+        if (j < roh.length && kolumnentitel[j]) {
+          continue;
+        }
+      }
+      ergebnis.add(roh[i]);
     }
     return ergebnis;
+  }
+
+  private static boolean istKolumnentitel(String zeile) {
+    return KOPFZEILE.matcher(zeile).matches()
+        || SEITENZAHL.matcher(zeile).matches()
+        || BUNDESANZEIGER.matcher(zeile).matches()
+        || SEITENMARKER.matcher(zeile).matches()
+        || DRUCKSACHE_KOPF.matcher(zeile).matches()
+        || BUNDESTAG_KOPF.matcher(zeile).matches()
+        || BUNDESRAT_KOPF.matcher(zeile).matches();
   }
 
   /**

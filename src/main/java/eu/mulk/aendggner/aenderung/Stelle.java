@@ -104,6 +104,32 @@ public record Stelle(List<Komponente> komponenten) {
     return komponenten.stream().anyMatch(Gliederungseinheit.class::isInstance);
   }
 
+  /**
+   * Wahr, wenn die Stelle eine Gliederungseinheit des Überschriften-Gerüsts (Teil, Abschnitt, …)
+   * nennt. Anhänge und Anlagen zählen nicht dazu: die sind im gii-XML eigene Normen mit Text und
+   * werden wie Paragraphen behandelt (siehe {@link #anlagenEnbez()}).
+   */
+  public boolean betrifftEchteGliederung() {
+    return komponenten.stream()
+        .filter(Gliederungseinheit.class::isInstance)
+        .map(Gliederungseinheit.class::cast)
+        .anyMatch(g -> !istAnlagenArt(g.art()));
+  }
+
+  /** Die enbez der adressierten Anhang-/Anlagen-Norm („Anhang“, „Anlage 2“), falls vorhanden. */
+  public Optional<String> anlagenEnbez() {
+    return komponenten.stream()
+        .filter(Gliederungseinheit.class::isInstance)
+        .map(Gliederungseinheit.class::cast)
+        .filter(g -> istAnlagenArt(g.art()))
+        .findFirst()
+        .map(Gliederungseinheit::bezeichnung);
+  }
+
+  private static boolean istAnlagenArt(String art) {
+    return art.equals("Anhang") || art.equals("Anlage");
+  }
+
   public Optional<Absatzbezeichnung> absatzbezeichnung() {
     return komponenten.stream()
         .filter(Absatzbezeichnung.class::isInstance)

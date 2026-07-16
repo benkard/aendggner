@@ -6,6 +6,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Anfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Aufhebung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ebene;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.GliederungsUeberschriften;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Neufassung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Sammelbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Streichung;
@@ -640,6 +641,344 @@ class BefehlAnwenderTest {
     assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
     var text = absatzText(ergebnis.neu(), "§ 1", 1);
     assertThat(text).contains("1. (weggefallen)").contains("2. (weggefallen)").contains("3. (weggefallen)");
+  }
+
+  // --- Anhang/Anlage als Norm-Ziel -----------------------------------------------------------
+
+  /** Ein Gesetz mit Anhang-Norm nach dem Muster des UWG (mehrere Absätze, Nummern mit Kindern). */
+  private static Gesetz gesetzMitAnhang() {
+    return new Gesetz(
+        "TestG",
+        null,
+        null,
+        List.of(
+            new Norm(
+                "§ 1",
+                "Zweck",
+                null,
+                List.of(new Absatz("1", "Es gilt der Anhang.")),
+                false),
+            new Norm(
+                "Anhang",
+                "(zu § 1)",
+                null,
+                List.of(
+                    new Absatz(null, "Folgende Handlungen sind stets unzulässig:"),
+                    new Absatz(
+                        null,
+                        "  1. die erste Handlung;\n"
+                            + "  2. die zweite Handlung,\n"
+                            + "    a) wenn sie morgens geschieht, oder\n"
+                            + "    b) wenn sie abends geschieht;\n"
+                            + "  3. die dritte Handlung;"),
+                    new Absatz(
+                        null,
+                        "  31. die aggressive Handlung,\n"
+                            + "    a) wenn sie laut geschieht, oder\n"
+                            + "    b) wenn sie leise gemacht wird.\n"
+                            + "  32. die letzte Handlung;")),
+                false)));
+  }
+
+  private static Stelle anhangStelle(Stelle.Komponente... feinere) {
+    var komponenten = new java.util.ArrayList<Stelle.Komponente>();
+    komponenten.add(new Stelle.Gliederungseinheit("Anhang", ""));
+    komponenten.addAll(List.of(feinere));
+    return new Stelle(komponenten);
+  }
+
+  @Test
+  void fuegtNummerImAnhangNachNummerMitKindernEin() {
+    // „Nach Nummer 2 wird die folgende Nummer 2a eingefügt“ — Nummer 2 hat Buchstaben a)/b);
+    // die neue Nummer muss hinter deren Block landen, nicht zwischen Nummer und Buchstaben.
+    var befehl =
+        new StrukturEinfuegung(
+            anhangStelle(new Stelle.NummerNr("2")),
+            false,
+            Ebene.NUMMER,
+            "2a",
+            "2a. die eingeschobene Handlung;",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetzMitAnhang(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "Anhang", 1))
+        .isEqualTo(
+            "  1. die erste Handlung;\n"
+                + "  2. die zweite Handlung,\n"
+                + "    a) wenn sie morgens geschieht, oder\n"
+                + "    b) wenn sie abends geschieht;\n"
+                + "  2a. die eingeschobene Handlung;\n"
+                + "  3. die dritte Handlung;");
+  }
+
+  @Test
+  void fuegtNummernBlockImAnhangEin() {
+    // Mehrere Einheiten in einem Einfügeblock bleiben eigene Zeilen.
+    var befehl =
+        new StrukturEinfuegung(
+            anhangStelle(new Stelle.NummerNr("3")),
+            false,
+            Ebene.NUMMER,
+            null,
+            "3a. die vierte Handlung;\n3b. die fünfte Handlung;",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetzMitAnhang(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "Anhang", 1))
+        .endsWith(
+            "  3. die dritte Handlung;\n"
+                + "  3a. die vierte Handlung;\n"
+                + "  3b. die fünfte Handlung;");
+  }
+
+  @Test
+  void loestNummerBuchstabeKetteImAnhangAuf() {
+    // „b)“ existiert in Nummer 2 und Nummer 31 — die Kette „Nummer 31 Buchstabe b“ ist trotzdem
+    // eindeutig, weil der Buchstabe im Block der Nummer 31 gesucht wird.
+    var befehl =
+        new Ersetzung(
+            anhangStelle(new Stelle.NummerNr("31"), new Stelle.BuchstabeNr("b")),
+            "gemacht wird.",
+            "gemacht wird;",
+            false,
+            false,
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetzMitAnhang(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "Anhang", 2))
+        .contains("wenn sie leise gemacht wird;")
+        .contains("  32. die letzte Handlung;");
+    // Nummer 2 Buchstabe b bleibt unangetastet.
+    assertThat(absatzText(ergebnis.neu(), "Anhang", 1)).contains("wenn sie abends geschieht;");
+  }
+
+  @Test
+  void streichtWoerterInDerUeberschriftEinerNorm() {
+    var befehl =
+        new Streichung(
+            stelle(new Stelle.Paragraph("3"), new Stelle.Ueberschrift()),
+            "Schlussvorschriften",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(ergebnis.neu().norm("§ 3").orElseThrow().titel()).isEmpty();
+  }
+
+  @Test
+  void meldetMehrdeutigeNummerOhneAbsatzangabeImAnhang() {
+    // Gäbe es dieselbe Nummer in mehreren Absätzen, bliebe der Befehl manuell.
+    var gesetz =
+        new Gesetz(
+            "TestG",
+            null,
+            null,
+            List.of(
+                new Norm(
+                    "Anhang",
+                    null,
+                    null,
+                    List.of(
+                        new Absatz(null, "  1. erstens;"),
+                        new Absatz(null, "  1. nochmal erstens;")),
+                    false)));
+    var befehl =
+        new Ersetzung(
+            anhangStelle(new Stelle.NummerNr("1")), "erstens", "zuerst", false, false, PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz, List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.MANUELL_PRUEFEN);
+    assertThat(ergebnis.protokoll().get(0).begruendung()).contains("nicht eindeutig");
+  }
+
+  // --- Inhaltsübersicht ------------------------------------------------------------------------
+
+  private static Gesetz gesetzMitInhaltsuebersicht() {
+    return new Gesetz(
+        "TestG",
+        null,
+        null,
+        List.of(
+            new Norm(
+                "Inhaltsübersicht",
+                null,
+                null,
+                List.of(
+                    new Absatz(
+                        null,
+                        "Teil 1 | Allgemeines\n"
+                            + "§ 1 | Zweck\n"
+                            + "§ 2 | Begriffe\n"
+                            + "Teil 2 | Verfahren\n"
+                            + "Abschnitt 1 | Grundsätze\n"
+                            + "§ 3 | Ablauf\n"
+                            + "§ 4 | Fristen\n"
+                            + "§ 5 | Schluss")),
+                false),
+            new Norm("§ 1", "Zweck", null, List.of(new Absatz(null, "Text.")), false)));
+  }
+
+  private static Stelle iuStelle(Stelle.Komponente... feinere) {
+    var komponenten = new java.util.ArrayList<Stelle.Komponente>();
+    komponenten.add(new Stelle.Inhaltsuebersicht());
+    komponenten.addAll(List.of(feinere));
+    return new Stelle(komponenten);
+  }
+
+  @Test
+  void fasstAngabeInDerInhaltsuebersichtNeu() {
+    var befehl =
+        new Neufassung(iuStelle(new Stelle.Paragraph("2")), "§ 2 Begriffsbestimmungen", PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetzMitInhaltsuebersicht(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "Inhaltsübersicht", 0))
+        .contains("§ 2 | Begriffsbestimmungen")
+        .doesNotContain("§ 2 | Begriffe\n");
+  }
+
+  @Test
+  void fuegtAngabeInDerInhaltsuebersichtEin() {
+    var befehl =
+        new StrukturEinfuegung(
+            iuStelle(new Stelle.Paragraph("2")),
+            false,
+            Ebene.PARAGRAPH,
+            null,
+            "§ 2a Anwendungsbereich",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetzMitInhaltsuebersicht(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "Inhaltsübersicht", 0))
+        .contains("§ 2 | Begriffe\n§ 2a | Anwendungsbereich\nTeil 2 | Verfahren");
+  }
+
+  @Test
+  void ersetztAngabenBereichInDerInhaltsuebersicht() {
+    // „Die Angaben zu den §§ 3 bis 4 werden durch die folgenden Angaben ersetzt: …“
+    var befehl =
+        new StrukturErsetzung(
+            iuStelle(new Stelle.Paragraph("3")),
+            iuStelle(new Stelle.Paragraph("4")),
+            Ebene.PARAGRAPH,
+            "§ 3 (weggefallen) § 4 (weggefallen)",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetzMitInhaltsuebersicht(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "Inhaltsübersicht", 0))
+        .contains("§ 3 | (weggefallen)\n§ 4 | (weggefallen)")
+        .doesNotContain("Ablauf");
+  }
+
+  @Test
+  void streichtAngabeUndLoestGliederungsKetteAuf() {
+    // „Die Angabe zu Teil 2 Abschnitt 1 wird gestrichen.“ — Kette grenzt das Fenster ein.
+    var befehl =
+        new Aufhebung(
+            iuStelle(
+                new Stelle.Gliederungseinheit("Teil", "2"),
+                new Stelle.Gliederungseinheit("Abschnitt", "1")),
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetzMitInhaltsuebersicht(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "Inhaltsübersicht", 0))
+        .doesNotContain("Abschnitt 1 | Grundsätze")
+        .contains("Teil 2 | Verfahren\n§ 3 | Ablauf");
+  }
+
+  // --- Gliederungs-Überschriften ---------------------------------------------------------------
+
+  private static Gesetz gesetzMitGliederungen() {
+    var teil1 = new Gliederung("010", "Teil 1", "Allgemeines");
+    var teil2 = new Gliederung("020", "Teil 2", "Anforderungen");
+    return new Gesetz(
+        "TestG",
+        null,
+        null,
+        List.of(
+            new Norm("§ 1", "Zweck", teil1, List.of(new Absatz(null, "Eins.")), false),
+            new Norm("§ 2", "Begriffe", teil1, List.of(new Absatz(null, "Zwei.")), false),
+            new Norm("§ 3", "Pflichten", teil2, List.of(new Absatz(null, "Drei.")), false),
+            new Norm("§ 4", "Nachweise", teil2, List.of(new Absatz(null, "Vier.")), false)),
+        List.of(teil1, teil2));
+  }
+
+  @Test
+  void fuegtGliederungsUeberschriftenEin() {
+    // „Nach § 2 werden die folgenden Überschriften zu Teil 3 und zu Teil 3 Abschnitt 1
+    // eingefügt: „Teil 3 Modernisierung Abschnitt 1 Grundpflichten“.“
+    var befehl =
+        new GliederungsUeberschriften(
+            stelle(new Stelle.Paragraph("2")),
+            List.of(
+                new Stelle.Gliederungseinheit("Teil", "3"),
+                new Stelle.Gliederungseinheit("Abschnitt", "1")),
+            List.of(),
+            "Teil 3 Modernisierung Abschnitt 1 Grundpflichten",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetzMitGliederungen(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(ergebnis.neu().gliederungen())
+        .extracting(Gliederung::bezeichnung)
+        .containsExactly("Teil 1", "Teil 3", "Abschnitt 1", "Teil 2");
+    var abschnitt1 = ergebnis.neu().gliederungen().get(2);
+    assertThat(abschnitt1.titel()).isEqualTo("Grundpflichten");
+    // §§ 3 und 4 (der zusammenhängende Block nach dem Anker) hängen jetzt unter Abschnitt 1.
+    assertThat(ergebnis.neu().norm("§ 3").orElseThrow().gliederung()).isEqualTo(abschnitt1);
+    assertThat(ergebnis.neu().norm("§ 4").orElseThrow().gliederung()).isEqualTo(abschnitt1);
+    assertThat(ergebnis.neu().norm("§ 2").orElseThrow().gliederung().bezeichnung())
+        .isEqualTo("Teil 1");
+  }
+
+  @Test
+  void ersetztGliederungsUeberschriften() {
+    // „Die bisherigen Überschriften zu Teil 2 werden durch die folgende Überschrift zu
+    // Abschnitt 2 ersetzt: „Abschnitt 2 Neue Anforderungen“.“
+    var befehl =
+        new GliederungsUeberschriften(
+            Stelle.LEER,
+            List.of(new Stelle.Gliederungseinheit("Abschnitt", "2")),
+            List.of(List.of(new Stelle.Gliederungseinheit("Teil", "2"))),
+            "Abschnitt 2 Neue Anforderungen",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetzMitGliederungen(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(ergebnis.neu().gliederungen())
+        .extracting(Gliederung::bezeichnung)
+        .containsExactly("Teil 1", "Abschnitt 2");
+    assertThat(ergebnis.neu().norm("§ 3").orElseThrow().gliederung().titel())
+        .isEqualTo("Neue Anforderungen");
+  }
+
+  @Test
+  void ersetztGesetzesUeberschrift() {
+    var befehl =
+        new Neufassung(
+            stelle(new Stelle.Ueberschrift()), "Gesetz zur gründlichen Erprobung", PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(ergebnis.neu().langue()).isEqualTo("Gesetz zur gründlichen Erprobung");
   }
 
   private static String absatzText(Gesetz gesetz, String enbez, int index) {

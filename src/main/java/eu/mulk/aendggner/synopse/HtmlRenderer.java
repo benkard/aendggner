@@ -66,12 +66,16 @@ public final class HtmlRenderer {
     }
     sb.append("<section class=\"gliederung-aenderungen\">\n<h2>Geänderte Gliederungs-Überschriften</h2>\n");
     for (var aenderung : synopse.gliederungsAenderungen()) {
-      var spalten = WortDiff.vergleiche(aenderung.alt().anzeigeText(), aenderung.neu().anzeigeText());
+      var altText = aenderung.alt() != null ? aenderung.alt().anzeigeText() : "";
+      var spalten = WortDiff.vergleiche(altText, aenderung.neu().anzeigeText());
       sb.append("<div class=\"vergleich\">\n<div class=\"alt\">")
           .append(spalten.altHtml())
           .append("</div>\n<div class=\"neu\">")
-          .append(spalten.neuHtml())
-          .append("</div>\n</div>\n");
+          .append(spalten.neuHtml());
+      if (aenderung.alt() == null) {
+        sb.append(" <span class=\"badge neu-badge\">neu</span>");
+      }
+      sb.append("</div>\n</div>\n");
     }
     sb.append("</section>\n");
   }

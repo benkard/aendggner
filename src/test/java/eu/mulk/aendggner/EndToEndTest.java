@@ -89,9 +89,12 @@ class EndToEndTest {
     assertThat(parseErgebnis.befehle().size()).isGreaterThanOrEqualTo(10);
     var typisiert =
         parseErgebnis.befehle().stream().filter(b -> !(b instanceof UnbekannterBefehl)).count();
-    assertThat(typisiert).isGreaterThan(parseErgebnis.befehle().size() / 2);
+    assertThat(typisiert).isEqualTo(parseErgebnis.befehle().size());
 
+    // Referenzfall des Ausbaus: alle Befehle (auch die Anhang-Änderungen) werden angewandt.
     var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
+    assertThat(anwendung.anzahlManuell()).isZero();
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(parseErgebnis.befehle().size());
     var synopse = SynopseBuilder.baue(gesetz, anwendung, parseErgebnis.warnungen(), false);
     assertThat(HtmlRenderer.rendere(synopse, "E2E-Test")).contains("Neue Fassung");
   }
