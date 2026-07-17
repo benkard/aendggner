@@ -100,6 +100,27 @@ class TextBereinigerTest {
   }
 
   @Test
+  void ziehtMarkerlosNichtBeiKurzemStichwortVorEingerueckterDefinitionZusammen() {
+    // Definitionslisten-Muster (neues BGBl-Format, „2a. …Siegel“ + hängend eingerückte
+    // Definition): die Stichwort-Zeile endet ohne Trailing-Space, ist aber deutlich kürzer als
+    // die umgebenden Volltextzeilen — kein Wort wird getrennt, der Umbruch ist bewusst.
+    var roh =
+        "1. „Betriebsstoff“ jeder Bestandteil einer Ware, der wiederholt verbraucht wird und ersetzt"
+            + " oder aufgefüllt werden muss, damit die Ware ordnungsgemäß funktioniert. \n"
+            + "2. „Haltbarkeit“ die Fähigkeit der Waren, ihre erforderlichen Funktionen und ihre"
+            + " Leistung bei normaler Verwendung über einen längeren Zeitraum zu bewahren. \n"
+            + "3. „Zertifizierungssystem“ ein System der Überprüfung durch Dritte, durch das"
+            + " bestätigt wird, dass ein Produkt bestimmten Anforderungen entspricht. \n"
+            + "2a. unzulässiges Anbringen eines Nachhaltigkeitssiegels\n"
+            + "das Anbringen eines Nachhaltigkeitssiegels, das weder auf einem Zertifizierungssystem"
+            + " beruht noch von \n"
+            + "staatlichen Stellen festgesetzt wurde;";
+
+    assertThat(TextBereiniger.bereinige(roh))
+        .contains("Nachhaltigkeitssiegels\ndas Anbringen eines Nachhaltigkeitssiegels");
+  }
+
+  @Test
   void repariertInvertierteZitatzeichenAnAbsatzmarkern() {
     // BMJV-Vorlagen zeichnen das hängende „ nach dem Absatzmarker bzw. der Paragraphenangabe.
     assertThat(TextBereiniger.bereinige("(1) „ Ungeachtet des § 8 gilt.“"))

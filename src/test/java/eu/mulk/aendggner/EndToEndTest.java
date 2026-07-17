@@ -84,6 +84,11 @@ class EndToEndTest {
     assertThat(text).doesNotContain("Dieses Gesetz dient der Umsetzung der Richtlinie (EU)");
     assertThat(text).contains("wird wie folgt geändert");
 
+    // Regression: Stichwort/Definition-Umbruch im Anhang darf nicht ohne Leerzeichen verklebt
+    // werden (kurze Stichwort-Zeile vor hängend eingerückter Definition, kein Wort wird getrennt).
+    assertThat(text).contains("Nachhaltigkeitssiegels\ndas Anbringen");
+    assertThat(text).doesNotContain("Nachhaltigkeitssiegelsdas");
+
     var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, null);
     assertThat(parseErgebnis.artikel()).containsExactly("1");
     assertThat(parseErgebnis.befehle().size()).isGreaterThanOrEqualTo(10);

@@ -21,6 +21,62 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 17. Juli 2026,
+ zuletzt geändert durch die am 17. Juli 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Auf Grund eines gemeldeten Wiedergabefehlers wird die Zusammenzugsheuristik des
+Textbereinigers für markerlose Zeilenumbrüche um ein Spaltenbreiten-Kriterium
+ergänzt; ferner wird die Neufassungs-Anweisung ohne Stellenbereich an die bereits
+bestehende Zitat-Normalisierung angeschlossen.
+
+
+Artikel 1
+Spaltenbreiten-Kriterium für markerlose Zeilenumbruch-Zusammenzüge
+
+Der Textbereiniger (TextBereiniger.verbindeUmbrueche) zog eine Zeile, die ohne
+Leerraum am Ende mit einem Buchstaben schließt und deren Folgezeile klein
+beginnt, bislang stets ohne Trennzeichen mit der Folgezeile zusammen, in der
+Annahme, es handle sich um eine bei der PDF-Extraktion um den Bindestrich
+gebrachte Silbentrennung. Diese Annahme trifft auf einen bewussten Wortgrenzen-
+Umbruch (etwa das Stichwort einer hängend eingerückten Definition, wie er im
+Anhang zum UWG vorkommt) nicht zu und führte dort zu verklebten Wörtern ohne
+jedes Leerzeichen. Die Heuristik (TextBereiniger.endetMarkerlos,
+.typischeZeilenlaenge) wird deshalb um ein Spaltenbreiten-Kriterium ergänzt: Der
+Zusammenzug unterbleibt, wenn die Zeile deutlich kürzer ist als die in ihrem
+Umfeld übliche Zeilenlänge (neunzig vom Hundert-Perzentil eines Fensters von
+zwanzig Zeilen davor und danach), da ein automatischer Umbruch stets nahe der
+Spaltenbreite erfolgt und ein deutlich kürzeres Zeilenende mithin nicht auf eine
+Silbentrennung, sondern auf einen gewollten Umbruch schließen lässt. Das Fenster
+wird bewusst lokal statt dokumentweit bemessen, da ein und dasselbe Schriftstück
+Abschnitte unterschiedlicher Spaltenbreite mischen kann (etwa Regelungstext und
+Begründung eines Entwurfs).
+
+
+Artikel 2
+Zitat-Normalisierung bei der stellenlosen Neufassung
+
+Der Befehlsanwender (BefehlAnwender.wendeNeufassungAn) übernahm den Zitatinhalt
+bei der Neufassung eines Satzes, einer Nummer oder eines Buchstabens bislang
+ungefiltert, während die übrigen mit Zitattext arbeitenden Anwendungsfälle ihn
+durchweg der Normalisierung (normalisiereZitatText) unterziehen, welche
+eingestreute Zeilenumbrüche zu einem Leerzeichen faltet. Damit ein durch
+Artikel 1 nunmehr häufiger erhaltener Zeilenumbruch nicht unnormalisiert bis in
+die Synopse durchschlägt und dort als unerwünschter Zeilenumbruch innerhalb
+eines Satzes in Erscheinung tritt, wird auch dieser Anwendungsfall der
+Normalisierung unterworfen.
+
+
+Schlussbestimmung
+
+Die vorstehenden Änderungen sind durch die Prüfung sämtlicher Testfälle (einhun-
+dertfünfundsiebzig an der Zahl) sowie durch die vollständige Erstellung (mvnw
+verify) bestätigt worden. Anlass war ein anhand der UWG-Novelle 2026 gemeldeter
+Wiedergabefehler; die Behebung wurde anhand der Beispieldaten (UWG-Anhang,
+Nummern 2a sowie 4a bis 4c) verifiziert.
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 16. Juli 2026,
  zuletzt geändert durch die am 16. Juli 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

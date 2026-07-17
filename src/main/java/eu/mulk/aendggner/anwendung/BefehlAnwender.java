@@ -460,7 +460,8 @@ public final class BefehlAnwender {
     }
 
     // Neufassung eines Satzes / einer Nummer / eines Buchstabens: Bereich ersetzen.
-    return bearbeiteText(normen, befehl, text -> TextErgebnis.ok(befehl.neuerText().strip()));
+    return bearbeiteText(
+        normen, befehl, text -> TextErgebnis.ok(normalisiereZitatText(befehl.neuerText())));
   }
 
   /** Ein Ziel (Absatz, Satz, Nummer, Buchstabe) wird durch einen Block ersetzt (ggf. 1 → N). */

@@ -73,6 +73,17 @@ public final class TextBereiniger {
   private static final Pattern KONJUNKTION =
       Pattern.compile("^(und|oder|sowie|bzw\\.|beziehungsweise)\\b.*");
 
+  /** Perzentil der Zeilenlängen, das als „volle Spaltenbreite“ gilt (siehe {@link #verbindeUmbrueche}). */
+  private static final double VOLLZEILE_PERZENTIL = 0.9;
+
+  /** Mindestanteil der vollen Spaltenbreite, ab dem ein markerloser Umbruch als Silbentrennung
+   * statt als bewusster Wortgrenzen-Umbruch gilt. */
+  private static final double VOLLZEILE_MINDESTANTEIL = 0.7;
+
+  /** Anzahl Zeilen vor/nach einer Kandidatenzeile, die für die lokale Spaltenbreiten-Schätzung
+   * herangezogen werden (siehe {@link #typischeZeilenlaenge}). */
+  private static final int VOLLZEILE_FENSTER = 20;
+
   // BMJV-Entwurfsvorlagen zeichnen das hängende öffnende Anführungszeichen im Content-Stream
   // NACH dem ersten Element der zitierten Passage: „(1) „ Ungeachtet…“ statt „„(1) Ungeachtet…“,
   // „§ 19„“ statt „„§ 19“.
@@ -183,7 +194,11 @@ public final class TextBereiniger {
    *   <li><b>Markerlos</b> (Bundestags-Drucksachen: „Schwel“ + „lenwertes“): Reguläre Umbrüche
    *       enden dort mit Leerzeichen vor dem Zeilenumbruch; endet eine Zeile direkt mit einem
    *       Buchstaben und beginnt die Folgezeile klein, ist es eine Trennung → ohne Leerzeichen
-   *       zusammenziehen.
+   *       zusammenziehen. Das trifft aber nur zu, wenn die Zeile (fast) die volle Spaltenbreite
+   *       ausnutzt — sonst wäre der Umbruch dort nicht nötig gewesen. Kurze, bewusst
+   *       abgebrochene Zeilen (z.B. ein Stichwort vor einer hängend eingerückten Definition:
+   *       „…Nachhaltigkeitssiegels“ + „das Anbringen …“) werden deshalb ausgenommen — sie sind
+   *       ein Wortgrenzen-Umbruch, keine Silbentrennung, auch wenn das Trailing-Space-Signal fehlt.
    * </ul>
    */
   private static ArrayList<String> verbindeUmbrueche(List<String> zeilen) {
@@ -198,7 +213,10 @@ public final class TextBereiniger {
       while (true) {
         var gestutzt = zeile.stripTrailing();
         var mitTrennstrich = endetMitSilbentrennung(gestutzt);
-        var markerlos = markerlosAktiv && endetMarkerlos(zeile);
+        var markerlos =
+            markerlosAktiv
+                && endetMarkerlos(zeile)
+                && gestutzt.length() >= typischeZeilenlaenge(zeilen, i) * VOLLZEILE_MINDESTANTEIL;
         if (!mitTrennstrich && !markerlos) {
           break;
         }
@@ -264,6 +282,37 @@ public final class TextBereiniger {
       }
     }
     return mitTrailingSpace > 0 && mitTrailingSpace * 4 >= nichtLeer;
+  }
+
+  /**
+   * Typische „volle“ Zeilenlänge im Umfeld von {@code zentrum} ({@link #VOLLZEILE_PERZENTIL}-
+   * Perzentil der gestutzten Längen nichtleerer Zeilen in einem Fenster von {@link
+   * #VOLLZEILE_FENSTER} Zeilen davor/danach) — ein grober Näherungswert für die lokale
+   * Spaltenbreite, ohne auf PDF-Positionsdaten zugreifen zu müssen. Lokal statt dokumentweit, weil
+   * ein einziges Dokument Abschnitte mit unterschiedlicher Spaltenbreite mischen kann (z.B.
+   * schmalerer Regelungstext vs. breitere Begründung in Regierungsentwürfen) — eine dokumentweite
+   * Kennzahl würde dort die kürzere Spalte systematisch benachteiligen. Vereinzelte überlange
+   * Zeilen (z.B. selbst fälschlich verklebte Umbrüche) dürfen den Wert nicht verzerren, daher ein
+   * hohes Perzentil statt des reinen Maximums.
+   */
+  private static int typischeZeilenlaenge(List<String> zeilen, int zentrum) {
+    var laengen = new ArrayList<Integer>();
+    int von = Math.max(0, zentrum - VOLLZEILE_FENSTER);
+    int bis = Math.min(zeilen.size(), zentrum + VOLLZEILE_FENSTER + 1);
+    for (int i = von; i < bis; i++) {
+      var zeile = zeilen.get(i);
+      if (zeile.isBlank()) {
+        continue;
+      }
+      laengen.add(zeile.stripTrailing().length());
+    }
+    if (laengen.isEmpty()) {
+      return 0;
+    }
+    laengen.sort(null);
+    int index = (int) (laengen.size() * VOLLZEILE_PERZENTIL);
+    index = Math.min(index, laengen.size() - 1);
+    return laengen.get(index);
   }
 
   private static String strippeZeilenenden(List<String> zeilen) {
