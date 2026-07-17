@@ -38,6 +38,15 @@ final class ContentFlattener {
     switch (element.getNodeName()) {
       case "BR" -> sb.append('\n');
       case "DL" -> flattenListe(element, sb, einrueckung);
+      // Mehrere <LA>-Geschwister in einem <DD> sind eigene Zeilen (z.B. Kurzüberschrift +
+      // Definitionstext im UWG-Anhang) — ohne Trenner würden sie nahtlos verkleben. Die
+      // Folgezeile wird tiefer eingerückt als die Aufzählungszeile, damit sie als Kindzeile
+      // der Einheit erkennbar bleibt (Stellenauflösung „Nummer 31 Buchstabe b“).
+      case "LA" -> {
+        flattenKinder(element, sb, einrueckung);
+        neueZeile(sb);
+        sb.append("  ".repeat(einrueckung + 1));
+      }
       case "pre" -> sb.append(element.getTextContent());
       case "table" -> flattenTabelle(element, sb);
       case "TOC" -> flattenToc(element, sb);

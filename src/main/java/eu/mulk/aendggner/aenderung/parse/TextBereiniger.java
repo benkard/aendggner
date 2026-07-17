@@ -12,8 +12,33 @@ import java.util.regex.Pattern;
  * <p>Wichtig für die Silbentrennung: Die Verarbeitung erhält den Trailing-Whitespace der Zeilen bis
  * zum Schluss, denn er ist das Unterscheidungssignal für markerlose Trennungen (siehe {@link
  * #verbindeUmbrueche}).
+ *
+ * <p>PDF-extrahierter Text trägt außerdem die geometrische Umbruch-Klassifikation des {@link
+ * FontgroessenFilter}s ({@link #HARTES_ZEILENENDE}/{@link #WEICHES_ZEILENENDE} am Zeilenende):
+ * Weiche Umbrüche (Zeile endet am rechten Blocksatzrand) werden zu Fließtext zusammengezogen,
+ * harte (deutlich davor) bleiben als Zeilenumbruch erhalten. Nach {@link #bereinige} ist damit
+ * jeder verbleibende Zeilenumbruch nach bester Einschätzung beabsichtigt; die Marker selbst
+ * verlassen diese Klasse nie.
  */
 public final class TextBereiniger {
+
+  /** Vom {@link FontgroessenFilter} an eine Zeile angehängt, deren Ende deutlich vor dem lokalen
+   * rechten Satzspiegelrand liegt: ein bewusstes Zeilenende. */
+  static final char HARTES_ZEILENENDE = '\uE000';
+
+  /** Vom {@link FontgroessenFilter} an eine Zeile angehängt, die am lokalen rechten
+   * Satzspiegelrand endet: ein automatischer (weicher) Blocksatz-Umbruch. */
+  static final char WEICHES_ZEILENENDE = '\uE001';
+
+  /** Geometrische Einordnung eines Zeilenendes (siehe {@link FontgroessenFilter}). */
+  private enum Umbruch {
+    HART,
+    WEICH,
+    UNBEKANNT
+  }
+
+  /** Eine Rohtextzeile samt der Einordnung ihres Zeilenendes. */
+  private record Zeile(String text, Umbruch umbruch) {}
 
   // BGBl alt (zweispaltig, bis 2022) und neu (recht.bund.de, ab 2023).
   private static final Pattern KOPFZEILE =
@@ -44,16 +69,20 @@ public final class TextBereiniger {
               + ")"
               + gesperrt(" ersetzt."));
 
+  /** Whitespace einschließlich der Umbruch-Marker des FontgroessenFilters — die kurzen Zeilen
+   * des senkrechten Wasserzeichens tragen sie an jedem Zeilenende. */
+  private static final String FUELLER = "[\\s\\uE000\\uE001]*";
+
   /** Regex für eine Phrase, deren Zeichen durch beliebigen Whitespace getrennt sein dürfen. */
   private static String gesperrt(String phrase) {
     var sb = new StringBuilder();
     for (char c : phrase.toCharArray()) {
       if (c == ' ') {
-        sb.append("\\s*[-–]?\\s*");
+        sb.append(FUELLER).append("[-–]?").append(FUELLER);
       } else if (c == '-') {
-        sb.append("[-–]\\s*");
+        sb.append("[-–]").append(FUELLER);
       } else {
-        sb.append(Pattern.quote(String.valueOf(c))).append("\\s*");
+        sb.append(Pattern.quote(String.valueOf(c))).append(FUELLER);
       }
     }
     return sb.toString();
@@ -72,6 +101,11 @@ public final class TextBereiniger {
   /** Konjunktionen, die typischerweise auf einen Suspensivstrich folgen („Wirk- und …“). */
   private static final Pattern KONJUNKTION =
       Pattern.compile("^(und|oder|sowie|bzw\\.|beziehungsweise)\\b.*");
+
+  /** Aufzählungsmarker am Zeilenanfang („3. “, „d) “, „aa) “) — eröffnet eine bewusste
+   * Strukturzeile, in die nie hineingejoint werden darf. */
+  private static final Pattern AUFZAEHLUNGSMARKER =
+      Pattern.compile("(\\d+[a-z]?\\.|[a-z]{1,3}\\))\\s");
 
   /** Perzentil der Zeilenlängen, das als „volle Spaltenbreite“ gilt (siehe {@link #verbindeUmbrueche}). */
   private static final double VOLLZEILE_PERZENTIL = 0.9;
@@ -106,11 +140,45 @@ public final class TextBereiniger {
     text = INVERTIERTES_LISTEN_ZITAT.matcher(text).replaceAll("$1„$2 ");
     text = trenneVerklebteZitatgrenzen(text);
     text = VORABFASSUNG.matcher(text).replaceAll("\n");
-    var zeilen = entferneKolumnentitel(text);
+    var zeilen = entferneKolumnentitel(zerlegeInZeilen(text));
     var verbunden = verbindeUmbrueche(zeilen);
     // Falsch-positive markerlose Zusammenzüge („durch“ + „die“ → „durchdie“) reparieren — die
     // Befehlsvokabeln sind nie Kompositum-Bestandteile.
-    return trenneVerklebteZitatgrenzen(strippeZeilenenden(verbunden));
+    return trenneVerklebteZitatgrenzen(reflowUndStrippe(verbunden));
+  }
+
+  /**
+   * Zerlegt den Text in Zeilen und streift dabei die Umbruch-Marker des {@link
+   * FontgroessenFilter}s in die Klassifikation ab. Verirrte Marker mitten in der Zeile (z.B.
+   * Reste der Wasserzeichen-Entfernung) sind bedeutungslos und werden entfernt.
+   */
+  private static ArrayList<Zeile> zerlegeInZeilen(String text) {
+    var roh = text.split("\n", -1);
+    var ergebnis = new ArrayList<Zeile>(roh.length);
+    for (var zeile : roh) {
+      var umbruch = Umbruch.UNBEKANNT;
+      if (!zeile.isEmpty()) {
+        char letztes = zeile.charAt(zeile.length() - 1);
+        if (letztes == HARTES_ZEILENENDE) {
+          umbruch = Umbruch.HART;
+        } else if (letztes == WEICHES_ZEILENENDE) {
+          umbruch = Umbruch.WEICH;
+        }
+        if (umbruch != Umbruch.UNBEKANNT) {
+          zeile = zeile.substring(0, zeile.length() - 1);
+        }
+      }
+      ergebnis.add(new Zeile(ohneMarker(zeile), umbruch));
+    }
+    return ergebnis;
+  }
+
+  private static String ohneMarker(String text) {
+    if (text.indexOf(HARTES_ZEILENENDE) < 0 && text.indexOf(WEICHES_ZEILENENDE) < 0) {
+      return text;
+    }
+    return text.replace(String.valueOf(HARTES_ZEILENENDE), "")
+        .replace(String.valueOf(WEICHES_ZEILENENDE), "");
   }
 
   /**
@@ -147,28 +215,27 @@ public final class TextBereiniger {
   }
 
   /** Entfernt Seitenkopf-/Fußzeilen. Trailing-Whitespace der übrigen Zeilen bleibt erhalten! */
-  private static ArrayList<String> entferneKolumnentitel(String text) {
-    var roh = text.split("\n", -1);
-    var kolumnentitel = new boolean[roh.length];
-    for (int i = 0; i < roh.length; i++) {
-      kolumnentitel[i] = istKolumnentitel(roh[i]);
+  private static ArrayList<Zeile> entferneKolumnentitel(List<Zeile> roh) {
+    var kolumnentitel = new boolean[roh.size()];
+    for (int i = 0; i < roh.size(); i++) {
+      kolumnentitel[i] = istKolumnentitel(roh.get(i).text());
     }
-    var ergebnis = new ArrayList<String>();
-    for (int i = 0; i < roh.length; i++) {
+    var ergebnis = new ArrayList<Zeile>();
+    for (int i = 0; i < roh.size(); i++) {
       if (kolumnentitel[i]) {
         continue;
       }
       // Eine verirrte „Anlage N“-Marke direkt vor einem Seitenkopf gehört zum Seitenmöbel.
-      if (ANLAGE_MARKE.matcher(roh[i]).matches()) {
+      if (ANLAGE_MARKE.matcher(roh.get(i).text()).matches()) {
         int j = i + 1;
-        while (j < roh.length && roh[j].isBlank()) {
+        while (j < roh.size() && roh.get(j).text().isBlank()) {
           j++;
         }
-        if (j < roh.length && kolumnentitel[j]) {
+        if (j < roh.size() && kolumnentitel[j]) {
           continue;
         }
       }
-      ergebnis.add(roh[i]);
+      ergebnis.add(roh.get(i));
     }
     return ergebnis;
   }
@@ -194,41 +261,58 @@ public final class TextBereiniger {
    *   <li><b>Markerlos</b> (Bundestags-Drucksachen: „Schwel“ + „lenwertes“): Reguläre Umbrüche
    *       enden dort mit Leerzeichen vor dem Zeilenumbruch; endet eine Zeile direkt mit einem
    *       Buchstaben und beginnt die Folgezeile klein, ist es eine Trennung → ohne Leerzeichen
-   *       zusammenziehen. Das trifft aber nur zu, wenn die Zeile (fast) die volle Spaltenbreite
-   *       ausnutzt — sonst wäre der Umbruch dort nicht nötig gewesen. Kurze, bewusst
-   *       abgebrochene Zeilen (z.B. ein Stichwort vor einer hängend eingerückten Definition:
+   *       zusammenziehen. Das trifft aber nur zu, wenn die Zeile den rechten Rand tatsächlich
+   *       erreicht — sonst wäre der Umbruch dort nicht nötig gewesen. Bewusst abgebrochene
+   *       Zeilen (z.B. ein Stichwort vor einer hängend eingerückten Definition:
    *       „…Nachhaltigkeitssiegels“ + „das Anbringen …“) werden deshalb ausgenommen — sie sind
-   *       ein Wortgrenzen-Umbruch, keine Silbentrennung, auch wenn das Trailing-Space-Signal fehlt.
+   *       ein Wortgrenzen-Umbruch, keine Silbentrennung, auch wenn das Trailing-Space-Signal
+   *       fehlt. Maßgeblich ist die geometrische Klassifikation des FontgroessenFilters; nur wo
+   *       sie fehlt, springt die Zeichenzahl-Näherung ({@link #typischeZeilenlaenge}) ein.
    * </ul>
+   *
+   * <p>Beginnt die Folgezeile mit einem Aufzählungsmarker („d)“, „3.“), unterbleibt jeder
+   * Zusammenzug — ein Marker eröffnet eine bewusste Strukturzeile, auch wenn er klein
+   * geschrieben ist („…vorgesehen und“ + „d) die Überwachung …“).
    */
-  private static ArrayList<String> verbindeUmbrueche(List<String> zeilen) {
+  private static ArrayList<Zeile> verbindeUmbrueche(List<Zeile> zeilen) {
     // Markerlose Trennungen sind nur erkennbar, wenn die Quelle die Trailing-Space-Konvention
     // verwendet (PDF-Extraktion). Handgeschriebene Klartextdateien haben keine Trailing-Spaces —
     // dort würde die Heuristik reguläre Umbrüche verschmelzen, also bleibt sie aus.
     var markerlosAktiv = verwendetTrailingSpaces(zeilen);
 
-    var ergebnis = new ArrayList<String>();
+    var ergebnis = new ArrayList<Zeile>();
     for (int i = 0; i < zeilen.size(); i++) {
-      var zeile = zeilen.get(i);
+      var zeile = zeilen.get(i).text();
+      var umbruch = zeilen.get(i).umbruch();
       while (true) {
         var gestutzt = zeile.stripTrailing();
-        var mitTrennstrich = endetMitSilbentrennung(gestutzt);
+        // Ein geometrisch hartes Zeilenende ist ein bewusster Umbruch — nie zusammenziehen.
+        var mitTrennstrich = umbruch != Umbruch.HART && endetMitSilbentrennung(gestutzt);
         var markerlos =
             markerlosAktiv
                 && endetMarkerlos(zeile)
-                && gestutzt.length() >= typischeZeilenlaenge(zeilen, i) * VOLLZEILE_MINDESTANTEIL;
+                && switch (umbruch) {
+                  case HART -> false;
+                  case WEICH -> true;
+                  case UNBEKANNT ->
+                      gestutzt.length()
+                          >= typischeZeilenlaenge(zeilen, i) * VOLLZEILE_MINDESTANTEIL;
+                };
         if (!mitTrennstrich && !markerlos) {
           break;
         }
         // Leerzeilen (z.B. an Spalten-/Seitenumbrüchen) überspringen.
         int j = i + 1;
-        while (j < zeilen.size() && zeilen.get(j).isBlank()) {
+        while (j < zeilen.size() && zeilen.get(j).text().isBlank()) {
           j++;
         }
         if (j >= zeilen.size()) {
           break;
         }
-        var naechste = zeilen.get(j).stripLeading();
+        var naechste = zeilen.get(j).text().stripLeading();
+        if (AUFZAEHLUNGSMARKER.matcher(naechste).lookingAt()) {
+          break;
+        }
         int erstesZeichen = naechste.codePointAt(0);
         if (mitTrennstrich) {
           if (Character.isLowerCase(erstesZeichen) && !KONJUNKTION.matcher(naechste).matches()) {
@@ -245,9 +329,10 @@ public final class TextBereiniger {
             break;
           }
         }
+        umbruch = zeilen.get(j).umbruch();
         i = j;
       }
-      ergebnis.add(zeile);
+      ergebnis.add(new Zeile(zeile, umbruch));
     }
     return ergebnis;
   }
@@ -269,10 +354,11 @@ public final class TextBereiniger {
   }
 
   /** Endet ein nennenswerter Teil der nichtleeren Zeilen mit Whitespace? */
-  private static boolean verwendetTrailingSpaces(List<String> zeilen) {
+  private static boolean verwendetTrailingSpaces(List<Zeile> zeilen) {
     int nichtLeer = 0;
     int mitTrailingSpace = 0;
-    for (var zeile : zeilen) {
+    for (var eintrag : zeilen) {
+      var zeile = eintrag.text();
       if (zeile.isBlank()) {
         continue;
       }
@@ -295,12 +381,12 @@ public final class TextBereiniger {
    * Zeilen (z.B. selbst fälschlich verklebte Umbrüche) dürfen den Wert nicht verzerren, daher ein
    * hohes Perzentil statt des reinen Maximums.
    */
-  private static int typischeZeilenlaenge(List<String> zeilen, int zentrum) {
+  private static int typischeZeilenlaenge(List<Zeile> zeilen, int zentrum) {
     var laengen = new ArrayList<Integer>();
     int von = Math.max(0, zentrum - VOLLZEILE_FENSTER);
     int bis = Math.min(zeilen.size(), zentrum + VOLLZEILE_FENSTER + 1);
     for (int i = von; i < bis; i++) {
-      var zeile = zeilen.get(i);
+      var zeile = zeilen.get(i).text();
       if (zeile.isBlank()) {
         continue;
       }
@@ -315,13 +401,37 @@ public final class TextBereiniger {
     return laengen.get(index);
   }
 
-  private static String strippeZeilenenden(List<String> zeilen) {
+  /**
+   * Zieht geometrisch weiche Umbrüche (Blocksatz-Zeilenfall) mit einem Leerzeichen zu Fließtext
+   * zusammen und stutzt die Zeilenenden. Harte und unklassifizierte Umbrüche bleiben erhalten —
+   * nach diesem Schritt ist jeder verbleibende Zeilenumbruch nach bester Einschätzung
+   * beabsichtigt. Leerzeilen unmittelbar nach einem weichen Umbruch sind Spalten-/Seitenwechsel
+   * mitten im Absatz und entfallen.
+   *
+   * <p>Beginnt die Folgezeile mit einem Aufzählungsmarker, bleibt der Umbruch auch nach einer
+   * weichen Zeile stehen: Der Zeilenfall kann zufällig genau vor einem Aufzählungspunkt am Rand
+   * enden, und ein in die Zeile gezogener Marker wäre für die nachgelagerte Strukturerkennung
+   * unsichtbar.
+   */
+  private static String reflowUndStrippe(List<Zeile> zeilen) {
     var sb = new StringBuilder();
+    boolean erste = true;
+    boolean vorherWeich = false;
     for (var zeile : zeilen) {
-      if (sb.length() > 0) {
-        sb.append('\n');
+      var text = zeile.text().stripTrailing();
+      if (vorherWeich && text.isBlank()) {
+        continue;
       }
-      sb.append(zeile.stripTrailing());
+      var gestrippt = text.stripLeading();
+      if (erste) {
+        sb.append(text);
+        erste = false;
+      } else if (vorherWeich && !AUFZAEHLUNGSMARKER.matcher(gestrippt).lookingAt()) {
+        sb.append(' ').append(gestrippt);
+      } else {
+        sb.append('\n').append(text);
+      }
+      vorherWeich = zeile.umbruch() == Umbruch.WEICH && !text.isBlank();
     }
     return sb.toString();
   }

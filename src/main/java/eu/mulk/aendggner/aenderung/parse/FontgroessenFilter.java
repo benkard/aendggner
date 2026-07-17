@@ -2,6 +2,8 @@ package eu.mulk.aendggner.aenderung.parse;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +24,14 @@ import org.jboss.logging.Logger;
  * Der erste ermittelt die zeichenhäufigste Fontgröße jeder Seite, der zweite lässt nur Läufe durch,
  * deren mittlere Größe nicht deutlich darunter liegt (Überschriften sind größer und bleiben
  * erhalten). Seiten ohne klar dominante Brotschrift werden nicht gefiltert.
+ *
+ * <p>Zusätzlich klassifiziert der Filter jedes Zeilenende geometrisch als <b>weich</b>
+ * (automatischer Blocksatz-Umbruch: die Zeile endet am lokalen rechten Satzspiegelrand) oder
+ * <b>hart</b> (bewusstes Zeilenende: deutlich davor) und markiert es mit {@link
+ * TextBereiniger#WEICHES_ZEILENENDE} bzw. {@link TextBereiniger#HARTES_ZEILENENDE}. Der
+ * TextBereiniger nutzt das, um weiche Umbrüche zu Fließtext zusammenzuziehen und bewusste
+ * Umbrüche (etwa die Kurzüberschrift einer hängend eingerückten Definition im UWG-Anhang) zu
+ * erhalten — eine Unterscheidung, die aus dem reinen Text nicht zuverlässig möglich ist.
  */
 final class FontgroessenFilter {
 
@@ -42,6 +52,37 @@ final class FontgroessenFilter {
    */
   private static final double KANDIDATEN_SCHWELLE = 0.25;
 
+  /** Interne End-X-Metadaten am Zeilenende („␂527␂“), von {@link #klassifiziereZeilenenden}
+   * konsumiert; verlässt diese Klasse nie. */
+  private static final char ENDX_MARKE = '\uE002';
+
+  /** Verirrte End-X-Metadaten mitten in einer Zeile (siehe {@link #klassifiziereZeilenenden}). */
+  private static final java.util.regex.Pattern ENDX_REST =
+      java.util.regex.Pattern.compile("\uE002\\d*\uE002?");
+
+  /** Fensterhälfte (Zeilen davor/danach) für die lokale Schätzung des rechten Rands. Lokal statt
+   * dokumentweit, weil ein Dokument Blöcke unterschiedlicher Spaltenbreite mischt (schmalerer
+   * Regelungstext vs. breitere Begründung; zweispaltiges altes BGBl, dessen Spalten in
+   * Content-Stream-Reihenfolge nacheinander kommen). */
+  private static final int RAND_FENSTER = 20;
+
+  /** Perzentil der End-X-Werte im Fenster, das als rechter Rand gilt (robust gegen einzelne
+   * überlange Artefaktzeilen, anders als das Maximum). */
+  private static final double RAND_PERZENTIL = 0.9;
+
+  /** Bis zu diesem Abstand (pt) unter dem Rand endet eine Zeile „am Rand“ → weicher Umbruch.
+   * Blocksatz-Zeilen enden auf wenige pt genau am Rand. */
+  private static final float WEICH_TOLERANZ_PT = 3f;
+
+  /** Ab diesem Abstand (pt) unter dem Rand ist das Zeilenende bewusst gesetzt → harter Umbruch.
+   * Der Bereich dazwischen bleibt unklassifiziert (z.B. Zeilen, deren gefilterte
+   * Fußnotenziffer das gemessene Ende leicht verkürzt). */
+  private static final float HART_ABSTAND_PT = 10f;
+
+  /** Mindestzahl von Fensterzeilen am Rand, damit das Fenster als Blocksatz gilt und überhaupt
+   * klassifiziert wird — Titelseiten, Inhaltsübersichten u.ä. bleiben unklassifiziert. */
+  private static final int MIN_RANDZEILEN = 5;
+
   private FontgroessenFilter() {}
 
   static String extrahiere(PDDocument dokument) throws IOException {
@@ -61,7 +102,72 @@ final class FontgroessenFilter {
     filter.setLineSeparator("\n");
     var ausgabe = new StringWriter();
     filter.writeText(dokument, ausgabe);
-    return ausgabe.toString();
+    return klassifiziereZeilenenden(ausgabe.toString());
+  }
+
+  /**
+   * Ersetzt die End-X-Metadaten der Zeilen durch die Umbruch-Klassifikation: Zeilen, die am
+   * lokalen rechten Rand enden, erhalten {@link TextBereiniger#WEICHES_ZEILENENDE}, deutlich
+   * davor endende {@link TextBereiniger#HARTES_ZEILENENDE}; alles andere bleibt unmarkiert.
+   */
+  private static String klassifiziereZeilenenden(String text) {
+    var zeilen = text.split("\n", -1);
+    var endX = new float[zeilen.length];
+    Arrays.fill(endX, Float.NaN);
+    for (int i = 0; i < zeilen.length; i++) {
+      var zeile = zeilen[i];
+      if (zeile.isEmpty() || zeile.charAt(zeile.length() - 1) != ENDX_MARKE) {
+        continue;
+      }
+      int start = zeile.lastIndexOf(ENDX_MARKE, zeile.length() - 2);
+      if (start < 0) {
+        continue;
+      }
+      try {
+        endX[i] = Integer.parseInt(zeile, start + 1, zeile.length() - 1, 10);
+      } catch (NumberFormatException e) {
+        continue;
+      }
+      zeilen[i] = zeile.substring(0, start);
+    }
+
+    // Verirrte Metadaten mitten in der Zeile (Seitenwechsel ohne Zeilentrenner) sind wertlos.
+    for (int i = 0; i < zeilen.length; i++) {
+      if (zeilen[i].indexOf(ENDX_MARKE) >= 0) {
+        zeilen[i] = ENDX_REST.matcher(zeilen[i]).replaceAll("");
+      }
+    }
+
+    for (int i = 0; i < zeilen.length; i++) {
+      if (Float.isNaN(endX[i])) {
+        continue;
+      }
+      var fenster = new ArrayList<Float>();
+      for (int j = Math.max(0, i - RAND_FENSTER);
+          j < Math.min(zeilen.length, i + RAND_FENSTER + 1);
+          j++) {
+        if (!Float.isNaN(endX[j])) {
+          fenster.add(endX[j]);
+        }
+      }
+      fenster.sort(null);
+      float rand = fenster.get(Math.min((int) (fenster.size() * RAND_PERZENTIL), fenster.size() - 1));
+      int randZeilen = 0;
+      for (float x : fenster) {
+        if (x >= rand - WEICH_TOLERANZ_PT) {
+          randZeilen++;
+        }
+      }
+      if (randZeilen < MIN_RANDZEILEN) {
+        continue; // kein Blocksatz-Nachweis im Umfeld — nicht klassifizierbar
+      }
+      if (endX[i] >= rand - WEICH_TOLERANZ_PT) {
+        zeilen[i] = zeilen[i] + TextBereiniger.WEICHES_ZEILENENDE;
+      } else if (endX[i] < rand - HART_ABSTAND_PT) {
+        zeilen[i] = zeilen[i] + TextBereiniger.HARTES_ZEILENENDE;
+      }
+    }
+    return String.join("\n", zeilen);
   }
 
   /** Anteil der Seitenhöhe, unterhalb dessen Brotschrift-Text als Seitenfuß (Kolumnentitel)
@@ -189,6 +295,9 @@ final class FontgroessenFilter {
     private final Map<Integer, Float> schwellen;
     private final Map<Integer, Float> untergrenzen;
 
+    /** End-X (pt) des breitesten behaltenen Laufs der laufenden Zeile; NaN vor dem ersten. */
+    private float zeilenEndX = Float.NaN;
+
     GroessenFilterStripper(Map<Integer, Float> schwellen, Map<Integer, Float> untergrenzen) {
       this.schwellen = schwellen;
       this.untergrenzen = untergrenzen;
@@ -196,10 +305,43 @@ final class FontgroessenFilter {
 
     @Override
     protected void writeString(String text, List<TextPosition> positionen) throws IOException {
+      if (!behalte(positionen)) {
+        return; // Fußnotenblock bzw. hochgestellte Ziffer
+      }
+      for (var position : positionen) {
+        float endX = position.getXDirAdj() + position.getWidthDirAdj();
+        zeilenEndX = Float.isNaN(zeilenEndX) ? endX : Math.max(zeilenEndX, endX);
+      }
+      super.writeString(text, positionen);
+    }
+
+    /** Schreibt vor jedem Zeilentrenner das End-X der Zeile als Metadaten für
+     * {@link #klassifiziereZeilenenden}. */
+    @Override
+    protected void writeLineSeparator() throws IOException {
+      schreibeEndXMarke();
+      super.writeLineSeparator();
+    }
+
+    /** Die letzte Zeile einer Seite endet ohne Zeilentrenner — ohne Flush würde ihr End-X erst
+     * an der ersten Zeile der Folgeseite landen und diese falsch klassifizieren. */
+    @Override
+    protected void writePageEnd() throws IOException {
+      schreibeEndXMarke();
+      super.writePageEnd();
+    }
+
+    private void schreibeEndXMarke() throws IOException {
+      if (!Float.isNaN(zeilenEndX)) {
+        writeString(ENDX_MARKE + Integer.toString(Math.round(zeilenEndX)) + ENDX_MARKE);
+        zeilenEndX = Float.NaN;
+      }
+    }
+
+    private boolean behalte(List<TextPosition> positionen) {
       var schwelle = schwellen.get(getCurrentPageNo());
       if (schwelle == null || positionen.isEmpty()) {
-        super.writeString(text, positionen);
-        return;
+        return true;
       }
       float groessenSumme = 0;
       float ySumme = 0;
@@ -209,16 +351,12 @@ final class FontgroessenFilter {
       }
       float groesse = groessenSumme / positionen.size();
       if (groesse >= schwelle) {
-        super.writeString(text, positionen);
-        return;
+        return true;
       }
       var brotschrift = schwelle + TOLERANZ_PT;
       var grenze = untergrenzen.get(getCurrentPageNo());
       boolean unterDerBrotschrift = grenze != null && ySumme / positionen.size() > grenze;
-      if (unterDerBrotschrift || groesse < brotschrift - STARK_KLEINER_PT) {
-        return; // Fußnotenblock bzw. hochgestellte Ziffer
-      }
-      super.writeString(text, positionen);
+      return !unterDerBrotschrift && groesse >= brotschrift - STARK_KLEINER_PT;
     }
   }
 

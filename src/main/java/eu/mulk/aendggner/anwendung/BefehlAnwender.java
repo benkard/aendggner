@@ -1261,10 +1261,21 @@ public final class BefehlAnwender {
     return absaetze;
   }
 
-  /** Fließtext-Whitespace glätten, Aufzählungszeilen des Zitats aber erhalten. */
+  /**
+   * Zitattext in die kanonische Zeilenform bringen: Leerzeilen entfallen, Zeilen werden gestutzt,
+   * Aufzählungspunkte eingerückt. Zeilenumbrüche bleiben erhalten — der TextBereiniger hat weiche
+   * (Blocksatz-)Umbrüche bereits zu Fließtext zusammengezogen, verbleibende Umbrüche sind also
+   * beabsichtigt (z.B. die Kurzüberschrift über einer hängend eingerückten Definition im
+   * UWG-Anhang) und müssen dieselbe Form erhalten wie beim Flatten des Stammgesetz-XML.
+   */
   private static String normalisiereZitatText(String text) {
     var zeilen = text.split("\n");
     var sb = new StringBuilder();
+    // Fortsetzungszeilen innerhalb eines Aufzählungspunkts (z.B. der Definitionstext unter einer
+    // Kurzüberschrift) werden tiefer eingerückt als die Aufzählungszeile — dieselbe Form, die der
+    // ContentFlattener aus dem Stammgesetz-XML erzeugt, und Voraussetzung dafür, dass die
+    // Stellenauflösung sie als Kindzeilen der Einheit erkennt.
+    var fortsetzungsEinzug = "";
     for (var zeile : zeilen) {
       var gestutzt = zeile.strip();
       if (gestutzt.isEmpty()) {
@@ -1273,10 +1284,11 @@ public final class BefehlAnwender {
       if (sb.length() == 0) {
         sb.append(gestutzt);
       } else if (gestutzt.matches("^(\\d+[a-z]?\\.|[a-z]{1,3}\\))\\s.*")) {
-        // Aufzählungspunkt: eigene Zeile.
+        // Aufzählungspunkt: eigene Zeile mit Einzug.
         sb.append("\n  ").append(gestutzt);
+        fortsetzungsEinzug = "    ";
       } else {
-        sb.append(' ').append(gestutzt);
+        sb.append('\n').append(fortsetzungsEinzug).append(gestutzt);
       }
     }
     return sb.toString();
