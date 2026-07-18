@@ -60,27 +60,25 @@ final class FontgroessenFilter {
   private static final java.util.regex.Pattern ENDX_REST =
       java.util.regex.Pattern.compile("\uE002\\d*\uE002?");
 
-  /** Fensterhälfte (Zeilen davor/danach) für die lokale Schätzung des rechten Rands. Lokal statt
-   * dokumentweit, weil ein Dokument Blöcke unterschiedlicher Spaltenbreite mischt (schmalerer
-   * Regelungstext vs. breitere Begründung; zweispaltiges altes BGBl, dessen Spalten in
-   * Content-Stream-Reihenfolge nacheinander kommen). */
+  /** Fensterhälfte (Zeilen davor/danach) für die lokale Suche nach Ausrichtungs-Clustern. Lokal
+   * statt dokumentweit, weil ein Dokument Blöcke unterschiedlicher Spaltenbreite mischt
+   * (schmalerer Regelungstext vs. breitere Begründung; zweispaltiges altes BGBl, dessen Spalten
+   * in Content-Stream-Reihenfolge nacheinander kommen). */
   private static final int RAND_FENSTER = 20;
 
-  /** Perzentil der End-X-Werte im Fenster, das als rechter Rand gilt (robust gegen einzelne
-   * überlange Artefaktzeilen, anders als das Maximum). */
-  private static final double RAND_PERZENTIL = 0.9;
+  /** Streuung (pt), innerhalb derer Zeilenenden als „gleich ausgerichtet“ gelten. Blocksatz-Zeilen
+   * enden auf wenige pt genau am Rand; ein evtl. mitgemessenes Trailing-Space verschiebt das Ende
+   * um eine Leerzeichenbreite (~2–3 pt). */
+  private static final float CLUSTER_TOLERANZ_PT = 4f;
 
-  /** Bis zu diesem Abstand (pt) unter dem Rand endet eine Zeile „am Rand“ → weicher Umbruch.
-   * Blocksatz-Zeilen enden auf wenige pt genau am Rand. */
-  private static final float WEICH_TOLERANZ_PT = 3f;
-
-  /** Ab diesem Abstand (pt) unter dem Rand ist das Zeilenende bewusst gesetzt → harter Umbruch.
-   * Der Bereich dazwischen bleibt unklassifiziert (z.B. Zeilen, deren gefilterte
+  /** Ab diesem Abstand (pt) unter einem Ausrichtungs-Cluster ist ein Zeilenende bewusst gesetzt →
+   * harter Umbruch. Der Bereich dazwischen bleibt unklassifiziert (z.B. Zeilen, deren gefilterte
    * Fußnotenziffer das gemessene Ende leicht verkürzt). */
   private static final float HART_ABSTAND_PT = 10f;
 
-  /** Mindestzahl von Fensterzeilen am Rand, damit das Fenster als Blocksatz gilt und überhaupt
-   * klassifiziert wird — Titelseiten, Inhaltsübersichten u.ä. bleiben unklassifiziert. */
+  /** Mindestzahl gleich ausgerichteter Fensterzeilen, damit ein Zeilenende als Satzspiegelrand
+   * (Ausrichtungs-Cluster) gilt — Titelseiten, Unterschriftenblöcke u.ä. bilden keine Cluster
+   * und bleiben unklassifiziert. */
   private static final int MIN_RANDZEILEN = 5;
 
   private FontgroessenFilter() {}
@@ -106,9 +104,13 @@ final class FontgroessenFilter {
   }
 
   /**
-   * Ersetzt die End-X-Metadaten der Zeilen durch die Umbruch-Klassifikation: Zeilen, die am
-   * lokalen rechten Rand enden, erhalten {@link TextBereiniger#WEICHES_ZEILENENDE}, deutlich
-   * davor endende {@link TextBereiniger#HARTES_ZEILENENDE}; alles andere bleibt unmarkiert.
+   * Ersetzt die End-X-Metadaten der Zeilen durch die Umbruch-Klassifikation: Zeilen, die an einem
+   * lokalen Satzspiegelrand enden (Ausrichtungs-Cluster aus mindestens {@link #MIN_RANDZEILEN}
+   * gleich endenden Fensterzeilen), erhalten {@link TextBereiniger#WEICHES_ZEILENENDE}; Zeilen,
+   * die deutlich vor einem solchen Rand enden, {@link TextBereiniger#HARTES_ZEILENENDE}; alles
+   * andere bleibt unmarkiert. Cluster statt Perzentil, weil ein Fenster am Spaltenwechsel des
+   * zweispaltigen alten BGBl beide Spaltenränder enthält — maßgeblich ist der Rand, an dem die
+   * Zeile selbst ausgerichtet ist bzw. der nächste oberhalb ihres Endes.
    */
   private static String klassifiziereZeilenenden(String text) {
     var zeilen = text.split("\n", -1);
@@ -139,7 +141,8 @@ final class FontgroessenFilter {
     }
 
     for (int i = 0; i < zeilen.length; i++) {
-      if (Float.isNaN(endX[i])) {
+      float x = endX[i];
+      if (Float.isNaN(x)) {
         continue;
       }
       var fenster = new ArrayList<Float>();
@@ -150,24 +153,32 @@ final class FontgroessenFilter {
           fenster.add(endX[j]);
         }
       }
-      fenster.sort(null);
-      float rand = fenster.get(Math.min((int) (fenster.size() * RAND_PERZENTIL), fenster.size() - 1));
-      int randZeilen = 0;
-      for (float x : fenster) {
-        if (x >= rand - WEICH_TOLERANZ_PT) {
-          randZeilen++;
-        }
-      }
-      if (randZeilen < MIN_RANDZEILEN) {
-        continue; // kein Blocksatz-Nachweis im Umfeld — nicht klassifizierbar
-      }
-      if (endX[i] >= rand - WEICH_TOLERANZ_PT) {
+      if (istCluster(fenster, x)) {
+        // Die Zeile endet an einem Satzspiegelrand → automatischer Blocksatz-Umbruch.
         zeilen[i] = zeilen[i] + TextBereiniger.WEICHES_ZEILENENDE;
-      } else if (endX[i] < rand - HART_ABSTAND_PT) {
-        zeilen[i] = zeilen[i] + TextBereiniger.HARTES_ZEILENENDE;
+        continue;
+      }
+      // Gibt es deutlich oberhalb des Zeilenendes einen Satzspiegelrand, wäre dort noch Platz
+      // gewesen → das Zeilenende ist bewusst gesetzt.
+      for (float v : fenster) {
+        if (v >= x + HART_ABSTAND_PT && istCluster(fenster, v)) {
+          zeilen[i] = zeilen[i] + TextBereiniger.HARTES_ZEILENENDE;
+          break;
+        }
       }
     }
     return String.join("\n", zeilen);
+  }
+
+  /** Enden mindestens {@link #MIN_RANDZEILEN} der Fensterzeilen gleich ausgerichtet bei {@code x}? */
+  private static boolean istCluster(List<Float> fenster, float x) {
+    int anzahl = 0;
+    for (float v : fenster) {
+      if (Math.abs(v - x) <= CLUSTER_TOLERANZ_PT) {
+        anzahl++;
+      }
+    }
+    return anzahl >= MIN_RANDZEILEN;
   }
 
   /** Anteil der Seitenhöhe, unterhalb dessen Brotschrift-Text als Seitenfuß (Kolumnentitel)

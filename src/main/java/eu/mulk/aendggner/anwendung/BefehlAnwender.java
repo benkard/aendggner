@@ -526,12 +526,7 @@ public final class BefehlAnwender {
             befehl,
             (text, bereich) -> {
               var einrueckung = einrueckungVon(text, bereich.von());
-              var ersatz =
-                  normalisiereZitatText(befehl.text())
-                      .lines()
-                      .map(zeile -> einrueckung + zeile.strip())
-                      .reduce((a, b) -> a + "\n" + b)
-                      .orElse("");
+              var ersatz = rueckeZitatEin(normalisiereZitatText(befehl.text()), einrueckung);
               return TextErgebnis.ok(
                   text.substring(0, bereich.von()) + ersatz + text.substring(bereich.bis()));
             });
@@ -644,12 +639,7 @@ public final class BefehlAnwender {
     var absatz = absaetze.get(f1.absatzIndex());
     var text = absatz.text();
     var einrueckung = einrueckungVon(text, von);
-    var ersatz =
-        normalisiereZitatText(befehl.text())
-            .lines()
-            .map(zeile -> einrueckung + zeile.strip())
-            .reduce((a, b) -> a + "\n" + b)
-            .orElse("");
+    var ersatz = rueckeZitatEin(normalisiereZitatText(befehl.text()), einrueckung);
     absaetze.set(f1.absatzIndex(), absatz.mitText(text.substring(0, von) + ersatz + text.substring(bis)));
     normen.set(f1.normIndex(), norm.mitAbsaetzen(absaetze));
     return angewandt(befehl, norm.enbez());
@@ -734,12 +724,7 @@ public final class BefehlAnwender {
                 int position = befehl.vorher() ? bereich.von() : bereich.bis();
                 // Der Einfügeblock darf mehrere Einheiten enthalten („die Nummern 4a bis 4c“);
                 // jede Aufzählungszeile des Zitats bleibt eine eigene Zeile.
-                var block =
-                    normalisiereZitatText(befehl.text())
-                        .lines()
-                        .map(zeile -> einrueckung + zeile.strip())
-                        .reduce((a, b) -> a + "\n" + b)
-                        .orElse("");
+                var block = rueckeZitatEin(normalisiereZitatText(befehl.text()), einrueckung);
                 return TextErgebnis.ok(
                     befehl.vorher()
                         ? text.substring(0, position) + block + "\n" + text.substring(position)
@@ -1268,6 +1253,10 @@ public final class BefehlAnwender {
    * beabsichtigt (z.B. die Kurzüberschrift über einer hängend eingerückten Definition im
    * UWG-Anhang) und müssen dieselbe Form erhalten wie beim Flatten des Stammgesetz-XML.
    */
+  /** Eine Zeile, die mit einem Aufzählungsmarker beginnt („3. “, „d) “). */
+  private static final Pattern AUFZAEHLUNGSZEILE =
+      Pattern.compile("^(\\d+[a-z]?\\.|[a-z]{1,3}\\))\\s.*");
+
   private static String normalisiereZitatText(String text) {
     var zeilen = text.split("\n");
     var sb = new StringBuilder();
@@ -1283,13 +1272,40 @@ public final class BefehlAnwender {
       }
       if (sb.length() == 0) {
         sb.append(gestutzt);
-      } else if (gestutzt.matches("^(\\d+[a-z]?\\.|[a-z]{1,3}\\))\\s.*")) {
+        if (AUFZAEHLUNGSZEILE.matcher(gestutzt).matches()) {
+          fortsetzungsEinzug = "  ";
+        }
+      } else if (AUFZAEHLUNGSZEILE.matcher(gestutzt).matches()) {
         // Aufzählungspunkt: eigene Zeile mit Einzug.
         sb.append("\n  ").append(gestutzt);
         fortsetzungsEinzug = "    ";
       } else {
         sb.append('\n').append(fortsetzungsEinzug).append(gestutzt);
       }
+    }
+    return sb.toString();
+  }
+
+  /**
+   * Rückt die kanonischen Zitatzeilen auf die Ziel-Einrückung um: Aufzählungszeilen (und die
+   * erste Zeile) auf {@code einrueckung}, Fortsetzungszeilen — etwa der Definitionstext unter
+   * einer Kurzüberschrift — zwei Zeichen tiefer, damit sie Kindzeilen der Einheit bleiben
+   * (dieselbe Form, die der ContentFlattener aus dem Stammgesetz-XML erzeugt).
+   */
+  private static String rueckeZitatEin(String zitat, String einrueckung) {
+    var sb = new StringBuilder();
+    boolean erste = true;
+    for (var zeile : zitat.split("\n", -1)) {
+      var inhalt = zeile.strip();
+      if (!erste) {
+        sb.append('\n');
+      }
+      sb.append(einrueckung);
+      if (!erste && !AUFZAEHLUNGSZEILE.matcher(inhalt).matches()) {
+        sb.append("  ");
+      }
+      sb.append(inhalt);
+      erste = false;
     }
     return sb.toString();
   }

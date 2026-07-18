@@ -88,6 +88,13 @@ class EndToEndTest {
     // werden (kurze Stichwort-Zeile vor hängend eingerückter Definition, kein Wort wird getrennt).
     assertThat(text).contains("Nachhaltigkeitssiegels\ndas Anbringen");
     assertThat(text).doesNotContain("Nachhaltigkeitssiegelsdas");
+    // Dank geometrischer Umbruch-Klassifikation gilt das auch für Stichwort-Zeilen, die fast die
+    // volle Spaltenbreite erreichen (Nummer 4c) …
+    assertThat(text).contains("Treibhausgasemissionen\ndas Treffen");
+    assertThat(text).doesNotContain("Treibhausgasemissionendas");
+    // … und für markerlose Zeilenenden vor einer Aufzählungs-Folgezeile („und“ + „d)“).
+    assertThat(text).contains("vorgesehen und\nd) die Überwachung");
+    assertThat(text).doesNotContain("undd)");
 
     var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, null);
     assertThat(parseErgebnis.artikel()).containsExactly("1");
@@ -100,6 +107,14 @@ class EndToEndTest {
     var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
     assertThat(anwendung.anzahlManuell()).isZero();
     assertThat(anwendung.anzahlAngewandt()).isEqualTo(parseErgebnis.befehle().size());
+
+    // Kurzüberschrift und Definitionstext stehen in der angewandten Fassung auf eigenen Zeilen —
+    // sowohl bei XML-stämmigen (Nummer 22) als auch bei PDF-stämmigen (Nummer 2a) Anhang-Nummern.
+    var anhangNeu = anwendung.neu().norm("Anhang").orElseThrow();
+    assertThat(anhangNeu.gesamtText())
+        .contains("Irreführung über Unternehmereigenschaft\n    die unwahre Angabe")
+        .contains("unzulässiges Anbringen eines Nachhaltigkeitssiegels\n    das Anbringen");
+
     var synopse = SynopseBuilder.baue(gesetz, anwendung, parseErgebnis.warnungen(), false);
     assertThat(HtmlRenderer.rendere(synopse, "E2E-Test")).contains("Neue Fassung");
   }

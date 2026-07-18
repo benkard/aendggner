@@ -32,7 +32,7 @@ UWG-Anhang) sowohl im PDF-Extraktor als auch im XML-Flattener vereinheitlicht.
 
 
 Artikel 1
-Geometrische Spaltenbreiten-Klassifikation für markerlose Zeilenumbrüche
+Geometrische Klassifikation der Zeilenenden nach Ausrichtungs-Clustern
 
 Der Textbereiniger (TextBereiniger.verbindeUmbrueche) zog eine Zeile, die ohne
 Leerraum am Ende mit einem Buchstaben schließt und deren Folgezeile klein
@@ -41,37 +41,61 @@ Annahme, es handle sich um eine bei der PDF-Extraktion um den Bindestrich
 gebrachte Silbentrennung. Diese Annahme trifft auf einen bewussten Wortgrenzen-
 Umbruch (etwa das Stichwort einer hängend eingerückten Definition, wie er im
 Anhang zum UWG vorkommt) nicht zu. Zur Behebung bestimmt der PDF-Vorverarbeiter
-(FontgroessenFilter) das geometrische End-X der Zeilenläufe und klassifiziert
-die Zeilenenden anhand des lokalen rechten Randes (90. Perzentil in einem
-Fenster von 20 Zeilen davor/danach) in weiche (am Rand endende), harte (deutlich
-davor endende) oder unklassifizierte Umbrüche. Der Textbereiniger zieht nur noch
-geometrisch weiche oder (in Ermangelung von Geometriedaten als Rückfalloption)
-zeichenzahlnäherungsweise am Rand liegende markerlose Umbrüche zusammen. Harte
-Umbrüche bleiben als gewollte Wortgrenzen-Umbrüche erhalten.
+(FontgroessenFilter) das geometrische End-X jeder Zeile (unter Flush auch am
+Seitenende, damit die letzte Zeile einer Seite nicht die erste der Folgeseite
+verfälscht) und klassifiziert die Zeilenenden anhand von Ausrichtungs-Clustern
+in einem Fenster von 20 Zeilen davor/danach: Ein Zeilenende ist weich, wenn
+mindestens fünf Fensterzeilen (auf vier Punkt genau) gleich ausgerichtet enden
+(Satzspiegelrand des Blocksatzes), und hart, wenn ein solcher Rand mindestens
+zehn Punkt oberhalb des Zeilenendes verläuft — dort wäre noch Platz gewesen,
+der Umbruch ist mithin gewollt. Cluster statt eines Fenster-Perzentils, weil am
+Spaltenwechsel des zweispaltigen alten Bundesgesetzblatts beide Spaltenränder
+in ein Fenster fallen; maßgeblich ist der Rand, an dem die Zeile selbst
+ausgerichtet ist. Der Textbereiniger zieht markerlose Umbrüche nur noch bei
+weichen Zeilenenden zusammen (in Ermangelung von Geometriedaten näherungsweise
+nach Zeichenzahl wie bisher), nie jedoch vor einer Folgezeile, die mit einem
+Aufzählungsmarker („d)“, „3.“) beginnt.
 
 
 Artikel 2
+Zusammenzug weicher und Erhaltung harter Umbrüche
+
+Nach den Einzelzusammenzügen fügt der Textbereiniger geometrisch weiche
+Zeilenenden mit einem Leerzeichen zu Fließtext zusammen (Reflow); harte und
+unklassifizierte Umbrüche bleiben erhalten. Nach der Bereinigung ist damit
+jeder verbleibende Zeilenumbruch nach bester Einschätzung beabsichtigt, weshalb
+die Zitat-Normalisierung des Befehlsanwenders (normalisiereZitatText) Umbrüche
+nicht mehr zu Leerzeichen faltet. Ausgenommen vom Reflow sind Strukturzeilen
+(„Artikel 2“, „§ 19“, allein stehende Gliederungs-Bezeichnungen): Gleich
+breite, zentrierte Überschriften in Serie bilden ein Schein-Cluster, der Parser
+benötigt sie jedoch allein auf der Zeile.
+
+
+Artikel 3
 Strukturierung und Normalisierung hängend eingerückter Definitionslisten
 
 Damit die nunmehr erhaltenen hängenden Zeilenenden in Definitionslisten (wie
-beim UWG-Anhang) korrekt strukturiert werden:
-1.  Der Befehlsanwender (BefehlAnwender.normalisiereZitatText) unterwirft nunmehr
-    auch die stellenlose Neufassung (z.B. eines Satzes) der Zitat-Normalisierung
-    und rückt fortlaufende Zeilen innerhalb eines Aufzählungspunktes tiefer
-    (vier Leerzeichen) ein als den Aufzählungspunkt selbst (zwei Leerzeichen).
-2.  Der XML-Flattener (ContentFlattener) trennt mehrere <LA>-Geschwister innerhalb
-    eines <DD>-Elements durch Zeilenumbrüche und rückt sie tiefer ein.
-Beide Wege erzeugen dieselbe kanonische Zeilenform, welche für die korrekte
-Erkennung von Kindzeilen durch die Stellenauflösung erforderlich ist.
+beim UWG-Anhang oder in § 2 IfSG) korrekt strukturiert werden:
+1.  Der XML-Flattener (ContentFlattener) trennt mehrere <LA>-Geschwister innerhalb
+    eines <DD>-Elements durch Zeilenumbrüche und rückt die Folgezeilen tiefer ein
+    als die Aufzählungszeile (Kindzeilen der Einheit für die Stellenauflösung).
+2.  Der Befehlsanwender rückt beim Einsetzen von Zitattext (rueckeZitatEin)
+    Fortsetzungszeilen zwei Zeichen tiefer ein als die Aufzählungszeile.
+Beide Wege erzeugen dieselbe kanonische Zeilenform („  2a. Stichwort“ nebst
+„    Definitionstext“), welche für die korrekte Erkennung von Kindzeilen durch
+die Stellenauflösung (StellenAufloeser.zeilenBlock) erforderlich ist.
 
 
 Schlussbestimmung
 
 Die vorstehenden Änderungen sind durch die Prüfung sämtlicher Testfälle (einhun-
-dertvierundsiebzig an der Zahl) sowie durch die vollständige Erstellung (mvnw
-verify) bestätigt worden. Anlass war ein anhand der UWG-Novelle 2026 gemeldeter
-Wiedergabefehler; die Behebung wurde anhand der Beispieldaten (UWG-Anhang,
-Nummern 2a sowie 4a bis 4c) verifiziert.
+dertneunundsiebzig an der Zahl), durch die vollständige Erstellung (mvnw verify)
+sowie durch einen Vorher-nachher-Vergleich sämtlicher einundzwanzig Beispiel-
+kombinationen (UWG, AGG, ProdHaftG, GEG, IfSG; Anwendungs- und Prüfzahlen
+durchgehend unverändert) bestätigt worden. Anlass war ein anhand der UWG-Novelle
+2026 gemeldeter Wiedergabefehler (verklebte Kurzüberschriften im Anhang, auch in
+der Grundvorschrift); die Behebung wurde anhand der Beispieldaten (UWG-Anhang,
+Nummern 2a, 4c sowie 22; § 2 IfSG) verifiziert.
 
 
 ════════════════════════════════════════════════════════════════════════════════

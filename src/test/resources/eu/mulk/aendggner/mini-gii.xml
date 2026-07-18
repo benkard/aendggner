@@ -78,4 +78,18 @@
       </text>
     </textdaten>
   </norm>
+  <norm builddate="20201120213007" doknr="BJNR000000000BJNE000400000">
+    <metadaten>
+      <jurabk>TestG</jurabk>
+      <enbez>Anhang</enbez>
+      <titel format="XML">(zu § 1)</titel>
+    </metadaten>
+    <textdaten>
+      <text format="XML">
+        <Content>
+          <P><DL Font="normal" Type="arabic"><DT>1.</DT><DD Font="normal"><LA Size="normal">Irreführung über die Erprobung</LA><LA Size="normal">die unwahre Angabe, die Erprobung sei abgeschlossen;</LA></DD><DT>2.</DT><DD Font="normal"><LA Size="normal">Verheimlichung von Prüfschritten</LA><LA Size="normal">das Verschweigen, dass <DL Font="normal" Type="alpha"><DT>a)</DT><DD Font="normal"><LA Size="normal">Zwischenschritte oder</LA></DD><DT>b)</DT><DD Font="normal"><LA Size="normal">Endschritte ausgelassen wurden.</LA></DD></DL></LA></DD></DL></P>
+        </Content>
+      </text>
+    </textdaten>
+  </norm>
 </dokumente>

@@ -19,7 +19,7 @@ class GiiXmlLoaderTest {
     assertThat(gesetz.langue()).isEqualTo("Gesetz zur Erprobung des ÄndGgners");
     assertThat(gesetz.kurzue()).isEqualTo("Testgesetz");
     // Die Rahmen-Norm ohne enbez wird übersprungen.
-    assertThat(gesetz.normen()).hasSize(3);
+    assertThat(gesetz.normen()).hasSize(4);
     assertThat(gesetz.normen().get(0).enbez()).isEqualTo("Inhaltsübersicht");
     assertThat(gesetz.norm("§ 1")).isPresent();
     assertThat(gesetz.norm("§ 3")).isEmpty();
@@ -56,6 +56,26 @@ class GiiXmlLoaderTest {
         zeilen.stream().filter(z -> z.strip().startsWith("1.")).findFirst().orElseThrow();
     var innere = zeilen.stream().filter(z -> z.strip().startsWith("a)")).findFirst().orElseThrow();
     assertThat(einrueckung(innere)).isGreaterThan(einrueckung(aeussere));
+  }
+
+  @Test
+  void trenntKurzueberschriftUndDefinitionInAufzaehlungen() throws Exception {
+    var gesetz = new GiiXmlLoader().load(fixture());
+    var anhang = gesetz.norm("Anhang").orElseThrow().absaetze().get(0).text();
+
+    // Zwei <LA>-Geschwister in einem <DD> (Kurzüberschrift + Definitionstext, wie im UWG-Anhang
+    // oder in § 2 IfSG) sind eigene Zeilen — nicht nahtlos verklebter Fließtext. Die Folgezeile
+    // ist tiefer eingerückt als die Aufzählungszeile, damit die Stellenauflösung sie als
+    // Kindzeile der Einheit erkennt.
+    assertThat(anhang).doesNotContain("Erprobungdie");
+    assertThat(anhang)
+        .contains(
+            "1. Irreführung über die Erprobung\n"
+                + "    die unwahre Angabe, die Erprobung sei abgeschlossen;");
+    // Auch mit geschachtelter Aufzählung im Definitionstext bleibt die Zeilenstruktur erhalten.
+    assertThat(anhang)
+        .contains("  2. Verheimlichung von Prüfschritten\n    das Verschweigen, dass")
+        .contains("    a) Zwischenschritte oder");
   }
 
   @Test

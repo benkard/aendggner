@@ -121,6 +121,57 @@ class TextBereinigerTest {
   }
 
   @Test
+  void ziehtMarkerlosNichtVorAufzaehlungsmarkerZusammen() {
+    // Ein Marker eröffnet eine bewusste Strukturzeile — auch wenn die Vorzeile markerlos mit
+    // einem Buchstaben endet und die Folgezeile klein beginnt („…und“ + „d) die Überwachung“).
+    var roh =
+        "es ist der Entzug der Verwendung im Fall von Verstößen gegen die Anforderungen"
+            + " vorgesehen und\n"
+            + "d) die Überwachung der Einhaltung der Anforderungen durch einen Dritten erfolgt. \n"
+            + "Nächste Zeile endet mit Leerzeichen. ";
+
+    assertThat(TextBereiniger.bereinige(roh)).contains("und\nd) die Überwachung");
+  }
+
+  @Test
+  void ziehtMarkerlosNichtBeiGeometrischHartemZeilenendeZusammen() {
+    // Volle Spaltenbreite in Zeichen, aber laut Geometrie-Marker des FontgroessenFilters
+    // deutlich vor dem Rand endend (lange Stichwort-Zeile wie Nummer 4c im UWG-Anhang):
+    // der Umbruch ist bewusst und bleibt erhalten.
+    var roh =
+        "4c. Aussagen zu Umweltauswirkungen bei Kompensation von Treibhausgasemissionen\uE000\n"
+            + "das Treffen einer Aussage, die sich auf die Kompensation von"
+            + " Treibhausgasemissionen gründet. ";
+
+    assertThat(TextBereiniger.bereinige(roh)).contains("Treibhausgasemissionen\ndas Treffen");
+  }
+
+  @Test
+  void reflowtGeometrischWeicheUmbruecheUndErhaeltHarte() {
+    var roh =
+        "Erste Zeile des Absatzes wird \uE001\n"
+            + "fortgesetzt und endet hier. \uE000\n"
+            + "Nächste eigene Zeile. \uE000";
+
+    assertThat(TextBereiniger.bereinige(roh))
+        .isEqualTo("Erste Zeile des Absatzes wird fortgesetzt und endet hier.\nNächste eigene Zeile.");
+  }
+
+  @Test
+  void strukturzeilenBleibenTrotzWeicherKlassifikationEigeneZeilen() {
+    // Gleich breite, zentrierte Artikel-Überschriften in Serie bilden ein Schein-
+    // Ausrichtungs-Cluster und werden fälschlich als weich klassifiziert — der Parser braucht
+    // sie aber allein auf der Zeile (teileInArtikel).
+    var roh =
+        "Artikel 2\uE001\n"
+            + "Inkrafttreten\uE000\n"
+            + "Dieses Gesetz tritt am Tag nach der Verkündung in Kraft. \uE000";
+
+    assertThat(TextBereiniger.bereinige(roh))
+        .isEqualTo("Artikel 2\nInkrafttreten\nDieses Gesetz tritt am Tag nach der Verkündung in Kraft.");
+  }
+
+  @Test
   void repariertInvertierteZitatzeichenAnAbsatzmarkern() {
     // BMJV-Vorlagen zeichnen das hängende „ nach dem Absatzmarker bzw. der Paragraphenangabe.
     assertThat(TextBereiniger.bereinige("(1) „ Ungeachtet des § 8 gilt.“"))

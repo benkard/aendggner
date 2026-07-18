@@ -107,6 +107,17 @@ public final class TextBereiniger {
   private static final Pattern AUFZAEHLUNGSMARKER =
       Pattern.compile("(\\d+[a-z]?\\.|[a-z]{1,3}\\))\\s");
 
+  /** Zeilen, die eigenständige Struktur-Anker des Parsers sind („Artikel 2“, „§ 19“, allein
+   * stehende Gliederungs-Bezeichnungen) und nie mit Nachbarzeilen zusammengezogen werden dürfen —
+   * auch dann nicht, wenn die Geometrie sie für einen Blocksatz-Umbruch hält: gleich breite,
+   * zentrierte Überschriften in Serie (etwa die Artikel-Überschriften der Folgeänderungen eines
+   * Entwurfs) bilden ein Schein-Ausrichtungs-Cluster. */
+  private static final Pattern STRUKTURZEILE =
+      Pattern.compile(
+          "^(?:(?:Artikel|Teil|Abschnitt|Unterabschnitt|Kapitel|Titel|Buch)\\s+\\d+[a-z]?"
+              + "|§\\s*\\d+[a-z]?"
+              + "|(?:Anlage|Anhang)(?:\\s+\\d+[a-z]?)?)$");
+
   /** Perzentil der Zeilenlängen, das als „volle Spaltenbreite“ gilt (siehe {@link #verbindeUmbrueche}). */
   private static final double VOLLZEILE_PERZENTIL = 0.9;
 
@@ -426,12 +437,17 @@ public final class TextBereiniger {
       if (erste) {
         sb.append(text);
         erste = false;
-      } else if (vorherWeich && !AUFZAEHLUNGSMARKER.matcher(gestrippt).lookingAt()) {
+      } else if (vorherWeich
+          && !AUFZAEHLUNGSMARKER.matcher(gestrippt).lookingAt()
+          && !STRUKTURZEILE.matcher(gestrippt).matches()) {
         sb.append(' ').append(gestrippt);
       } else {
         sb.append('\n').append(text);
       }
-      vorherWeich = zeile.umbruch() == Umbruch.WEICH && !text.isBlank();
+      vorherWeich =
+          zeile.umbruch() == Umbruch.WEICH
+              && !text.isBlank()
+              && !STRUKTURZEILE.matcher(gestrippt).matches();
     }
     return sb.toString();
   }
