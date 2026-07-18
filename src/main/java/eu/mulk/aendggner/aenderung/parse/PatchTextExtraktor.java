@@ -21,6 +21,15 @@ public final class PatchTextExtraktor {
   private static final Logger log = Logger.getLogger(PatchTextExtraktor.class);
 
   private final Tika tika = new Tika();
+  private final SuperskriptModus superskriptModus;
+
+  public PatchTextExtraktor() {
+    this(SuperskriptModus.ENTFERNEN);
+  }
+
+  public PatchTextExtraktor(SuperskriptModus superskriptModus) {
+    this.superskriptModus = superskriptModus;
+  }
 
   public String extrahiere(Path datei) throws IOException {
     var mimeType = tika.detect(datei);
@@ -36,9 +45,9 @@ public final class PatchTextExtraktor {
     };
   }
 
-  private static String extrahierePdf(Path datei) throws IOException {
+  private String extrahierePdf(Path datei) throws IOException {
     try (var dokument = Loader.loadPDF(datei.toFile())) {
-      return FontgroessenFilter.extrahiere(dokument);
+      return FontgroessenFilter.extrahiere(dokument, superskriptModus);
     }
   }
 }

@@ -2,6 +2,16 @@ Stammgesetz (Landesrecht Bayern):
 - Bayerisches Jagdgesetz (BayJG) vom 13. Oktober 1978 (BayRS 792-1-W)
 - https://www.gesetze-bayern.de/Content/Document/BayJG
   (BayJG.pdf, konsolidierte Fassung nach dem Änderungsgesetz)
+- BayJG-alt.txt: die vor dem Änderungsgesetz geltende Fassung (Stand
+  nach der Änderung vom 23.07.2024, GVBl. S. 247) im kanonischen
+  Klartext-Format des BayRechtLoaders. Abgeleitet am 17.07.2026 aus den
+  in der Wayback Machine archivierten Einzelnorm-Seiten
+  http://web.archive.org/web/<ts>/https://www.gesetze-bayern.de/Content/Document/BayJG-<n>
+  (je Artikel der jüngste Schnappschuss vor dem 31.03.2026;
+  <sup>-Satznummern und Fußnotenmarker als Unicode-Superskripte,
+  Aufzählungen in gii-üblicher Einrückung, Gliederungs-Überschriften aus
+  den BayJG-G<k>-Abschnittsseiten). Basis des Akzeptanztests
+  EndToEndTest.bayJgGvblAcceptance.
 
 Änderungsgesetz:
 - Gesetz zur Änderung des Bayerischen Jagdgesetzes und weiterer

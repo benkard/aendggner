@@ -229,7 +229,8 @@ final class InhaltsuebersichtAnwender {
   private static Pattern zeilenMuster(Stelle.Komponente ziel) {
     return switch (ziel) {
       case Stelle.Paragraph p ->
-          Pattern.compile("^§\\s*" + Pattern.quote(p.nummer()) + "(?![0-9a-z])");
+          Pattern.compile(
+              "^" + Pattern.quote(p.sigel()) + "\\s*" + Pattern.quote(p.nummer()) + "(?![0-9a-z])");
       case Stelle.Gliederungseinheit g -> {
         if (g.nummer().isEmpty()) {
           yield Pattern.compile("^" + Pattern.quote(g.art()) + "\\b");
@@ -279,7 +280,7 @@ final class InhaltsuebersichtAnwender {
       var m =
           Pattern.compile(
                   "^((?:Teil|Abschnitt|Unterabschnitt|Kapitel|Buch)\\s+\\d+[a-z]?|Anhang"
-                      + "|§\\s*\\d+[a-z]*)\\s*(.*)$")
+                      + "|(?:§|Art\\.)\\s*\\d+[a-z]*)\\s*(.*)$")
               .matcher(s);
       if (m.matches() && !m.group(2).isEmpty()) {
         zeilen.add(m.group(1) + " | " + m.group(2));
@@ -301,7 +302,7 @@ final class InhaltsuebersichtAnwender {
   // Zeilenanfänge einer Inhaltsübersicht: §-Angaben (nicht Querverweise) und Gliederungsmarken.
   private static final Pattern UEBERSICHT_MARKE =
       Pattern.compile(
-          "(?=§\\s*\\d+[a-z]?\\s+"
+          "(?=(?:§|Art\\.)\\s*\\d+[a-z]?\\s+"
               + "(?!Absatz|Absätze|Abs|Satz|Sätze|Nummer|Nummern|Nr|Buchstabe|Buchstaben"
               + "|und|bis|oder|sowie|des|der|dieses)"
               + "(?:\\(|\\p{Lu})"
@@ -315,13 +316,13 @@ final class InhaltsuebersichtAnwender {
   private static List<String> angabenZeilen(String zitat, String einrueckung) {
     var flach = zitat.strip().replaceAll("\\s+", " ");
     var zeilen = new ArrayList<String>();
-    if (flach.startsWith("§")) {
+    if (flach.startsWith("§") || flach.startsWith("Art.")) {
       for (var stueck : PARAGRAPH_ANGABE.split(flach)) {
         var s = stueck.strip();
         if (s.isEmpty()) {
           continue;
         }
-        var m = Pattern.compile("^(§\\s*\\d+[a-z]*)\\s*(.*)$").matcher(s);
+        var m = Pattern.compile("^((?:§|Art\\.)\\s*\\d+[a-z]*)\\s*(.*)$").matcher(s);
         if (m.matches() && !m.group(2).isEmpty()) {
           zeilen.add(einrueckung + m.group(1) + " | " + m.group(2));
         } else {
@@ -339,7 +340,7 @@ final class InhaltsuebersichtAnwender {
   // trennen nicht (nach ihnen folgt ein Kleinwort oder eine Strukturangabe statt eines Titels).
   private static final Pattern PARAGRAPH_ANGABE =
       Pattern.compile(
-          "(?=§\\s*\\d+[a-z]?\\s+"
+          "(?=(?:§|Art\\.)\\s*\\d+[a-z]?\\s+"
               + "(?!Absatz|Absätze|Abs|Satz|Sätze|Nummer|Nummern|Nr|Buchstabe|Buchstaben"
               + "|und|bis|oder|sowie|des|der|dieses)"
               + "(?:\\(|\\p{Lu}))");
@@ -362,7 +363,7 @@ final class InhaltsuebersichtAnwender {
 
   private static String anzeige(Stelle.Komponente ziel) {
     return switch (ziel) {
-      case Stelle.Paragraph p -> "§ " + p.nummer();
+      case Stelle.Paragraph p -> p.enbez();
       case Stelle.Gliederungseinheit g -> g.bezeichnung();
       default -> ziel.toString();
     };

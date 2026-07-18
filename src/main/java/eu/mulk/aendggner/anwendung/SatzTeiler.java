@@ -1,13 +1,18 @@
 package eu.mulk.aendggner.anwendung;
 
+import eu.mulk.aendggner.gesetz.Superskript;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Zerlegt einen Absatztext in Sätze im Rechtssinne, mit einer Stoppliste für juristische
  * Abkürzungen und Datumsangaben („Abs.“, „31. März 2021“).
+ *
+ * <p>Trägt der Text amtliche Satznummern als Unicode-Superskripte (bayerisches Landesrecht,
+ * „¹Die freilebende Tierwelt …“), wird exakt an diesen geteilt statt heuristisch.
  */
 public final class SatzTeiler {
 
@@ -63,6 +68,10 @@ public final class SatzTeiler {
   private SatzTeiler() {}
 
   public static List<SatzBereich> teile(String text) {
+    var nummeriert = teileAnSatznummern(text);
+    if (nummeriert != null) {
+      return nummeriert;
+    }
     var bereiche = new ArrayList<SatzBereich>();
     var matcher = SATZENDE.matcher(text);
     int start = 0;
@@ -83,6 +92,55 @@ public final class SatzTeiler {
   /** Die Satztexte statt der Bereiche. */
   public static List<String> teileTexte(String text) {
     return teile(text).stream().map(b -> text.substring(b.von(), b.bis()).strip()).toList();
+  }
+
+  /**
+   * Teilt an amtlichen Satznummern (Superskript-Läufe an Satzanfängen); {@code null}, wenn der Text
+   * keine trägt. Text vor der ersten Satznummer (und Fußnotenzeilen nach dem letzten Satz) bleibt
+   * dem jeweils angrenzenden Satz zugeschlagen.
+   */
+  private static @Nullable List<SatzBereich> teileAnSatznummern(String text) {
+    // Satzgrenzen: stets der Textanfang (Satz 1 samt etwaigem Vorspann vor „¹“) plus die Position
+    // jeder Satznummer ab „²“. Eine allein stehende Nummer ≥ 2 (weil Satz 1 unnummeriert ist oder
+    // seine Nummer zuvor gestrichen wurde, „Verboten … ²Art. 33 …“) bildet so eine eigene Grenze.
+    var matcher = Superskript.LAUF.matcher(text);
+    var grenzen = new ArrayList<Integer>();
+    grenzen.add(0);
+    boolean gefunden = false;
+    while (matcher.find()) {
+      if (Superskript.istSatzanfang(text, matcher.start(), matcher.end())) {
+        gefunden = true;
+        int nummer = Integer.parseInt(Superskript.zuZahl(matcher.group()));
+        if (nummer >= 2 && matcher.start() > 0) {
+          grenzen.add(matcher.start());
+        }
+      }
+    }
+    if (!gefunden) {
+      return null;
+    }
+    var bereiche = new ArrayList<SatzBereich>();
+    for (int k = 0; k < grenzen.size(); k++) {
+      int von = grenzen.get(k);
+      int bis = k + 1 < grenzen.size() ? grenzen.get(k + 1) : text.length();
+      while (bis > von && Character.isWhitespace(text.charAt(bis - 1))) {
+        bis--;
+      }
+      if (bis > von) {
+        bereiche.add(new SatzBereich(von, bis));
+      }
+    }
+    return bereiche;
+  }
+
+  /** Die amtliche Satznummer am Anfang des Satztexts; {@code null}, wenn er keine trägt. */
+  public static @Nullable Integer nummerVonSatz(String satzText) {
+    var s = satzText.stripLeading();
+    var matcher = Superskript.LAUF.matcher(s);
+    if (!matcher.lookingAt() || !Superskript.istSatzanfang(s, 0, matcher.end())) {
+      return null;
+    }
+    return Integer.parseInt(Superskript.zuZahl(matcher.group()));
   }
 
   private static boolean istAbkuerzung(String text, int punktPosition) {

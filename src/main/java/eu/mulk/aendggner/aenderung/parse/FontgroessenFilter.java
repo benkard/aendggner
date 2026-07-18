@@ -84,6 +84,11 @@ final class FontgroessenFilter {
   private FontgroessenFilter() {}
 
   static String extrahiere(PDDocument dokument) throws IOException {
+    return extrahiere(dokument, SuperskriptModus.ENTFERNEN);
+  }
+
+  static String extrahiere(PDDocument dokument, SuperskriptModus superskriptModus)
+      throws IOException {
     var zaehler = new GroessenZaehler();
     zaehler.setLineSeparator("\n");
     var wegwerf = new StringWriter();
@@ -96,7 +101,9 @@ final class FontgroessenFilter {
     }
     log.debugf("Brotschriftgrößen (je Seite): %s", schwellen);
 
-    var filter = new GroessenFilterStripper(schwellen, zaehler.brotschriftUntergrenzen(schwellen));
+    var filter =
+        new GroessenFilterStripper(
+            schwellen, zaehler.brotschriftUntergrenzen(schwellen), superskriptModus);
     filter.setLineSeparator("\n");
     var ausgabe = new StringWriter();
     filter.writeText(dokument, ausgabe);
@@ -303,27 +310,118 @@ final class FontgroessenFilter {
     /** Läufe, die um mehr als diese Punktzahl unter der Brotschrift liegen, sind immer Beiwerk. */
     private static final float STARK_KLEINER_PT = 3f;
 
+    /** Mindest-Hebung (pt) der Grundlinie, ab der eine kleinere Ziffer als Superskript gilt. */
+    private static final float SUPERSKRIPT_HEBUNG_MIN_PT = 2f;
+
+    /** Maximal-Hebung (pt): darüber liegt ein Zeilenwechsel vor, kein Superskript. */
+    private static final float SUPERSKRIPT_HEBUNG_MAX_PT = 6f;
+
     private final Map<Integer, Float> schwellen;
     private final Map<Integer, Float> untergrenzen;
+    private final SuperskriptModus superskriptModus;
 
     /** End-X (pt) des breitesten behaltenen Laufs der laufenden Zeile; NaN vor dem ersten. */
     private float zeilenEndX = Float.NaN;
 
-    GroessenFilterStripper(Map<Integer, Float> schwellen, Map<Integer, Float> untergrenzen) {
+    GroessenFilterStripper(
+        Map<Integer, Float> schwellen,
+        Map<Integer, Float> untergrenzen,
+        SuperskriptModus superskriptModus) {
       this.schwellen = schwellen;
       this.untergrenzen = untergrenzen;
+      this.superskriptModus = superskriptModus;
     }
 
     @Override
     protected void writeString(String text, List<TextPosition> positionen) throws IOException {
       if (!behalte(positionen)) {
-        return; // Fußnotenblock bzw. hochgestellte Ziffer
+        // Fußnotenblock bzw. hochgestellte Ziffer. In BEHALTEN-Modus werden reine Ziffernläufe
+        // im Satzspiegel (oberhalb des Fußnotenblocks) als Superskripte übernommen.
+        var hochgestellt = superskriptModus == SuperskriptModus.BEHALTEN ? nurZiffern(positionen) : null;
+        if (hochgestellt == null) {
+          return;
+        }
+        text = hochgestellt;
+      } else if (superskriptModus == SuperskriptModus.BEHALTEN) {
+        // Gehobene, kleiner gesetzte Ziffern innerhalb eines Brotschrift-Laufs (bayerische
+        // Satznummern und Fußnotenmarker kleben im selben Lauf wie der Fließtext).
+        text = mitSuperskripten(text, positionen);
       }
       for (var position : positionen) {
         float endX = position.getXDirAdj() + position.getWidthDirAdj();
         zeilenEndX = Float.isNaN(zeilenEndX) ? endX : Math.max(zeilenEndX, endX);
       }
       super.writeString(text, positionen);
+    }
+
+    /**
+     * Der Lauf als Superskript-Text, falls er ausschließlich aus Ziffern im Satzspiegel besteht
+     * (hochgestellte Marker, die als eigener Lauf ankommen); sonst {@code null}.
+     */
+    private @org.jspecify.annotations.Nullable String nurZiffern(List<TextPosition> positionen) {
+      if (positionen.isEmpty()) {
+        return null;
+      }
+      var grenze = untergrenzen.get(getCurrentPageNo());
+      var sb = new StringBuilder();
+      for (var position : positionen) {
+        if (grenze != null && position.getYDirAdj() > grenze) {
+          return null; // Fußnotenblock
+        }
+        var unicode = position.getUnicode();
+        for (int i = 0; i < unicode.length(); i++) {
+          if (!Character.isDigit(unicode.charAt(i))) {
+            return null;
+          }
+        }
+        sb.append(eu.mulk.aendggner.gesetz.Superskript.zuSuperskript(unicode));
+      }
+      return sb.toString();
+    }
+
+    /**
+     * Ersetzt innerhalb eines behaltenen Laufs Ziffern, die kleiner gesetzt und gegenüber der
+     * Grundlinie des Laufs deutlich gehoben sind, durch Unicode-Superskripte. Die Grundlinie ist
+     * das größte Y des Laufs (gehobene Zeichen haben kleinere Y-Werte); die Hebung ist nach oben
+     * begrenzt, damit ein etwaiger Zeilenwechsel im Lauf keine Fehltreffer erzeugt.
+     */
+    private String mitSuperskripten(String text, List<TextPosition> positionen) {
+      float grundlinie = Float.NEGATIVE_INFINITY;
+      float brotschriftGroesse = 0;
+      for (var position : positionen) {
+        if (position.getYDirAdj() > grundlinie) {
+          grundlinie = position.getYDirAdj();
+          brotschriftGroesse = position.getFontSizeInPt();
+        }
+      }
+      var sb = new StringBuilder(text.length());
+      boolean geaendert = false;
+      for (var position : positionen) {
+        var unicode = position.getUnicode();
+        float hebung = grundlinie - position.getYDirAdj();
+        if (hebung >= SUPERSKRIPT_HEBUNG_MIN_PT
+            && hebung <= SUPERSKRIPT_HEBUNG_MAX_PT
+            && position.getFontSizeInPt() < brotschriftGroesse
+            && istZiffernfolge(unicode)) {
+          sb.append(eu.mulk.aendggner.gesetz.Superskript.zuSuperskript(unicode));
+          geaendert = true;
+        } else {
+          sb.append(unicode);
+        }
+      }
+      return geaendert ? sb.toString() : text;
+    }
+
+    private static boolean istZiffernfolge(String unicode) {
+      if (unicode.isEmpty()) {
+        return false;
+      }
+      for (int i = 0; i < unicode.length(); i++) {
+        if (!Character.isDigit(unicode.charAt(i))) {
+          return false;
+        }
+      }
+      return true;
     }
 
     /** Schreibt vor jedem Zeilentrenner das End-X der Zeile als Metadaten für

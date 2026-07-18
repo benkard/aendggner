@@ -2,8 +2,11 @@ package eu.mulk.aendggner;
 
 import eu.mulk.aendggner.aenderung.parse.AenderungsgesetzParser;
 import eu.mulk.aendggner.aenderung.parse.PatchTextExtraktor;
+import eu.mulk.aendggner.aenderung.parse.SuperskriptModus;
 import eu.mulk.aendggner.aenderung.parse.TextBereiniger;
 import eu.mulk.aendggner.anwendung.BefehlAnwender;
+import eu.mulk.aendggner.gesetz.Gesetz;
+import eu.mulk.aendggner.gesetz.bayern.BayRechtLoader;
 import eu.mulk.aendggner.gesetz.gii.GiiXmlLoader;
 import eu.mulk.aendggner.synopse.HtmlRenderer;
 import eu.mulk.aendggner.synopse.SynopseBuilder;
@@ -30,7 +33,11 @@ public class AendGgner implements Callable<Integer> {
 
   private static final Logger log = Logger.getLogger(AendGgner.class);
 
-  @Parameters(index = "0", description = "The base law (gii-norm XML from gesetze-im-internet.de).")
+  @Parameters(
+      index = "0",
+      description =
+          "The base law: gii-norm XML from gesetze-im-internet.de, or — for Bavarian state law —"
+              + " the consolidated version from gesetze-bayern.de (PDF or canonical plain text).")
   private Path baseFile;
 
   @Parameters(
@@ -103,7 +110,7 @@ public class AendGgner implements Callable<Integer> {
     log.debugf("Logging configured.");
 
     if (dumpGesetz) {
-      var gesetz = new GiiXmlLoader().load(baseFile);
+      var gesetz = ladeStammgesetz();
       System.out.printf(
           "%s — %s (%d Normen)%n", gesetz.jurabk(), gesetz.langue(), gesetz.normen().size());
       for (var norm : gesetz.normen()) {
@@ -118,7 +125,7 @@ public class AendGgner implements Callable<Integer> {
     }
 
     if (extractOnly) {
-      var extraktor = new PatchTextExtraktor();
+      var extraktor = new PatchTextExtraktor(superskriptModus());
       for (var file : patches) {
         var text = extraktor.extrahiere(file);
         System.out.println(raw ? text : TextBereiniger.bereinige(text));
@@ -127,8 +134,8 @@ public class AendGgner implements Callable<Integer> {
     }
 
     if (dumpBefehle) {
-      var gesetz = new GiiXmlLoader().load(baseFile);
-      var extraktor = new PatchTextExtraktor();
+      var gesetz = ladeStammgesetz();
+      var extraktor = new PatchTextExtraktor(superskriptModus());
       var parser = new AenderungsgesetzParser();
       for (var file : patches) {
         var text = TextBereiniger.bereinige(extraktor.extrahiere(file));
@@ -169,8 +176,8 @@ public class AendGgner implements Callable<Integer> {
     }
 
     // Pipeline: Stammgesetz laden → Befehle parsen → anwenden → Synopse rendern.
-    var altesGesetz = new GiiXmlLoader().load(baseFile);
-    var extraktor = new PatchTextExtraktor();
+    var altesGesetz = ladeStammgesetz();
+    var extraktor = new PatchTextExtraktor(superskriptModus());
     var parser = new AenderungsgesetzParser();
 
     var gesetz = altesGesetz;
@@ -213,6 +220,23 @@ public class AendGgner implements Callable<Integer> {
         synopse.eintraege().size());
 
     return gesamtErgebnis.anzahlAngewandt() == 0 && !protokoll.isEmpty() ? 2 : 0;
+  }
+
+  /** Gii-XML → {@link GiiXmlLoader}; PDF/Klartext (bayerisches Landesrecht) → {@link
+   * BayRechtLoader}. */
+  private Gesetz ladeStammgesetz() throws Exception {
+    return istGiiXml() ? new GiiXmlLoader().load(baseFile) : new BayRechtLoader().load(baseFile);
+  }
+
+  /** Bayerische Stammtexte tragen amtliche Satznummern — auch die Änderungsgesetze werden dann
+   * mit Superskript-Erhalt extrahiert, damit Zitate und Stammtext dieselbe Schreibweise tragen. */
+  private SuperskriptModus superskriptModus() throws IOException {
+    return istGiiXml() ? SuperskriptModus.ENTFERNEN : SuperskriptModus.BEHALTEN;
+  }
+
+  private boolean istGiiXml() throws IOException {
+    var mimeType = new org.apache.tika.Tika().detect(baseFile);
+    return mimeType.equals("application/xml") || mimeType.equals("text/xml");
   }
 
   private static String kuerze(String text) {

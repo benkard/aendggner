@@ -98,6 +98,25 @@ public final class TextBereiniger {
       Pattern.compile(
           "^\\s*Deutscher Bundestag [–-] \\d+\\. Wahlperiode [–-] \\d+ [–-] Drucksache.*$");
 
+  // Bayerisches Gesetz- und Verordnungsblatt: Kolumnentitel mit Seitenzahl links oder rechts
+  // („… Nr. 6/2026 77“) bzw. auf geraden Seiten ohne Zwischenraum an die Jahreszahl geklebt
+  // („… Nr. 6/202676“).
+  private static final Pattern GVBL_KOPF =
+      Pattern.compile(
+          "^\\s*(?:\\d{1,4}\\s+)?Bayerisches Gesetz- und Verordnungsblatt Nr\\. \\d+/\\d{4}"
+              + "(?:\\s*\\d{1,4})?\\s*$");
+  // Bayerischer Landtag: laufender Seitenkopf („Drucksache 19/9707 Bayerischer Landtag
+  // 19. Wahlperiode Seite 2“) und Titelköpfe („19. Wahlperiode 28.01.2026  Drucksache 19/9707“,
+  // „Bayerischer Landtag“ + „19. Wahlperiode Drucksache 19/9707“).
+  private static final Pattern LANDTAG_SEITENKOPF =
+      Pattern.compile(
+          "^\\s*Drucksache \\d+/\\d+\\s+Bayerischer Landtag\\s+\\d+\\. Wahlperiode"
+              + "\\s+Seite \\d+\\s*$");
+  private static final Pattern LANDTAG_TITELKOPF =
+      Pattern.compile(
+          "^\\s*\\d+\\. Wahlperiode\\s+(?:\\d{2}\\.\\d{2}\\.\\d{4}\\s+)?Drucksache \\d+/\\d+\\s*$");
+  private static final Pattern LANDTAG_MARKE = Pattern.compile("^\\s*Bayerischer Landtag\\s*$");
+
   /** Konjunktionen, die typischerweise auf einen Suspensivstrich folgen („Wirk- und …“). */
   private static final Pattern KONJUNKTION =
       Pattern.compile("^(und|oder|sowie|bzw\\.|beziehungsweise)\\b.*");
@@ -116,6 +135,7 @@ public final class TextBereiniger {
       Pattern.compile(
           "^(?:(?:Artikel|Teil|Abschnitt|Unterabschnitt|Kapitel|Titel|Buch)\\s+\\d+[a-z]?"
               + "|§\\s*\\d+[a-z]?"
+              + "|Art\\.\\s*\\d+[a-z]?"
               + "|(?:Anlage|Anhang)(?:\\s+\\d+[a-z]?)?)$");
 
   /** Perzentil der Zeilenlängen, das als „volle Spaltenbreite“ gilt (siehe {@link #verbindeUmbrueche}). */
@@ -145,7 +165,10 @@ public final class TextBereiniger {
   private TextBereiniger() {}
 
   public static String bereinige(String rohText) {
-    var text = normalisiereAnfuehrungszeichen(rohText);
+    // Geschützte Leerzeichen (GVBl-Satz: „§  1“, „Abs.  2“) sind für Javas \s und
+    // String.strip unsichtbar — früh auf gewöhnliche Leerzeichen normalisieren.
+    var text = rohText.replace(' ', ' ').replace(' ', ' ');
+    text = normalisiereAnfuehrungszeichen(text);
     text = INVERTIERTES_ZITAT.matcher(text).replaceAll("$1„($2) ");
     text = INVERTIERTES_PARAGRAPH_ZITAT.matcher(text).replaceAll("$1„$2");
     text = INVERTIERTES_LISTEN_ZITAT.matcher(text).replaceAll("$1„$2 ");
@@ -258,7 +281,11 @@ public final class TextBereiniger {
         || SEITENMARKER.matcher(zeile).matches()
         || DRUCKSACHE_KOPF.matcher(zeile).matches()
         || BUNDESTAG_KOPF.matcher(zeile).matches()
-        || BUNDESRAT_KOPF.matcher(zeile).matches();
+        || BUNDESRAT_KOPF.matcher(zeile).matches()
+        || GVBL_KOPF.matcher(zeile).matches()
+        || LANDTAG_SEITENKOPF.matcher(zeile).matches()
+        || LANDTAG_TITELKOPF.matcher(zeile).matches()
+        || LANDTAG_MARKE.matcher(zeile).matches();
   }
 
   /**

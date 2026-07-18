@@ -30,6 +30,15 @@ geometrische Zeilenend-Klassifikation auf Basis von PDFBox-Koordinaten ergänzt;
 ferner wird die Strukturierung hängend eingerückter Definitionslisten (z.B. im
 UWG-Anhang) sowohl im PDF-Extraktor als auch im XML-Flattener vereinheitlicht.
 
+Sodann wird das Erzeugnis in einer fünften Ertüchtigungswelle für das Landes-
+recht des Freistaates Bayern ertüchtigt (Artikel 4 bis 10): Stammgesetze in
+Artikel-Gliederung aus der konsolidierten Fassung von gesetze-bayern.de,
+paragraphengegliederte Änderungsgesetze aus dem Bayerischen Gesetz- und
+Verordnungsblatt und aus Landtags-Drucksachen, amtliche Satznummern als
+Superskripte sowie die bayerischen Befehlsformen. Belegfall ist das Gesetz zur
+Änderung des Bayerischen Jagdgesetzes und weiterer Rechtsvorschriften vom
+26. März 2026 (GVBl. S. 113) nebst Regierungsentwurf (Ltg-Drs. 19/9707).
+
 
 Artikel 1
 Geometrische Klassifikation der Zeilenenden nach Ausrichtungs-Clustern
@@ -86,16 +95,164 @@ Beide Wege erzeugen dieselbe kanonische Zeilenform („  2a. Stichwort“ nebst
 die Stellenauflösung (StellenAufloeser.zeilenBlock) erforderlich ist.
 
 
+Artikel 4
+Verallgemeinerung der Normbezeichnung auf das Artikel-Sigel
+
+Die Stellenkomponente des Paragraphen (Stelle.Paragraph) führt neben der Nummer
+nunmehr das Sigel („§“ oder „Art.“) und bildet daraus die Einzelnormbezeichnung
+(enbez). Der Stellenparser (StellenParser) nimmt „Art.“ als Normbezeichnung
+sowie durchgehend die abgekürzten und deklinierten Einheitenwörter an („Abs.“,
+„Nr.“, „Nrn.“, „Buchst.“, „Sätzen“, „Absätzen“); ferner wird die Komponente des
+Halbsatzes eingeführt (Auflösung durch Teilung des Satzes am Semikolon) und
+werden koordinierte Stellen mit nachgestellten Komponenten („Art. 18 Satz 2,
+Art. 19 und 20 Satz 1“) entfaltet. Befehlserkenner und Befehlsanwender bilden
+sämtliche bisher auf das „§“-Zeichen festgelegten Muster auf beide Sigel ab;
+das Verhalten gegenüber Bundesrecht bleibt unverändert.
+
+
+Artikel 5
+Amtliche Satznummern als Superskripte
+
+Bayerische Normtexte führen amtliche Satznummern als hochgestellte Ziffern.
+Der PDF-Vorverarbeiter (FontgroessenFilter) erhält einen Superskript-Modus:
+Ziffernfolgen, die kleiner gesetzt und gegenüber der Grundlinie ihres Laufs um
+zwei bis sechs Punkt gehoben sind, werden als Unicode-Superskripte (¹ ² ³)
+übernommen statt verworfen — im selben Lauf klebende Satznummern und Fußnoten-
+marker („Enteignung⁶)“) eingeschlossen. Der Satzteiler (SatzTeiler) teilt
+nummerierte Texte exakt an den Satznummern und stellt die Nummer eines Satzes
+bereit; die Stellenauflösung löst Satzangaben in nummerierten Texten nach dem
+amtlichen Label statt nach der Position auf. Die Satz-Umnummerierung schreibt
+die Satznummer im Text um („Satz 5 wird Satz 4“ → „⁵“ wird „⁴“). Für Bundes-
+recht (Modus „Entfernen“) bleibt das Verhalten unverändert.
+
+
+Artikel 6
+Kolumnentitel des GVBl und des Bayerischen Landtags; geschützte Leerzeichen
+
+Der Textbereiniger entfernt die Kolumnentitel des Bayerischen Gesetz- und
+Verordnungsblatts (mit links- oder rechtsstehender, auch an die Jahreszahl
+geklebter Seitenzahl: „… Nr. 6/202676“) sowie die Titel- und Seitenköpfe der
+Landtags-Drucksachen; eine am Seitenwechsel unterbrochene Silbentrennung heilt
+nach der Kopfentfernung („kurz-“ + „fristige“). Geschützte Leerzeichen des
+GVBl-Satzes („§ 1“, „Abs. 2“) werden früh auf gewöhnliche Leerzeichen
+normalisiert, da sie für die Muster des Parsers unsichtbar sind. Die Struktur-
+zeilen-Ausnahme des Reflows erfasst nunmehr auch „Art. N“.
+
+
+Artikel 7
+Paragraphengegliederte Änderungsgesetze; Rahmenbefehl im Vorspann;
+Fortführungszeichen
+
+Bayerische Änderungsgesetze gliedern sich in Paragraphen. Der Parser
+(AenderungsgesetzParser) teilt ein Dokument ohne Artikel-Überschriften an
+freistehenden „§ N“-Zeilen; die Auswahl über den Einleitungssatz (betrifft)
+bleibt maßgeblich und wählt auch die „Weitere Änderung“ desselben Stamm-
+gesetzes. Nennungen des Stammgesetzes als Genitiv-Attribut eines Ausführungs-
+oder Durchführungstitels („Verordnung zur Ausführung des Bayerischen Jagd-
+gesetzes“) zählen nicht als Treffer. Trägt der Vorspann nach der gesetzesweiten
+Änderungsformel einen Rahmenbefehl („… wird wie folgt geändert: Art. 28 Abs. 1
+wird wie folgt geändert:“) oder das Ziel eingebettet in der Formel selbst
+(„Art. 7 Abs. 2 des X-Gesetzes … wird wie folgt geändert:“), so wird dieses
+Ziel Kontext aller Gliederungspunkte. Der Zitatextraktor behandelt das
+Fortführungszeichen des GVBl (jedes neugefasste Aufzählungsglied öffnet am
+Zeilenanfang erneut mit „, geschlossen wird einmal am Blockende) als
+Typografie statt als geschachteltes Zitat; der Begründungs-Abschneider nimmt
+auch „Begründung:“ an. Ein GVBl-Heft, das zugleich ein artikelgegliedertes
+Änderungsgesetz enthielte, unterdrückte die Paragraphen-Teilung — Ausweg ist
+die Handkorrektur über --extract-only.
+
+
+Artikel 8
+Stammgesetz-Lader für das bayerische Landesrecht
+
+Das neue Paket gesetz/bayern liest ein Stammgesetz aus der konsolidierten
+Fassung von gesetze-bayern.de — als PDF (über den Superskript-erhaltenden
+Extraktionsweg) oder als kanonischen Klartext im Format der --extract-only-
+Ausgabe (BayRechtLoader, BayRechtTextParser). Erfasst werden Titelblock,
+Gliederungs-Überschriften samt nummerierten Unter-Überschriften (synthetische
+Kennzahlen), Normköpfe „Art. N“ (Querverweise am Zeilenanfang werden über eine
+Negativliste und die Monotonie der Artikelnummern ausgeschlossen; vom Reflow an
+ein Satzende geklebte Normköpfe werden am doppelten Leerzeichen erkannt und
+wieder abgetrennt), aufgehobene Artikel sowie Fußnotenzeilen („⁶) [Amtl.
+Anm.:] …“), die superskript-normalisiert im tragenden Absatz verbleiben. Die
+Befehlszeile (AendGgner) wählt den Lader nach dem Dateityp des Stammgesetzes
+(XML → gii, PDF/Klartext → Bayern) und extrahiert Änderungsgesetze dann im
+Superskript-Modus.
+
+
+Artikel 9
+Bayerische Befehlsformen
+
+Der Befehlserkenner und der Befehlsanwender werden ergänzt um: die Aufhebung
+von Fußnoten („Fußnote 1 wird aufgehoben“, auch mehrere — entfernt Fußnoten-
+zeile und Inline-Marker der Kontextnorm), die Streichung der Satznummerierung
+(„In Satz 1 wird die Satznummerierung „1“ gestrichen“), die Wortlaut-Formen
+(„Der Wortlaut wird Satz 1“, „Der bisherige Wortlaut wird Abs. 5“ — erhält nur
+der einzige unnummerierte Absatz die Nummer —, „Dem Wortlaut werden die
+folgenden Abs. 1 bis 4 vorangestellt“ nebst lokativer Folgeklausel auf den
+nummerierten Absatz), stellenlose und koordinierte Streichungen („Die Angabe
+„X“ wird gestrichen“, „werden die Angabe „X“ und die Angabe „Y“ gestrichen“),
+Ersetzungspaare mit „sowie“ und Einfügepaare mit Komma-Reihung, Bereichs- und
+Koordinations-Umnummerierungen in abgekürzter Form („Die bisherigen Abs. 1
+bis 3 werden die Abs. 2 bis 4“) sowie Klauselketten mit gemeinsamem Schluss-
+verb („… wird durch … und … wird durch … ersetzt“). Die Absatz-Umnummerierung
+greift nur noch, wenn der Absatz selbst das Ziel ist (bei „Satz 5 wird Satz 4“
+stammt die Absatzangabe aus dem Kontextrahmen und der Satz-Zweig ist
+zuständig).
+
+
+Artikel 10
+Feinbehandlung von Satzgrenzen, Fußnoten und mehrschrittigen Aufhebungen bei
+der Anwendung
+
+Aus der vollständigen Anwendung der bayerischen Belegnovelle auf die (nach
+Artikel 8 wiederhergestellte) alte Jagdgesetz-Fassung ergeben sich folgende
+Verfeinerungen des Satzteilers, des Befehlserkenners und des Befehlsanwenders:
+
+1.  Der Satzteiler (SatzTeiler) bestimmt die Satzgrenzen fortan als Textanfang
+    zuzüglich der Fundstelle jeder amtlichen Satznummer ab „²“. Eine allein
+    stehende Nummer ≥ 2 — sei es, weil der erste Satz keine Nummer trägt, sei es,
+    weil seine Nummer zuvor gestrichen wurde („Verboten ist … ²Art. 33 …“) —
+    bildet damit eine eigene Grenze. Als Satzanfang gilt eine Satznummer auch vor
+    einem Paragraphzeichen („³§ 23 …“).
+
+2.  Fußnoten-Definitionszeilen („⁶) [Amtl. Anm.:] …“) sind für die wortweisen
+    Operationen (Streichen, Ersetzen, Einfügen) kein Inhalt: Sie werden vor der
+    Operation abgetrennt und danach unverändert wieder angefügt, sodass die
+    Streichung eines Fußnotenmarkers („die Angabe „¹)“ wird gestrichen“) den in
+    den Text eingebetteten Marker trifft, nicht aber den gleichlautenden Kopf der
+    Definitionszeile (deren Beseitigung der Fußnoten-Aufhebung vorbehalten bleibt).
+
+3.  Die Aufhebung eines durch seine Bezeichnung benannten Absatzes markiert
+    diesen — unter Beibehaltung seiner Nummer — als weggefallen. Eine nachfolgende
+    Absatz-Umnummerierung auf eine Zielnummer, die bereits von einem leeren Platz-
+    halter (weggefallen oder gegenstandslos) belegt ist, überschreibt diesen
+    (in Entsprechung zur Umnummerierung auf eine weggefallene Zielnorm), sodass
+    Folgen wie „Abs. 2 wird aufgehoben; Abs. 3 wird Abs. 2 …“ vollständig aufgehen.
+
+4.  In einem Verbund erbt eine reine Wortoperation ohne eigenen Lokativ den Skopus
+    der linken Klausel („In Abs. 2 Satz 1 wird „A“ ersetzt und die Angabe „B“ wird
+    gestrichen“ wirkt für beide Klauseln auf Abs. 2 Satz 1); das gemeinsame Verb
+    wird hierzu in die grammatische Normalform vorgezogen.
+
+
 Schlussbestimmung
 
-Die vorstehenden Änderungen sind durch die Prüfung sämtlicher Testfälle (einhun-
-dertneunundsiebzig an der Zahl), durch die vollständige Erstellung (mvnw verify)
-sowie durch einen Vorher-nachher-Vergleich sämtlicher einundzwanzig Beispiel-
-kombinationen (UWG, AGG, ProdHaftG, GEG, IfSG; Anwendungs- und Prüfzahlen
-durchgehend unverändert) bestätigt worden. Anlass war ein anhand der UWG-Novelle
-2026 gemeldeter Wiedergabefehler (verklebte Kurzüberschriften im Anhang, auch in
-der Grundvorschrift); die Behebung wurde anhand der Beispieldaten (UWG-Anhang,
-Nummern 2a, 4c sowie 22; § 2 IfSG) verifiziert.
+Die vorstehenden Änderungen sind durch die Prüfung sämtlicher Testfälle (zwei-
+hundertelf an der Zahl) sowie durch die vollständige Erstellung (mvnw verify)
+bestätigt worden. Die Behebung des eingangs genannten Wiedergabefehlers wurde
+anhand der Beispieldaten (UWG-Anhang, Nummern 2a, 4c sowie 22; § 2 IfSG)
+verifiziert; die Anwendungs- und Prüfzahlen der bundesrechtlichen Beispiele (UWG,
+AGG, ProdHaftG, GEG, IfSG) bleiben durchgehend unverändert. Die Ertüchtigung für
+das bayerische Landesrecht ist durch die vollständige Anwendung der Belegnovelle
+(GVBl. 2026 S. 113, §§ 1 und 2) auf die wiederhergestellte alte Fassung des
+Bayerischen Jagdgesetzes belegt: Von einhundertvierundfünfzig Änderungsanweisungen
+werden einhundertneunundvierzig selbsttätig angewandt; keine bleibt unerkannt.
+Die fünf verbleibenden Anweisungen sind Folgeänderungen innerhalb zweier mehr-
+schrittiger Umnummerierungssequenzen (Neunummerierung des Bußgeldkatalogs in
+Art. 56 sowie die Absatzverschiebung in Art. 29a) und werden — statt fehlerhaft
+gedeutet zu werden — mit Begründung dem Abschnitt „Manuell prüfen“ zugewiesen.
+Der Regierungsentwurf (Ltg-Drs. 19/9707) wird auf derselben Grundlage verarbeitet.
 
 
 ════════════════════════════════════════════════════════════════════════════════

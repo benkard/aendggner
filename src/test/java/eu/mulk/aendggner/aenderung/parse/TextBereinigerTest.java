@@ -48,6 +48,36 @@ class TextBereinigerTest {
   }
 
   @Test
+  void entferntGvblKolumnentitel() {
+    // Gerade Seiten kleben die Seitenzahl ohne Zwischenraum an die Jahreszahl („…/202676“);
+    // eine am Seitenwechsel unterbrochene Silbentrennung heilt nach der Kopfentfernung.
+    var roh =
+        "Einheiten über Online-Plattformen für die kurz-\n"
+            + "Bayerisches Gesetz- und Verordnungsblatt Nr. 6/202676\n"
+            + "fristige Vermietung von Unterkünften anbietet, \n"
+            + "Bayerisches Gesetz- und Verordnungsblatt Nr. 6/2026 77\n"
+            + "Zweiter Satz. ";
+
+    assertThat(TextBereiniger.bereinige(roh))
+        .isEqualTo(
+            "Einheiten über Online-Plattformen für die kurzfristige Vermietung von Unterkünften"
+                + " anbietet,\nZweiter Satz.");
+  }
+
+  @Test
+  void entferntLandtagsKolumnentitel() {
+    var roh =
+        "Bayerischer Landtag \n"
+            + "19. Wahlperiode 28.01.2026  Drucksache 19/9707 \n"
+            + "Erster Satz. \n"
+            + "Drucksache 19/9707 Bayerischer Landtag 19. Wahlperiode Seite 2 \n"
+            + "Zweiter Satz. \n"
+            + "19. Wahlperiode Drucksache 19/9707 ";
+
+    assertThat(TextBereiniger.bereinige(roh)).isEqualTo("Erster Satz.\nZweiter Satz.");
+  }
+
+  @Test
   void entferntKopfzeilenDesNeuenBgblFormats() {
     var roh =
         "Erster Satz. \n"

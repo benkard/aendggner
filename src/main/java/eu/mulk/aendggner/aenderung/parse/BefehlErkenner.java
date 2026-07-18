@@ -5,7 +5,9 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Anfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Aufhebung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ebene;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.FussnotenAufhebung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.GliederungsUeberschriften;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.SatznummerierungStreichung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Neufassung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Sammelbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Streichung;
@@ -14,7 +16,9 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturErsetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Umnummerierung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WoerterEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortAnker;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortlautVoranstellung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortlautZuAbsatz;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortlautZuSatz;
 import eu.mulk.aendggner.aenderung.Provenienz;
 import eu.mulk.aendggner.aenderung.Stelle;
 import java.util.ArrayList;
@@ -65,7 +69,7 @@ final class BefehlErkenner {
   // „…““ — neue Gliederungs-Überschriften hinter einem Anker-§.
   private static final Pattern GLIEDERUNG_UEBERSCHRIFT_EINFUEGUNG =
       Pattern.compile(
-          "^Nach (§ \\S+) (?:wird|werden) (?:die |der |das )?folgenden? Überschrift(?:en)? "
+          "^Nach ((?:§|Art\\.) \\S+) (?:wird|werden) (?:die |der |das )?folgenden? Überschrift(?:en)? "
               + "zu (.+?) (?:ein|an)gefügt: "
               + Z
               + "\\.?$");
@@ -243,6 +247,19 @@ final class BefehlErkenner {
 
   private static final Pattern AUFHEBUNG = Pattern.compile("^(.+?) (?:wird|werden) aufgehoben\\.$");
 
+  // „Fußnote 1 wird aufgehoben.“ / „Die Fußnoten 9 und 10 werden aufgehoben.“ (bayerisches
+  // Landesrecht; Fußnoten stehen dort als „ⁿ) [Amtl. Anm.:] …“-Zeilen im Normtext).
+  private static final Pattern FUSSNOTE_AUFHEBUNG =
+      Pattern.compile(
+          "^(?:Die )?Fußnoten? (\\d+(?:(?:, | und )\\d+)*) (?:wird|werden) aufgehoben\\.$");
+  private static final Pattern FUSSNOTEN_TRENNER = Pattern.compile(", | und ");
+
+  // „In Satz 1 wird die Satznummerierung „1“ gestrichen.“ (bayerisches Landesrecht) — etwa
+  // nachdem der zweite und letzte Satz eines Absatzes aufgehoben wurde.
+  private static final Pattern SATZNUMMERIERUNG_STREICHUNG =
+      Pattern.compile(
+          "^(?:In )?(.+?) (?:wird|werden) die Satznummerierung " + Z + " gestrichen\\.$");
+
   // „Die Überschrift von Teil 3 Abschnitt 2 wird gestrichen.“ — Streichung einer Gliederungs-
   // Überschrift (die Wörter-Streichung STREICHUNG erfordert dagegen ein Zitat).
   private static final Pattern UEBERSCHRIFT_STREICHUNG =
@@ -274,6 +291,23 @@ final class BefehlErkenner {
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?" + WOERTER + " " + Z + " gestrichen\\.$");
 
+  // „Die Angabe „X“ wird gestrichen.“ — ohne Stellenangabe (Kontext liefert das Ziel); tritt vor
+  // allem als rechte Klausel eines Verbunds auf („… ersetzt und die Angabe „X“ wird gestrichen“).
+  private static final Pattern STREICHUNG_OHNE_STELLE =
+      Pattern.compile(
+          "^(?:Die Wörter|Das Wort|Die Angabe|Die Zahl) " + Z + " (?:wird|werden) "
+              + "(?:jeweils )?gestrichen\\.$");
+
+  // „In Nr. 2 werden die Angabe „X“ und die Angabe „Y“ gestrichen.“ — mehrere Streichobjekte
+  // unter einem gemeinsamen „gestrichen“.
+  private static final Pattern STREICHUNG_MEHRFACH =
+      Pattern.compile(
+          "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?("
+              + WOERTER
+              + " «\\d+»(?:(?:, | und | sowie )"
+              + WOERTER
+              + " «\\d+»)+) gestrichen\\.$");
+
   // „§ 9 wird gestrichen.“, „Absatz 3 wird gestrichen.“, „Die §§ 34 bis 39 werden gestrichen.“,
   // „Der bisherige Teil 3 wird gestrichen.“ — Streichung ganzer Struktureinheiten (semantisch eine
   // Aufhebung). Greift erst, wenn die Wörter-Streichung STREICHUNG (die ein Zitat verlangt) und die
@@ -284,30 +318,36 @@ final class BefehlErkenner {
   private static final Pattern UMNUMMERIERUNG =
       Pattern.compile(
           "^(?:Der bisherige |Die bisherige |Das bisherige )?(.+?) wird (?:zu )?"
-              + "(§|Absatz|Satz|Nummer|Buchstabe|Teil|Abschnitt|Unterabschnitt|Buch|Kapitel|Anlage) "
+              + "(§|Art\\.|Absatz|Abs\\.|Satz|Nummer|Nr\\.|Buchstabe|Buchst\\."
+              + "|Teil|Abschnitt|Unterabschnitt|Buch|Kapitel|Anlage) "
               + "(\\d+[a-z]?)\\.$");
 
   // „Die bisherigen Absätze 2 bis 4 werden zu den Absätzen 3 bis 5.“ bzw. „Die bisherigen Nummern 4
   // bis 6 werden die Nummern 8 bis 10.“ — Bereichs-Umnummerierung, in Einzelbefehle aufgelöst.
   private static final Pattern UMNUMMERIERUNG_BEREICH =
       Pattern.compile(
-          "^Die (?:bisherigen )?(?:Absätze|Sätze|Nummern|Buchstaben) (\\d+) bis (\\d+) "
-              + "werden (?:zu den |die )?(Absätzen|Sätzen|Nummern|Buchstaben|Absätze|Sätze) "
+          "^Die (?:bisherigen )?(?:Absätze|Abs\\.|Sätze|Nummern|Nrn?\\.|Buchstaben|Buchst\\.) "
+              + "(\\d+) bis (\\d+) "
+              + "werden (?:zu den |die )?(Absätzen|Sätzen|Nummern|Buchstaben|Absätze|Sätze"
+              + "|Abs\\.|Nrn?\\.|Buchst\\.) "
               + "(\\d+) bis (\\d+)\\.$");
 
   // „Die §§ 46 und 47 werden zu den §§ 34 und 35.“ — paarweise §-Umnummerierung (auch Bereiche).
   private static final Pattern UMNUMMERIERUNG_PARAGRAPHEN =
-      Pattern.compile("^Die §§ (.+?) werden (?:zu den §§ |zu §§ |die §§ )(.+?)\\.$");
+      Pattern.compile("^Die (§§|Artt?\\.) (.+?) werden (?:zu den \\1 |zu \\1 |die \\1 )(.+?)\\.$");
 
   // „Die §§ 52 bis 56 werden wie folgt gefasst: „§ 52 (weggefallen) …““ — Neufassung eines §-Bereichs;
   // der Zitatblock wird an „§ N“-Grenzen in Einzel-Neufassungen zerlegt.
   private static final Pattern PARAGRAPH_BEREICH_NEUFASSUNG =
       Pattern.compile(
-          "^Die §§ (\\d+[a-z]?) bis (\\d+[a-z]?) (?:wird|werden) wie folgt gefasst: " + Z + "\\.?$");
+          "^Die (?:§§|Artt?\\.) (\\d+[a-z]?) bis (\\d+[a-z]?) (?:wird|werden) wie folgt gefasst: "
+              + Z
+              + "\\.?$");
 
-  // „Der Wortlaut wird Absatz 1.“
+  // „Der Wortlaut wird Absatz 1.“, bayerisch auch „Der bisherige Wortlaut wird Abs. 5.“ und
+  // „Der Wortlaut wird Satz 1.“
   private static final Pattern WORTLAUT_ZU_ABSATZ =
-      Pattern.compile("^Der Wortlaut wird Absatz (\\d+[a-z]?)\\.$");
+      Pattern.compile("^Der (?:bisherige )?Wortlaut wird (Absatz|Abs\\.|Satz) (\\d+[a-z]?)\\.$");
 
   // „In Nummer 7 wird das Wort «1» am Ende durch ein Komma ersetzt.“
   private static final Pattern WORT_ZU_SATZZEICHEN =
@@ -361,15 +401,16 @@ final class BefehlErkenner {
 
   private static final Pattern EBENE_BEZEICHNUNG =
       Pattern.compile(
-          "^(?:§ (\\d+[a-z]?)|Absatz (\\d+[a-z]?)|Satz(?: (\\d+[a-z]?))?|Sätze"
-              + "|Nummer (\\d+[a-z]?)|Buchstabe ([a-z]{1,3})"
-              + "|(Absätze .+|Nummern .+|Buchstaben .+))$");
+          "^(?:(?:§|Art\\.) (\\d+[a-z]?)|(?:Absatz|Abs\\.) (\\d+[a-z]?)|Satz(?: (\\d+[a-z]?))?|Sätze"
+              + "|(?:Nummer|Nr\\.) (\\d+[a-z]?)|(?:Buchstabe|Buchst\\.) ([a-z]{1,3})"
+              + "|(Absätze .+|Abs\\. .+|Sätze .+|Nummern .+|Nrn?\\. .+|Buchstaben .+"
+              + "|Buchst\\. .+))$");
 
   // „In <Stelle> werden die Wörter «1» durch die Wörter «2» und die Angabe «3» durch die Wörter «4»
   // ersetzt.“ — mehrere Ersetzungspaare unter einem gemeinsamen „ersetzt“. Die Mitte (Gruppe 2)
   // wird an „ und “ in Einzelpaare zerlegt und je gegen EIN_ERSETZUNGS_PAAR validiert.
   private static final Pattern PAAR_ERSETZUNG =
-      Pattern.compile("^(?:In )?(.+?) (?:wird|werden) (.+(?: und |, ).+) ersetzt\\.$");
+      Pattern.compile("^(?:In )?(.+?) (?:wird|werden) (.+(?: und | sowie |, ).+) ersetzt\\.$");
   private static final Pattern EIN_ERSETZUNGS_PAAR =
       Pattern.compile(
           "^(?:jeweils )?"
@@ -381,15 +422,17 @@ final class BefehlErkenner {
               + " )?"
               + Z
               + "$");
-  // Paare trennen sich an „ und “ sowie an Kommata vor dem nächsten Wörter-Objekt.
+  // Paare trennen sich an „ und “/„ sowie “ sowie an Kommata vor dem nächsten Wörter-Objekt.
   private static final Pattern PAAR_SEP =
-      Pattern.compile(" und |,\\s+(?=(?:die Wörter|das Wort|die Angabe|die Zahl) )");
+      Pattern.compile(" und | sowie |,\\s+(?=(?:die Wörter|das Wort|die Angabe|die Zahl) )");
 
   // „Die bisherigen Absätze 6 und 7 werden die Absätze 1 und 2.“ — koordinierte Umnummerierung.
   private static final Pattern UMNUMMERIERUNG_KOORDINIERT =
       Pattern.compile(
-          "^Die (?:bisherigen )?(Absätze|Sätze|Nummern|Buchstaben) (\\d+[a-z]?) und (\\d+[a-z]?) "
-              + "werden (?:zu den |die )?(?:Absätze[n]?|Sätze[n]?|Nummern|Buchstaben) "
+          "^Die (?:bisherigen )?(Absätze|Abs\\.|Sätze|Nummern|Nrn?\\.|Buchstaben|Buchst\\.)"
+              + " (\\d+[a-z]?) und (\\d+[a-z]?) "
+              + "werden (?:zu den |die )?(?:Absätze[n]?|Abs\\.|Sätze[n]?|Nummern|Nrn?\\."
+              + "|Buchstaben|Buchst\\.) "
               + "(\\d+[a-z]?) und (\\d+[a-z]?)\\.$");
 
   // „In Absatz 3 Satz 1 wird vor dem Punkt am Ende ein Komma und werden die Wörter „…“
@@ -408,7 +451,8 @@ final class BefehlErkenner {
   private static final Pattern EINFUEGUNGS_PAARE =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?((?:nach|vor) .+) eingefügt\\.$");
-  private static final Pattern EINFUEGUNGS_PAAR_SEP = Pattern.compile(" und (?=nach |vor )");
+  private static final Pattern EINFUEGUNGS_PAAR_SEP =
+      Pattern.compile("(?: und |,\\s+)(?=nach |vor )");
   private static final Pattern EIN_EINFUEGUNGS_PAAR =
       Pattern.compile(
           "^(nach|vor) (?:dem Wort|den Wörtern|der Angabe|der Zahl) "
@@ -422,7 +466,12 @@ final class BefehlErkenner {
   // „… ein Komma eingefügt und werden …“: Trennstellen eines Verbundbefehls sind „ und “ (ggf. mit
   // Komma) bzw. „, “ direkt vor „wird/werden“. Innerhalb von Zitaten steht „ und “ als «n» maskiert.
   private static final Pattern VERBUND_SEP =
-      Pattern.compile(",? und |, (?=wird\\b|werden\\b)");
+      Pattern.compile(
+          ",? und |, (?=wird\\b|werden\\b)"
+              // Komma-Kette gleichrangiger Klauseln („… ersetzt, die Angabe «n» wird gestrichen
+              // und …“) — nur vor einer Wortgruppen-Klausel mit maskiertem Zitat, damit echte
+              // Relativsätze nicht getrennt werden.
+              + "|, (?=(?:die Wörter|das Wort|die Angabe|die Zahl) «)");
   private static final Pattern WIRD_WERDEN = Pattern.compile(" (?:wird|werden) ");
 
   // „In <Stelle> wird nach den Wörtern «1» ein Komma eingefügt.“ (Satzzeichen statt Wörter einfügen)
@@ -461,7 +510,8 @@ final class BefehlErkenner {
   private static final Pattern UMNUMMERIERUNGS_RAHMEN =
       Pattern.compile(
           "^(?:Der bisherige |Die bisherige |Das bisherige )?(.+?) wird (?:zu )?"
-              + "(§|Absatz|Satz|Nummer|Buchstabe|Teil|Abschnitt|Unterabschnitt|Buch|Kapitel|Anlage)"
+              + "(§|Art\\.|Absatz|Abs\\.|Satz|Nummer|Nr\\.|Buchstabe|Buchst\\."
+              + "|Teil|Abschnitt|Unterabschnitt|Buch|Kapitel|Anlage)"
               + " (\\d+[a-z]?) und wird wie folgt geändert:$");
 
   /** Ein Kontextrahmen samt optionalem Begleitbefehl (Umnummerierung des Rahmens selbst). */
@@ -599,7 +649,21 @@ final class BefehlErkenner {
     }
 
     if ((m = WORTLAUT_ZU_ABSATZ.matcher(text)).matches()) {
-      return Optional.of(new WortlautZuAbsatz(kontext, m.group(1), provenienz));
+      if (m.group(1).equals("Satz")) {
+        return Optional.of(new WortlautZuSatz(kontext, m.group(2), provenienz));
+      }
+      return Optional.of(new WortlautZuAbsatz(kontext, m.group(2), provenienz));
+    }
+
+    if ((m = FUSSNOTE_AUFHEBUNG.matcher(text)).matches()) {
+      var nummern = List.of(FUSSNOTEN_TRENNER.split(m.group(1)));
+      return Optional.of(new FussnotenAufhebung(kontext, nummern, provenienz));
+    }
+
+    if ((m = SATZNUMMERIERUNG_STREICHUNG.matcher(text)).matches()) {
+      var nummer = wortZitat(zitate, m.group(2));
+      return ausStellen(
+          m.group(1), s -> new SatznummerierungStreichung(kontext.plus(s), nummer, provenienz));
     }
 
     if ((m = UEBERSCHRIFT_ERSETZUNG.matcher(text)).matches()) {
@@ -658,7 +722,7 @@ final class BefehlErkenner {
       if (stellen.size() == 1
           && (ziel.equals("Überschrift")
               || ziel.equals("Inhaltsübersicht")
-              || ziel.matches("§\\s*\\d+[a-z]?"))) {
+              || ziel.matches("(?:§|Art\\.)\\s*\\d+[a-z]?"))) {
         return Optional.of(new Neufassung(kontext.plus(stellen.get(0)), neuerText, provenienz));
       }
       var ebene = strukturEbene(ziel);
@@ -845,7 +909,7 @@ final class BefehlErkenner {
         // „Nach § 60a werden die folgenden §§ 60b und 60c eingefügt: „…““ — Block mehrerer
         // Paragraphen (Aufteilung an den §-Überschriften erfolgt beim Anwenden). Signal:
         // Ebene PARAGRAPH mit bezeichnung == null.
-        if (m.group(3).strip().matches("§§\\s*\\d.*")) {
+        if (m.group(3).strip().matches("(?:§§|Artt?\\.)\\s*\\d.*")) {
           return Optional.of(
               new StrukturEinfuegung(
                   kontext.plus(stelle.get()),
@@ -872,6 +936,12 @@ final class BefehlErkenner {
       // Bei der stellenlosen Form ist die neue Einheit zugleich der Anker (sie tritt vor die
       // gleichnamige bestehende Einheit).
       boolean mitStelle = m.pattern() == VORANSTELLUNG_MIT_STELLE;
+      // „Dem Wortlaut werden die folgenden Abs. 1 bis 4 vorangestellt: „…““ (bayerisch): die
+      // neuen Absätze treten vor den gesamten bisherigen Normtext.
+      if (mitStelle && m.group(1).equals("Wortlaut")) {
+        return Optional.of(
+            new WortlautVoranstellung(kontext, zitat(zitate, m.group(4)), provenienz));
+      }
       var ankerPhrase = m.group(1);
       var ebeneBez = ebeneUndBezeichnung(mitStelle ? m.group(2) : m.group(1));
       var stelle = StellenParser.parse(ankerPhrase);
@@ -996,12 +1066,40 @@ final class BefehlErkenner {
       return ausStellen(m.group(1), s -> new Streichung(kontext.plus(s), woerter, provenienz));
     }
 
+    if ((m = STREICHUNG_OHNE_STELLE.matcher(text)).matches()) {
+      var woerter = wortZitat(zitate, m.group(1));
+      return Optional.of(new Streichung(kontext, woerter, provenienz));
+    }
+
+    if ((m = STREICHUNG_MEHRFACH.matcher(text)).matches()) {
+      var stellen = StellenParser.parseMehrfach(m.group(1));
+      if (stellen.isEmpty()) {
+        if (!StellenParser.istNurChapeau(m.group(1))) {
+          return Optional.empty();
+        }
+        stellen = List.of(Stelle.LEER);
+      }
+      var objekte = new ArrayList<String>();
+      var zm = Pattern.compile("«(\\d+)»").matcher(m.group(2));
+      while (zm.find()) {
+        objekte.add(wortZitat(zitate, zm.group(1)));
+      }
+      var teile = new ArrayList<Aenderungsbefehl>();
+      for (var s : stellen) {
+        for (var woerter : objekte) {
+          teile.add(new Streichung(kontext.plus(s), woerter, provenienz));
+        }
+      }
+      return Optional.of(teile.size() == 1 ? teile.get(0) : new Sammelbefehl(teile));
+    }
+
     if ((m = STRUKTUR_STREICHUNG.matcher(text)).matches()) {
       return ausStellen(m.group(1), s -> new Aufhebung(kontext.plus(s), provenienz));
     }
 
     if ((m = UMNUMMERIERUNG_PARAGRAPHEN.matcher(text)).matches()) {
-      return paragraphenUmnummerierung(m.group(1), m.group(2), kontext, provenienz);
+      var sigel = m.group(1).startsWith("Art") ? "Art. " : "§ ";
+      return paragraphenUmnummerierung(sigel, m.group(2), m.group(3), kontext, provenienz);
     }
 
     if ((m = UMNUMMERIERUNG_BEREICH.matcher(text)).matches()) {
@@ -1047,7 +1145,12 @@ final class BefehlErkenner {
     }
     var stellen = StellenParser.parseMehrfach(m.group(1));
     if (stellen.isEmpty()) {
-      return Optional.empty();
+      // „In dem Satzteil nach Nr. 3 werden … ersetzt.“ — reine Chapeau-Angabe ohne eigene
+      // Komponente: die Ersetzung sucht im Text der Kontextstelle.
+      if (!StellenParser.istNurChapeau(m.group(1))) {
+        return Optional.empty();
+      }
+      stellen = List.of(Stelle.LEER);
     }
     var segmente = PAAR_SEP.split(m.group(2));
     if (segmente.length < 2) {
@@ -1135,6 +1238,13 @@ final class BefehlErkenner {
    * erkannt werden, entsteht ein {@link Sammelbefehl}. Nur wenn <em>alle</em> Klauseln erkannt
    * werden, greift die Zerlegung — sonst bleibt der Befehl unbekannt (konservativ).
    */
+  // Reine Wortoperationen tragen nie einen eigenen strukturellen Lokativ, sondern wirken innerhalb
+  // des zuvor gesetzten Skopus (Gapping): „… und die Angabe „X“ wird gestrichen/eingefügt“.
+  private static final Pattern REINE_WORT_OPERATION =
+      Pattern.compile(
+          "(?i)(?:die Angabe|nach der Angabe|vor der Angabe|die Wörter|die Worte|"
+              + "nach den Wörtern|vor den Wörtern|das Wort)\\b");
+
   private static Optional<Aenderungsbefehl> erkenneVerbund(
       String text, Stelle kontext, ZitatExtraktor.Ergebnis zitate, Provenienz provenienz) {
     var sep = VERBUND_SEP.matcher(text);
@@ -1145,6 +1255,15 @@ final class BefehlErkenner {
         continue;
       }
       var linksBefehl = erkenneAlsSatz(links, kontext, zitate, provenienz);
+      if (linksBefehl.isEmpty()) {
+        // Gemeinsames Schlussverb (Gapping): „die Angabe «A» wird durch die Angabe «B» und die
+        // Angabe «C» wird durch die Angabe «D» ersetzt.“ — das „ersetzt“ der rechten Klausel
+        // gilt auch links.
+        var schluss = gemeinsamerVerbSchluss(rechts);
+        if (schluss != null) {
+          linksBefehl = erkenneAlsSatz(links + " " + schluss, kontext, zitate, provenienz);
+        }
+      }
       if (linksBefehl.isEmpty()) {
         continue;
       }
@@ -1182,10 +1301,48 @@ final class BefehlErkenner {
     if (linksBefehl instanceof Umnummerierung um
         && um.neu().paragraph().isPresent()
         && rechts.startsWith("in ")
-        && !rechts.matches(".*§\\s*\\d.*")) {
+        && !rechts.matches(".*(?:§|Art\\.)\\s*\\d.*")) {
       var imNeuen = erkenneAlsSatz(gross, um.neu(), zitate, provenienz);
       if (imNeuen.isPresent()) {
         return imNeuen;
+      }
+    }
+    // „Der bisherige Wortlaut wird Abs. 5 und in Halbsatz 1 wird … ersetzt“ (bayerisch): die
+    // lokative Folgeklausel bezieht sich auf den soeben nummerierten Absatz.
+    if (linksBefehl instanceof WortlautZuAbsatz wz
+        && rechts.startsWith("in ")
+        && !rechts.matches(".*(?:§|Art\\.)\\s*\\d.*")) {
+      var neuKontext =
+          wz.stelle().plus(new Stelle(List.of(new Stelle.AbsatzNr(wz.nummer()))));
+      var imNeuen = erkenneAlsSatz(gross, neuKontext, zitate, provenienz);
+      if (imNeuen.isPresent()) {
+        return imNeuen;
+      }
+    }
+    // Gapping mit gemeinsamem Lokativ: „In Abs. 2 Satz 1 wird A ersetzt und die Angabe „B“ wird
+    // gestrichen“ — die rechte Klausel ist eine reine Wortoperation ohne eigenen Lokativ und erbt
+    // daher den Skopus der linken (sonst löste sie fälschlich auf Artikelebene auf). Nur wenn die
+    // linke Klausel überhaupt einen Lokativ trägt und der so entstandene Befehl eine engere Stelle
+    // als der bloße Kontext trifft.
+    // Nach einer Umnummerierung wird die Wortoperation nicht auf die neue Stelle festgenagelt: sie
+    // löst norm-weit auf (findet ihren Zieltext im umbenannten Absatz, ohne eine womöglich schon
+    // bestehende Zielnummer fälschlich zu treffen) — das übernehmen die Zweige weiter unten.
+    if (REINE_WORT_OPERATION.matcher(rechts).lookingAt()
+        && !(linksBefehl instanceof Umnummerierung)) {
+      var praefix0 = lokativerPraefix(links);
+      var vm = WIRD_WERDEN.matcher(rechts);
+      if (praefix0 != null && !praefix0.isBlank() && vm.find()) {
+        // „die Angabe „X“ wird gestrichen“ → „In <loc> wird die Angabe „X“ gestrichen“: den Lokativ
+        // der linken Klausel voranstellen und das Verb nach vorn ziehen (grammatische Normalform).
+        var subjekt = rechts.substring(0, vm.start()).strip();
+        var praedikat = rechts.substring(vm.end()).strip();
+        var umgestellt =
+            praefix0.strip() + " " + vm.group().strip() + " " + subjekt + " " + praedikat;
+        var geerbt = erkenneAlsSatz(umgestellt, kontext, zitate, provenienz);
+        if (geerbt.isPresent()
+            && geerbt.get().stelle().komponenten().size() > kontext.komponenten().size()) {
+          return geerbt;
+        }
       }
     }
     var direkt = erkenneAlsSatz(rechts, kontext, zitate, provenienz);
@@ -1257,6 +1414,15 @@ final class BefehlErkenner {
     return erkenne(satz, kontext, zitate, provenienz);
   }
 
+  private static final Pattern VERB_SCHLUSS =
+      Pattern.compile(".*\\b(ersetzt|gestrichen|eingefügt|angefügt|aufgehoben)\\.$");
+
+  /** Das gemeinsame Schlussverb einer Klauselkette („… ersetzt.“), falls vorhanden. */
+  private static @Nullable String gemeinsamerVerbSchluss(String rechts) {
+    var m = VERB_SCHLUSS.matcher(rechts);
+    return m.matches() ? m.group(1) + "." : null;
+  }
+
   /** Der Teil einer Klausel vor dem ersten „wird“/„werden“ („In § 3 Absatz 1“). */
   private static @Nullable String lokativerPraefix(String klausel) {
     var m = WIRD_WERDEN.matcher(klausel);
@@ -1276,9 +1442,9 @@ final class BefehlErkenner {
    * §-Umnummerierungen auf. Beide Seiten werden zu Paragraphenlisten expandiert und zusammengeführt.
    */
   private static Optional<Aenderungsbefehl> paragraphenUmnummerierung(
-      String altPhrase, String neuPhrase, Stelle kontext, Provenienz provenienz) {
-    var alt = StellenParser.parseMehrfach("§ " + altPhrase);
-    var neu = StellenParser.parseMehrfach("§ " + neuPhrase);
+      String sigel, String altPhrase, String neuPhrase, Stelle kontext, Provenienz provenienz) {
+    var alt = StellenParser.parseMehrfach(sigel + altPhrase);
+    var neu = StellenParser.parseMehrfach(sigel + neuPhrase);
     if (alt.isEmpty() || alt.size() != neu.size()) {
       return Optional.empty();
     }
@@ -1429,11 +1595,11 @@ final class BefehlErkenner {
   private static @Nullable Ebene strukturEbene(String ziel) {
     var erstesWort = ziel.split("\\s+", 2)[0];
     return switch (erstesWort) {
-      case "§", "§§" -> Ebene.PARAGRAPH;
-      case "Absatz", "Absätze" -> Ebene.ABSATZ;
+      case "§", "§§", "Art.", "Artt." -> Ebene.PARAGRAPH;
+      case "Absatz", "Absätze", "Abs." -> Ebene.ABSATZ;
       case "Satz", "Sätze" -> Ebene.SATZ;
-      case "Nummer", "Nummern" -> Ebene.NUMMER;
-      case "Buchstabe", "Buchstaben" -> Ebene.BUCHSTABE;
+      case "Nummer", "Nummern", "Nr.", "Nrn." -> Ebene.NUMMER;
+      case "Buchstabe", "Buchstaben", "Buchst." -> Ebene.BUCHSTABE;
       default -> null;
     };
   }
@@ -1441,10 +1607,11 @@ final class BefehlErkenner {
   private static Stelle.Komponente komponenteFuer(String ebene, String nummer) {
     return switch (ebene) {
       case "§" -> new Stelle.Paragraph(nummer);
-      case "Absatz" -> new Stelle.AbsatzNr(nummer);
+      case "Art." -> new Stelle.Paragraph(nummer, "Art.");
+      case "Absatz", "Abs." -> new Stelle.AbsatzNr(nummer);
       case "Satz" -> new Stelle.SatzNr(nummer);
-      case "Nummer" -> new Stelle.NummerNr(nummer);
-      case "Buchstabe" -> new Stelle.BuchstabeNr(nummer);
+      case "Nummer", "Nr." -> new Stelle.NummerNr(nummer);
+      case "Buchstabe", "Buchst." -> new Stelle.BuchstabeNr(nummer);
       case "Teil", "Abschnitt", "Unterabschnitt", "Buch", "Kapitel", "Anlage" ->
           new Stelle.Gliederungseinheit(ebene, nummer);
       default -> throw new IllegalArgumentException("Unbekannte Ebene: " + ebene);
@@ -1454,10 +1621,10 @@ final class BefehlErkenner {
   /** Normalisiert die Ebenenwörter (auch Dativ-/Pluralformen) auf den Basisnamen. */
   private static @Nullable String ebeneAusWort(String wort) {
     return switch (wort) {
-      case "Absatz", "Absätze", "Absätzen" -> "Absatz";
+      case "Absatz", "Absätze", "Absätzen", "Abs." -> "Absatz";
       case "Satz", "Sätze", "Sätzen" -> "Satz";
-      case "Nummer", "Nummern" -> "Nummer";
-      case "Buchstabe", "Buchstaben" -> "Buchstabe";
+      case "Nummer", "Nummern", "Nr.", "Nrn." -> "Nummer";
+      case "Buchstabe", "Buchstaben", "Buchst." -> "Buchstabe";
       default -> null;
     };
   }
@@ -1469,17 +1636,18 @@ final class BefehlErkenner {
   private static Optional<Aenderungsbefehl> paragraphBereichNeufassung(
       String block, Stelle kontext, Provenienz provenienz) {
     var teile = new ArrayList<Aenderungsbefehl>();
-    var stuecke = block.strip().split("(?=§\\s*\\d)");
+    var stuecke = block.strip().split("(?=(?:§|Art\\.)\\s*\\d)");
     for (var stueck : stuecke) {
       var s = stueck.strip();
       if (s.isEmpty()) {
         continue;
       }
-      var pm = Pattern.compile("^§\\s*(\\d+[a-z]?)\\b").matcher(s);
+      var pm = Pattern.compile("^(§|Art\\.)\\s*(\\d+[a-z]?)\\b").matcher(s);
       if (!pm.find()) {
         return Optional.empty();
       }
-      var stelle = kontext.plus(new Stelle(List.of(new Stelle.Paragraph(pm.group(1)))));
+      var stelle =
+          kontext.plus(new Stelle(List.of(new Stelle.Paragraph(pm.group(2), pm.group(1)))));
       teile.add(new Neufassung(stelle, s, provenienz));
     }
     if (teile.isEmpty()) {

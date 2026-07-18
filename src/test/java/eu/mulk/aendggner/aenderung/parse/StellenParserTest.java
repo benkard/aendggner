@@ -83,6 +83,33 @@ class StellenParserTest {
   }
 
   @Test
+  void parstBayerischeArtikelStelle() {
+    // Bayerisches Landesrecht: Normen heißen „Art. N“, Unterkomponenten sind abgekürzt.
+    var stelle = StellenParser.parse("Art. 6 Abs. 2 Satz 1 Nr. 2").orElseThrow();
+    assertThat(stelle.anzeigeText()).isEqualTo("Art. 6 Absatz 2 Satz 1 Nummer 2");
+    assertThat(stelle.paragraph().orElseThrow().enbez()).isEqualTo("Art. 6");
+  }
+
+  @Test
+  void parstBayerischenBereichMitAbkuerzung() {
+    // „In den Abs. 4 und 5“ und Bereiche wie „Art. 4 bis 6“ mit erhaltenem Sigel.
+    var stellen = StellenParser.parseMehrfach("Art. 4 Abs. 3, Art. 5 Abs. 2 und Art. 11 Abs. 6");
+    assertThat(stellen).extracting(Stelle::anzeigeText)
+        .containsExactly("Art. 4 Absatz 3", "Art. 5 Absatz 2", "Art. 11 Absatz 6");
+    var bereich = StellenParser.parseMehrfach("Abs. 1 bis 3");
+    assertThat(bereich).extracting(Stelle::anzeigeText)
+        .containsExactly("Absatz 1", "Absatz 2", "Absatz 3");
+  }
+
+  @Test
+  void ignoriertBayerischenChapeauZusatz() {
+    assertThat(StellenParser.parse("Abs. 2 Satzteil vor Nr. 1").orElseThrow().anzeigeText())
+        .isEqualTo("Absatz 2");
+    assertThat(StellenParser.parse("in dem Satzteil nach Nr. 3").isEmpty()).isTrue();
+    assertThat(StellenParser.istNurChapeau("in dem Satzteil nach Nr. 3")).isTrue();
+  }
+
+  @Test
   void ignoriertChapeauZusatz() {
     // „in der Angabe vor Nummer 1“ ist ein verfeinernder Zusatz ohne eigene Komponente.
     assertThat(StellenParser.parse("Absatz 1 in der Angabe vor Nummer 1").orElseThrow().anzeigeText())

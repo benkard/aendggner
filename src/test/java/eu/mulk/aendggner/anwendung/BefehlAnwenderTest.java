@@ -984,4 +984,154 @@ class BefehlAnwenderTest {
   private static String absatzText(Gesetz gesetz, String enbez, int index) {
     return gesetz.norm(enbez).orElseThrow().absaetze().get(index).text();
   }
+
+  // --- Bayerisches Landesrecht ---------------------------------------------------------------
+
+  /** Ein Gesetz nach bayerischem Muster: Art.-Normen, amtliche Satznummern, Fußnoten. */
+  private static Gesetz bayGesetz() {
+    return new Gesetz(
+        "BayTestG",
+        "Bayerisches Testgesetz",
+        null,
+        List.of(
+            new Norm(
+                "Art. 1",
+                "Zweck",
+                null,
+                List.of(
+                    new Absatz(
+                        "1",
+                        "¹Die Erprobung ist Zweck dieses Gesetzes⁶). ²Sie erfolgt sorgfältig.\n"
+                            + "⁶) [Amtl. Anm.:] BayRS 0-0-T"),
+                    new Absatz("2", "¹Erster Satz. ²Zweiter Satz.")),
+                false),
+            new Norm(
+                "Art. 2",
+                "Begriffe",
+                null,
+                List.of(
+                    new Absatz(
+                        null,
+                        "Erprobung ist die Prüfung der Tauglichkeit; sie endet mit einem"
+                            + " Bericht.")),
+                false)),
+        List.of());
+  }
+
+  @Test
+  void wendetFussnotenAufhebungAn() {
+    var befehl =
+        new eu.mulk.aendggner.aenderung.Aenderungsbefehl.FussnotenAufhebung(
+            stelle(new Stelle.Paragraph("1", "Art.")), List.of("6"), PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(bayGesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    var text = absatzText(ergebnis.neu(), "Art. 1", 0);
+    assertThat(text).doesNotContain("⁶").doesNotContain("[Amtl. Anm.:]");
+    assertThat(text).startsWith("¹Die Erprobung ist Zweck dieses Gesetzes.");
+  }
+
+  @Test
+  void meldetFehlendeFussnoteAlsManuellPruefen() {
+    var befehl =
+        new eu.mulk.aendggner.aenderung.Aenderungsbefehl.FussnotenAufhebung(
+            stelle(new Stelle.Paragraph("1", "Art.")), List.of("7"), PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(bayGesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.MANUELL_PRUEFEN);
+    assertThat(ergebnis.protokoll().get(0).begruendung()).contains("Fußnote 7");
+  }
+
+  @Test
+  void wendetSatznummerierungsStreichungAn() {
+    var befehl =
+        new eu.mulk.aendggner.aenderung.Aenderungsbefehl.SatznummerierungStreichung(
+            stelle(
+                new Stelle.Paragraph("1", "Art."),
+                new Stelle.AbsatzNr("2"),
+                new Stelle.SatzNr("1")),
+            "1",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(bayGesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "Art. 1", 1)).isEqualTo("Erster Satz. ²Zweiter Satz.");
+  }
+
+  @Test
+  void satzUmnummerierungSchreibtSuperskriptUm() {
+    // „Satz 2 wird Satz 3.“ — die amtliche Satznummer im Text wird umgeschrieben.
+    var befehl =
+        new Umnummerierung(
+            stelle(
+                new Stelle.Paragraph("1", "Art."),
+                new Stelle.AbsatzNr("2"),
+                new Stelle.SatzNr("2")),
+            stelle(
+                new Stelle.Paragraph("1", "Art."),
+                new Stelle.AbsatzNr("2"),
+                new Stelle.SatzNr("3")),
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(bayGesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "Art. 1", 1)).isEqualTo("¹Erster Satz. ³Zweiter Satz.");
+  }
+
+  @Test
+  void wendetWortlautZuSatzAn() {
+    var befehl =
+        new eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortlautZuSatz(
+            stelle(new Stelle.Paragraph("2", "Art.")), "1", PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(bayGesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "Art. 2", 0)).startsWith("¹Erprobung ist die Prüfung");
+  }
+
+  @Test
+  void wendetWortlautVoranstellungUndNummerierungAn() {
+    // Bayerische Folge: erst „Dem Wortlaut werden die folgenden Abs. 1 und 2 vorangestellt“,
+    // dann „Der bisherige Wortlaut wird Abs. 3“ — nur der unnummerierte Absatz erhält die Nummer.
+    var voranstellung =
+        new eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortlautVoranstellung(
+            stelle(new Stelle.Paragraph("2", "Art.")), "(1) Erstens. (2) Zweitens.", PROV);
+    var nummerierung =
+        new eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortlautZuAbsatz(
+            stelle(new Stelle.Paragraph("2", "Art.")), "3", PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(bayGesetz(), List.of(voranstellung, nummerierung));
+
+    assertThat(ergebnis.protokoll())
+        .allSatisfy(eintrag -> assertThat(eintrag.status()).isEqualTo(Status.ANGEWANDT));
+    var norm = ergebnis.neu().norm("Art. 2").orElseThrow();
+    assertThat(norm.absaetze()).hasSize(3);
+    assertThat(norm.absaetze().get(0).nummer()).isEqualTo("1");
+    assertThat(norm.absaetze().get(1).nummer()).isEqualTo("2");
+    assertThat(norm.absaetze().get(2).nummer()).isEqualTo("3");
+    assertThat(norm.absaetze().get(2).text()).startsWith("Erprobung ist");
+  }
+
+  @Test
+  void wendetHalbsatzErsetzungAn() {
+    var befehl =
+        new Ersetzung(
+            stelle(new Stelle.Paragraph("2", "Art."), new Stelle.HalbsatzNr("2")),
+            "sie endet",
+            "sie schließt",
+            false,
+            false,
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(bayGesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "Art. 2", 0))
+        .isEqualTo("Erprobung ist die Prüfung der Tauglichkeit; sie schließt mit einem Bericht.");
+  }
 }

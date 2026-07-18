@@ -217,4 +217,97 @@ class EndToEndTest {
     assertThat(neueNorm.titel()).isEqualTo("Außerkrafttreten");
     assertThat(neueNorm.gesamtText()).contains("9. Dezember 2026 außer Kraft");
   }
+
+  /**
+   * Bayerisches Landesrecht (Akzeptanzfall der fünften Welle): altes BayJG (Klartext, aus der
+   * archivierten Fassung von gesetze-bayern.de abgeleitet) + GVBl-Heft 6/2026. §§ 1 und 2 des
+   * Änderungsgesetzes betreffen das BayJG; alle Befehle werden erkannt und angewandt.
+   */
+  @Test
+  void bayJgGvblAcceptance() throws Exception {
+    var alt = SAMPLEDATA.resolve("BayJG/BayJG-alt.txt");
+    var pdf = SAMPLEDATA.resolve("BayJG/gvbl-2026-06.pdf");
+    assumeTrue(Files.exists(alt) && Files.exists(pdf), "BayJG-Beispieldaten fehlen");
+
+    // 1. Stammgesetz laden (Art.-gegliedert, amtliche Satznummern als Superskripte).
+    var gesetz = new eu.mulk.aendggner.gesetz.bayern.BayRechtLoader().load(alt);
+    assertThat(gesetz.jurabk()).isEqualTo("BayJG");
+    assertThat(gesetz.langue()).isEqualTo("Bayerisches Jagdgesetz");
+    assertThat(gesetz.norm("Art. 1").orElseThrow().absaetze().get(0).text())
+        .startsWith("¹Die freilebende Tierwelt");
+
+    // 2. GVBl-Heft extrahieren (Superskript-Erhalt; Kolumnentitel entfernt).
+    var text =
+        TextBereiniger.bereinige(
+            new PatchTextExtraktor(eu.mulk.aendggner.aenderung.parse.SuperskriptModus.BEHALTEN)
+                .extrahiere(pdf));
+    assertThat(text).doesNotContain("Gesetz- und Verordnungsblatt Nr. 6/2026 ");
+    assertThat(text).contains("für die kurzfristige Vermietung");
+
+    // 3. Parsen: §§ 1 und 2 betreffen das BayJG (nicht aber die AVBayJG-§§ 4 und 5,
+    //    deren Titel das BayJG nur als Genitiv-Attribut nennt); alles wird erkannt.
+    var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, null);
+    assertThat(parseErgebnis.artikel()).containsExactly("1", "2");
+    assertThat(parseErgebnis.befehle()).hasSize(154);
+    assertThat(parseErgebnis.befehle()).noneMatch(b -> b instanceof UnbekannterBefehl);
+
+    // 4. Anwenden auf die alte Fassung. Von 154 Befehlen bleiben genau fünf als „manuell prüfen“
+    //    stehen — allesamt Folgeänderungen innerhalb zweier mehrschrittiger Umnummerierungs-
+    //    sequenzen, die ÄndGgner bewusst nicht automatisch auflöst (statt fehlerhaft zu raten):
+    //      * Art. 29a (§ 1 Nr. 23): ein vorangestellter Absatz und die Bereichs-Umnummerierung
+    //        „Die bisherigen Abs. 1 bis 3 werden die Abs. 2 bis 4“ verschieben die Absatzzählung;
+    //        die auf den neuen Abs. 5 zielenden Wort-/Satzbefehle finden ihren Alttext nicht mehr.
+    //      * Art. 56 (§ 1 Nr. 48): eine umfangreiche Neunummerierung des Bußgeldkatalogs
+    //        (Einfügen der Nrn. 5–7 und 13, Verschieben von Nr. 6→9, 11→12 …) verschiebt die
+    //        Zielnummern der begleitenden Buchstaben-/Wortänderungen.
+    //    Diese Residuen sind exakt gepinnt; sie landen mit Begründung im Abschnitt „Manuell prüfen“
+    //    der Synopse und werden nie stillschweigend verworfen.
+    var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
+    assertThat(anwendung.protokoll()).hasSameSizeAs(parseErgebnis.befehle());
+    var manuellPfade =
+        anwendung.protokoll().stream()
+            .filter(a -> a.status() == BefehlAnwender.Status.MANUELL_PRUEFEN)
+            .map(a -> a.befehl().provenienz().gliederungsPfad())
+            .toList();
+    assertThat(manuellPfade)
+        .containsExactlyInAnyOrder(
+            "23. c) aa)", "23. c) cc)", "48. a) ee)", "48. a) gg)", "48. b) cc)");
+
+    // 5. Stichproben: § 2 (in Kraft 1.1.2027) hebt Art. 28 Abs. 1 Satz 4 auf und nummeriert
+    //    Satz 5 um; § 1 Nr. 16 stellt Art. 22a die Abs. 1 bis 4 voran.
+    var art28 = anwendung.neu().norm("Art. 28").orElseThrow();
+    var abs1 = art28.absaetze().get(0);
+    assertThat(abs1.text()).doesNotContain("⁵");
+    var art22a = anwendung.neu().norm("Art. 22a").orElseThrow();
+    assertThat(art22a.absaetze().size()).isGreaterThanOrEqualTo(5);
+    assertThat(art22a.absaetze().get(0).nummer()).isEqualTo("1");
+
+    // 6. Synopse rendern.
+    var synopse = SynopseBuilder.baue(gesetz, anwendung, parseErgebnis.warnungen(), false);
+    var html = HtmlRenderer.rendere(synopse, "E2E-Test BayJG");
+    assertThat(html).contains("Art. 29");
+  }
+
+  /** Landtags-Gesetzentwurf (Ltg-Drs. 19/9707) auf derselben alten Fassung. */
+  @Test
+  void bayJgLandtagsEntwurf() throws Exception {
+    var alt = SAMPLEDATA.resolve("BayJG/BayJG-alt.txt");
+    var pdf = SAMPLEDATA.resolve("BayJG/Ltg-Drs-19-9707_Gesetzentwurf.pdf");
+    assumeTrue(Files.exists(alt) && Files.exists(pdf), "BayJG-Beispieldaten fehlen");
+
+    var gesetz = new eu.mulk.aendggner.gesetz.bayern.BayRechtLoader().load(alt);
+    var text =
+        TextBereiniger.bereinige(
+            new PatchTextExtraktor(eu.mulk.aendggner.aenderung.parse.SuperskriptModus.BEHALTEN)
+                .extrahiere(pdf));
+    var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, null);
+
+    // Nur § 1 des Entwurfs ändert das BayJG; Vorblatt und Begründung erzeugen keine Befehle.
+    assertThat(parseErgebnis.artikel()).containsExactly("1");
+    assertThat(parseErgebnis.befehle()).hasSize(154);
+    assertThat(parseErgebnis.befehle()).noneMatch(b -> b instanceof UnbekannterBefehl);
+
+    var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
+    assertThat(anwendung.protokoll()).hasSameSizeAs(parseErgebnis.befehle());
+  }
 }

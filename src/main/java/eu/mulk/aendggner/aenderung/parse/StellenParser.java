@@ -46,12 +46,13 @@ public final class StellenParser {
 
   private StellenParser() {}
 
-  // „in dem Satzteil vor Nummer 1“, „in der Angabe vor Nummer 1“ — verfeinernde Chapeau-Angaben
-  // ohne eigene Stelle-Komponente; die Ersetzung sucht ohnehin im Text der umgebenden Stelle.
+  // „in dem Satzteil vor Nummer 1“, „in der Angabe vor Nummer 1“, bayerisch auch „Satzteil nach
+  // Nr. 3“ — verfeinernde Chapeau-Angaben ohne eigene Stelle-Komponente; die Ersetzung sucht
+  // ohnehin im Text der umgebenden Stelle.
   private static final Pattern CHAPEAU_QUALIFIER =
       Pattern.compile(
-          "(?i)(?:im |in dem |in der |dem |der )?(?:Satzteil|Angabe) vor "
-              + "(?:Nummer|Buchstabe|Satz|Absatz) \\S+");
+          "(?i)(?:im |in dem |in der |dem |der )?(?:Satzteil|Angabe) (?:vor|nach) "
+              + "(?:Nummer|Nr\\.|Buchstabe|Buchst\\.|Satz|Absatz|Abs\\.) \\S+");
 
   /**
    * Wahr, wenn die Phrase ausschließlich aus einem Chapeau-Qualifier besteht (z.B. „im Satzteil
@@ -82,7 +83,16 @@ public final class StellenParser {
           komponenten.add(new Stelle.Paragraph(wert));
           i++;
         }
-        case "Absatz", "Abs.", "Absätze" -> {
+        // Bayerisches Landesrecht: Gesetze gliedern sich in Artikel, zitiert stets als „Art. N“.
+        case "Art.", "Artt." -> {
+          var wert = naechstesWort(woerter, i);
+          if (wert == null || !NUMMER_WERT.matcher(wert).matches()) {
+            return Optional.empty();
+          }
+          komponenten.add(new Stelle.Paragraph(wert, "Art."));
+          i++;
+        }
+        case "Absatz", "Abs.", "Absätze", "Absätzen" -> {
           var wert = naechstesWort(woerter, i);
           if (wert == null || !NUMMER_WERT.matcher(wert).matches()) {
             return Optional.empty();
@@ -90,7 +100,7 @@ public final class StellenParser {
           komponenten.add(new Stelle.AbsatzNr(wert));
           i++;
         }
-        case "Satz", "Sätze" -> {
+        case "Satz", "Sätze", "Sätzen" -> {
           var wert = naechstesWort(woerter, i);
           if (wert == null || !NUMMER_WERT.matcher(wert).matches()) {
             return Optional.empty();
@@ -98,7 +108,15 @@ public final class StellenParser {
           komponenten.add(new Stelle.SatzNr(wert));
           i++;
         }
-        case "Nummer", "Nr.", "Nummern" -> {
+        case "Halbsatz", "Halbsätze", "Halbs." -> {
+          var wert = naechstesWort(woerter, i);
+          if (wert == null || !NUMMER_WERT.matcher(wert).matches()) {
+            return Optional.empty();
+          }
+          komponenten.add(new Stelle.HalbsatzNr(wert));
+          i++;
+        }
+        case "Nummer", "Nr.", "Nummern", "Nrn." -> {
           var wert = naechstesWort(woerter, i);
           if (wert == null || !NUMMER_WERT.matcher(wert).matches()) {
             return Optional.empty();
@@ -195,6 +213,14 @@ public final class StellenParser {
           return List.of();
         }
         voll = geerbt.get();
+      } else if (vorige != null) {
+        // Bloßes Label mit nachgestellten Komponenten („Art. 18 Satz 2, Art. 19 und 20 Satz 1“ →
+        // das „20 Satz 1“): Das Label erbt die gröbste passende Komponentenart der vorigen Stelle.
+        var kombiniert = mitGeerbtemLabelUndRest(vorige, segment);
+        if (kombiniert.isEmpty()) {
+          return List.of();
+        }
+        voll = kombiniert.get();
       } else {
         return List.of();
       }
@@ -217,9 +243,58 @@ public final class StellenParser {
     return Optional.of(new Stelle(komponenten));
   }
 
+  private static final Pattern LABEL_MIT_REST =
+      Pattern.compile("(\\d+[a-z]?|[a-z]{1,3})\\s+(\\S.*)");
+
+  /**
+   * „Art. 19 und 20 Satz 1“: Das führende bloße Label des Segments erbt aus {@code vorige} die
+   * letzte Komponentenart, die gröber ist als die erste Komponente des Rests; die feineren
+   * Komponenten der vorigen Stelle entfallen, der geparste Rest wird angehängt.
+   */
+  private static Optional<Stelle> mitGeerbtemLabelUndRest(Stelle vorige, String segment) {
+    var m = LABEL_MIT_REST.matcher(segment.strip());
+    if (!m.matches()) {
+      return Optional.empty();
+    }
+    var rest = parse(m.group(2));
+    if (rest.isEmpty()) {
+      return Optional.empty();
+    }
+    int restRang = rang(rest.get().komponenten().get(0));
+    var vorKomp = vorige.komponenten();
+    for (int i = vorKomp.size() - 1; i >= 0; i--) {
+      if (rang(vorKomp.get(i)) < restRang) {
+        var neu = mitLabel(vorKomp.get(i), m.group(1));
+        if (neu == null) {
+          return Optional.empty();
+        }
+        var komponenten = new ArrayList<Stelle.Komponente>(vorKomp.subList(0, i));
+        komponenten.add(neu);
+        komponenten.addAll(rest.get().komponenten());
+        return Optional.of(new Stelle(komponenten));
+      }
+    }
+    return Optional.empty();
+  }
+
+  /** Hierarchie-Rang einer Komponente (kleiner = gröber). */
+  private static int rang(Stelle.Komponente komponente) {
+    return switch (komponente) {
+      case Stelle.Gliederungseinheit g -> 0;
+      case Stelle.Paragraph p -> 1;
+      case Stelle.AbsatzNr a -> 2;
+      case Stelle.SatzNr s -> 3;
+      case Stelle.HalbsatzNr h -> 4;
+      case Stelle.NummerNr n -> 5;
+      case Stelle.BuchstabeNr b -> 6;
+      default -> 9;
+    };
+  }
+
   private static final Pattern BEREICH =
       Pattern.compile(
-          "(?:(§§?|Absätze|Absatz|Sätze|Satz|Nummern|Nummer|Buchstaben|Buchstabe)\\s+)?"
+          "(?:(§§?|Artt?\\.|Absätze|Absatz|Abs\\.|Sätze|Satz|Nummern|Nummer|Nrn?\\.|Buchstaben"
+              + "|Buchstabe|Buchst\\.)\\s+)?"
               + "(\\d+|[a-z])\\s+bis\\s+(\\d+|[a-z])");
 
   /**
@@ -292,19 +367,21 @@ public final class StellenParser {
   private static Stelle.@Nullable Komponente komponenteFuerArt(String art, String label) {
     return switch (art) {
       case "§", "§§" -> new Stelle.Paragraph(label);
-      case "Absatz", "Absätze" -> new Stelle.AbsatzNr(label);
+      case "Art.", "Artt." -> new Stelle.Paragraph(label, "Art.");
+      case "Absatz", "Absätze", "Abs." -> new Stelle.AbsatzNr(label);
       case "Satz", "Sätze" -> new Stelle.SatzNr(label);
-      case "Nummer", "Nummern" -> new Stelle.NummerNr(label);
-      case "Buchstabe", "Buchstaben" -> new Stelle.BuchstabeNr(label);
+      case "Nummer", "Nummern", "Nr.", "Nrn." -> new Stelle.NummerNr(label);
+      case "Buchstabe", "Buchstaben", "Buchst." -> new Stelle.BuchstabeNr(label);
       default -> null;
     };
   }
 
   private static Stelle.@Nullable Komponente mitLabel(Stelle.Komponente muster, String label) {
     return switch (muster) {
-      case Stelle.Paragraph p -> new Stelle.Paragraph(label);
+      case Stelle.Paragraph p -> new Stelle.Paragraph(label, p.sigel());
       case Stelle.AbsatzNr a -> new Stelle.AbsatzNr(label);
       case Stelle.SatzNr s -> new Stelle.SatzNr(label);
+      case Stelle.HalbsatzNr h -> new Stelle.HalbsatzNr(label);
       case Stelle.NummerNr n -> new Stelle.NummerNr(label);
       case Stelle.BuchstabeNr b -> new Stelle.BuchstabeNr(label);
       case Stelle.Gliederungseinheit g -> new Stelle.Gliederungseinheit(g.art(), label);

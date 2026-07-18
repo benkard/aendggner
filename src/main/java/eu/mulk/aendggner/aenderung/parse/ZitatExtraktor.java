@@ -62,6 +62,12 @@ public final class ZitatExtraktor {
     for (int i = 0; i < text.length(); i++) {
       char c = text.charAt(i);
       if (c == OEFFNEND) {
+        if (tiefe > 0 && istFortfuehrungszeichen(text, i)) {
+          // GVBl-Zitierweise: Jedes neugefasste Aufzählungsglied öffnet am Zeilenanfang erneut
+          // mit „, geschlossen wird nur einmal am Blockende. Das Fortführungszeichen ist
+          // Typografie, kein geschachteltes Zitat — es würde die Tiefenzählung entgleisen lassen.
+          continue;
+        }
         if (tiefe == 0) {
           aktuellesZitat.setLength(0);
         } else {
@@ -102,6 +108,27 @@ public final class ZitatExtraktor {
       zitate.add(aktuellesZitat.toString());
     }
     return new Ergebnis(ausgabe.toString(), zitate, warnungen);
+  }
+
+  // Aufzählungsmarker unmittelbar nach dem öffnenden Zeichen („2.“, „b)“, „aa)“).
+  private static final Pattern FORTFUEHRUNGS_MARKER =
+      Pattern.compile("^(?:\\d+[a-z]?\\.|[a-z]{1,3}\\))[ \\t]");
+
+  /**
+   * Wahr, wenn das öffnende Anführungszeichen an Position {@code i} ein Fortführungszeichen ist:
+   * Es steht am Zeilenanfang innerhalb eines offenen Zitats und ihm folgt unmittelbar ein
+   * Aufzählungsmarker.
+   */
+  private static boolean istFortfuehrungszeichen(String text, int i) {
+    int z = i;
+    while (z > 0 && (text.charAt(z - 1) == ' ' || text.charAt(z - 1) == '\t')) {
+      z--;
+    }
+    if (z != 0 && text.charAt(z - 1) != '\n') {
+      return false;
+    }
+    var fenster = text.substring(i + 1, Math.min(text.length(), i + 10));
+    return FORTFUEHRUNGS_MARKER.matcher(fenster).find();
   }
 
   private static String kontextAuszug(String text, int position) {

@@ -24,6 +24,13 @@ public final class AenderungsgesetzParser {
 
   private static final Pattern ARTIKEL_UEBERSCHRIFT = Pattern.compile("^Artikel\\s+(\\d+[a-z]?)$");
 
+  // Bayerische Änderungsgesetze gliedern sich in Paragraphen statt Artikel („§ 1“ als
+  // freistehende Überschriftzeile). Die §-Teilung greift nur, wenn das Dokument keinerlei
+  // Artikel-Überschriften enthält — Bundesgesetze mit unzitiert abgedruckten Ablösegesetzen
+  // (ProdHaftG) enthalten freistehende „§ N“-Zeilen innerhalb ihrer Artikel.
+  private static final Pattern PARAGRAPH_UEBERSCHRIFT_AUSSEN =
+      Pattern.compile("^§\\s*(\\d+[a-z]?)$");
+
   public record ParseErgebnis(
       List<Aenderungsbefehl> befehle, List<String> artikel, List<String> warnungen) {}
 
@@ -35,20 +42,35 @@ public final class AenderungsgesetzParser {
    */
   public ParseErgebnis parse(String text, Gesetz ziel, @Nullable String artikelFilter) {
     var zitate = ZitatExtraktor.extrahiere(text);
-    var artikelBloecke = teileInArtikel(zitate.text());
+    var artikelBloecke = teileInArtikel(zitate.text(), ARTIKEL_UEBERSCHRIFT);
+    boolean paragraphenModus = false;
+    if (artikelBloecke.isEmpty()) {
+      artikelBloecke = teileInArtikel(zitate.text(), PARAGRAPH_UEBERSCHRIFT_AUSSEN);
+      paragraphenModus = !artikelBloecke.isEmpty();
+    }
 
     var befehle = new ArrayList<Aenderungsbefehl>();
     var betroffeneArtikel = new ArrayList<String>();
+    var warnungen = new ArrayList<>(zitate.warnungen());
 
     for (var artikel : artikelBloecke) {
       var relevant =
           artikelFilter != null
               ? artikel.label.equals(artikelFilter)
+                  && (!paragraphenModus || hatAenderungsformel(artikel))
               : betrifft(artikel, ziel, zitate);
       if (!relevant) {
         continue;
       }
       log.infof("Artikel %s betrifft %s.", artikel.label, ziel.jurabk());
+      if (paragraphenModus && artikelFilter != null && betroffeneArtikel.contains(artikel.label)) {
+        // Ein GVBl-Heft enthält mehrere Gesetze mit je eigener §-Zählung.
+        warnungen.add(
+            "Mehrere Änderungsgesetze im Dokument tragen einen § "
+                + artikel.label
+                + "; --artikel ist hier mehrdeutig — besser ohne Filter arbeiten (Auswahl über den"
+                + " Namen des Stammgesetzes).");
+      }
       betroffeneArtikel.add(artikel.label);
 
       var scan = GliederungsScanner.scanne(artikel.zeilen);
@@ -59,12 +81,76 @@ public final class AenderungsgesetzParser {
         befehle.add(vorspannBefehl(scan.vorspann(), artikel.label, zitate));
         continue;
       }
+      // Der Vorspann kann nach der gesetzesweiten Änderungsformel einen Rahmenbefehl tragen, der
+      // den Kontext aller Punkte setzt: „… wird wie folgt geändert: Art. 28 Abs. 1 wird wie folgt
+      // geändert:“ (GVBl) bzw. mit eingebettetem Ziel „Art. 7 Abs. 2 des X-Gesetzes … wird wie
+      // folgt geändert:“ (dann trägt die Formel das Ziel selbst).
+      var kontext = vorspannKontext(scan.vorspann(), artikel.label, zitate, befehle);
       for (var punkt : scan.punkte()) {
-        verarbeitePunkt(punkt, Stelle.LEER, artikel.label, "", zitate, befehle);
+        verarbeitePunkt(punkt, kontext, artikel.label, "", zitate, befehle);
       }
     }
 
-    return new ParseErgebnis(befehle, betroffeneArtikel, zitate.warnungen());
+    return new ParseErgebnis(befehle, betroffeneArtikel, warnungen);
+  }
+
+  private static final String AENDERUNGSFORMEL = "wird wie folgt geändert:";
+
+  private static boolean hatAenderungsformel(ArtikelBlock artikel) {
+    var scan = GliederungsScanner.scanne(artikel.zeilen);
+    return scan.vorspann().replaceAll("\\s+", " ").contains("wird wie folgt geändert");
+  }
+
+  // Eingebettetes Rahmenziel in der Änderungsformel selbst: „Art. 7 Abs. 2 des Bayerischen
+  // Umweltinformationsgesetzes … wird wie folgt geändert:“. Der Lookbehind auf „durch “ schließt
+  // die Zitierkette der Änderungshistorie aus („das zuletzt durch § 5 des Gesetzes vom … geändert
+  // worden ist“) — dort ist die Norm nie das Subjekt der Formel.
+  private static final Pattern EINGEBETTETES_ZIEL =
+      Pattern.compile(
+          "(?<!durch )\\b((?:§|Art\\.)\\s*\\d+[a-z]?"
+              + "(?:\\s+(?:Absatz|Abs\\.|Satz|Nummer|Nr\\.|Buchstabe|Buchst\\.)\\s+\\d+[a-z]?)*)"
+              + "\\s+(?:des|der)\\s+\\p{Lu}");
+
+  /**
+   * Bestimmt aus dem Vorspann eines Artikels mit Gliederungspunkten den gemeinsamen Kontext der
+   * Punkte. Ohne erkennbaren Rahmen bleibt der Kontext leer (die Punkte müssen ihre Ziele dann
+   * selbst vollständig nennen; Unerkanntes landet als „nicht erkannt“ im Protokoll — niemals
+   * stillschweigend).
+   */
+  private static Stelle vorspannKontext(
+      String vorspann,
+      String artikelLabel,
+      ZitatExtraktor.Ergebnis zitate,
+      List<Aenderungsbefehl> befehle) {
+    var normalisiert = vorspann.replaceAll("\\s+", " ").strip();
+    // Die erste Formel ist die gesetzesweite Einleitung; ein dahinter stehender Rahmenbefehl
+    // trägt ggf. seine eigene Formel („… wird wie folgt geändert: Art. 28 Abs. 1 wird wie folgt
+    // geändert:“).
+    int formel = normalisiert.indexOf(AENDERUNGSFORMEL);
+    if (formel < 0) {
+      return Stelle.LEER;
+    }
+    var rest = normalisiert.substring(formel + AENDERUNGSFORMEL.length()).strip();
+    if (!rest.isEmpty()) {
+      // Rahmenbefehl hinter der gesetzesweiten Formel („Art. 28 Abs. 1 wird wie folgt geändert:“,
+      // auch als Umnummerierungs-Verbund).
+      var provenienz = new Provenienz(artikelLabel, "", zitate.stelleZitateWiederHer(rest));
+      var rahmen = BefehlErkenner.rahmenMitBefehl(rest, Stelle.LEER, provenienz);
+      if (rahmen.isPresent()) {
+        if (rahmen.get().begleitbefehl() != null) {
+          befehle.add(rahmen.get().begleitbefehl());
+        }
+        return rahmen.get().stelle();
+      }
+      return Stelle.LEER;
+    }
+    // Die Formel endet den Vorspann: Trägt sie ihr Ziel eingebettet („Art. 7 Abs. 2 des
+    // X-Gesetzes … wird wie folgt geändert:“), wird dieses zum Kontext.
+    var eingebettet = EINGEBETTETES_ZIEL.matcher(normalisiert.substring(0, formel));
+    if (eingebettet.find()) {
+      return StellenParser.parse(eingebettet.group(1)).orElse(Stelle.LEER);
+    }
+    return Stelle.LEER;
   }
 
   /** Versucht, den Vorspann-Rest nach der Änderungsformel als einzelnen Befehl zu erkennen. */
@@ -133,7 +219,7 @@ public final class AenderungsgesetzParser {
 
   private record ArtikelBlock(String label, List<String> zeilen) {}
 
-  private static List<ArtikelBlock> teileInArtikel(String platzhalterText) {
+  private static List<ArtikelBlock> teileInArtikel(String platzhalterText, Pattern ueberschrift) {
     var bloecke = new ArrayList<ArtikelBlock>();
     String aktuellesLabel = null;
     var aktuelleZeilen = new ArrayList<String>();
@@ -141,10 +227,10 @@ public final class AenderungsgesetzParser {
     for (var zeile : platzhalterText.split("\n", -1)) {
       // Gesetzentwürfe (RefE/RegE/Drucksachen): Nach dem Gesetzestext folgt der Begründungsteil
       // — Freitext, der keine Befehle enthält und den letzten Artikel nicht verunreinigen darf.
-      if (aktuellesLabel != null && zeile.strip().equals("Begründung")) {
+      if (aktuellesLabel != null && zeile.strip().matches("Begründung:?")) {
         break;
       }
-      var matcher = ARTIKEL_UEBERSCHRIFT.matcher(zeile.strip());
+      var matcher = ueberschrift.matcher(zeile.strip());
       if (matcher.matches()) {
         if (aktuellesLabel != null) {
           bloecke.add(new ArtikelBlock(aktuellesLabel, List.copyOf(aktuelleZeilen)));
@@ -174,6 +260,11 @@ public final class AenderungsgesetzParser {
     if (!vorspann.contains("wird wie folgt geändert")) {
       return false;
     }
+    // Ausführungs-/Durchführungstitel nennen das Stammgesetz nur als Genitiv-Attribut („Die
+    // Verordnung zur Ausführung des Bayerischen Jagdgesetzes (AVBayJG) … wird wie folgt
+    // geändert“) — solche Nennungen zählen nicht als Treffer.
+    vorspann =
+        vorspann.replaceAll("\\b(?:zur Ausführung|zur Durchführung|zum Vollzug) des [^,()]*", "");
     var vorspannStamm = stammForm(vorspann);
     return (ziel.kurzue() != null && vorspannStamm.contains(stammForm(ziel.kurzue())))
         || (ziel.langue() != null && vorspannStamm.contains(stammForm(ziel.langue())))

@@ -60,9 +60,15 @@ wortweise hervorgehoben).
 
 Eingaben:
 
-* Stammgesetz: XML im gii-norm-Format von
+* Stammgesetz (Bundesrecht): XML im gii-norm-Format von
   https://www.gesetze-im-internet.de/[gesetze-im-internet.de]
-* Änderungsgesetz: BGBl-PDF oder Klartext
+* Stammgesetz (Landesrecht Bayern): konsolidierte Fassung von
+  https://www.gesetze-bayern.de/[gesetze-bayern.de] als PDF oder als
+  kanonischer Klartext im Format der `--extract-only`-Ausgabe; amtliche
+  Satznummern und Fußnotenmarker stehen als Unicode-Superskripte im
+  Text („¹Die freilebende Tierwelt …“, „Enteignung⁶)“)
+* Änderungsgesetz: BGBl-, GVBl- oder Drucksachen-PDF (Bundestag,
+  Bundesrat, Bayerischer Landtag) oder Klartext
 
 [source,shell script]
 ----
@@ -111,6 +117,22 @@ aktuellen Entwürfe angewandt (UWG/AGG/ProdHaftG: 0 manuell); was
 unsicher bleibt — etwa Befehle gegen eine ältere Gesetzesfassung, deren
 Zieltext nicht mehr existiert — landet mit Begründung im Abschnitt
 *Manuell prüfen* der Synopse und wird niemals stillschweigend verworfen.
+
+Für das bayerische Landesrecht versteht ÄndGgner die dortigen
+Konventionen: Stammgesetze gliedern sich in Artikel („Art. 6 Abs. 2
+Satz 1 Nr. 2“, durchgängig abgekürzt zitiert), Änderungsgesetze dagegen
+in Paragraphen — auch mehrere Gesetze in einem GVBl-Heft, aus denen die
+auf das Stammgesetz zielenden §§ (einschließlich „Weitere Änderung“)
+anhand des Einleitungssatzes ausgewählt werden. Amtliche Satznummern
+bleiben als Superskripte erhalten und dienen als exakte Satzgrenzen;
+zusätzlich erkannt werden die bayerischen Befehlsformen („Fußnote 1
+wird aufgehoben“, „In Satz 1 wird die Satznummerierung „1“ gestrichen“,
+„Dem Wortlaut werden die folgenden Abs. 1 bis 4 vorangestellt“, „Der
+bisherige Wortlaut wird Abs. 5“, Halbsatz-Ziele, Klauselketten mit
+gemeinsamem Schlussverb) sowie das Fortführungszeichen des GVBl (jedes
+neugefasste Aufzählungsglied öffnet erneut mit „). Meta-Änderungen an
+Drucksachen (Änderungsanträge des Landtags) sind bewusst noch nicht
+abgedeckt.
 
 
 == Running the Tests

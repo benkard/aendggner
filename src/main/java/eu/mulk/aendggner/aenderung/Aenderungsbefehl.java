@@ -107,6 +107,41 @@ public sealed interface Aenderungsbefehl {
       implements Aenderungsbefehl {}
 
   /**
+   * „Der Wortlaut wird Satz 1.“ (bayerisches Landesrecht) — der bisher unnummerierte Text erhält
+   * die amtliche Satznummer als Superskript (Vorbereitung für das Anfügen weiterer Sätze).
+   */
+  record WortlautZuSatz(Stelle stelle, String nummer, Provenienz provenienz)
+      implements Aenderungsbefehl {}
+
+  /**
+   * „Dem Wortlaut werden die folgenden Abs. 1 bis 4 vorangestellt: „…““ (bayerisches Landesrecht) —
+   * neue Absätze treten vor den bisherigen Normtext.
+   */
+  record WortlautVoranstellung(Stelle stelle, String text, Provenienz provenienz)
+      implements Aenderungsbefehl {}
+
+  /**
+   * „Fußnote 1 wird aufgehoben.“ / „Die Fußnoten 9 und 10 werden aufgehoben.“ (bayerisches
+   * Landesrecht) — entfernt die Fußnotenzeile(n) „ⁿ) [Amtl. Anm.:] …“ samt der Inline-Marker „ⁿ)“
+   * aus der Kontextnorm.
+   */
+  record FussnotenAufhebung(Stelle stelle, java.util.List<String> nummern, Provenienz provenienz)
+      implements Aenderungsbefehl {
+
+    public FussnotenAufhebung {
+      nummern = java.util.List.copyOf(nummern);
+    }
+  }
+
+  /**
+   * „In Satz 1 wird die Satznummerierung „1“ gestrichen.“ (bayerisches Landesrecht) — entfernt die
+   * amtliche Superskript-Satznummer am Anfang des bezeichneten Bereichs (etwa nachdem der zweite
+   * und letzte Satz eines Absatzes aufgehoben wurde).
+   */
+  record SatznummerierungStreichung(Stelle stelle, String nummer, Provenienz provenienz)
+      implements Aenderungsbefehl {}
+
+  /**
    * „Nach § 33 werden die folgenden Überschriften zu Teil 3 und zu Teil 3 Abschnitt 1 eingefügt:
    * „…““ bzw. „Die bisherigen Überschriften zu Teil 4 und Teil 4 Abschnitt 1 werden durch die
    * folgende Überschrift zu Abschnitt 2 ersetzt: „…““ — neue Gliederungs-Überschriften im

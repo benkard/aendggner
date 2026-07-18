@@ -39,7 +39,7 @@ final class StellenAufloeser {
     if (stelle.betrifftInhaltsuebersicht()) {
       enbez = "Inhaltsübersicht";
     } else if (stelle.paragraph().isPresent()) {
-      enbez = "§ " + stelle.paragraph().get().nummer();
+      enbez = stelle.paragraph().get().enbez();
     } else if (stelle.anlagenEnbez().isPresent()) {
       enbez = stelle.anlagenEnbez().get();
     } else {
@@ -136,6 +136,7 @@ final class StellenAufloeser {
         .anyMatch(
             k ->
                 k instanceof Stelle.SatzNr
+                    || k instanceof Stelle.HalbsatzNr
                     || k instanceof Stelle.NummerNr
                     || k instanceof Stelle.BuchstabeNr);
   }
@@ -174,12 +175,73 @@ final class StellenAufloeser {
     }
     for (var komponente : stelle.komponenten()) {
       if (komponente instanceof Stelle.SatzNr satz) {
-        int index = Integer.parseInt(satz.nummer().replaceAll("[a-z]$", "")) - 1;
+        int nummer = Integer.parseInt(satz.nummer().replaceAll("[a-z]$", ""));
         var saetze = SatzTeiler.teile(text);
-        return index >= 0 && index < saetze.size() ? saetze.get(index) : null;
+        var satzBereich = satzBereich(text, nummer, saetze);
+        return satzBereich == null ? null : halbsatzBereich(text, stelle, satzBereich);
       }
     }
+    // Halbsatz ohne Satzangabe („in Halbsatz 1“ im Rahmen eines Satzes bzw. Absatzes).
+    if (stelle.komponenten().stream().anyMatch(k -> k instanceof Stelle.HalbsatzNr)) {
+      return halbsatzBereich(text, stelle, new SatzTeiler.SatzBereich(0, text.length()));
+    }
     return null;
+  }
+
+  /**
+   * Der Bereich des Satzes mit der gegebenen Nummer. Amtlich nummerierte Sätze (bayerisches
+   * Landesrecht) werden nach Satznummer statt Position aufgelöst — nach Streichungen kann die
+   * Zählung von der Position abweichen. Trägt mindestens ein Satz eine Nummer, entscheidet allein
+   * das Label (kein Positions-Fallback, der einen falsch nummerierten Satz greifen könnte).
+   */
+  private static SatzTeiler.@Nullable SatzBereich satzBereich(
+      String text, int nummer, List<SatzTeiler.SatzBereich> saetze) {
+    boolean nummeriert = false;
+    for (var kandidat : saetze) {
+      var label = SatzTeiler.nummerVonSatz(text.substring(kandidat.von(), kandidat.bis()));
+      if (label != null && label == nummer) {
+        return kandidat;
+      }
+      nummeriert |= label != null;
+    }
+    if (nummeriert) {
+      return null;
+    }
+    int index = nummer - 1;
+    return index >= 0 && index < saetze.size() ? saetze.get(index) : null;
+  }
+
+  /**
+   * Verfeinert den Bereich um eine etwaige Halbsatz-Angabe: Halbsatz 1 reicht bis zum (ersten)
+   * Semikolon, Halbsatz 2 beginnt dahinter. Ohne Semikolon ist die Angabe nicht auflösbar
+   * (konservativ: {@code null} → manuell prüfen).
+   */
+  private static SatzTeiler.@Nullable SatzBereich halbsatzBereich(
+      String text, Stelle stelle, SatzTeiler.SatzBereich bereich) {
+    Stelle.HalbsatzNr halbsatz = null;
+    for (var komponente : stelle.komponenten()) {
+      if (komponente instanceof Stelle.HalbsatzNr h) {
+        halbsatz = h;
+      }
+    }
+    if (halbsatz == null) {
+      return bereich;
+    }
+    int semikolon = text.indexOf(';', bereich.von());
+    if (semikolon < 0 || semikolon >= bereich.bis()) {
+      return null;
+    }
+    return switch (halbsatz.nummer()) {
+      case "1" -> new SatzTeiler.SatzBereich(bereich.von(), semikolon);
+      case "2" -> {
+        int start = semikolon + 1;
+        while (start < bereich.bis() && Character.isWhitespace(text.charAt(start))) {
+          start++;
+        }
+        yield new SatzTeiler.SatzBereich(start, bereich.bis());
+      }
+      default -> null;
+    };
   }
 
   /**

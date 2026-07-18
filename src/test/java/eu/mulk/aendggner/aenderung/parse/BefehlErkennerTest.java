@@ -1026,4 +1026,121 @@ class BefehlErkennerTest {
     assertThat(ersetzung.alt()).isEqualTo("einer Rechtsverordnung nach § 14,");
     assertThat(ersetzung.neu()).isEqualTo("§ 14 Absatz 8,");
   }
+
+  // --- Bayerisches Landesrecht ---------------------------------------------------------------
+
+  private static final Stelle ART_22 = new Stelle(List.of(new Stelle.Paragraph("22", "Art.")));
+
+  @Test
+  void erkenntBayerischeErsetzungMitAbkuerzungen() {
+    var befehl =
+        erkenne(
+            "In Abs. 2 Satz 1 Nr. 1 wird die Angabe „des Bundesbaugesetzes“ durch die Angabe"
+                + " „des Baugesetzbuchs (BauGB)“ ersetzt.",
+            new Stelle(List.of(new Stelle.Paragraph("6", "Art."))));
+
+    assertThat(befehl).containsInstanceOf(Ersetzung.class);
+    var ersetzung = (Ersetzung) befehl.orElseThrow();
+    assertThat(ersetzung.stelle().anzeigeText()).isEqualTo("Art. 6 Absatz 2 Satz 1 Nummer 1");
+  }
+
+  @Test
+  void erkenntFussnotenAufhebung() {
+    var einzeln = erkenne("Fußnote 1 wird aufgehoben.", ART_22);
+    assertThat(einzeln).containsInstanceOf(Aenderungsbefehl.FussnotenAufhebung.class);
+    assertThat(((Aenderungsbefehl.FussnotenAufhebung) einzeln.orElseThrow()).nummern())
+        .containsExactly("1");
+
+    var mehrere = erkenne("Die Fußnoten 9 und 10 werden aufgehoben.", ART_22);
+    assertThat(mehrere).containsInstanceOf(Aenderungsbefehl.FussnotenAufhebung.class);
+    assertThat(((Aenderungsbefehl.FussnotenAufhebung) mehrere.orElseThrow()).nummern())
+        .containsExactly("9", "10");
+  }
+
+  @Test
+  void erkenntSatznummerierungsStreichungImVerbund() {
+    // GVBl 2026 S. 113, Nr. 15 c) aa) — exakt die Verbundform des Belegdokuments.
+    var befehl =
+        erkenne(
+            "In Satz 1 wird die Satznummerierung „1“ gestrichen und die Angabe „Absätzen 1"
+                + " und 2“ wird durch die Angabe „Abs. 1 und 2“ ersetzt.",
+            ART_22);
+
+    assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile.get(0)).isInstanceOf(Aenderungsbefehl.SatznummerierungStreichung.class);
+    var streichung = (Aenderungsbefehl.SatznummerierungStreichung) teile.get(0);
+    assertThat(streichung.nummer()).isEqualTo("1");
+    assertThat(streichung.stelle().anzeigeText()).isEqualTo("Art. 22 Satz 1");
+    assertThat(teile.get(1)).isInstanceOf(Ersetzung.class);
+
+    var einfach = erkenne("In Satz 1 wird die Satznummerierung „1“ gestrichen.", ART_22);
+    assertThat(einfach).containsInstanceOf(Aenderungsbefehl.SatznummerierungStreichung.class);
+  }
+
+  @Test
+  void erkenntBayerischeWortlautFormen() {
+    var zuSatz = erkenne("Der Wortlaut wird Satz 1.", ART_22);
+    assertThat(zuSatz).containsInstanceOf(Aenderungsbefehl.WortlautZuSatz.class);
+
+    var zuAbsatz = erkenne("Der bisherige Wortlaut wird Abs. 5.", ART_22);
+    assertThat(zuAbsatz).containsInstanceOf(WortlautZuAbsatz.class);
+    assertThat(((WortlautZuAbsatz) zuAbsatz.orElseThrow()).nummer()).isEqualTo("5");
+
+    var voranstellung =
+        erkenne(
+            "Dem Wortlaut werden die folgenden Abs. 1 bis 4 vorangestellt: „(1) Erster."
+                + " (2) Zweiter. (3) Dritter. (4) Vierter.“",
+            ART_22);
+    assertThat(voranstellung).containsInstanceOf(Aenderungsbefehl.WortlautVoranstellung.class);
+    assertThat(((Aenderungsbefehl.WortlautVoranstellung) voranstellung.orElseThrow()).text())
+        .contains("(3) Dritter.");
+  }
+
+  @Test
+  void erkenntWortlautZuAbsatzMitFolgeklausel() {
+    // „Der bisherige Wortlaut wird Abs. 5 und in Halbsatz 1 wird …“ — die lokative Folgeklausel
+    // bezieht sich auf den soeben nummerierten Absatz.
+    var befehl =
+        erkenne(
+            "Der bisherige Wortlaut wird Abs. 5 und in Halbsatz 1 wird die Angabe „Das"
+                + " Staatsministerium“ durch die Angabe „Die oberste Jagdbehörde“ ersetzt.",
+            ART_22);
+
+    assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile.get(0)).isInstanceOf(WortlautZuAbsatz.class);
+    assertThat(teile.get(1)).isInstanceOf(Ersetzung.class);
+    assertThat(((Ersetzung) teile.get(1)).stelle().anzeigeText())
+        .isEqualTo("Art. 22 Absatz 5 Halbsatz 1");
+  }
+
+  @Test
+  void erkenntSatzUmnummerierungMitErsetzungsKlausel() {
+    // GVBl 2026 S. 113, Nr. 23 c) cc).
+    var befehl =
+        erkenne(
+            "Der bisherige Satz 2 wird Satz 3 und die Angabe „der Durchführung der Lehrgänge"
+                + " (Art. 28 Abs. 1 Satz 4),“ wird durch die Angabe „einer Durchführung von"
+                + " Lehrgängen für die Fallenjagd“ ersetzt.",
+            ART_22);
+
+    assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile.get(0)).isInstanceOf(Umnummerierung.class);
+    assertThat(teile.get(1)).isInstanceOf(Ersetzung.class);
+  }
+
+  @Test
+  void erkenntBayerischeUmnummerierungsVerbuende() {
+    // „Abs. 3 wird Abs. 2 und wird wie folgt geändert:“ läuft über rahmenMitBefehl;
+    // „Satz 5 wird Satz 4.“ ist eine gewöhnliche Umnummerierung.
+    var satz = erkenne("Satz 5 wird Satz 4.", ART_22);
+    assertThat(satz).containsInstanceOf(Umnummerierung.class);
+    assertThat(((Umnummerierung) satz.orElseThrow()).neu().anzeigeText())
+        .isEqualTo("Art. 22 Satz 4");
+
+    var abs = erkenne("Abs. 3 wird Abs. 2.", ART_22);
+    assertThat(abs).containsInstanceOf(Umnummerierung.class);
+  }
 }

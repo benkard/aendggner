@@ -20,6 +20,7 @@ public record Stelle(List<Komponente> komponenten) {
       permits Paragraph,
           AbsatzNr,
           SatzNr,
+          HalbsatzNr,
           NummerNr,
           BuchstabeNr,
           Ueberschrift,
@@ -27,8 +28,20 @@ public record Stelle(List<Komponente> komponenten) {
           Gliederungseinheit,
           Absatzbezeichnung {}
 
-  /** „§ 5“, „§ 28a“ — die Paragraphennummer ohne „§ “. */
-  public record Paragraph(String nummer) implements Komponente {}
+  /**
+   * „§ 5“, „§ 28a“, im bayerischen Landesrecht „Art. 5“ — die Normnummer ohne Sigel, dazu das
+   * Sigel selbst („§“ oder „Art.“).
+   */
+  public record Paragraph(String nummer, String sigel) implements Komponente {
+    public Paragraph(String nummer) {
+      this(nummer, "§");
+    }
+
+    /** Die Einzelnormbezeichnung, wie sie im {@code Gesetz}-Modell steht: „§ 5“, „Art. 5“. */
+    public String enbez() {
+      return sigel + " " + nummer;
+    }
+  }
 
   /** Eine Gliederungseinheit oberhalb des Paragraphen: „Teil 2“, „Abschnitt 3“, „Anlage 8“. */
   public record Gliederungseinheit(String art, String nummer) implements Komponente {
@@ -45,6 +58,9 @@ public record Stelle(List<Komponente> komponenten) {
 
   /** „Satz 1“ */
   public record SatzNr(String nummer) implements Komponente {}
+
+  /** „Halbsatz 1“ — die Hälfte eines am Semikolon geteilten Satzes (bayerische Zitierweise). */
+  public record HalbsatzNr(String nummer) implements Komponente {}
 
   /** „Nummer 4“ */
   public record NummerNr(String nummer) implements Komponente {}
@@ -148,9 +164,10 @@ public record Stelle(List<Komponente> komponenten) {
       }
       sb.append(
           switch (komponente) {
-            case Paragraph p -> "§ " + p.nummer();
+            case Paragraph p -> p.enbez();
             case AbsatzNr a -> "Absatz " + a.nummer();
             case SatzNr s -> "Satz " + s.nummer();
+            case HalbsatzNr h -> "Halbsatz " + h.nummer();
             case NummerNr n -> "Nummer " + n.nummer();
             case BuchstabeNr b -> "Buchstabe " + b.kennung();
             case Ueberschrift u -> "Überschrift";

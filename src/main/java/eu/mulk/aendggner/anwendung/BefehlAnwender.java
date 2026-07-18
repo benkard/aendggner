@@ -4,7 +4,9 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Anfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Aufhebung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.FussnotenAufhebung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.GliederungsUeberschriften;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.SatznummerierungStreichung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Neufassung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Sammelbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Streichung;
@@ -14,12 +16,15 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Umnummerierung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.UnbekannterBefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WoerterEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortAnker;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortlautVoranstellung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortlautZuAbsatz;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortlautZuSatz;
 import eu.mulk.aendggner.aenderung.Stelle;
 import eu.mulk.aendggner.gesetz.Absatz;
 import eu.mulk.aendggner.gesetz.Gesetz;
 import eu.mulk.aendggner.gesetz.Gliederung;
 import eu.mulk.aendggner.gesetz.Norm;
+import eu.mulk.aendggner.gesetz.Superskript;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -128,6 +133,10 @@ public final class BefehlAnwender {
         case Aufhebung a -> wendeAufhebungAn(normen, a);
         case Umnummerierung u -> wendeUmnummerierungAn(normen, u);
         case WortlautZuAbsatz w -> wendeWortlautZuAbsatzAn(normen, w);
+        case WortlautZuSatz w -> wendeWortlautZuSatzAn(normen, w);
+        case WortlautVoranstellung w -> wendeWortlautVoranstellungAn(normen, w);
+        case FussnotenAufhebung f -> wendeFussnotenAufhebungAn(normen, f);
+        case SatznummerierungStreichung s -> wendeSatznummerierungStreichungAn(normen, s);
         case GliederungsUeberschriften g ->
             wendeGliederungsUeberschriftenAn(normen, gliederungen, g);
         case Sammelbefehl s -> wendeSammelAn(normen, gliederungen, s);
@@ -318,6 +327,7 @@ public final class BefehlAnwender {
     return bearbeiteText(
         normen,
         befehl,
+        ohneFussnoten(
         text -> {
           if (befehl.amEnde()) {
             var gestutzt = text.stripTrailing();
@@ -336,13 +346,14 @@ public final class BefehlAnwender {
                 "„" + befehl.alt() + "“ kommt " + anzahl + "-mal vor (ohne „jeweils“ mehrdeutig).");
           }
           return TextErgebnis.ok(text.replace(befehl.alt(), befehl.neu()));
-        });
+        }));
   }
 
   private static AngewandteAenderung wendeStreichungAn(List<Norm> normen, Streichung befehl) {
     return bearbeiteText(
         normen,
         befehl,
+        ohneFussnoten(
         text -> {
           int anzahl = zaehleVorkommen(text, befehl.woerter());
           if (anzahl == 0) {
@@ -355,7 +366,7 @@ public final class BefehlAnwender {
               text.replace(befehl.woerter(), "")
                   .replaceAll("  +", " ")
                   .replaceAll(" ([,;.])", "$1"));
-        });
+        }));
   }
 
   private static AngewandteAenderung wendeWoerterEinfuegungAn(
@@ -363,6 +374,7 @@ public final class BefehlAnwender {
     return bearbeiteText(
         normen,
         befehl,
+        ohneFussnoten(
         text ->
             switch (befehl.anker()) {
               case WortAnker.NachWoertern nach -> {
@@ -405,7 +417,7 @@ public final class BefehlAnwender {
                 }
                 yield TextErgebnis.ok(gestutzt + " " + befehl.woerter());
               }
-            });
+            }));
   }
 
   // --- Strukturoperationen -------------------------------------------------------------------
@@ -419,7 +431,7 @@ public final class BefehlAnwender {
         return manuell(befehl, aufloesung.fehler());
       }
       var norm = normen.get(aufloesung.normIndex());
-      var titel = befehl.neuerText().replaceFirst("^§\\s*\\S+\\s+", "").strip();
+      var titel = befehl.neuerText().replaceFirst("^(?:§|Art\\.)\\s*\\S+\\s+", "").strip();
       normen.set(aufloesung.normIndex(), norm.mitTitel(titel));
       return angewandt(befehl, norm.enbez());
     }
@@ -671,7 +683,9 @@ public final class BefehlAnwender {
           yield angewandt(befehl, neue.stream().map(Norm::enbez).toList());
         }
 
-        var enbezNeu = "§ " + befehl.bezeichnung();
+        var sigelNeu =
+            befehl.stelle().paragraph().map(Stelle.Paragraph::sigel).orElse("§");
+        var enbezNeu = sigelNeu + " " + befehl.bezeichnung();
         if (StellenAufloeser.normIndex(gesetzAus(normen), enbezNeu) >= 0) {
           yield manuell(befehl, enbezNeu + " existiert bereits im Stammgesetz.");
         }
@@ -783,7 +797,10 @@ public final class BefehlAnwender {
       var absaetze = new ArrayList<>(norm.absaetze());
       for (int i = 0; i < absaetze.size(); i++) {
         if (nummer.equals(absaetze.get(i).nummer())) {
-          absaetze.set(i, new Absatz(null, absaetze.get(i).text()));
+          // Als weggefallen markieren (Nummer behalten) — konsistent mit der Aufhebung über einen
+          // Absatz-Lokator; eine etwaige Folge-Umnummerierung „Abs. N+1 wird Abs. N“ räumt den
+          // weggefallenen Absatz dann weg.
+          absaetze.set(i, new Absatz(nummer, "(weggefallen)"));
           normen.set(aufloesung.normIndex(), norm.mitAbsaetzen(absaetze));
           return angewandt(befehl, norm.enbez());
         }
@@ -845,8 +862,8 @@ public final class BefehlAnwender {
       List<Norm> normen, Umnummerierung befehl) {
     // „§ 9a wird zu § 9.“ — Umbenennung einer ganzen Norm.
     if (nurParagraph(befehl.stelle()) && nurParagraph(befehl.neu())) {
-      var enbezAlt = "§ " + befehl.stelle().paragraph().get().nummer();
-      var enbezNeu = "§ " + befehl.neu().paragraph().get().nummer();
+      var enbezAlt = befehl.stelle().paragraph().get().enbez();
+      var enbezNeu = befehl.neu().paragraph().get().enbez();
       int idx = StellenAufloeser.normIndex(gesetzAus(normen), enbezAlt);
       if (idx < 0) {
         return manuell(befehl, enbezAlt + " existiert nicht im Gesetz.");
@@ -870,7 +887,12 @@ public final class BefehlAnwender {
 
     var altAbsatz = befehl.stelle().absatz();
     var neuAbsatz = befehl.neu().absatz();
-    if (altAbsatz.isPresent() && neuAbsatz.isPresent()) {
+    // Nur wenn der Absatz selbst das Umnummerierungsziel ist — bei „Satz 5 wird Satz 4“ stammt
+    // eine etwaige Absatzangabe aus dem Kontextrahmen und der Satz-Zweig unten ist zuständig.
+    if (altAbsatz.isPresent()
+        && neuAbsatz.isPresent()
+        && feinsteIstAbsatz(befehl.stelle())
+        && feinsteIstAbsatz(befehl.neu())) {
       var ergebnis = StellenAufloeser.aufloese(gesetzAus(normen), befehl.stelle());
       if (ergebnis instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
         return manuell(befehl, nicht.begruendung());
@@ -878,13 +900,70 @@ public final class BefehlAnwender {
       var fundstelle = ((StellenAufloeser.Ergebnis.Gefunden) ergebnis).fundstelle();
       var norm = normen.get(fundstelle.normIndex());
       var absaetze = new ArrayList<>(norm.absaetze());
-      var absatz = absaetze.get(fundstelle.absatzIndex());
-      absaetze.set(fundstelle.absatzIndex(), new Absatz(neuAbsatz.get().nummer(), absatz.text()));
+      int quelleIdx = fundstelle.absatzIndex();
+      var neueNummer = neuAbsatz.get().nummer();
+      // Ein leerer Platzhalter-Absatz mit der Zielnummer (weggefallen/gegenstandslos) wird durch die
+      // Umnummerierung überschrieben (analog zur Norm-Umnummerierung auf eine weggefallene Zielnorm).
+      for (int i = absaetze.size() - 1; i >= 0; i--) {
+        if (i != quelleIdx
+            && neueNummer.equals(absaetze.get(i).nummer())
+            && istLeererPlatzhalter(absaetze.get(i).text())) {
+          absaetze.remove(i);
+          if (i < quelleIdx) {
+            quelleIdx--;
+          }
+        }
+      }
+      absaetze.set(quelleIdx, new Absatz(neueNummer, absaetze.get(quelleIdx).text()));
       normen.set(fundstelle.normIndex(), norm.mitAbsaetzen(absaetze));
       return angewandt(befehl, norm.enbez());
     }
-    // Satz-Umnummerierungen ändern den Text nicht (Sätze sind unnummeriert).
+    // Satz-Umnummerierung: unnummerierte Sätze brauchen keine Textänderung; amtlich nummerierte
+    // (bayerisches Landesrecht, „Satz 5 wird Satz 4.“) erhalten die neue Satznummer im Text.
+    var altSatz = letzteKomponente(befehl.stelle(), Stelle.SatzNr.class);
+    var neuSatz = letzteKomponente(befehl.neu(), Stelle.SatzNr.class);
+    if (altSatz != null && neuSatz != null) {
+      var ergebnis = StellenAufloeser.aufloese(gesetzAus(normen), befehl.stelle());
+      if (ergebnis instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
+        return manuell(befehl, nicht.begruendung());
+      }
+      var fundstelle = ((StellenAufloeser.Ergebnis.Gefunden) ergebnis).fundstelle();
+      if (fundstelle.bereich() != null && fundstelle.absatzIndex() != null) {
+        var norm = normen.get(fundstelle.normIndex());
+        var absaetze = new ArrayList<>(norm.absaetze());
+        var absatz = absaetze.get(fundstelle.absatzIndex());
+        var text = absatz.text();
+        var marker = Superskript.LAUF.matcher(text).region(fundstelle.bereich().von(), fundstelle.bereich().bis());
+        if (marker.lookingAt()
+            && Superskript.istSatzanfang(text, marker.start(), marker.end())) {
+          var neuerText =
+              text.substring(0, marker.start())
+                  + Superskript.zuSuperskript(neuSatz.nummer())
+                  + text.substring(marker.end());
+          absaetze.set(fundstelle.absatzIndex(), absatz.mitText(neuerText));
+          normen.set(fundstelle.normIndex(), norm.mitAbsaetzen(absaetze));
+          return angewandt(befehl, norm.enbez());
+        }
+      }
+    }
     return angewandt(befehl, "(keine Textänderung nötig)");
+  }
+
+  /** Ein leerer Platzhalter-Absatz ohne Inhalt („(weggefallen)“, „(gegenstandslos)“). */
+  private static boolean istLeererPlatzhalter(String text) {
+    var t = text.strip();
+    return t.equals("(weggefallen)") || t.equals("(gegenstandslos)");
+  }
+
+  private static <K extends Stelle.Komponente> @Nullable K letzteKomponente(
+      Stelle stelle, Class<K> art) {
+    K letzte = null;
+    for (var komponente : stelle.komponenten()) {
+      if (art.isInstance(komponente)) {
+        letzte = art.cast(komponente);
+      }
+    }
+    return letzte;
   }
 
   private static AngewandteAenderung wendeWortlautZuAbsatzAn(
@@ -894,6 +973,18 @@ public final class BefehlAnwender {
       return manuell(befehl, aufloesung.fehler());
     }
     var norm = normen.get(aufloesung.normIndex());
+    // Steht genau ein unnummerierter Absatz zwischen nummerierten (bayerische Folge „Dem Wortlaut
+    // werden … Abs. 1 bis 4 vorangestellt“ → „Der bisherige Wortlaut wird Abs. 5“), erhält nur
+    // dieser die Nummer. Sind alle Absätze unnummeriert, wird der Gesamtwortlaut zu einem Absatz.
+    var unnummerierte =
+        norm.absaetze().stream().filter(a -> a.nummer() == null).toList();
+    if (unnummerierte.size() == 1 && norm.absaetze().size() > 1) {
+      var absaetze = new ArrayList<>(norm.absaetze());
+      int idx = absaetze.indexOf(unnummerierte.get(0));
+      absaetze.set(idx, new Absatz(befehl.nummer(), unnummerierte.get(0).text()));
+      normen.set(aufloesung.normIndex(), norm.mitAbsaetzen(absaetze));
+      return angewandt(befehl, norm.enbez());
+    }
     var sb = new StringBuilder();
     for (var absatz : norm.absaetze()) {
       if (sb.length() > 0) {
@@ -905,6 +996,109 @@ public final class BefehlAnwender {
         aufloesung.normIndex(),
         norm.mitAbsaetzen(List.of(new Absatz(befehl.nummer(), sb.toString()))));
     return angewandt(befehl, norm.enbez());
+  }
+
+  /** „Der Wortlaut wird Satz 1.“ — der Zieltext erhält die amtliche Satznummer als Superskript. */
+  private static AngewandteAenderung wendeWortlautZuSatzAn(
+      List<Norm> normen, WortlautZuSatz befehl) {
+    var ergebnis = StellenAufloeser.aufloese(gesetzAus(normen), befehl.stelle());
+    if (ergebnis instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
+      return manuell(befehl, nicht.begruendung());
+    }
+    var fundstelle = ((StellenAufloeser.Ergebnis.Gefunden) ergebnis).fundstelle();
+    var norm = normen.get(fundstelle.normIndex());
+    Integer absatzIndex = fundstelle.absatzIndex();
+    if (absatzIndex == null) {
+      if (norm.absaetze().size() != 1) {
+        return manuell(
+            befehl, norm.enbez() + " hat " + norm.absaetze().size() + " Absätze; Ziel unklar.");
+      }
+      absatzIndex = 0;
+    }
+    var absaetze = new ArrayList<>(norm.absaetze());
+    var absatz = absaetze.get(absatzIndex);
+    var marke = Superskript.zuSuperskript(befehl.nummer());
+    if (!absatz.text().startsWith(marke)) {
+      absaetze.set(absatzIndex, absatz.mitText(marke + absatz.text()));
+      normen.set(fundstelle.normIndex(), norm.mitAbsaetzen(absaetze));
+    }
+    return angewandt(befehl, norm.enbez());
+  }
+
+  /** „Dem Wortlaut werden die folgenden Abs. 1 bis 4 vorangestellt: „…““ */
+  private static AngewandteAenderung wendeWortlautVoranstellungAn(
+      List<Norm> normen, WortlautVoranstellung befehl) {
+    var aufloesung = loeseNormAuf(normen, befehl.stelle());
+    if (aufloesung.fehler() != null) {
+      return manuell(befehl, aufloesung.fehler());
+    }
+    var neue = parseAbsaetze(befehl.text());
+    if (neue.isEmpty()) {
+      return manuell(befehl, "Im Zitat wurde kein Absatz erkannt.");
+    }
+    var norm = normen.get(aufloesung.normIndex());
+    var absaetze = new ArrayList<>(neue);
+    absaetze.addAll(norm.absaetze());
+    normen.set(aufloesung.normIndex(), norm.mitAbsaetzen(absaetze));
+    return angewandt(befehl, norm.enbez());
+  }
+
+  /** „Fußnote 1 wird aufgehoben.“ — entfernt Fußnotenzeile und Inline-Marker in der Kontextnorm. */
+  private static AngewandteAenderung wendeFussnotenAufhebungAn(
+      List<Norm> normen, FussnotenAufhebung befehl) {
+    var aufloesung = loeseNormAuf(normen, befehl.stelle());
+    if (aufloesung.fehler() != null) {
+      return manuell(befehl, aufloesung.fehler());
+    }
+    var norm = normen.get(aufloesung.normIndex());
+    var absaetze = new ArrayList<>(norm.absaetze());
+    var fehlend = new ArrayList<String>();
+    for (var nummer : befehl.nummern()) {
+      var marke = Superskript.zuSuperskript(nummer) + ")";
+      var zeilenMuster =
+          Pattern.compile("(?m)^" + Pattern.quote(marke) + "\\s*\\[Amtl\\. Anm\\.:\\].*(?:\n|$)");
+      boolean gefunden = false;
+      for (int i = 0; i < absaetze.size(); i++) {
+        var text = absaetze.get(i).text();
+        var ohneZeile = zeilenMuster.matcher(text).replaceAll("");
+        var ohneMarker = ohneZeile.replace(marke, "");
+        if (!ohneMarker.equals(text)) {
+          absaetze.set(i, absaetze.get(i).mitText(ohneMarker.stripTrailing()));
+          gefunden = true;
+        }
+      }
+      if (!gefunden) {
+        fehlend.add(nummer);
+      }
+    }
+    if (!fehlend.isEmpty()) {
+      return manuell(
+          befehl,
+          "Fußnote "
+              + String.join(", ", fehlend)
+              + " kommt in "
+              + norm.enbez()
+              + " nicht vor.");
+    }
+    normen.set(aufloesung.normIndex(), norm.mitAbsaetzen(absaetze));
+    return angewandt(befehl, norm.enbez());
+  }
+
+  /** „In Satz 1 wird die Satznummerierung „1“ gestrichen.“ */
+  private static AngewandteAenderung wendeSatznummerierungStreichungAn(
+      List<Norm> normen, SatznummerierungStreichung befehl) {
+    return bearbeiteBereich(
+        normen,
+        befehl,
+        (text, bereich) -> {
+          var marke = Superskript.zuSuperskript(befehl.nummer());
+          if (!text.startsWith(marke, bereich.von())) {
+            return TextErgebnis.fehler(
+                "Die Satznummerierung „" + befehl.nummer() + "“ steht nicht am Anfang des Ziels.");
+          }
+          return TextErgebnis.ok(
+              text.substring(0, bereich.von()) + text.substring(bereich.von() + marke.length()));
+        });
   }
 
   /**
@@ -947,6 +1141,28 @@ public final class BefehlAnwender {
 
   private interface TextOperation {
     TextErgebnis wende(String text);
+  }
+
+  // Fußnoten-Definitionszeile am Zeilenanfang („⁶) [Amtl. Anm.:] …“), die dem tragenden Absatz
+  // anhängt. Für wortweise Operationen (Streichen/Ersetzen/Einfügen) ist sie kein Inhalt: der
+  // eingebettete Marker „Gesetzbuchs²)“ soll getroffen werden, der gleichlautende Definitionskopf
+  // „²)“ nicht. Fußnoten werden daher vor der Operation abgetrennt und danach unverändert
+  // wieder angehängt (ihre eigene Aufhebung läuft über FussnotenAufhebung).
+  private static final Pattern FUSSNOTEN_DEFINITION = Pattern.compile("(?m)^[⁰¹²³⁴⁵⁶⁷⁸⁹]+\\)");
+
+  private static TextOperation ohneFussnoten(TextOperation operation) {
+    return text -> {
+      var m = FUSSNOTEN_DEFINITION.matcher(text);
+      if (!m.find()) {
+        return operation.wende(text);
+      }
+      int grenze = m.start();
+      var ergebnis = operation.wende(text.substring(0, grenze));
+      if (ergebnis.fehler() != null) {
+        return ergebnis;
+      }
+      return TextErgebnis.ok(ergebnis.text() + text.substring(grenze));
+    };
   }
 
   private interface BereichsOperation {
@@ -1067,7 +1283,7 @@ public final class BefehlAnwender {
   private static NormAufloesung loeseNormAuf(List<Norm> normen, Stelle stelle) {
     String enbez;
     if (stelle.paragraph().isPresent()) {
-      enbez = "§ " + stelle.paragraph().get().nummer();
+      enbez = stelle.paragraph().get().enbez();
     } else if (stelle.anlagenEnbez().isPresent()) {
       enbez = stelle.anlagenEnbez().get();
     } else {
@@ -1097,6 +1313,7 @@ public final class BefehlAnwender {
         .noneMatch(
             k ->
                 k instanceof Stelle.SatzNr
+                    || k instanceof Stelle.HalbsatzNr
                     || k instanceof Stelle.NummerNr
                     || k instanceof Stelle.BuchstabeNr);
   }
@@ -1154,7 +1371,7 @@ public final class BefehlAnwender {
   // die Untergliederungs- und Verbindungswörter aus, sodass an solchen Stellen nicht getrennt wird.
   private static final Pattern PARAGRAPH_UEBERSCHRIFT =
       Pattern.compile(
-          "(?=§\\s*\\d+[a-z]?\\s+"
+          "(?=(?:§|Art\\.)\\s*\\d+[a-z]?\\s+"
               + "(?!Absatz|Absätze|Abs|Satz|Sätze|Nummer|Nummern|Nr|Buchstabe|Buchstaben|Buchst"
               + "|und|bis|oder|sowie|des|der|dieses|genannten)"
               + "\\p{Lu})");
@@ -1167,11 +1384,11 @@ public final class BefehlAnwender {
     var normen = new ArrayList<Norm>();
     for (var stueck : PARAGRAPH_UEBERSCHRIFT.split(block.strip())) {
       var s = stueck.strip();
-      var m = Pattern.compile("^§\\s*(\\d+[a-z]?)\\b").matcher(s);
+      var m = Pattern.compile("^(§|Art\\.)\\s*(\\d+[a-z]?)\\b").matcher(s);
       if (s.isEmpty() || !m.find()) {
         continue;
       }
-      var enbez = "§ " + m.group(1);
+      var enbez = m.group(1) + " " + m.group(2);
       normen.add(parseNorm(s, enbez, new Norm(enbez, null, gliederung, List.of(), false)));
     }
     return normen;
@@ -1188,7 +1405,7 @@ public final class BefehlAnwender {
     if (erster >= 0) {
       var kopf = text.substring(0, erster).strip();
       if (!kopf.isEmpty()) {
-        titel = kopf.replaceFirst("^§\\s*\\S+\\s*", "").replaceAll("\\s+", " ").strip();
+        titel = kopf.replaceFirst("^(?:§|Art\\.)\\s*\\S+\\s*", "").replaceAll("\\s+", " ").strip();
         if (titel.isEmpty()) {
           titel = vorlage.titel();
         }
@@ -1201,7 +1418,7 @@ public final class BefehlAnwender {
     // Steht „§ N“ allein auf der ersten Zeile, ist die zweite Zeile die Überschrift und der Rest
     // der Normtext.
     var zeilen = text.lines().map(String::strip).filter(z -> !z.isEmpty()).toList();
-    if (zeilen.size() >= 3 && zeilen.get(0).matches("§\\s*\\d+[a-z]?")) {
+    if (zeilen.size() >= 3 && zeilen.get(0).matches("(?:§|Art\\.)\\s*\\d+[a-z]?")) {
       titel = zeilen.get(1);
       var rest = String.join("\n", zeilen.subList(2, zeilen.size()));
       return new Norm(
@@ -1212,7 +1429,7 @@ public final class BefehlAnwender {
           false);
     }
     // Fallback: gesamter Text (ohne „§ N“-Präfix) als unnummerierter Absatz, Titel unverändert.
-    var inhalt = text.replaceFirst("^§\\s*\\S+\\s*", "");
+    var inhalt = text.replaceFirst("^(?:§|Art\\.)\\s*\\S+\\s*", "");
     return new Norm(
         enbez,
         titel,
