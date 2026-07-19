@@ -1,0 +1,87 @@
+= Beispieldaten: Landesrecht weiterer Länder
+Matthias Andreas Benkard
+
+Ergänzend zum bayerischen Belegfall (`BayJG/`) sind hier Änderungsgesetze und
+Änderungsverordnungen aus dem Landesrecht weiterer Länder gesammelt. Sie dienen als
+Kandidaten für künftige Ertüchtigungswellen und decken Konventionen ab, die im Bundes- und
+im bayerischen Recht so nicht vorkommen.
+
+WICHTIG: Anders als Bayern (Art./§-Inversion) gliedern alle übrigen Länder ihre Stammgesetze
+in *§* (wie der Bund) mit `Artikel N` als Änderungsgesetz-Container. Die neuen Testdimensionen
+liegen daher im *PDF-Layout* und in *Befehlsidiom-Varianten*, nicht in der Gliederung.
+
+Zu jedem Beispiel ist bislang nur das *Änderungsgesetz* beschafft. Die jeweils zugehörige
+*konsolidierte Stammfassung* (nötig für einen Akzeptanztest wie bei BayJG) fehlt noch; sie käme
+je Land aus einem eigenen Portal (juris-basiert: landesrecht-bw, recht.nrw, revosax, voris,
+hessenrecht, gesetze-rechtsprechung.sh.juris.de; Eigensystem: Berlin) oder als handgepflegter
+`--extract-only`-Klartext analog zu `BayJG/BayJG-alt.txt`.
+
+== Übersicht
+
+[cols="1,3,3",options="header"]
+|===
+|Land |Datei / Fundstelle |Besonderheit für das Werkzeug
+
+|Berlin
+|`Berlin/GVBl-2026-17_ASOG-LAF-AendG.pdf` — GVBl. für Berlin Nr. 17 vom 11.06.2026, S. 234
+(Gesetz zur Änderung des ASOG und des LAF-Errichtungsgesetzes vom 03.06.2026)
+|*Zweispaltiges Layout* (Herausgabe über Wolters Kluwer) — höchster Extraktionswert, analog
+zum zweispaltigen Alt-BGBl. Tiefe Verschachtelung a)/aa)/bb)/cc), Anlage-Ziele.
+
+|Schleswig-Holstein
+|`SchleswigHolstein/GVOBl-2026-27_Kommunalrecht-AendG.pdf` — GVOBl. Schl.-H. 2026/27 vom
+30.03.2026 (Gesetz zur Änderung des Gesetzes zur Änderung kommunalrechtlicher Vorschriften)
+|Neues Neufassungsidiom „§ 34a Absatz 1 *erhält folgende Fassung*:" (statt „wird wie folgt
+gefasst"); *hochgestellte Fußnotenmarker an Artikel-Überschriften* („Artikel 1 ¹)"); Meta-
+Änderung an einem anderen Änderungsgesetz („Artikel 5 wird gestrichen").
+
+|Hessen
+|`Hessen/GVBl-2026-05_11-AendVO-verkehrsrechtl-Zustaendigkeiten.pdf` — GVBl. Hessen Nr. 5 vom
+03.02.2026 (Elfte Verordnung zur Änderung der Verordnung zur Bestimmung verkehrsrechtlicher
+Zuständigkeiten)
+|*Sperrsatz* in Datums- und Signaturzeilen („3 . F e bru a r 2 02 6", „Der Mi n is t er pr
+äs i d e nt") als Extraktions-Härtetest; *abgekürztes „Abs."/„Nr." im §-Kontext*; FFN-Fußnote.
+
+|Niedersachsen
+|`Niedersachsen/Nds-GVBl-2026-10_ELER-Foerdergesetz-AendG.pdf` — Nds. GVBl. 2026 Nr. 10 vom
+04.02.2026 (Gesetz zur Änderung des Niedersächsischen ELER-Fördergesetzes) +
+`Nds-GVBl-2026-23_BeurtVO-Steuer_amtliche-Satznummern.pdf` — Nr. 23 vom 18.03.2026
+|*Hochgestellte amtliche Satznummern ¹²³* wie Bayern, aber im *§-Modus* (nicht invertiert) →
+das bayerische Superskriptmodul wäre wiederverwendbar. Nr. 23 (Verordnung) zeigt die
+Satznummern deutlich; Nr. 10 ist das eigentliche Änderungsgesetz (Idiom „Absatz 1 erhält
+folgende Fassung"). Saubere einspaltige PDFs über die stabile API `verkuendung-niedersachsen.de`.
+
+|Baden-Württemberg
+|`BadenWuerttemberg/GBl-2026-26_KommunalwahlO-AendVO.pdf` — GBl. BW 2026 Nr. 26 vom 27.02.2026
+(Verordnung des Innenministeriums zur Änderung der Kommunalwahlordnung)
+|Standard-HdR-Befehle im GBl-Layout; „werden nach dem Wort … die Wörter … eingefügt",
+„werden die Wörter … gestrichen".
+
+|Nordrhein-Westfalen
+|`NRW/GV-NRW-2026-S202_22-Rundfunkaenderungsgesetz.pdf` — GV. NRW. 2026 Nr. 7 vom 31.03.2026,
+S. 202 (22. Rundfunkänderungsgesetz)
+|Umfangreiches Mehrgesetz-Artikelgesetz (17 S.); „Die Inhaltsübersicht wird wie folgt
+geändert", „§ … (weggefallen)". Bereitgestellt aus dem amtlichen recht.nrw.de-PDF.
+
+|Sachsen
+|`Sachsen/SaechsGVBl-2026-S134_AendG-SaechsBeamtVG_revosax.pdf` — SächsGVBl. S. 134
+(Gesetz zur Änderung des Sächsischen Beamtenversorgungsgesetzes vom 13.04.2026)
+|Kompaktes Änderungsgesetz, Verschachtelung a)/aa)/bb)/cc), „wird durch den folgenden Satz
+ersetzt". Quelle: revosax-Gesamtansicht (nicht der Original-GVBl-Satz — recht-sachsen.de ist ein
+cookie-/kostenpflichtiger Shop).
+
+|Thüringen
+|`Thueringen/GVBl-TH-2026-02_KiGaFinanzVO-AendVO-ua.pdf` — GVBl. Freistaat Thüringen Nr. 2 vom
+13.02.2026 (u. a. Vierte Verordnung zur Änderung der Thüringer Kindergartenfinanzierungs-
+verordnung)
+|Sammelheft (28 S.) mit mehreren Verkündungen; enthält eine Änderungsverordnung („§ 4 wird wie
+folgt geändert").
+|===
+
+== Noch offen
+
+* *Rheinland-Pfalz*: Die Verkündungsplattform `verkuendung.rlp.de` verkündet erst seit dem
+  01.07.2026 elektronisch; ältere GVBl-Hefte liegen nicht als freie Direkt-PDF vor.
+* Bremen, Hamburg, Mecklenburg-Vorpommern, Saarland, Brandenburg, Sachsen-Anhalt: noch nicht
+  erfasst.
+* Für alle Länder fehlt die konsolidierte Stammfassung (siehe oben).
