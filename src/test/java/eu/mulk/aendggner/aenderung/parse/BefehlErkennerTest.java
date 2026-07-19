@@ -91,6 +91,21 @@ class BefehlErkennerTest {
   }
 
   @Test
+  void erkenntNeufassungMitErhaeltFolgendeFassung() {
+    // „… erhält folgende Fassung:“ ist die Neufassungsform in Schleswig-Holstein und Niedersachsen.
+    var befehl =
+        erkenne(
+            "§ 34a Absatz 1 erhält folgende Fassung: „(1) Durch Hauptsatzung kann bestimmt"
+                + " werden, dass Gemeindevertreterinnen und Gemeindevertreter teilnehmen.“",
+            Stelle.LEER);
+
+    assertThat(befehl).containsInstanceOf(Neufassung.class);
+    var neufassung = (Neufassung) befehl.orElseThrow();
+    assertThat(neufassung.stelle().anzeigeText()).isEqualTo("§ 34a Absatz 1");
+    assertThat(neufassung.neuerText()).startsWith("(1) Durch Hauptsatzung");
+  }
+
+  @Test
   void erkenntParagraphEinfuegung() {
     // Echter Befehl aus Art. 1 Nr. 17 des Dritten Bevölkerungsschutzgesetzes.
     var befehl =

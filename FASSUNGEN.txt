@@ -21,6 +21,59 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 19. Juli 2026,
+ zuletzt geändert durch die am 19. Juli 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+In einer sechsten Ertüchtigungswelle wird das Erzeugnis über das bayerische
+Landesrecht hinaus für das Landesrecht der übrigen Länder vorbereitet. Da diese
+ihre Stammgesetze — anders als Bayern — in Paragraphen gliedern, wird der
+bayerische Lader zu einem gemeinsamen Landesrecht-Lader verallgemeinert, der das
+Sigel (§ oder Art.) je Norm aus dem Text ableitet; der Superskript-Modus folgt
+nunmehr datengetrieben der Schreibweise des Stammgesetzes. Ferner wird die in
+mehreren Ländern übliche Neufassungsform „erhält folgende Fassung“ erkannt. Als
+Beispieldaten sind bereits Änderungsgesetze aus acht Ländern hinterlegt
+(sampledata: Berlin, Schleswig-Holstein, Hessen, Niedersachsen, Baden-Württem-
+berg, Nordrhein-Westfalen, Sachsen, Thüringen); ihre konsolidierten Stammfassungen
+und die dazugehörigen Akzeptanzfälle folgen in weiteren Fassungen dieser Welle.
+
+
+Artikel 1
+Verallgemeinerung des bayerischen Laders zu einem Landesrecht-Lader
+
+Die Klassen BayRechtLoader und BayRechtTextParser (Paket gesetz.bayern) werden zu
+LandesRechtLoader und LandesRechtTextParser (Paket gesetz.land) verallgemeinert.
+Der Normkopf erkennt statt allein „Art. N“ nunmehr „§ N“ wie „Art. N“ und leitet
+das Sigel je Norm aus dem Treffer ab (Norm.enbez), sodass die Gliederung des
+jeweiligen Landes ohne ein eigenes Land-Merkmal folgt. Das Querverweis-
+Schlüsselwort im Normkopf wird nur noch als ganzes Wort ausgeschlossen, damit ein
+Normtitel wie „Satzungen“ nicht am Verweis-Wort „Satz“ scheitert; die
+Juris-Abkürzung darf mehrteilig sein („(GO NRW)“). Das bayerische Verhalten
+bleibt unverändert.
+
+
+Artikel 2
+Datengetriebener Superskript-Modus aus der Stammfassung
+
+Ob ein Änderungsgesetz mit Erhalt der hochgestellten amtlichen Satznummern
+extrahiert wird, richtet sich nicht mehr danach, ob das Stammgesetz als gii-XML
+vorliegt, sondern danach, ob die geladene Stammfassung selbst amtliche Satznummern
+am Satzanfang trägt (Superskript.traegtSatznummern). Damit erhalten das bayerische
+Landesrecht und das niedersächsische Recht ihre Superskripte, das Bundesrecht und
+die Länder ohne amtliche Satzzählung verwerfen sie wie bisher.
+
+
+Artikel 3
+Erkennung der Neufassungsform „erhält folgende Fassung“
+
+Der Befehlserkenner erkennt die Neufassung nunmehr auch in der in Schleswig-
+Holstein und Niedersachsen üblichen Form „… erhält (erhalten) folgende Fassung:“,
+neben der bisherigen Form „… wird (werden) wie folgt gefasst:“. Die Erweiterung
+ist rein zusätzlich (Verb-Baustein NEUFASSUNG_VERB) und lässt die Muster des
+Bundes- und des bayerischen Rechts unberührt.
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 17. Juli 2026,
  zuletzt geändert durch die am 17. Juli 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

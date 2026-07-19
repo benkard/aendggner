@@ -1,4 +1,4 @@
-package eu.mulk.aendggner.gesetz.bayern;
+package eu.mulk.aendggner.gesetz.land;
 
 import eu.mulk.aendggner.aenderung.parse.PatchTextExtraktor;
 import eu.mulk.aendggner.aenderung.parse.SuperskriptModus;
@@ -12,19 +12,21 @@ import org.apache.tika.Tika;
 import org.jboss.logging.Logger;
 
 /**
- * Liest ein Stammgesetz des bayerischen Landesrechts aus der konsolidierten Fassung von
- * gesetze-bayern.de — als PDF oder als kanonischer Klartext.
+ * Liest ein Stammgesetz des Landesrechts aus der konsolidierten Fassung — als PDF oder als
+ * kanonischer Klartext. Deckt bayerisches Landesrecht (Gliederung in {@code Art.}, amtliche
+ * Satznummern) ebenso ab wie die {@code §}-gegliederten Gesetze der übrigen Länder; das Sigel
+ * folgt je Norm aus dem Text (siehe {@link LandesRechtTextParser}).
  *
  * <p>PDFs durchlaufen dieselbe Aufbereitung wie Änderungsgesetze (Fontgrößen-Filter mit
  * Superskript-Erhalt, Textbereinigung); der bereinigte Lineartext ist zugleich das dokumentierte
- * Klartext-Format (siehe {@link BayRechtTextParser}): Wo die PDF-Extraktion versagt oder nur eine
- * andere Quelle verfügbar ist (etwa eine archivierte HTML-Fassung), kann der Text von Hand
- * aufbereitet und als {@code .txt} eingespeist werden. Amtliche Satznummern und Fußnotenmarker
- * stehen dabei als Unicode-Superskripte im Text (¹Die freilebende Tierwelt …, Enteignung⁶)).
+ * Klartext-Format: Wo die PDF-Extraktion versagt oder nur eine andere Quelle verfügbar ist (etwa
+ * eine archivierte HTML-Fassung), kann der Text von Hand aufbereitet und als {@code .txt}
+ * eingespeist werden. Amtliche Satznummern und Fußnotenmarker stehen dabei als Unicode-Superskripte
+ * im Text (¹Die freilebende Tierwelt …, Enteignung⁶)).
  */
-public final class BayRechtLoader {
+public final class LandesRechtLoader {
 
-  private static final Logger log = Logger.getLogger(BayRechtLoader.class);
+  private static final Logger log = Logger.getLogger(LandesRechtLoader.class);
 
   private final Tika tika = new Tika();
 
@@ -44,15 +46,15 @@ public final class BayRechtLoader {
                   "Nicht unterstützter Dateityp %s für Stammgesetz %s (unterstützt: PDF, Klartext)"
                       .formatted(mimeType, datei));
         };
-    return BayRechtTextParser.parse(text);
+    return LandesRechtTextParser.parse(text);
   }
 
   /**
    * Stellt einen vom Zeilen-Reflow an das Satzende der Vornorm geklebten Normkopf („… verlangen.
    * Art. 17  Jagderlaubnis“) wieder auf eine eigene Zeile. Das doppelte Leerzeichen zwischen
-   * Artikelnummer und Titel unterscheidet den Normkopf von gewöhnlichen Querverweisen.
+   * Norm-Nummer und Titel unterscheidet den Normkopf von gewöhnlichen Querverweisen.
    */
   private static String nachSatzendeGetrennteNormkoepfe(String text) {
-    return text.replaceAll("(?<=[.“?!])[ \\t]+(?=Art\\.\\s\\d+[a-z]?[ \\t]{2})", "\n");
+    return text.replaceAll("(?<=[.“?!])[ \\t]+(?=(?:§|Art\\.)\\s\\d+[a-z]?[ \\t]{2})", "\n");
   }
 }

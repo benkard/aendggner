@@ -1,4 +1,4 @@
-package eu.mulk.aendggner.gesetz.bayern;
+package eu.mulk.aendggner.gesetz.land;
 
 import eu.mulk.aendggner.gesetz.Absatz;
 import eu.mulk.aendggner.gesetz.Gesetz;
@@ -11,9 +11,12 @@ import java.util.regex.Pattern;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Parst den kanonischen Lineartext eines bayerischen Stammgesetzes (gesetze-bayern.de) zu einem
- * {@link Gesetz}. Das Layout entspricht der {@code --extract-only}-Ausgabe der konsolidierten
- * PDF-Fassung (siehe {@link BayRechtLoader}):
+ * Parst den kanonischen Lineartext eines Landesrecht-Stammgesetzes zu einem {@link Gesetz}. Das
+ * Layout entspricht der {@code --extract-only}-Ausgabe der konsolidierten PDF-Fassung (siehe {@link
+ * LandesRechtLoader}). Die Norm-Gliederung folgt dem jeweiligen Land: der Bund und die meisten
+ * Länder zitieren in {@code §}, Bayern in {@code Art.} — das Sigel wird je Norm aus dem Normkopf
+ * abgeleitet und nach {@link Norm#enbez()} durchgereicht, ein zentrales „Land“-Merkmal ist nicht
+ * nötig.
  *
  * <pre>
  * Bayerisches Jagdgesetz          ← Langtitel
@@ -23,17 +26,20 @@ import org.jspecify.annotations.Nullable;
  * BayRS 792-1-W
  * Vollzitat nach RedR: …          ← übersprungen (ggf. mehrzeilig)
  * I. Abschnitt Grundsätze         ← Gliederungs-Überschrift
- * 1. Allgemeine Vorschriften      ← nummerierte Unter-Überschrift (vor einem Art.-Kopf)
- * Art. 1  Gesetzeszweck           ← Normkopf; „Art. 60  (aufgehoben)“ → weggefallen
+ * 1. Allgemeine Vorschriften      ← nummerierte Unter-Überschrift (vor einem Normkopf)
+ * Art. 1  Gesetzeszweck           ← Normkopf (§/Art.); „Art. 60  (aufgehoben)“ → weggefallen
  * (1) ¹Die freilebende Tierwelt … ← Absätze mit amtlichen Satznummern als Superskript
  * ⁶) [Amtl. Anm.:] …              ← Fußnotenzeile, verbleibt im Text des tragenden Absatzes
  * </pre>
  */
-final class BayRechtTextParser {
+final class LandesRechtTextParser {
 
   private static final Pattern ABSATZ_MARKER = Pattern.compile("^\\((\\d+[a-z]?)\\)\\s+");
 
-  private static final Pattern JURABK_ZEILE = Pattern.compile("^\\((\\S+)\\)$");
+  // Juris-Abkürzung direkt hinter dem Langtitel. Bayern führt einteilige Kürzel („(BayJG)“), die
+  // übrigen Länder oft mehrteilige („(GO NRW)“); Nur die Zeile unmittelbar nach dem Titel wird
+  // geprüft, sodass spätere Fundstellen-Klammern („(BayRS V S. 595)“) nicht getroffen werden.
+  private static final Pattern JURABK_ZEILE = Pattern.compile("^\\(([^()]+)\\)$");
 
   // Kopf der Druckfassung („BayJG: Bayerisches Jagdgesetz … (Art. 1–64)“), ggf. mit
   // umbrochenem Rest („1–64)“) auf der Folgezeile.
@@ -45,13 +51,17 @@ final class BayRechtTextParser {
 
   private static final Pattern UNTER_GLIEDERUNG = Pattern.compile("^(\\d+[a-z]?)\\.\\s+(\\S.*)$");
 
-  // Normkopf: „Art. N“ plus Titel auf derselben Zeile. Die Negativliste schließt
-  // Querverweise am Zeilenanfang aus („Art. 4 Abs. 3 …“).
+  // Normkopf: „§ N“ bzw. „Art. N“ plus Titel auf derselben Zeile. Das Sigel steht in Gruppe 1, die
+  // Nummer in Gruppe 2, der Titel in Gruppe 3. Die Negativliste schließt Querverweise am
+  // Zeilenanfang aus („Art. 4 Abs. 3 …“, „§ 5 Absatz 2 …“).
   private static final Pattern NORM_KOPF =
       Pattern.compile(
-          "^Art\\.\\s+(\\d+[a-z]?)\\s+"
-              + "(?!Absatz|Abs\\.|Satz|Sätze|Nummer|Nr\\.|Buchstabe|Buchst\\."
-              + "|und|bis|oder|sowie|des|der|dieses)"
+          "^(§|Art\\.)\\s+(\\d+[a-z]?)\\s+"
+              // Querverweis-Schlüsselwörter nur als ganzes Wort ausschließen: „§ 4 Satz 2“ ist ein
+              // Verweis, „§ 4 Satzungen“ dagegen ein Normtitel. Der Schutz „(?![a-zäöüß])“ verhindert,
+              // dass „Satz“ auch „Satzungen“, „Nummer“ auch „Nummerierung“ trifft.
+              + "(?!(?:Absatz|Abs\\.|Satz|Sätze|Nummer|Nr\\.|Buchstabe|Buchst\\."
+              + "|und|bis|oder|sowie|des|der|dieses)(?![a-zäöüß]))"
               + "((?:\\p{Lu}|\\().*)$");
 
   private static final Pattern WEGGEFALLEN_TITEL =
@@ -60,7 +70,7 @@ final class BayRechtTextParser {
   private static final Pattern FUSSNOTE =
       Pattern.compile("^([⁰¹²³⁴⁵⁶⁷⁸⁹]+|\\d{1,3})\\)\\s*(\\[Amtl\\. Anm\\.:\\].*)$");
 
-  private BayRechtTextParser() {}
+  private LandesRechtTextParser() {}
 
   static Gesetz parse(String text) {
     var zeilen = text.lines().toList();
@@ -95,6 +105,7 @@ final class BayRechtTextParser {
     String elternKennzahl = null;
     int gliederungsZaehler = 0;
 
+    String normSigel = null;
     String normNummer = null;
     String normTitel = null;
     var normZeilen = new ArrayList<String>();
@@ -109,11 +120,11 @@ final class BayRechtTextParser {
 
       if (zeile == null
           || gliederung.matches()
-          || (normKopf.matches() && istNeuerNormKopf(normKopf.group(1), letzteNormNummer))
+          || (normKopf.matches() && istNeuerNormKopf(normKopf.group(2), letzteNormNummer))
           || (unterGliederung.matches() && istUnterGliederung(unterGliederung, zeilen, i))) {
         // Laufende Norm abschließen.
         if (normNummer != null) {
-          normen.add(baueNorm(normNummer, normTitel, aktuelleGliederung, normZeilen));
+          normen.add(baueNorm(normSigel, normNummer, normTitel, aktuelleGliederung, normZeilen));
         }
         normNummer = null;
         normZeilen.clear();
@@ -131,9 +142,10 @@ final class BayRechtTextParser {
                   gliederung.group(1) + ". " + gliederung.group(2),
                   titel.isEmpty() ? null : titel);
           gliederungen.add(aktuelleGliederung);
-        } else if (normKopf.matches() && istNeuerNormKopf(normKopf.group(1), letzteNormNummer)) {
-          normNummer = normKopf.group(1);
-          normTitel = normKopf.group(2).strip();
+        } else if (normKopf.matches() && istNeuerNormKopf(normKopf.group(2), letzteNormNummer)) {
+          normSigel = normKopf.group(1);
+          normNummer = normKopf.group(2);
+          normTitel = normKopf.group(3).strip();
           letzteNormNummer = numerisch(normNummer);
         } else {
           var kennzahl =
@@ -152,8 +164,8 @@ final class BayRechtTextParser {
 
     if (normen.isEmpty()) {
       throw new IllegalArgumentException(
-          "Kein „Art. N“-Normkopf gefunden — ist das eine konsolidierte Fassung von"
-              + " gesetze-bayern.de?");
+          "Kein „§ N“- oder „Art. N“-Normkopf gefunden — ist das eine konsolidierte Fassung im"
+              + " kanonischen Klartextformat?");
     }
     return new Gesetz(jurabk != null ? jurabk : langue, langue, null, normen, gliederungen);
   }
@@ -211,8 +223,12 @@ final class BayRechtTextParser {
   }
 
   private static Norm baueNorm(
-      String nummer, @Nullable String titel, @Nullable Gliederung gliederung, List<String> zeilen) {
-    var enbez = "Art. " + nummer;
+      String sigel,
+      String nummer,
+      @Nullable String titel,
+      @Nullable Gliederung gliederung,
+      List<String> zeilen) {
+    var enbez = sigel + " " + nummer;
     boolean weggefallen = titel != null && WEGGEFALLEN_TITEL.matcher(titel).matches();
 
     var absaetze = new ArrayList<Absatz>();
@@ -245,6 +261,7 @@ final class BayRechtTextParser {
       absaetze.add(new Absatz(absatzNummer, String.join("\n", absatzZeilen)));
     }
 
-    return new Norm(enbez, titel == null || titel.isEmpty() ? null : titel, gliederung, absaetze, weggefallen);
+    return new Norm(
+        enbez, titel == null || titel.isEmpty() ? null : titel, gliederung, absaetze, weggefallen);
   }
 }

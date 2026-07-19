@@ -230,7 +230,7 @@ class EndToEndTest {
     assumeTrue(Files.exists(alt) && Files.exists(pdf), "BayJG-Beispieldaten fehlen");
 
     // 1. Stammgesetz laden (Art.-gegliedert, amtliche Satznummern als Superskripte).
-    var gesetz = new eu.mulk.aendggner.gesetz.bayern.BayRechtLoader().load(alt);
+    var gesetz = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(alt);
     assertThat(gesetz.jurabk()).isEqualTo("BayJG");
     assertThat(gesetz.langue()).isEqualTo("Bayerisches Jagdgesetz");
     assertThat(gesetz.norm("Art. 1").orElseThrow().absaetze().get(0).text())
@@ -295,7 +295,7 @@ class EndToEndTest {
     var pdf = SAMPLEDATA.resolve("BayJG/Ltg-Drs-19-9707_Gesetzentwurf.pdf");
     assumeTrue(Files.exists(alt) && Files.exists(pdf), "BayJG-Beispieldaten fehlen");
 
-    var gesetz = new eu.mulk.aendggner.gesetz.bayern.BayRechtLoader().load(alt);
+    var gesetz = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(alt);
     var text =
         TextBereiniger.bereinige(
             new PatchTextExtraktor(eu.mulk.aendggner.aenderung.parse.SuperskriptModus.BEHALTEN)

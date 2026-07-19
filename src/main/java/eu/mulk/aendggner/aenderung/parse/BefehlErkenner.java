@@ -50,8 +50,14 @@ final class BefehlErkenner {
   // Aufzählungslabel, das in Entwürfen/Drucksachen vor dem Zitat steht („… gefasst: 3. „…““).
   private static final String ENUM = "((?:\\d+[a-z]?\\.|[a-z]{1,3}\\))\\s*)?";
 
+  // Verb der Neufassung. Neben „wird/werden wie folgt gefasst“ (Bund/Bayern) auch „erhält/erhalten
+  // folgende Fassung“ — die in mehreren Ländern (Schleswig-Holstein, Niedersachsen) übliche Form.
+  // Rein zusätzliche Alternation ohne eigene Fanggruppe, damit die Gruppennummern gleich bleiben.
+  private static final String NEUFASSUNG_VERB =
+      "(?:(?:wird|werden) wie folgt gefasst|(?:erhält|erhalten) folgende Fassung)";
+
   private static final Pattern NEUFASSUNG =
-      Pattern.compile("^(.+?) (?:wird|werden) wie folgt gefasst: " + ENUM + Z + "\\.?$");
+      Pattern.compile("^(.+?) " + NEUFASSUNG_VERB + ": " + ENUM + Z + "\\.?$");
 
   // „§ 2 Absatz 2 wird durch die folgenden Absätze 2 und 3 ersetzt: „…““ (neues BGBl-Format);
   // auch „Die Überschrift wird durch die folgende Überschrift ersetzt: „…““ (Entwürfe).
@@ -340,9 +346,7 @@ final class BefehlErkenner {
   // der Zitatblock wird an „§ N“-Grenzen in Einzel-Neufassungen zerlegt.
   private static final Pattern PARAGRAPH_BEREICH_NEUFASSUNG =
       Pattern.compile(
-          "^Die (?:§§|Artt?\\.) (\\d+[a-z]?) bis (\\d+[a-z]?) (?:wird|werden) wie folgt gefasst: "
-              + Z
-              + "\\.?$");
+          "^Die (?:§§|Artt?\\.) (\\d+[a-z]?) bis (\\d+[a-z]?) " + NEUFASSUNG_VERB + ": " + Z + "\\.?$");
 
   // „Der Wortlaut wird Absatz 1.“, bayerisch auch „Der bisherige Wortlaut wird Abs. 5.“ und
   // „Der Wortlaut wird Satz 1.“

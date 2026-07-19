@@ -46,6 +46,21 @@ public final class Superskript {
   }
 
   /**
+   * Wahr, wenn {@code text} mindestens eine amtliche Satznummer am Satzanfang trägt. Dient dazu, die
+   * Schreibweise eines Stammgesetzes zu erkennen (Landesrecht mit amtlicher Satzzählung behält seine
+   * Superskripte, Bundesrecht ohne solche verwirft sie).
+   */
+  public static boolean traegtSatznummern(String text) {
+    var m = LAUF.matcher(text);
+    while (m.find()) {
+      if (istSatzanfang(text, m.start(), m.end())) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
    * Wahr, wenn der Superskript-Lauf {@code [start, ende)} in {@code text} eine amtliche Satznummer
    * am Satzanfang ist — im Unterschied zum Fußnotenmarker, der einem Wort anhängt und auf den eine
    * schließende Klammer folgt („Enteignung⁶)“).

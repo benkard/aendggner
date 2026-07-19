@@ -1,13 +1,14 @@
-package eu.mulk.aendggner.gesetz.bayern;
+package eu.mulk.aendggner.gesetz.land;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 import eu.mulk.aendggner.gesetz.Gliederung;
 import org.junit.jupiter.api.Test;
 
-class BayRechtTextParserTest {
+class LandesRechtTextParserTest {
 
-  private static final String BEISPIEL =
+  // Bayern: Gliederung in „Art.“, amtliche Satznummern als Superskript.
+  private static final String BAYERN =
       """
       BayJG: Bayerisches Jagdgesetz (BayJG) Vom 13. Oktober 1978 (BayRS V S. 595) BayRS 792-1-W (Art.
       1–64)
@@ -51,17 +52,38 @@ class BayRechtTextParserTest {
       (1) Dieses Gesetz tritt am 1. Januar 1979 in Kraft.
       """;
 
+  // Übriges Landesrecht: Gliederung in „§“ (wie der Bund), hier mit amtlichen Satznummern.
+  private static final String PARAGRAPHEN =
+      """
+      Gemeindeordnung für das Land Nordrhein-Westfalen
+      (GO NRW)
+      Vom 14. Juli 1994
+      I. Teil Grundlagen der Gemeindeverfassung
+      § 1  Wesen der Gemeinde
+
+      (1) ¹Die Gemeinden sind die Grundlage des demokratischen Staatsaufbaus. ²Sie fördern das Wohl der Einwohner.
+      (2) Die Gemeinden verwalten ihre Angelegenheiten selbst.
+      § 2  Aufgaben
+
+      Die Gemeinden erfüllen die Aufgaben der örtlichen Gemeinschaft.
+      § 3  (weggefallen)
+
+      § 4  Satzungen
+
+      (1) Die Gemeinden können ihre Angelegenheiten durch Satzung regeln.
+      """;
+
   @Test
-  void parstTitelblock() {
-    var gesetz = BayRechtTextParser.parse(BEISPIEL);
+  void parstBayerischenTitelblock() {
+    var gesetz = LandesRechtTextParser.parse(BAYERN);
     assertThat(gesetz.jurabk()).isEqualTo("BayJG");
     assertThat(gesetz.langue()).isEqualTo("Bayerisches Jagdgesetz");
     assertThat(gesetz.kurzue()).isNull();
   }
 
   @Test
-  void parstNormenMitTitelnUndAbsaetzen() {
-    var gesetz = BayRechtTextParser.parse(BEISPIEL);
+  void parstBayerischeNormenMitTitelnUndAbsaetzen() {
+    var gesetz = LandesRechtTextParser.parse(BAYERN);
     assertThat(gesetz.normen())
         .extracting(n -> n.enbez())
         .containsExactly("Art. 1", "Art. 3", "Art. 8", "Art. 59", "Art. 60", "Art. 63", "Art. 64");
@@ -82,7 +104,7 @@ class BayRechtTextParserTest {
   @Test
   void querverweiseAmZeilenanfangEroeffnenKeineNorm() {
     // „Art. 11 Abs. 6 …“ am Zeilenanfang in Art. 8 ist ein Querverweis, kein Normkopf.
-    var gesetz = BayRechtTextParser.parse(BEISPIEL);
+    var gesetz = LandesRechtTextParser.parse(BAYERN);
     var art8 = gesetz.norm("Art. 8").orElseThrow();
     assertThat(art8.absaetze().get(0).text()).contains("Art. 11 Abs. 6 sind entsprechend");
     assertThat(gesetz.norm("Art. 11")).isEmpty();
@@ -90,7 +112,7 @@ class BayRechtTextParserTest {
 
   @Test
   void parstGliederungenMitUnterUeberschriften() {
-    var gesetz = BayRechtTextParser.parse(BEISPIEL);
+    var gesetz = LandesRechtTextParser.parse(BAYERN);
     assertThat(gesetz.gliederungen())
         .extracting(Gliederung::anzeigeText)
         .containsExactly(
@@ -107,7 +129,7 @@ class BayRechtTextParserTest {
 
   @Test
   void erkenntWeggefalleneNormenUndFussnoten() {
-    var gesetz = BayRechtTextParser.parse(BEISPIEL);
+    var gesetz = LandesRechtTextParser.parse(BAYERN);
     assertThat(gesetz.norm("Art. 60").orElseThrow().weggefallen()).isTrue();
     assertThat(gesetz.norm("Art. 63").orElseThrow().weggefallen()).isFalse();
 
@@ -116,5 +138,27 @@ class BayRechtTextParserTest {
     assertThat(art59.absaetze().get(0).text())
         .contains("Enteignung⁶)")
         .contains("⁶) [Amtl. Anm.:] BayRS 2141-1-I");
+  }
+
+  @Test
+  void parstParagraphengegliedertesLandesrecht() {
+    // Die übrigen Länder zitieren in „§“; das Sigel folgt aus dem Normkopf, ein Land-Merkmal ist
+    // nicht nötig. Amtliche Satznummern werden ebenso wie bei Bayern erhalten.
+    var gesetz = LandesRechtTextParser.parse(PARAGRAPHEN);
+    assertThat(gesetz.jurabk()).isEqualTo("GO NRW");
+    assertThat(gesetz.langue()).isEqualTo("Gemeindeordnung für das Land Nordrhein-Westfalen");
+    assertThat(gesetz.normen())
+        .extracting(n -> n.enbez())
+        .containsExactly("§ 1", "§ 2", "§ 3", "§ 4");
+
+    var p1 = gesetz.norm("§ 1").orElseThrow();
+    assertThat(p1.titel()).isEqualTo("Wesen der Gemeinde");
+    assertThat(p1.absaetze()).hasSize(2);
+    assertThat(p1.absaetze().get(0).text()).startsWith("¹Die Gemeinden sind die Grundlage");
+
+    // Unnummerierter Einzelabsatz und weggefallene Norm wie im bayerischen Fall.
+    assertThat(gesetz.norm("§ 2").orElseThrow().absaetze().get(0).nummer()).isNull();
+    assertThat(gesetz.norm("§ 3").orElseThrow().weggefallen()).isTrue();
+    assertThat(gesetz.gliederungen()).extracting(Gliederung::anzeigeText).containsExactly("I. Teil — Grundlagen der Gemeindeverfassung");
   }
 }
