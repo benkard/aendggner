@@ -78,10 +78,17 @@ verordnung)
 folgt geändert").
 |===
 
+== Stand der Umsetzung
+
+* *Sachsen* ist als erster nichtbayerischer Belegfall vollständig umgesetzt: konsolidierte
+  Vorfassung `Sachsen/SaechsBeamtVG-alt.txt` (kanonischer Klartext, Fassung vom 01.02.2025, aus
+  der archivierten revosax-Volltextfassung abgeleitet) und End-to-End-Akzeptanztest
+  (`EndToEndTest.saechsBeamtVgAcceptance`; fünf Befehle, kein Rest).
+* Für die übrigen erfassten Länder fehlt die konsolidierte Stammfassung noch (siehe oben).
+
 == Noch offen
 
 * *Rheinland-Pfalz*: Die Verkündungsplattform `verkuendung.rlp.de` verkündet erst seit dem
   01.07.2026 elektronisch; ältere GVBl-Hefte liegen nicht als freie Direkt-PDF vor.
 * Bremen, Hamburg, Mecklenburg-Vorpommern, Saarland, Brandenburg, Sachsen-Anhalt: noch nicht
   erfasst.
-* Für alle Länder fehlt die konsolidierte Stammfassung (siehe oben).

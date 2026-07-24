@@ -21,6 +21,53 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 24. Juli 2026,
+ zuletzt geändert durch die am 24. Juli 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Die sechste Ertüchtigungswelle wird um den ersten nichtbayerischen Landesrecht-
+Belegfall ergänzt: das paragraphengegliederte Sächsische Beamtenversorgungsgesetz
+(SächsBeamtVG) in seiner Fassung vom 1. Februar 2025 nebst dem Gesetz zur Änderung
+des SächsBeamtVG vom 13. April 2026 (SächsGVBl. S. 134). Alle fünf Befehle werden
+erkannt und angewandt. Dazu wird der Landesrecht-Textparser um die in den meisten
+Ländern übliche arabische Gliederungsform ertüchtigt und die Fußzeile der revosax-
+Volltextausgabe als Kolumnentitel entfernt.
+
+
+Artikel 1
+Arabische, schlüsselwort-erste Gliederungs-Überschriften
+
+Der Landesrecht-Textparser (LandesRechtTextParser) erkannte Gliederungs-
+Überschriften bislang allein in der bayerischen Form „I. Abschnitt Titel“ (römische
+Zählung, nachgestelltes Schlüsselwort). Die übrigen Länder gliedern in der Form
+„Abschnitt 1“, „Unterabschnitt 2“, „Teil 3“ (arabische Zählung, vorangestelltes
+Schlüsselwort, Titel auf der Folgezeile). Der Parser wird um ein entsprechendes
+Muster (GLIEDERUNG_ARABISCH) ergänzt, das solche Überschriften — nach der
+kanonischen Zusammenführung von Schlüsselwort, Nummer und Titel auf eine Zeile —
+als Gliederungsgrenzen erkennt. Das bayerische Verhalten bleibt unberührt.
+
+
+Artikel 2
+Fußzeile der revosax-Volltextausgabe
+
+Der Textbereiniger (TextBereiniger.istKolumnentitel) entfernt nunmehr auch die
+Fußzeile der Volltextausgaben des sächsischen Rechtsportals revosax
+(„https://www.revosax.sachsen.de Fassung vom 13.04.2026 Seite 1 von 1“, Muster
+REVOSAX_FUSS), die Herausgeber-URL, Fassungsdatum und Seitenangabe trägt.
+
+
+Artikel 3
+Belegfall Sächsisches Beamtenversorgungsgesetz
+
+Als Beispieldaten treten die konsolidierte Vorfassung des SächsBeamtVG
+(sampledata/Sachsen/SaechsBeamtVG-alt.txt, kanonischer Klartext, aus der
+archivierten revosax-Volltextfassung abgeleitet) und ein End-to-End-Akzeptanztest
+(EndToEndTest.saechsBeamtVgAcceptance) hinzu: Die Ersetzungen in § 47 (Einmalige
+Unfallentschädigung) und die Neufassung des § 80 Absatz 1 Satz 2 (Allgemeine
+Anpassung) werden vollständig angewandt, ohne Rest.
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 19. Juli 2026,
  zuletzt geändert durch die am 19. Juli 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

@@ -117,6 +117,12 @@ public final class TextBereiniger {
           "^\\s*\\d+\\. Wahlperiode\\s+(?:\\d{2}\\.\\d{2}\\.\\d{4}\\s+)?Drucksache \\d+/\\d+\\s*$");
   private static final Pattern LANDTAG_MARKE = Pattern.compile("^\\s*Bayerischer Landtag\\s*$");
 
+  // Fußzeile der revosax-Volltextausgabe (Sachsen), z.B. „https://www.revosax.sachsen.de
+  // Fassung vom 13.04.2026 Seite 1 von 1“ — Herausgeber-URL, Fassungsdatum und Seitenangabe.
+  private static final Pattern REVOSAX_FUSS =
+      Pattern.compile(
+          "^\\s*https?://\\S+\\s+Fassung vom \\d{1,2}\\.\\d{1,2}\\.\\d{4}\\s+Seite \\d+ von \\d+\\s*$");
+
   /** Konjunktionen, die typischerweise auf einen Suspensivstrich folgen („Wirk- und …“). */
   private static final Pattern KONJUNKTION =
       Pattern.compile("^(und|oder|sowie|bzw\\.|beziehungsweise)\\b.*");
@@ -285,7 +291,8 @@ public final class TextBereiniger {
         || GVBL_KOPF.matcher(zeile).matches()
         || LANDTAG_SEITENKOPF.matcher(zeile).matches()
         || LANDTAG_TITELKOPF.matcher(zeile).matches()
-        || LANDTAG_MARKE.matcher(zeile).matches();
+        || LANDTAG_MARKE.matcher(zeile).matches()
+        || REVOSAX_FUSS.matcher(zeile).matches();
   }
 
   /**

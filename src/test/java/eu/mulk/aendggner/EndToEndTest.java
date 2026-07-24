@@ -310,4 +310,61 @@ class EndToEndTest {
     var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
     assertThat(anwendung.protokoll()).hasSameSizeAs(parseErgebnis.befehle());
   }
+
+  /**
+   * Sächsisches Landesrecht (Akzeptanzfall der sechsten Welle): das paragraphengegliederte
+   * SächsBeamtVG in der Fassung vom 1. Februar 2025 (Klartext, aus der archivierten revosax-
+   * Volltextfassung abgeleitet) + das Gesetz zur Änderung des SächsBeamtVG vom 13. April 2026
+   * (SächsGVBl. S. 134). Anders als Bayern gliedert Sachsen in §; alle fünf Befehle werden erkannt
+   * und angewandt.
+   */
+  @Test
+  void saechsBeamtVgAcceptance() throws Exception {
+    var alt = SAMPLEDATA.resolve("Sachsen/SaechsBeamtVG-alt.txt");
+    var pdf = SAMPLEDATA.resolve("Sachsen/SaechsGVBl-2026-S134_AendG-SaechsBeamtVG_revosax.pdf");
+    assumeTrue(Files.exists(alt) && Files.exists(pdf), "SächsBeamtVG-Beispieldaten fehlen");
+
+    // 1. Stammgesetz laden (§-gegliedert, amtliche Satznummern als Superskripte, arabische
+    //    „Abschnitt N“-Gliederung).
+    var gesetz = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(alt);
+    assertThat(gesetz.jurabk()).isEqualTo("SächsBeamtVG");
+    assertThat(gesetz.langue()).isEqualTo("Sächsisches Beamtenversorgungsgesetz");
+    assertThat(gesetz.norm("§ 47").orElseThrow().absaetze()).hasSize(6);
+    assertThat(gesetz.norm("§ 47").orElseThrow().absaetze().get(0).text()).contains("80 000 Euro");
+    assertThat(gesetz.norm("§ 80").orElseThrow().absaetze()).hasSize(4);
+
+    // 2. Änderungsgesetz extrahieren (Superskript-Erhalt; revosax-Fußzeile entfernt).
+    var text =
+        TextBereiniger.bereinige(
+            new PatchTextExtraktor(eu.mulk.aendggner.aenderung.parse.SuperskriptModus.BEHALTEN)
+                .extrahiere(pdf));
+    assertThat(text).doesNotContain("Fassung vom 30.04.2026");
+
+    // 3. Parsen: nur Artikel 1 ändert das SächsBeamtVG (Artikel 2 ist Inkrafttreten); fünf Befehle,
+    //    keiner unbekannt.
+    var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, null);
+    assertThat(parseErgebnis.artikel()).containsExactly("1");
+    assertThat(parseErgebnis.befehle()).hasSize(5);
+    assertThat(parseErgebnis.befehle()).noneMatch(b -> b instanceof UnbekannterBefehl);
+
+    // 4. Anwenden: alle fünf Befehle greifen, kein Residuum.
+    var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
+    assertThat(anwendung.protokoll())
+        .hasSameSizeAs(parseErgebnis.befehle())
+        .allMatch(a -> a.status() == BefehlAnwender.Status.ANGEWANDT);
+
+    // 5. Stichproben auf der neuen Fassung.
+    var neu = anwendung.neu();
+    var neuer47 = neu.norm("§ 47").orElseThrow();
+    assertThat(neuer47.absaetze().get(0).text()).contains("150 000 Euro").doesNotContain("80 000");
+    var abs2 = neuer47.absaetze().get(1).text();
+    assertThat(abs2).contains("100 000 Euro").contains("40 000 Euro").contains("20 000 Euro");
+    assertThat(neu.norm("§ 80").orElseThrow().absaetze().get(0).text())
+        .contains("§ 47 Absatz 1 und 2");
+
+    // 6. Synopse rendern.
+    var synopse = SynopseBuilder.baue(gesetz, anwendung, parseErgebnis.warnungen(), false);
+    var html = HtmlRenderer.rendere(synopse, "E2E-Test SächsBeamtVG");
+    assertThat(html).contains("§ 47");
+  }
 }

@@ -49,6 +49,13 @@ final class LandesRechtTextParser {
   private static final Pattern GLIEDERUNG =
       Pattern.compile("^([IVXLCDM]+)\\.\\s+(Abschnitt|Teil|Kapitel)\\b\\s*(.*)$");
 
+  // Gliederungs-Überschrift in keyword-erster, arabischer Form („Abschnitt 1“, „Unterabschnitt 2“,
+  // „Teil 3“). Die meisten Länder (z.B. Sachsen) gliedern so; Bayern dagegen römisch mit
+  // nachgestelltem Schlüsselwort („I. Abschnitt“, Muster GLIEDERUNG). Der Titel steht — nach der
+  // kanonischen Aufbereitung — mit doppeltem Leerzeichen auf derselben Zeile.
+  private static final Pattern GLIEDERUNG_ARABISCH =
+      Pattern.compile("^(Buch|Teil|Kapitel|Abschnitt|Unterabschnitt|Titel) (\\d+[a-z]?)\\s+(\\S.*)$");
+
   private static final Pattern UNTER_GLIEDERUNG = Pattern.compile("^(\\d+[a-z]?)\\.\\s+(\\S.*)$");
 
   // Normkopf: „§ N“ bzw. „Art. N“ plus Titel auf derselben Zeile. Das Sigel steht in Gruppe 1, die
@@ -95,6 +102,7 @@ final class LandesRechtTextParser {
     // Rest des Titelblocks (Datum, Fundstellen, Vollzitat) bis zur ersten Struktur überspringen.
     while (i < zeilen.size()
         && !GLIEDERUNG.matcher(zeilen.get(i).strip()).matches()
+        && !GLIEDERUNG_ARABISCH.matcher(zeilen.get(i).strip()).matches()
         && !NORM_KOPF.matcher(zeilen.get(i).strip()).matches()) {
       i++;
     }
@@ -115,11 +123,13 @@ final class LandesRechtTextParser {
       var zeile = i < zeilen.size() ? zeilen.get(i).strip() : null;
 
       var gliederung = zeile != null ? GLIEDERUNG.matcher(zeile) : null;
+      var arabisch = zeile != null ? GLIEDERUNG_ARABISCH.matcher(zeile) : null;
       var unterGliederung = zeile != null ? UNTER_GLIEDERUNG.matcher(zeile) : null;
       var normKopf = zeile != null ? NORM_KOPF.matcher(zeile) : null;
 
       if (zeile == null
           || gliederung.matches()
+          || arabisch.matches()
           || (normKopf.matches() && istNeuerNormKopf(normKopf.group(2), letzteNormNummer))
           || (unterGliederung.matches() && istUnterGliederung(unterGliederung, zeilen, i))) {
         // Laufende Norm abschließen.
@@ -140,6 +150,16 @@ final class LandesRechtTextParser {
               new Gliederung(
                   elternKennzahl,
                   gliederung.group(1) + ". " + gliederung.group(2),
+                  titel.isEmpty() ? null : titel);
+          gliederungen.add(aktuelleGliederung);
+        } else if (arabisch.matches()) {
+          gliederungsZaehler++;
+          elternKennzahl = String.format("%03d", gliederungsZaehler);
+          var titel = arabisch.group(3).strip();
+          aktuelleGliederung =
+              new Gliederung(
+                  elternKennzahl,
+                  arabisch.group(1) + " " + arabisch.group(2),
                   titel.isEmpty() ? null : titel);
           gliederungen.add(aktuelleGliederung);
         } else if (normKopf.matches() && istNeuerNormKopf(normKopf.group(2), letzteNormNummer)) {
