@@ -69,7 +69,10 @@ final class LandesRechtTextParser {
               // dass „Satz“ auch „Satzungen“, „Nummer“ auch „Nummerierung“ trifft.
               + "(?!(?:Absatz|Abs\\.|Satz|Sätze|Nummer|Nr\\.|Buchstabe|Buchst\\."
               + "|und|bis|oder|sowie|des|der|dieses)(?![a-zäöüß]))"
-              + "((?:\\p{Lu}|\\().*)$");
+              // Der Titel endet nicht auf einen Punkt: ein Normkopf trägt eine Überschrift, keinen
+              // ganzen Satz. So wird ein am Zeilenanfang stehender Querverweis-Satz („§ 7 GAPInVeKoSG
+              // findet entsprechend Anwendung.“) nicht fälschlich als Normkopf „§ 7“ gelesen.
+              + "((?:\\p{Lu}|\\().*[^.])\\s*$");
 
   private static final Pattern WEGGEFALLEN_TITEL =
       Pattern.compile("^\\((?:aufgehoben|weggefallen)\\)$");

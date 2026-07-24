@@ -84,7 +84,13 @@ folgt geändert").
   Vorfassung `Sachsen/SaechsBeamtVG-alt.txt` (kanonischer Klartext, Fassung vom 01.02.2025, aus
   der archivierten revosax-Volltextfassung abgeleitet) und End-to-End-Akzeptanztest
   (`EndToEndTest.saechsBeamtVgAcceptance`; fünf Befehle, kein Rest).
-* Für die übrigen erfassten Länder fehlt die konsolidierte Stammfassung noch (siehe oben).
+* *Niedersachsen* ist umgesetzt: `Niedersachsen/NEFG-alt.txt` (seit 2022 unveränderter NEFG, aus
+  dem zweispaltigen Nds. GVBl 2022 Nr. 33) und `EndToEndTest.nefgAcceptance` (fünf von sieben
+  Befehlen angewandt; zwei Einfügeformen — Sachnummer mit Leerzeichen „§ 2 a“, kapitelbezogene
+  §-Block-Einfügung — noch nicht unterstützt, als Grenze dokumentiert).
+* Baden-Württemberg (GBl 2026 Nr. 26): großes Anlage-lastiges Änderungsgesetz (§§ 4–57a + Anlagen
+  1/3b/4b); Stammfassung/Akzeptanztest noch offen.
+* Für Schleswig-Holstein fehlt die konsolidierte Stammfassung noch (siehe oben).
 
 == Noch offen
 

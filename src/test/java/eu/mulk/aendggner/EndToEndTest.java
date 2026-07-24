@@ -367,4 +367,65 @@ class EndToEndTest {
     var html = HtmlRenderer.rendere(synopse, "E2E-Test SächsBeamtVG");
     assertThat(html).contains("§ 47");
   }
+
+  /**
+   * Niedersächsisches Landesrecht (sechste Welle): das Niedersächsische ELER-Fördergesetz (NEFG,
+   * seit 2022 unverändert, Klartext aus dem zweispaltigen Nds. GVBl 2022 Nr. 33 abgeleitet) + das
+   * Gesetz zur Änderung des NEFG vom 28. Januar 2026 (Nds. GVBl 2026 Nr. 10). Prüft den
+   * §-gegliederten Superskript-Modus und die Neufassungsform „erhält folgende Fassung“ auf einem
+   * zweispaltig gesetzten Ausgangsheft.
+   */
+  @Test
+  void nefgAcceptance() throws Exception {
+    var alt = SAMPLEDATA.resolve("Niedersachsen/NEFG-alt.txt");
+    var pdf = SAMPLEDATA.resolve("Niedersachsen/Nds-GVBl-2026-10_ELER-Foerdergesetz-AendG.pdf");
+    assumeTrue(Files.exists(alt) && Files.exists(pdf), "NEFG-Beispieldaten fehlen");
+
+    var gesetz = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(alt);
+    assertThat(gesetz.jurabk()).isEqualTo("NEFG");
+    assertThat(gesetz.langue()).isEqualTo("Niedersächsisches ELER-Fördergesetz");
+    assertThat(gesetz.normen()).hasSize(13);
+    assertThat(gesetz.norm("§ 1").orElseThrow().absaetze()).hasSize(5);
+
+    var text =
+        TextBereiniger.bereinige(
+            new PatchTextExtraktor(eu.mulk.aendggner.aenderung.parse.SuperskriptModus.BEHALTEN)
+                .extrahiere(pdf));
+    // Die laufende GVBl-Fußzeile ist entfernt — sonst hängte sie sich an das Neufassungs-Zitat des
+    // § 1 Abs. 1 und der Befehl würde nicht erkannt.
+    assertThat(text).doesNotContain("Nds. GVBl. 2026 Nr. 10");
+
+    var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, null);
+    assertThat(parseErgebnis.artikel()).containsExactly("1");
+    assertThat(parseErgebnis.befehle()).hasSize(7);
+
+    // Fünf der sieben Befehle werden angewandt. Zwei bleiben als „manuell prüfen“ stehen — zwei
+    // Einfügeformen, die ÄndGgner noch nicht beherrscht (bewusst dokumentierte Grenze, nicht
+    // stillschweigend verworfen):
+    //   * Nr. 3 „Nach § 2 wird der folgende § 2 a eingefügt“ — Einfügung eines §-Blocks mit einer
+    //     durch Leerzeichen getrennten Sachnummer („§ 2 a“).
+    //   * Nr. 5 „In Kapitel 4 wird nach § 12 der folgende neue § 13 angefügt“ — kapitelbezogene
+    //     §-Block-Einfügung.
+    var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(5);
+    var manuellPfade =
+        anwendung.protokoll().stream()
+            .filter(a -> a.status() == BefehlAnwender.Status.MANUELL_PRUEFEN)
+            .map(a -> a.befehl().provenienz().gliederungsPfad())
+            .toList();
+    assertThat(manuellPfade).containsExactlyInAnyOrder("3.", "5.");
+
+    // Stichproben: „erhält folgende Fassung“ (§ 1 Abs. 1, § 2), Angaben-Ersetzung (§ 1 Abs. 5),
+    // Wörter-Einfügung (§ 6 Abs. 1) und §-Umnummerierung (§ 13 → § 14).
+    var neu = anwendung.neu();
+    assertThat(neu.norm("§ 1").orElseThrow().absaetze().get(0).text())
+        .contains("Verordnung (EU) 2021/2116");
+    assertThat(neu.norm("§ 1").orElseThrow().absaetze().get(4).text()).contains("§ 14 Abs. 3");
+    assertThat(neu.norm("§ 2").orElseThrow().titel()).isEqualTo("Registriernummer");
+    assertThat(neu.norm("§ 6").orElseThrow().gesamtText()).contains("8 bis 10");
+    assertThat(neu.norm("§ 14")).isPresent();
+
+    var synopse = SynopseBuilder.baue(gesetz, anwendung, parseErgebnis.warnungen(), false);
+    assertThat(HtmlRenderer.rendere(synopse, "E2E-Test NEFG")).contains("§ 1");
+  }
 }

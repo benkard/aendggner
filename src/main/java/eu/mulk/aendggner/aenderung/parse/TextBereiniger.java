@@ -123,6 +123,14 @@ public final class TextBereiniger {
       Pattern.compile(
           "^\\s*https?://\\S+\\s+Fassung vom \\d{1,2}\\.\\d{1,2}\\.\\d{4}\\s+Seite \\d+ von \\d+\\s*$");
 
+  // Niedersächsisches GVBl: laufende Fußzeile („Nds. GVBl. 2026 Nr. 10 vom 4. Februar 2026  Seite 2“)
+  // und Herausgeberzeile. Die Fußzeile steht zwischen zwei Aufzählungsgliedern und hängte sich sonst
+  // an den vorangehenden Befehl (Neufassungs-Zitat), sodass dessen Satzende-Anker nicht mehr greift.
+  private static final Pattern NDS_GVBL_FUSS =
+      Pattern.compile("^\\s*Nds\\. GVBl\\. \\d{4} Nr\\. \\d+ vom .+? Seite \\d+\\s*$");
+  private static final Pattern NDS_HERAUSGEBER =
+      Pattern.compile("^\\s*Herausgeber: Niedersächsische Staatskanzlei\\s*$");
+
   /** Konjunktionen, die typischerweise auf einen Suspensivstrich folgen („Wirk- und …“). */
   private static final Pattern KONJUNKTION =
       Pattern.compile("^(und|oder|sowie|bzw\\.|beziehungsweise)\\b.*");
@@ -292,7 +300,9 @@ public final class TextBereiniger {
         || LANDTAG_SEITENKOPF.matcher(zeile).matches()
         || LANDTAG_TITELKOPF.matcher(zeile).matches()
         || LANDTAG_MARKE.matcher(zeile).matches()
-        || REVOSAX_FUSS.matcher(zeile).matches();
+        || REVOSAX_FUSS.matcher(zeile).matches()
+        || NDS_GVBL_FUSS.matcher(zeile).matches()
+        || NDS_HERAUSGEBER.matcher(zeile).matches();
   }
 
   /**

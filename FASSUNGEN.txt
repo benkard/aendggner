@@ -67,6 +67,42 @@ Unfallentschädigung) und die Neufassung des § 80 Absatz 1 Satz 2 (Allgemeine
 Anpassung) werden vollständig angewandt, ohne Rest.
 
 
+Artikel 4
+Normköpfe tragen keine ganzen Sätze
+
+Der Landesrecht-Textparser (LandesRechtTextParser) las einen am Zeilenanfang
+stehenden Querverweis-Satz („§ 7 GAPInVeKoSG findet entsprechend Anwendung.“) als
+Normkopf „§ 7“, wodurch die dazwischenliegenden Normen der Monotonie-Prüfung zum
+Opfer fielen. Ein Normkopf trägt jedoch eine Überschrift, keinen ganzen Satz;
+deshalb schließt das Normkopf-Muster nunmehr Titel aus, die auf einen Punkt enden.
+
+
+Artikel 5
+Fußzeile und Herausgeberzeile des Niedersächsischen GVBl
+
+Der Textbereiniger (TextBereiniger.istKolumnentitel) entfernt nunmehr auch die
+laufende Fußzeile des Niedersächsischen Gesetz- und Verordnungsblatts („Nds. GVBl.
+2026 Nr. 10 vom 4. Februar 2026  Seite 2“) und die Herausgeberzeile. Die zwischen
+zwei Aufzählungsgliedern stehende Fußzeile hängte sich sonst an das voranstehende
+Neufassungs-Zitat, sodass dessen Satzende-Anker nicht mehr griff.
+
+
+Artikel 6
+Belegfall Niedersächsisches ELER-Fördergesetz
+
+Als weitere Beispieldaten treten die konsolidierte Fassung des seit 2022
+unveränderten NEFG (sampledata/Niedersachsen/NEFG-alt.txt, kanonischer Klartext,
+aus dem zweispaltig gesetzten Nds. GVBl 2022 Nr. 33 abgeleitet) und ein
+End-to-End-Akzeptanztest (EndToEndTest.nefgAcceptance) hinzu: Von den sieben
+Befehlen werden fünf angewandt — darunter zwei Neufassungen „erhält folgende
+Fassung“ (§ 1 Abs. 1, § 2), die Angaben-Ersetzung in § 1 Abs. 5, die
+Wörter-Einfügung in § 6 Abs. 1 und die Umnummerierung § 13 → § 14. Zwei
+Einfügeformen bleiben als „manuell prüfen“ stehen (bewusst dokumentierte Grenze):
+die Einfügung eines §-Blocks mit durch Leerzeichen getrennter Sachnummer („§ 2 a“)
+sowie die kapitelbezogene §-Block-Einfügung („In Kapitel 4 wird nach § 12 …
+angefügt“).
+
+
 ════════════════════════════════════════════════════════════════════════════════
  Fassung vom 19. Juli 2026,
  zuletzt geändert durch die am 19. Juli 2026 vorgenommenen Änderungen
