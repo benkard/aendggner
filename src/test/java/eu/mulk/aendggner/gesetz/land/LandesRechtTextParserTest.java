@@ -161,4 +161,36 @@ class LandesRechtTextParserTest {
     assertThat(gesetz.norm("§ 3").orElseThrow().weggefallen()).isTrue();
     assertThat(gesetz.gliederungen()).extracting(Gliederung::anzeigeText).containsExactly("I. Teil — Grundlagen der Gemeindeverfassung");
   }
+
+  @Test
+  void trenntKurztitelUndAbkuerzungImKlammerzusatz() {
+    // Landesgesetze führen im Klammerzusatz oft beides („Telemedienzuständigkeitsgesetz –
+    // TMZ-Gesetz“); das Änderungsgesetz zitiert den Kurztitel, nicht die Abkürzung.
+    var gesetz =
+        LandesRechtTextParser.parse(
+            """
+            Gesetz zur Regelung der Zuständigkeit für die Überwachung von Telemedien
+            (Telemedienzuständigkeitsgesetz – TMZ-Gesetz)
+            Vom 29. März 2007
+            § 1  Aufsicht bei Telemedien
+            (1) Die Landesanstalt für Medien ist zuständig.
+            """);
+
+    assertThat(gesetz.jurabk()).isEqualTo("TMZ-Gesetz");
+    assertThat(gesetz.kurzue()).isEqualTo("Telemedienzuständigkeitsgesetz");
+
+    // Ohne Trenner bleibt der Klammerzusatz die Abkürzung; ein nachgestellter Gedankenstrich
+    // („Gemeindeordnung – GO –“) gehört nicht zur Abkürzung.
+    var ohneKurztitel =
+        LandesRechtTextParser.parse(
+            "Gemeindeordnung für Schleswig-Holstein\n(GO)\n§ 1  Wesen\n(1) Text.\n");
+    assertThat(ohneKurztitel.jurabk()).isEqualTo("GO");
+    assertThat(ohneKurztitel.kurzue()).isNull();
+
+    var mitGedankenstrich =
+        LandesRechtTextParser.parse(
+            "Gemeindeordnung für Schleswig-Holstein\n(Gemeindeordnung – GO –)\n§ 1  Wesen\n(1) Text.\n");
+    assertThat(mitGedankenstrich.jurabk()).isEqualTo("GO");
+    assertThat(mitGedankenstrich.kurzue()).isEqualTo("Gemeindeordnung");
+  }
 }

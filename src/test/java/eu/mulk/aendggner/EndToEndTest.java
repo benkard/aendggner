@@ -482,4 +482,68 @@ class EndToEndTest {
     assertThat(kro.befehle()).hasSize(1);
     assertThat(kro.befehle().get(0).stelle().anzeigeText()).isEqualTo("§ 29a Absatz 1");
   }
+
+  /**
+   * Nordrhein-Westfalen: Artikel 3 des 22. Rundfunkänderungsgesetzes (GV. NRW. 2026 S. 202) ändert
+   * das Telemedienzuständigkeitsgesetz. Voller Akzeptanztest — alle vier Befehle werden angewandt;
+   * das Ergebnis stimmt mit der amtlichen Fassung vom 1. April 2026 (recht.nrw.de) überein.
+   */
+  @Test
+  void tmzGesetzAcceptance() throws Exception {
+    var alt = SAMPLEDATA.resolve("NRW/TMZ-Gesetz-alt.txt");
+    var pdf = SAMPLEDATA.resolve("NRW/GV-NRW-2026-S202_22-Rundfunkaenderungsgesetz.pdf");
+    assumeTrue(Files.exists(alt) && Files.exists(pdf), "TMZ-Gesetz-Beispieldaten fehlen");
+
+    var gesetz = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(alt);
+    // Der Klammerzusatz führt Kurztitel und Abkürzung nebeneinander; das Änderungsgesetz zitiert
+    // den Kurztitel („Das Telemedienzuständigkeitsgesetz vom 29. März 2007 …“).
+    assertThat(gesetz.jurabk()).isEqualTo("TMZ-Gesetz");
+    assertThat(gesetz.kurzue()).isEqualTo("Telemedienzuständigkeitsgesetz");
+    assertThat(gesetz.normen()).hasSize(3);
+    assertThat(gesetz.norm("§ 1").orElseThrow().absaetze()).hasSize(3);
+
+    var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(pdf));
+    var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, null);
+    // Das Heft ändert vier Gesetze; nur Artikel 3 trifft das TMZ-Gesetz.
+    assertThat(parseErgebnis.artikel()).containsExactly("3");
+    assertThat(parseErgebnis.befehle()).hasSize(4);
+    assertThat(parseErgebnis.befehle()).noneMatch(b -> b instanceof UnbekannterBefehl);
+
+    // Im amtlichen Satz fehlt bei Artikel 2 Nr. 11 das schließende Anführungszeichen. Ohne die
+    // Artikel-Grenze im ZitatExtraktor verschlänge dieses Zitat die Artikel 3 bis 5.
+    assertThat(parseErgebnis.warnungen())
+        .anyMatch(w -> w.startsWith("Zitat vor einer Artikel-Überschrift nicht geschlossen"));
+
+    var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(4);
+    assertThat(anwendung.protokoll())
+        .noneMatch(a -> a.status() == BefehlAnwender.Status.MANUELL_PRUEFEN);
+
+    // Abgleich mit der amtlichen Fassung vom 01.04.2026:
+    var neu = anwendung.neu();
+    // 1. Die Gesetzesüberschrift ist neu gefasst.
+    assertThat(neu.langue())
+        .startsWith("Gesetz zur Regelung der Zuständigkeit für die Überwachung von Telemedien im")
+        .contains("Anwendungsbereich des Digitale-Dienste-Gesetzes");
+    // 2. § 1 Absatz 2 nennt nun die Verordnung (EU) 2016/679 statt der Datenschutz-Grundverordnung
+    //    und das Telekommunikation-Digitale-Dienste-Datenschutz-Gesetz.
+    var absatz2 = neu.norm("§ 1").orElseThrow().absaetze().get(1).text();
+    assertThat(absatz2)
+        .contains("Verordnung (EU) 2016/679")
+        .contains("Telekommunikation-Digitale-Dienste-Datenschutz-Gesetzes vom 23. Juni 2021 (BGBl."
+            + " I S. 1982; 2022 I S. 1045)")
+        .doesNotContain("WDR-Rundfunkdatenschutzbeauftragte");
+    // 3./4. § 2: Fundstellen-Ersetzung im Satzteil vor Nummer 1 und Neufassung der Nummern 1 und 2.
+    var paragraph2 = neu.norm("§ 2").orElseThrow().gesamtText();
+    assertThat(paragraph2)
+        .contains("Artikel 4 des Gesetzes vom 17. Juli 2025 (BGBl. 2025 I Nr. 163)")
+        .contains("§ 33 Absatz 1 und 2 Nummer 1 und 2 des Digitale-Dienste-Gesetzes")
+        .doesNotContain("§ 11 Absatz 1 und 2 des Telemediengesetzes");
+    // § 3 bleibt unberührt.
+    assertThat(neu.norm("§ 3").orElseThrow().gesamtText())
+        .isEqualTo(gesetz.norm("§ 3").orElseThrow().gesamtText());
+
+    var synopse = SynopseBuilder.baue(gesetz, anwendung, parseErgebnis.warnungen(), false);
+    assertThat(HtmlRenderer.rendere(synopse, "E2E-Test TMZ-Gesetz")).contains("§ 2");
+  }
 }

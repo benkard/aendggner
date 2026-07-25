@@ -91,7 +91,23 @@ public final class ZitatExtraktor {
           aktuellesZitat.append(c);
         }
       } else if (tiefe > 0) {
-        aktuellesZitat.append(c);
+        if (c == '\n' && beginntArtikelUeberschrift(text, i + 1)) {
+          // Ein Änderungsgesetz zitiert nie über eine Artikel-Überschrift hinweg: Hier fehlt im
+          // amtlichen Satz ein schließendes Anführungszeichen (kommt vor, z.B. GV. NRW. 2026
+          // S. 202 Artikel 2 Nr. 11). Ohne diese Grenze verschlänge das offene Zitat alle
+          // folgenden Artikel und der Parser fände überhaupt keine Änderungsbefehle mehr.
+          warnungen.add(
+              "Zitat vor einer Artikel-Überschrift nicht geschlossen: …"
+                  + kontextAuszug(text, i)
+                  + "… — dort geschlossen.");
+          ausgabe.append('«').append(zitate.size()).append('»');
+          zitate.add(aktuellesZitat.toString());
+          aktuellesZitat.setLength(0);
+          tiefe = 0;
+          ausgabe.append(c);
+        } else {
+          aktuellesZitat.append(c);
+        }
       } else {
         ausgabe.append(c);
       }
@@ -129,6 +145,22 @@ public final class ZitatExtraktor {
     }
     var fenster = text.substring(i + 1, Math.min(text.length(), i + 10));
     return FORTFUEHRUNGS_MARKER.matcher(fenster).find();
+  }
+
+  /**
+   * Strukturgrenze eines Änderungsgesetzes: eine Zeile, die nur aus „Artikel N“ besteht. Bayerische
+   * Stammgesetze zitieren ihre Normköpfe als „Art. N“, nicht als „Artikel N“ — zitierter Inhalt
+   * läuft hier also nicht versehentlich auf.
+   */
+  private static final Pattern ARTIKEL_GRENZE = Pattern.compile("^Artikel[ \\t]+\\d+[a-z]?[ \\t]*$");
+
+  /** Wahr, wenn die bei {@code von} beginnende Zeile eine Artikel-Überschrift ist. */
+  private static boolean beginntArtikelUeberschrift(String text, int von) {
+    if (von >= text.length()) {
+      return false;
+    }
+    int ende = text.indexOf('\n', von);
+    return ARTIKEL_GRENZE.matcher(text.substring(von, ende < 0 ? text.length() : ende)).matches();
   }
 
   private static String kontextAuszug(String text, int position) {

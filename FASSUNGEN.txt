@@ -25,14 +25,24 @@ Vorbemerkung zur Führung dieses Verzeichnisses
  zuletzt geändert durch die am 25. Juli 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════
 
-Die sechste Ertüchtigungswelle wird um den schleswig-holsteinischen Belegfall
-ergänzt: das Gesetz zur Änderung des Gesetzes zur Änderung kommunalrechtlicher
-Vorschriften vom 26. März 2026 (GVOBl. Schl.-H. 2026/27). Es führt drei bislang
-unbekannte Eigenheiten ein — den laufenden Seitenkopf des GVOBl. Schleswig-
-Holstein, hochgestellte Fußnotenmarker an den Artikel-Überschriften und einen
-Flattersatz, in dem die geometrische Randerkennung versagt. Ein voller
-Akzeptanztest bleibt vorerst aus, weil die konsolidierte Gemeindeordnung aus
-freien Quellen nicht in der maßgeblichen Fassung zu beschaffen ist.
+Der Abschluss der sechsten und der Beginn der siebten Ertüchtigungswelle: Zwei
+weitere Belegfälle treten hinzu.
+
+Schleswig-Holstein (Artikel 1 bis 4): das Gesetz zur Änderung des Gesetzes zur
+Änderung kommunalrechtlicher Vorschriften vom 26. März 2026 (GVOBl. Schl.-H.
+2026/27). Es führt drei bislang unbekannte Eigenheiten ein — den laufenden Seiten-
+kopf des GVOBl. Schleswig-Holstein, hochgestellte Fußnotenmarker an den Artikel-
+Überschriften und einen Flattersatz, in dem die geometrische Randerkennung
+versagt. Ein voller Akzeptanztest bleibt vorerst aus, weil die konsolidierte
+Gemeindeordnung aus freien Quellen nicht in der maßgeblichen Fassung zu
+beschaffen ist.
+
+Nordrhein-Westfalen (Artikel 5 bis 7): Artikel 3 des 22. Rundfunkänderungsgesetzes
+vom 24. März 2026 (GV. NRW. S. 202) ändert das Telemedienzuständigkeitsgesetz.
+Alle vier Befehle werden erkannt und angewandt; das Ergebnis ist gegen die
+amtliche Fassung vom 1. April 2026 abgeglichen. Dazu werden die Trennung von
+Kurztitel und Abkürzung im Klammerzusatz und eine Strukturgrenze für unbalancierte
+Anführungszeichen nötig.
 
 
 Artikel 1
@@ -84,6 +94,46 @@ gesetze-rechtsprechung.sh.juris.de gibt seine Dokumentinhalte nur über eine
 anmeldepflichtige Schnittstelle aus, und die letzte frei archivierte Gesamt-
 ausgabe der Gemeindeordnung (14. November 2022) kennt den geänderten § 34a noch
 nicht. Die Fundstelle ist in sampledata/Landesrecht-Beispiele.adoc vermerkt.
+
+
+Artikel 5
+Kurztitel und Abkürzung im Klammerzusatz
+
+Der Landesrecht-Textparser (LandesRechtTextParser) las den Klammerzusatz der
+Titelzeile stets als Abkürzung. Landesgesetze führen dort jedoch häufig Kurztitel
+und Abkürzung nebeneinander („(Telemedienzuständigkeitsgesetz – TMZ-Gesetz)“,
+„(Gemeindeordnung – GO –)“), und das Änderungsgesetz zitiert das Stammgesetz mit
+dem Kurztitel, nicht mit der Abkürzung; die Artikelauswahl
+(AenderungsgesetzParser.betrifft) griff deshalb nicht. Der Parser trennt den
+Klammerzusatz nunmehr am Gedankenstrich (Muster KURZTITEL_TRENNER) und führt den
+Kurztitel als Kurzüberschrift des Gesetzes.
+
+
+Artikel 6
+Strukturgrenze bei unbalancierten Anführungszeichen
+
+Der Zitatextraktor (ZitatExtraktor) schlug den gesamten Folgetext einem Zitat zu,
+wenn im amtlichen Satz ein schließendes Anführungszeichen fehlte. Im 22. Rundfunk-
+änderungsgesetz (Artikel 2 Nr. 11) ist das der Fall; das offene Zitat verschlang
+dort die Artikel 3 bis 5, sodass überhaupt kein Änderungsbefehl mehr gefunden
+wurde. Ein Änderungsgesetz zitiert jedoch nie über eine Artikel-Überschrift
+hinweg. Der Extraktor schließt ein offenes Zitat deshalb vor einer Zeile, die nur
+aus „Artikel N“ besteht, und meldet dies als Warnung. Zitierte Paragraphen bleiben
+unberührt, weil das bayerische Landesrecht seine Normköpfe als „Art. N“ führt.
+
+
+Artikel 7
+Belegfall Telemedienzuständigkeitsgesetz
+
+Als weitere Beispieldaten treten die konsolidierte Vorfassung des TMZ-Gesetzes
+(sampledata/NRW/TMZ-Gesetz-alt.txt, kanonischer Klartext, Fassung vom 27. April
+2022 aus der Fassungshistorie von recht.nrw.de) und ein End-to-End-Akzeptanztest
+(EndToEndTest.tmzGesetzAcceptance) hinzu: Von den vier Befehlen des Artikels 3
+werden alle angewandt — die Neufassung der Gesetzesüberschrift, die Neufassung des
+§ 1 Absatz 2, die Fundstellen-Ersetzung im Satzteil vor Nummer 1 des § 2 und die
+Neufassung der Nummern 1 und 2 des § 2. Die Artikel 1, 2 und 4 desselben Heftes
+(WDR-Gesetz, Landesmediengesetz, Siebzehnter Rundfunkänderungsstaatsvertrag
+Ausführungsgesetz) werden zutreffend nicht gewählt.
 
 
 ════════════════════════════════════════════════════════════════════════════════

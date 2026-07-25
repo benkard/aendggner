@@ -41,6 +41,9 @@ final class LandesRechtTextParser {
   // geprüft, sodass spätere Fundstellen-Klammern („(BayRS V S. 595)“) nicht getroffen werden.
   private static final Pattern JURABK_ZEILE = Pattern.compile("^\\(([^()]+)\\)$");
 
+  /** Trennt im Klammerzusatz den Kurztitel von der Abkürzung („Kurztitel – Abk“). */
+  private static final Pattern KURZTITEL_TRENNER = Pattern.compile("\\s+[–—]\\s+");
+
   // Kopf der Druckfassung („BayJG: Bayerisches Jagdgesetz … (Art. 1–64)“), ggf. mit
   // umbrochenem Rest („1–64)“) auf der Folgezeile.
   private static final Pattern DRUCKKOPF = Pattern.compile("^\\S{1,20}: .+$");
@@ -95,10 +98,20 @@ final class LandesRechtTextParser {
     }
     var langue = zeilen.get(i++).strip();
     String jurabk = null;
+    String kurzue = null;
     if (i < zeilen.size()) {
       var m = JURABK_ZEILE.matcher(zeilen.get(i).strip());
       if (m.matches()) {
-        jurabk = m.group(1);
+        // Landesgesetze führen im Klammerzusatz häufig Kurztitel und Abkürzung nebeneinander
+        // („Telemedienzuständigkeitsgesetz – TMZ-Gesetz“, „Gemeindeordnung – GO –“). Das
+        // Änderungsgesetz zitiert dann den Kurztitel, nicht die Abkürzung.
+        var teile = KURZTITEL_TRENNER.split(m.group(1).strip(), 2);
+        if (teile.length == 2) {
+          kurzue = teile[0].strip();
+          jurabk = teile[1].strip().replaceAll("\\s*[–—-]\\s*$", "");
+        } else {
+          jurabk = m.group(1).strip();
+        }
         i++;
       }
     }
@@ -190,7 +203,7 @@ final class LandesRechtTextParser {
           "Kein „§ N“- oder „Art. N“-Normkopf gefunden — ist das eine konsolidierte Fassung im"
               + " kanonischen Klartextformat?");
     }
-    return new Gesetz(jurabk != null ? jurabk : langue, langue, null, normen, gliederungen);
+    return new Gesetz(jurabk != null ? jurabk : langue, langue, kurzue, normen, gliederungen);
   }
 
   /** Überspringt die Kopfzeile der Druckfassung samt umbrochenem Rest. */

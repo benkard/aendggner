@@ -61,6 +61,39 @@ class ZitatExtraktorTest {
   }
 
   @Test
+  void schliesstOffenesZitatVorArtikelUeberschrift() {
+    // Fehlt im amtlichen Satz das schließende Anführungszeichen (GV. NRW. 2026 S. 202 Artikel 2
+    // Nr. 11), verschlänge das Zitat sonst alle folgenden Artikel und der Parser fände keinen
+    // einzigen Änderungsbefehl mehr.
+    var ergebnis =
+        ZitatExtraktor.extrahiere(
+            "12. Dem § 128 wird folgender Absatz angefügt:\n"
+                + "„(3) § 14 gilt nicht.\n"
+                + "Artikel 3\n"
+                + "§ 1 wird wie folgt gefasst: „(1) Neu.“");
+
+    assertThat(ergebnis.text())
+        .isEqualTo(
+            "12. Dem § 128 wird folgender Absatz angefügt:\n«0»\nArtikel 3\n"
+                + "§ 1 wird wie folgt gefasst: «1»");
+    assertThat(ergebnis.zitat(0)).isEqualTo("(3) § 14 gilt nicht.");
+    assertThat(ergebnis.zitat(1)).isEqualTo("(1) Neu.");
+    assertThat(ergebnis.warnungen()).hasSize(1);
+    assertThat(ergebnis.warnungen().get(0)).startsWith("Zitat vor einer Artikel-Überschrift");
+  }
+
+  @Test
+  void zitiertUeberParagraphenUeberschriftenHinweg() {
+    // Nur „Artikel N“ ist Strukturgrenze: Ein zitierter Paragraph („§ 19“ + Überschrift auf der
+    // Folgezeile) gehört vollständig ins Zitat.
+    var ergebnis = ZitatExtraktor.extrahiere("Es wird gefasst: „§ 19\nAußerkrafttreten\nText.“");
+
+    assertThat(ergebnis.text()).isEqualTo("Es wird gefasst: «0»");
+    assertThat(ergebnis.zitat(0)).isEqualTo("§ 19\nAußerkrafttreten\nText.");
+    assertThat(ergebnis.warnungen()).isEmpty();
+  }
+
+  @Test
   void stelltZitateWiederHer() {
     var original = "Das Wort „alt“ wird durch das Wort „neu“ ersetzt.";
     var ergebnis = ZitatExtraktor.extrahiere(original);

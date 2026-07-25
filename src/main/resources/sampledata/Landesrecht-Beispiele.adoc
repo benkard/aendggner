@@ -61,7 +61,10 @@ folgende Fassung"). Saubere einspaltige PDFs über die stabile API `verkuendung-
 |`NRW/GV-NRW-2026-S202_22-Rundfunkaenderungsgesetz.pdf` — GV. NRW. 2026 Nr. 7 vom 31.03.2026,
 S. 202 (22. Rundfunkänderungsgesetz)
 |Umfangreiches Mehrgesetz-Artikelgesetz (17 S.); „Die Inhaltsübersicht wird wie folgt
-geändert", „§ … (weggefallen)". Bereitgestellt aus dem amtlichen recht.nrw.de-PDF.
+geändert", „§ … (weggefallen)". Bereitgestellt aus dem amtlichen recht.nrw.de-PDF. *Unbalancierte
+Anführungszeichen* im amtlichen Satz (Artikel 2 Nr. 7 b und Nr. 11). Konsolidierte Fassungen sind
+über `recht.nrw.de/lrgv/gesetz/<TTMMJJJJ>-<Kurztitel-Slug>` frei und serverseitig gerendert
+abrufbar; der Datumspräfix ist der Gültigkeitsbeginn der jeweiligen Fassung.
 
 |Sachsen
 |`Sachsen/SaechsGVBl-2026-S134_AendG-SaechsBeamtVG_revosax.pdf` — SächsGVBl. S. 134
@@ -92,6 +95,11 @@ folgt geändert").
   (`EndToEndTest.kommunalrechtAendGSchleswigHolstein`): Artikel 1 trifft die Gemeindeordnung,
   Artikel 2 die Kreisordnung, je ein Neufassungsbefehl, kein unbekannter Befehl. Ein voller
   Akzeptanztest ist *nicht* möglich — siehe „Noch offen“.
+* *Nordrhein-Westfalen* ist umgesetzt: `NRW/TMZ-Gesetz-alt.txt` (Telemedienzuständigkeitsgesetz in
+  der Fassung vom 27.04.2022, aus der Fassungshistorie von recht.nrw.de) und
+  `EndToEndTest.tmzGesetzAcceptance` (Artikel 3 des 22. Rundfunkänderungsgesetzes; alle vier
+  Befehle angewandt, kein Rest). Das Ergebnis ist gegen die amtliche Fassung vom 01.04.2026
+  abgeglichen. Die übrigen Artikel (WDR-Gesetz, Landesmediengesetz, 17. RÄStV-AusfG) bleiben offen.
 * Baden-Württemberg (GBl 2026 Nr. 26): großes Anlage-lastiges Änderungsgesetz (§§ 4–57a + Anlagen
   1/3b/4b); Stammfassung/Akzeptanztest noch offen.
 
