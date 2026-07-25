@@ -190,6 +190,13 @@ public final class TextBereiniger {
   private static final Pattern INVERTIERTES_LISTEN_ZITAT =
       Pattern.compile("(?m)^(\\s*)(\\d+[a-z]?\\.|[a-z]{1,3}\\))[ \\t]+„[ \\t]+");
 
+  // Sachnummern mit Leerzeichen: Niedersachsen zitiert eingeschobene Paragraphen als „§ 2 a“, der
+  // Rest der Rechtssprache als „§ 2a“. Auf die kanonische Form ziehen, damit Stellen- und
+  // Ebenenparser greifen. Ein folgendes „)“ oder „.“ schließt Aufzählungsmarker des
+  // Änderungsgesetzes aus („… nach § 8 c) In Absatz 2 …“).
+  private static final Pattern SACHNUMMER_MIT_LEERZEICHEN =
+      Pattern.compile("(§|Art\\.) (\\d+) ([a-z])(?![a-zäöüß).])");
+
   private TextBereiniger() {}
 
   public static String bereinige(String rohText) {
@@ -206,7 +213,8 @@ public final class TextBereiniger {
     var verbunden = verbindeUmbrueche(zeilen);
     // Falsch-positive markerlose Zusammenzüge („durch“ + „die“ → „durchdie“) reparieren — die
     // Befehlsvokabeln sind nie Kompositum-Bestandteile.
-    return loeseArtikelFussnoten(trenneVerklebteZitatgrenzen(reflowUndStrippe(verbunden)));
+    var ergebnis = loeseArtikelFussnoten(trenneVerklebteZitatgrenzen(reflowUndStrippe(verbunden)));
+    return SACHNUMMER_MIT_LEERZEICHEN.matcher(ergebnis).replaceAll("$1 $2$3");
   }
 
   /**

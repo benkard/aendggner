@@ -1134,4 +1134,37 @@ class BefehlAnwenderTest {
     assertThat(absatzText(ergebnis.neu(), "Art. 2", 0))
         .isEqualTo("Erprobung ist die Prüfung der Tauglichkeit; sie schließt mit einem Bericht.");
   }
+
+  @Test
+  void ziehtUmnummerierungVorDieNeubesetzendeEinfuegung() {
+    // „Nach § 2 wird der folgende neue § 3 eingefügt“ + „Der bisherige § 3 wird § 4“: In der
+    // Textreihenfolge angewandt kollidierten beide Befehle auf „§ 3“. Die Umnummerierung
+    // beschreibt den Stand vor der Änderung und geht der Neubesetzung sachlich voraus.
+    var einfuegung =
+        new StrukturEinfuegung(
+            stelle(new Stelle.Paragraph("2")),
+            false,
+            Ebene.PARAGRAPH,
+            "3",
+            "§ 3 Zwischennorm (1) Der neue Text.",
+            PROV);
+    var umnummerierung =
+        new Umnummerierung(
+            stelle(new Stelle.Paragraph("3")),
+            stelle(new Stelle.Paragraph("4")),
+            new Provenienz("1", "2.", "(Test)"));
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(einfuegung, umnummerierung));
+
+    assertThat(ergebnis.anzahlAngewandt()).isEqualTo(2);
+    // Protokolliert wird weiterhin in der Reihenfolge des Änderungsgesetzes.
+    assertThat(ergebnis.protokoll())
+        .extracting(a -> a.befehl().provenienz().gliederungsPfad())
+        .containsExactly("1.", "2.");
+    assertThat(ergebnis.neu().normen())
+        .extracting(n -> n.enbez())
+        .containsExactly("§ 1", "§ 2", "§ 3", "§ 4");
+    assertThat(ergebnis.neu().norm("§ 3").orElseThrow().titel()).isEqualTo("Zwischennorm");
+    assertThat(ergebnis.neu().norm("§ 4").orElseThrow().titel()).isEqualTo("Schlussvorschriften");
+  }
 }

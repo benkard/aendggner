@@ -200,7 +200,19 @@ final class BefehlErkenner {
 
   private static final Pattern STRUKTUR_EINFUEGUNG =
       Pattern.compile(
-          "^(Nach|Vor) (.+?) (?:wird|werden) (?:der |die |das )?folgende[nrs]? (.+?) "
+          "^(Nach|Vor) (.+?) (?:wird|werden) (?:der |die |das )?folgende[nrs]? (?:neue[nrs]? )?(.+?) "
+              + "(?:ein|an)gefügt: "
+              + ENUM
+              + Z
+              + "\\.?$");
+
+  // „In Kapitel 4 wird nach § 12 der folgende neue § 13 angefügt: „…““ — gliederungsbezogene
+  // Einfügung. Die Gliederungsangabe nennt nur den Abschnitt, in dem die neue Einheit landet;
+  // maßgeblich für die Position ist der Anker („nach § 12“), der ohnehin eindeutig ist.
+  private static final Pattern STRUKTUR_EINFUEGUNG_IN_GLIEDERUNG =
+      Pattern.compile(
+          "^In (?:Buch|Teil|Kapitel|Abschnitt|Unterabschnitt|Titel) \\S+ (?:wird|werden) "
+              + "(?i:(nach|vor)) (.+?) (?:der |die |das )?folgende[nrs]? (?:neue[nrs]? )?(.+?) "
               + "(?:ein|an)gefügt: "
               + ENUM
               + Z
@@ -897,8 +909,9 @@ final class BefehlErkenner {
               provenienz));
     }
 
-    if ((m = STRUKTUR_EINFUEGUNG.matcher(text)).matches()) {
-      var vorher = m.group(1).equals("Vor");
+    if ((m = STRUKTUR_EINFUEGUNG.matcher(text)).matches()
+        || (m = STRUKTUR_EINFUEGUNG_IN_GLIEDERUNG.matcher(text)).matches()) {
+      var vorher = m.group(1).equalsIgnoreCase("vor");
       var stelle = StellenParser.parse(m.group(2));
       if (stelle.isEmpty()) {
         return Optional.empty();

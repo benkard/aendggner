@@ -224,6 +224,18 @@ class TextBereinigerTest {
   }
 
   @Test
+  void ziehtSachnummernMitLeerzeichenZusammen() {
+    // Niedersachsen zitiert eingeschobene Paragraphen als „§ 2 a“; kanonisch ist „§ 2a“.
+    assertThat(TextBereiniger.bereinige("Nach § 2 wird der folgende § 2 a eingefügt:"))
+        .isEqualTo("Nach § 2 wird der folgende § 2a eingefügt:");
+    assertThat(TextBereiniger.bereinige("Art. 28 a Abs. 1")).isEqualTo("Art. 28a Abs. 1");
+    // Aufzählungsmarker des Änderungsgesetzes bleiben unberührt, ebenso echte Folgewörter.
+    assertThat(TextBereiniger.bereinige("Nach § 8 c) In Absatz 2"))
+        .isEqualTo("Nach § 8 c) In Absatz 2");
+    assertThat(TextBereiniger.bereinige("§ 5 des Gesetzes")).isEqualTo("§ 5 des Gesetzes");
+  }
+
+  @Test
   void entferntSeitenkopfDesGvoblSchleswigHolstein() {
     var roh =
         """

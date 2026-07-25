@@ -126,6 +126,27 @@ class BefehlErkennerTest {
   }
 
   @Test
+  void erkenntGliederungsbezogeneParagraphEinfuegung() {
+    // Echter Befehl aus Art. 1 Nr. 5 des Änderungsgesetzes zum NEFG (Nds. GVBl. 2026 Nr. 10). Die
+    // Kapitelangabe nennt nur den Abschnitt, in dem der neue Paragraph landet; maßgeblich für die
+    // Position ist der Anker „nach § 12“.
+    var befehl =
+        erkenne(
+            "In Kapitel 4 wird nach § 12 der folgende neue § 13 angefügt: „§ 13 Entbehrlichkeit"
+                + " von Vergabeverfahren im Unterschwellenbereich Das Gesetz ist nicht"
+                + " anzuwenden.“",
+            Stelle.LEER);
+
+    assertThat(befehl).containsInstanceOf(StrukturEinfuegung.class);
+    var einfuegung = (StrukturEinfuegung) befehl.orElseThrow();
+    assertThat(einfuegung.stelle().anzeigeText()).isEqualTo("§ 12");
+    assertThat(einfuegung.vorher()).isFalse();
+    assertThat(einfuegung.ebene()).isEqualTo(Ebene.PARAGRAPH);
+    assertThat(einfuegung.bezeichnung()).isEqualTo("13");
+    assertThat(einfuegung.text()).startsWith("§ 13 Entbehrlichkeit");
+  }
+
+  @Test
   void erkenntSatzEinfuegung() {
     var befehl =
         erkenne(

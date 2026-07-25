@@ -402,21 +402,18 @@ class EndToEndTest {
     assertThat(parseErgebnis.artikel()).containsExactly("1");
     assertThat(parseErgebnis.befehle()).hasSize(7);
 
-    // Fünf der sieben Befehle werden angewandt. Zwei bleiben als „manuell prüfen“ stehen — zwei
-    // Einfügeformen, die ÄndGgner noch nicht beherrscht (bewusst dokumentierte Grenze, nicht
-    // stillschweigend verworfen):
-    //   * Nr. 3 „Nach § 2 wird der folgende § 2 a eingefügt“ — Einfügung eines §-Blocks mit einer
-    //     durch Leerzeichen getrennten Sachnummer („§ 2 a“).
-    //   * Nr. 5 „In Kapitel 4 wird nach § 12 der folgende neue § 13 angefügt“ — kapitelbezogene
-    //     §-Block-Einfügung.
+    // Alle sieben Befehle werden angewandt, darunter die beiden niedersächsischen Einfügeformen:
+    //   * Nr. 3 „Nach § 2 wird der folgende § 2 a eingefügt“ — Sachnummer mit Leerzeichen.
+    //   * Nr. 5 „In Kapitel 4 wird nach § 12 der folgende neue § 13 angefügt“ — gliederungs-
+    //     bezogene Einfügung, deren Zielbezeichnung erst der nachfolgende Befehl Nr. 6 freimacht.
     var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
-    assertThat(anwendung.anzahlAngewandt()).isEqualTo(5);
-    var manuellPfade =
-        anwendung.protokoll().stream()
-            .filter(a -> a.status() == BefehlAnwender.Status.MANUELL_PRUEFEN)
-            .map(a -> a.befehl().provenienz().gliederungsPfad())
-            .toList();
-    assertThat(manuellPfade).containsExactlyInAnyOrder("3.", "5.");
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(7);
+    assertThat(anwendung.protokoll())
+        .noneMatch(a -> a.status() == BefehlAnwender.Status.MANUELL_PRUEFEN);
+    // Protokolliert wird trotz vorgezogener Umnummerierung in der Reihenfolge des Gesetzes.
+    assertThat(anwendung.protokoll())
+        .extracting(a -> a.befehl().provenienz().gliederungsPfad())
+        .containsExactly("1. a)", "1. b)", "2.", "3.", "4.", "5.", "6.");
 
     // Stichproben: „erhält folgende Fassung“ (§ 1 Abs. 1, § 2), Angaben-Ersetzung (§ 1 Abs. 5),
     // Wörter-Einfügung (§ 6 Abs. 1) und §-Umnummerierung (§ 13 → § 14).
@@ -426,7 +423,18 @@ class EndToEndTest {
     assertThat(neu.norm("§ 1").orElseThrow().absaetze().get(4).text()).contains("§ 14 Abs. 3");
     assertThat(neu.norm("§ 2").orElseThrow().titel()).isEqualTo("Registriernummer");
     assertThat(neu.norm("§ 6").orElseThrow().gesamtText()).contains("8 bis 10");
-    assertThat(neu.norm("§ 14")).isPresent();
+
+    // Die beiden neuen Paragraphen stehen an der richtigen Stelle, der bisherige § 13 ist § 14.
+    assertThat(neu.normen()).hasSize(15);
+    assertThat(neu.normen())
+        .extracting(n -> n.enbez())
+        .containsSubsequence("§ 2", "§ 2a", "§ 3")
+        .containsSubsequence("§ 12", "§ 13", "§ 14");
+    assertThat(neu.norm("§ 2a").orElseThrow().titel())
+        .isEqualTo("Anwendung bundesrechtlicher Vorschriften");
+    assertThat(neu.norm("§ 13").orElseThrow().titel())
+        .isEqualTo("Entbehrlichkeit von Vergabeverfahren im Unterschwellenbereich");
+    assertThat(neu.norm("§ 14").orElseThrow().titel()).isEqualTo("Verordnungsermächtigungen");
 
     var synopse = SynopseBuilder.baue(gesetz, anwendung, parseErgebnis.warnungen(), false);
     assertThat(HtmlRenderer.rendere(synopse, "E2E-Test NEFG")).contains("§ 1");

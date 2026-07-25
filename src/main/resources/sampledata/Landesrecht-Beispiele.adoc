@@ -88,9 +88,9 @@ folgt geändert").
   der archivierten revosax-Volltextfassung abgeleitet) und End-to-End-Akzeptanztest
   (`EndToEndTest.saechsBeamtVgAcceptance`; fünf Befehle, kein Rest).
 * *Niedersachsen* ist umgesetzt: `Niedersachsen/NEFG-alt.txt` (seit 2022 unveränderter NEFG, aus
-  dem zweispaltigen Nds. GVBl 2022 Nr. 33) und `EndToEndTest.nefgAcceptance` (fünf von sieben
-  Befehlen angewandt; zwei Einfügeformen — Sachnummer mit Leerzeichen „§ 2 a“, kapitelbezogene
-  §-Block-Einfügung — noch nicht unterstützt, als Grenze dokumentiert).
+  dem zweispaltigen Nds. GVBl 2022 Nr. 33) und `EndToEndTest.nefgAcceptance` (alle sieben Befehle
+  angewandt, kein Rest — einschließlich der beiden niedersächsischen Einfügeformen: Sachnummer mit
+  Leerzeichen „§ 2 a“ und gliederungsbezogene Einfügung „In Kapitel 4 wird nach § 12 …“).
 * *Schleswig-Holstein* ist bis einschließlich der Befehlserkennung umgesetzt
   (`EndToEndTest.kommunalrechtAendGSchleswigHolstein`): Artikel 1 trifft die Gemeindeordnung,
   Artikel 2 die Kreisordnung, je ein Neufassungsbefehl, kein unbekannter Befehl. Ein voller

@@ -2,6 +2,7 @@ package eu.mulk.aendggner.anwendung;
 
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Anfuegung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ebene;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Aufhebung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.FussnotenAufhebung;
@@ -26,6 +27,7 @@ import eu.mulk.aendggner.gesetz.Gliederung;
 import eu.mulk.aendggner.gesetz.Norm;
 import eu.mulk.aendggner.gesetz.Superskript;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -71,22 +73,67 @@ public final class BefehlAnwender {
     var protokoll = new ArrayList<AngewandteAenderung>();
     String neuerLangtitel = null;
 
-    for (var befehl : befehle) {
+    // Angewandt wird in Sachreihenfolge, protokolliert in der Reihenfolge des Änderungsgesetzes.
+    var ergebnisse = new AngewandteAenderung[befehle.size()];
+    for (int index : anwendungsReihenfolge(befehle)) {
+      var befehl = befehle.get(index);
       // „Die Überschrift wird wie folgt gefasst / durch die folgende Überschrift ersetzt“ auf
       // oberster Ebene meint die Überschrift des Gesetzes selbst.
       if (befehl instanceof Neufassung n && istNurUeberschrift(n.stelle())) {
         neuerLangtitel = n.neuerText().replaceAll("\\s+", " ").strip();
-        protokoll.add(angewandt(befehl, "(Gesetzesüberschrift)"));
+        ergebnisse[index] = angewandt(befehl, "(Gesetzesüberschrift)");
         continue;
       }
-      protokoll.add(wendeAn(normen, gliederungen, befehl));
+      ergebnisse[index] = wendeAn(normen, gliederungen, befehl);
     }
+    protokoll.addAll(Arrays.asList(ergebnisse));
 
     var neu = alt.mitNormen(normen).mitGliederungen(gliederungen);
     if (neuerLangtitel != null) {
       neu = neu.mitLangue(neuerLangtitel);
     }
     return new AnwendungsErgebnis(neu, protokoll);
+  }
+
+  /**
+   * Reihenfolge, in der die Befehle anzuwenden sind: grundsätzlich die des Änderungsgesetzes.
+   *
+   * <p>Eine Umnummerierung „Der bisherige § 13 wird § 14“ wird jedoch vor eine vorangehende
+   * Einfügung gezogen, die denselben Paragraphen neu besetzt („In Kapitel 4 wird nach § 12 der
+   * folgende neue § 13 angefügt“). „Bisherig“ bezeichnet den Stand vor der Änderung; die
+   * Umnummerierung geht der Neubesetzung sachlich also voraus. In der Textreihenfolge angewandt
+   * liefen beide Befehle dagegen auf zwei Paragraphen gleicher Bezeichnung hinaus.
+   */
+  private static List<Integer> anwendungsReihenfolge(List<Aenderungsbefehl> befehle) {
+    var reihenfolge = new ArrayList<Integer>(befehle.size());
+    for (int i = 0; i < befehle.size(); i++) {
+      reihenfolge.add(i);
+    }
+    for (int j = 0; j < befehle.size(); j++) {
+      if (!(befehle.get(j) instanceof Umnummerierung u) || !nurParagraph(u.stelle())) {
+        continue;
+      }
+      var quelle = u.stelle().paragraph().get().enbez();
+      for (int i = 0; i < j; i++) {
+        if (quelle.equals(neuerParagraph(befehle.get(i)))) {
+          reihenfolge.remove(Integer.valueOf(j));
+          reihenfolge.add(reihenfolge.indexOf(i), j);
+          break;
+        }
+      }
+    }
+    return reihenfolge;
+  }
+
+  /** Bezeichnung des Paragraphen, den {@code befehl} neu anlegt — sonst {@code null}. */
+  private static @Nullable String neuerParagraph(Aenderungsbefehl befehl) {
+    if (!(befehl instanceof StrukturEinfuegung s)
+        || s.ebene() != Ebene.PARAGRAPH
+        || s.bezeichnung() == null) {
+      return null;
+    }
+    var sigel = s.stelle().paragraph().map(Stelle.Paragraph::sigel).orElse("§");
+    return sigel + " " + s.bezeichnung();
   }
 
   private static boolean istNurUeberschrift(Stelle stelle) {
