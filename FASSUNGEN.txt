@@ -21,6 +21,72 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 25. Juli 2026,
+ zuletzt geändert durch die am 25. Juli 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Die sechste Ertüchtigungswelle wird um den schleswig-holsteinischen Belegfall
+ergänzt: das Gesetz zur Änderung des Gesetzes zur Änderung kommunalrechtlicher
+Vorschriften vom 26. März 2026 (GVOBl. Schl.-H. 2026/27). Es führt drei bislang
+unbekannte Eigenheiten ein — den laufenden Seitenkopf des GVOBl. Schleswig-
+Holstein, hochgestellte Fußnotenmarker an den Artikel-Überschriften und einen
+Flattersatz, in dem die geometrische Randerkennung versagt. Ein voller
+Akzeptanztest bleibt vorerst aus, weil die konsolidierte Gemeindeordnung aus
+freien Quellen nicht in der maßgeblichen Fassung zu beschaffen ist.
+
+
+Artikel 1
+Seitenkopf des Gesetz- und Verordnungsblatts für Schleswig-Holstein
+
+Der Textbereiniger (TextBereiniger.istKolumnentitel) entfernt nunmehr auch den
+zweizeiligen Titelkopf und den laufenden Seitenkopf des Gesetz- und Verordnungs-
+blatts für Schleswig-Holstein („Gesetz- und Verordnungsblatt für Schleswig-
+Holstein“ nebst „2026/27 vom 30. März“, Muster GVOBL_SH_KOPF, GVOBL_SH_LAND und
+GVOBL_SH_HEFT). Der laufende Kopf steht zwischen zwei Artikeln und klebte sonst
+an der folgenden Artikel-Überschrift.
+
+
+Artikel 2
+Fußnotenmarker an Artikel-Überschriften
+
+Schleswig-Holstein verweist an der Artikel-Überschrift eines Änderungsgesetzes
+mit einer hochgestellten Ziffer auf die Gliederungsnummer-Fußnote am Seitenfuß
+(„Artikel 1 ¹)“). Solche Überschriften genügten dem Muster der Artikel-Teilung
+(AenderungsgesetzParser.ARTIKEL_UEBERSCHRIFT) nicht. Der Textbereiniger streift
+den Marker nunmehr ab (TextBereiniger.loeseArtikelFussnoten, Muster
+ARTIKEL_FUSSNOTE) und trennt dabei eine in derselben Zeile stehende Einleitung
+wieder ab.
+
+
+Artikel 3
+Silbentrennung bei hartem Zeilenende
+
+Der Textbereiniger (TextBereiniger.verbindeUmbrueche) zog eine Silbentrennung am
+Zeilenende bislang nie zusammen, wenn die geometrische Randerkennung des
+Fontgrößenfilters ein hartes Zeilenende meldete. Im Flattersatz — wie ihn das
+GVOBl. Schl.-H. verwendet — findet diese Erkennung jedoch keinen Ausrichtungs-
+Cluster und stuft auch volle Zeilen als hart ein. Klebt der Trennstrich ohne
+Trailing-Whitespace am Zeilenende, ist er deshalb nunmehr auch dort als
+Silbentrennung zu lesen; bewusst gesetzte Suspensivstriche tragen den Trailing-
+Whitespace des Extraktors und bleiben unberührt.
+
+
+Artikel 4
+Belegfall Kommunalrecht-Änderungsgesetz Schleswig-Holstein
+
+Als weiterer Prüffall tritt ein Test bis einschließlich der Befehlserkennung
+hinzu (EndToEndTest.kommunalrechtAendGSchleswigHolstein): Artikel 1 trifft die
+Gemeindeordnung, Artikel 2 die Kreisordnung, Artikel 3 ein anderes Änderungs-
+gesetz; je Zielgesetz wird genau ein Neufassungsbefehl („§ 34a Absatz 1 erhält
+folgende Fassung“, „§ 29a Absatz 1 …“) erkannt, kein Befehl bleibt unbekannt.
+Ein voller Akzeptanztest ist nicht möglich: Das Landesportal
+gesetze-rechtsprechung.sh.juris.de gibt seine Dokumentinhalte nur über eine
+anmeldepflichtige Schnittstelle aus, und die letzte frei archivierte Gesamt-
+ausgabe der Gemeindeordnung (14. November 2022) kennt den geänderten § 34a noch
+nicht. Die Fundstelle ist in sampledata/Landesrecht-Beispiele.adoc vermerkt.
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 24. Juli 2026,
  zuletzt geändert durch die am 24. Juli 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

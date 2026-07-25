@@ -88,12 +88,24 @@ folgt geändert").
   dem zweispaltigen Nds. GVBl 2022 Nr. 33) und `EndToEndTest.nefgAcceptance` (fünf von sieben
   Befehlen angewandt; zwei Einfügeformen — Sachnummer mit Leerzeichen „§ 2 a“, kapitelbezogene
   §-Block-Einfügung — noch nicht unterstützt, als Grenze dokumentiert).
+* *Schleswig-Holstein* ist bis einschließlich der Befehlserkennung umgesetzt
+  (`EndToEndTest.kommunalrechtAendGSchleswigHolstein`): Artikel 1 trifft die Gemeindeordnung,
+  Artikel 2 die Kreisordnung, je ein Neufassungsbefehl, kein unbekannter Befehl. Ein voller
+  Akzeptanztest ist *nicht* möglich — siehe „Noch offen“.
 * Baden-Württemberg (GBl 2026 Nr. 26): großes Anlage-lastiges Änderungsgesetz (§§ 4–57a + Anlagen
   1/3b/4b); Stammfassung/Akzeptanztest noch offen.
-* Für Schleswig-Holstein fehlt die konsolidierte Stammfassung noch (siehe oben).
 
 == Noch offen
 
+* *Schleswig-Holstein — Stammfassung nicht beschaffbar*: Das Landesportal
+  `gesetze-rechtsprechung.sh.juris.de` ist seit Ende 2022 eine reine Single-Page-Anwendung; die
+  Dokumentinhalte liegen hinter einer anmeldepflichtigen „mylex“-API (`connectUrl` aus dem
+  `localStorage`), sämtliche Dokument-URLs liefern nur die leere Anwendungshülle. Die Wayback
+  Machine hat die serverseitig gerenderte Gesamtausgabe der Gemeindeordnung zuletzt am
+  14.11.2022 erfasst — dort fehlt der hier geänderte § 34a noch (er wurde erst durch das Gesetz
+  vom 05.02.2025 eingefügt). Auch die archivierten Einzelnorm-Seiten (113 Stück) sind bereits
+  SPA-Hüllen ohne Inhalt. Ein voller Akzeptanztest bleibt daher offen, bis die konsolidierte
+  Fassung aus einer anderen Quelle vorliegt.
 * *Rheinland-Pfalz*: Die Verkündungsplattform `verkuendung.rlp.de` verkündet erst seit dem
   01.07.2026 elektronisch; ältere GVBl-Hefte liegen nicht als freie Direkt-PDF vor.
 * Bremen, Hamburg, Mecklenburg-Vorpommern, Saarland, Brandenburg, Sachsen-Anhalt: noch nicht

@@ -1,5 +1,6 @@
 package eu.mulk.aendggner.aenderung.parse;
 
+import eu.mulk.aendggner.gesetz.Superskript;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -131,6 +132,19 @@ public final class TextBereiniger {
   private static final Pattern NDS_HERAUSGEBER =
       Pattern.compile("^\\s*Herausgeber: Niedersächsische Staatskanzlei\\s*$");
 
+  // GVOBl. Schleswig-Holstein: zweizeiliger Titelkopf („Gesetz- und Verordnungsblatt“ / „für
+  // Schleswig-Holstein“, auf Folgeseiten in einer Zeile) und die Heftangabe („Nummer 2026/27“ auf
+  // dem Titelblatt, „2026/27 vom 30. März“ als zweite Zeile des laufenden Seitenkopfs). Der
+  // laufende Kopf steht mitten im Text zwischen zwei Artikeln und klebte sonst an der folgenden
+  // Artikel-Überschrift.
+  private static final Pattern GVOBL_SH_KOPF =
+      Pattern.compile("^\\s*Gesetz- und Verordnungsblatt(?: für Schleswig-Holstein)?\\s*$");
+  private static final Pattern GVOBL_SH_LAND =
+      Pattern.compile("^\\s*für Schleswig-Holstein\\s*$");
+  private static final Pattern GVOBL_SH_HEFT =
+      Pattern.compile(
+          "^\\s*(?:Nummer \\d{4}/\\d{1,3}|\\d{4}/\\d{1,3} vom \\d{1,2}\\. \\p{L}+)\\s*$");
+
   /** Konjunktionen, die typischerweise auf einen Suspensivstrich folgen („Wirk- und …“). */
   private static final Pattern KONJUNKTION =
       Pattern.compile("^(und|oder|sowie|bzw\\.|beziehungsweise)\\b.*");
@@ -192,7 +206,7 @@ public final class TextBereiniger {
     var verbunden = verbindeUmbrueche(zeilen);
     // Falsch-positive markerlose Zusammenzüge („durch“ + „die“ → „durchdie“) reparieren — die
     // Befehlsvokabeln sind nie Kompositum-Bestandteile.
-    return trenneVerklebteZitatgrenzen(reflowUndStrippe(verbunden));
+    return loeseArtikelFussnoten(trenneVerklebteZitatgrenzen(reflowUndStrippe(verbunden)));
   }
 
   /**
@@ -262,6 +276,20 @@ public final class TextBereiniger {
         .replaceAll("(wie folgt geändert:?)(?=[a-z]{1,3}\\)|\\d+[a-z]?\\.)", "$1\n");
   }
 
+  /**
+   * Streift hochgestellte Fußnotenmarker von Artikel-Überschriften ab („Artikel 1 ¹)“ → „Artikel
+   * 1“). Schleswig-Holstein verweist damit auf die Gl.-Nr.-Fußnoten am Seitenfuß. Der Marker
+   * verhindert sonst die Artikel-Teilung; steht die Einleitung in derselben Zeile, wird sie dabei
+   * wieder abgetrennt.
+   */
+  private static String loeseArtikelFussnoten(String text) {
+    return ARTIKEL_FUSSNOTE.matcher(text).replaceAll("$1\n");
+  }
+
+  private static final Pattern ARTIKEL_FUSSNOTE =
+      Pattern.compile(
+          "(?m)^(Artikel\\s+\\d+[a-z]?)\\s*" + Superskript.LAUF.pattern() + "\\)[ \\t]*\\n?");
+
   /** Entfernt Seitenkopf-/Fußzeilen. Trailing-Whitespace der übrigen Zeilen bleibt erhalten! */
   private static ArrayList<Zeile> entferneKolumnentitel(List<Zeile> roh) {
     var kolumnentitel = new boolean[roh.size()];
@@ -302,7 +330,10 @@ public final class TextBereiniger {
         || LANDTAG_MARKE.matcher(zeile).matches()
         || REVOSAX_FUSS.matcher(zeile).matches()
         || NDS_GVBL_FUSS.matcher(zeile).matches()
-        || NDS_HERAUSGEBER.matcher(zeile).matches();
+        || NDS_HERAUSGEBER.matcher(zeile).matches()
+        || GVOBL_SH_KOPF.matcher(zeile).matches()
+        || GVOBL_SH_LAND.matcher(zeile).matches()
+        || GVOBL_SH_HEFT.matcher(zeile).matches();
   }
 
   /**
@@ -342,7 +373,13 @@ public final class TextBereiniger {
       while (true) {
         var gestutzt = zeile.stripTrailing();
         // Ein geometrisch hartes Zeilenende ist ein bewusster Umbruch — nie zusammenziehen.
-        var mitTrennstrich = umbruch != Umbruch.HART && endetMitSilbentrennung(gestutzt);
+        // Ausnahme: Klebt der Trennstrich ohne Trailing-Whitespace am Zeilenende, ist er eine
+        // echte Silbentrennung. Im Flattersatz (GVOBl. Schl.-H.) findet die Randerkennung keinen
+        // Ausrichtungs-Cluster und stuft auch volle Zeilen als hart ein; das Trailing-Space-Signal
+        // des Extraktors ist dort das verlässlichere Kriterium.
+        var mitTrennstrich =
+            endetMitSilbentrennung(gestutzt)
+                && (umbruch != Umbruch.HART || gestutzt.length() == zeile.length());
         var markerlos =
             markerlosAktiv
                 && endetMarkerlos(zeile)

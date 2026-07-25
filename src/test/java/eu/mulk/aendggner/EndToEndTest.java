@@ -3,16 +3,19 @@ package eu.mulk.aendggner;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.UnbekannterBefehl;
 import eu.mulk.aendggner.aenderung.parse.AenderungsgesetzParser;
 import eu.mulk.aendggner.aenderung.parse.PatchTextExtraktor;
 import eu.mulk.aendggner.aenderung.parse.TextBereiniger;
 import eu.mulk.aendggner.anwendung.BefehlAnwender;
+import eu.mulk.aendggner.gesetz.Gesetz;
 import eu.mulk.aendggner.gesetz.gii.GiiXmlLoader;
 import eu.mulk.aendggner.synopse.HtmlRenderer;
 import eu.mulk.aendggner.synopse.SynopseBuilder;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -427,5 +430,56 @@ class EndToEndTest {
 
     var synopse = SynopseBuilder.baue(gesetz, anwendung, parseErgebnis.warnungen(), false);
     assertThat(HtmlRenderer.rendere(synopse, "E2E-Test NEFG")).contains("§ 1");
+  }
+
+  /**
+   * Schleswig-Holstein: Extraktion und Befehlserkennung auf dem Kommunalrecht-Änderungsgesetz
+   * (GVOBl. Schl.-H. 2026/27). Kein voller Akzeptanztest — die konsolidierte Gemeindeordnung ist
+   * aus freien Quellen nicht in der maßgeblichen Fassung zu beschaffen (das juris-Landesportal
+   * liefert nur eine anmeldepflichtige API; die letzten frei archivierten Volltexte stammen aus
+   * 2022 und kennen den hier geänderten § 34a noch nicht). Geprüft wird deshalb alles bis
+   * einschließlich der Befehlserkennung, gegen ein Stammgesetz ohne Normen.
+   */
+  @Test
+  void kommunalrechtAendGSchleswigHolstein() throws Exception {
+    var pdf = SAMPLEDATA.resolve("SchleswigHolstein/GVOBl-2026-27_Kommunalrecht-AendG.pdf");
+    assumeTrue(Files.exists(pdf), "GVOBl-Schl.-H.-Beispiel-PDF fehlt");
+
+    var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(pdf));
+
+    // Laufender Seitenkopf entfernt — er stand zwischen Artikel 1 und Artikel 2 und klebte sonst
+    // an der Artikel-2-Überschrift.
+    assertThat(text).doesNotContain("Gesetz- und Verordnungsblatt für Schleswig-Holstein");
+    assertThat(text).doesNotContain("2026/27 vom 30. März");
+    // Hochgestellte Fußnotenmarker der Artikel-Überschriften („Artikel 1 ¹)“) sind abgestreift.
+    assertThat(text).contains("\nArtikel 1\n").contains("\nArtikel 2\n").contains("\nArtikel 3\n");
+    assertThat(text).doesNotContain("¹)").doesNotContain("²)").doesNotContain("³)");
+    // Silbentrennung im Flattersatz zusammengezogen (dort findet die geometrische Randerkennung
+    // keinen Ausrichtungs-Cluster und meldet auch volle Zeilen als hartes Zeilenende).
+    assertThat(text).contains("Ton-Bild-Übertragung zu ermöglichen").doesNotContain("Übertra-");
+
+    // Artikel 1 ändert die Gemeindeordnung, Artikel 2 die Kreisordnung, Artikel 3 ein anderes
+    // Änderungsgesetz — nur der jeweils zutreffende Artikel wird gewählt.
+    var gemeindeordnung =
+        new Gesetz("GO", "Gemeindeordnung für Schleswig-Holstein", "Gemeindeordnung", List.of());
+    var kreisordnung =
+        new Gesetz("KrO", "Kreisordnung für Schleswig-Holstein", "Kreisordnung", List.of());
+
+    var go = new AenderungsgesetzParser().parse(text, gemeindeordnung, null);
+    assertThat(go.artikel()).containsExactly("1");
+    assertThat(go.befehle()).hasSize(1);
+    assertThat(go.befehle()).noneMatch(b -> b instanceof UnbekannterBefehl);
+    var neufassung = go.befehle().get(0);
+    assertThat(neufassung.stelle().anzeigeText()).isEqualTo("§ 34a Absatz 1");
+    assertThat(neufassung).isInstanceOf(Aenderungsbefehl.Neufassung.class);
+    // Das Zitat der neuen Fassung ist vollständig übernommen („erhält folgende Fassung“).
+    assertThat(((Aenderungsbefehl.Neufassung) neufassung).neuerText())
+        .startsWith("(1) Durch Hauptsatzung kann bestimmt werden")
+        .endsWith("persönlich im Sitzungsraum anwesend sein.");
+
+    var kro = new AenderungsgesetzParser().parse(text, kreisordnung, null);
+    assertThat(kro.artikel()).containsExactly("2");
+    assertThat(kro.befehle()).hasSize(1);
+    assertThat(kro.befehle().get(0).stelle().anzeigeText()).isEqualTo("§ 29a Absatz 1");
   }
 }

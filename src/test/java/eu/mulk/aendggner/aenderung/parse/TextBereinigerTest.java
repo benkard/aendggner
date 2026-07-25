@@ -202,6 +202,40 @@ class TextBereinigerTest {
   }
 
   @Test
+  void ziehtSilbentrennungAuchBeiHartemZeilenendeZusammen() {
+    // Flattersatz (GVOBl. Schl.-H.): Die Randerkennung findet keinen Ausrichtungs-Cluster und
+    // meldet auch volle Zeilen als hartes Zeilenende. Klebt der Trennstrich ohne Trailing-
+    // Whitespace am Zeilenende, ist er dennoch eine Silbentrennung.
+    assertThat(TextBereiniger.bereinige("Teilnahme mittels Ton-Bild-Übertra-\ngung. "))
+        .isEqualTo("Teilnahme mittels Ton-Bild-Übertragung.");
+    // Mit Trailing-Whitespace bleibt das harte Zeilenende ein bewusster Umbruch.
+    assertThat(TextBereiniger.bereinige("Wirk-, Ausgangs- \nund Hilfsstoffe "))
+        .isEqualTo("Wirk-, Ausgangs-\nund Hilfsstoffe");
+  }
+
+  @Test
+  void streiftFussnotenmarkerVonArtikelUeberschriften() {
+    // Schleswig-Holstein verweist an der Artikel-Überschrift auf die Gl.-Nr.-Fußnote; steht die
+    // Einleitung in derselben Zeile, wird sie dabei wieder abgetrennt.
+    assertThat(TextBereiniger.bereinige("Artikel 1 ¹)\nDie Gemeindeordnung"))
+        .isEqualTo("Artikel 1\nDie Gemeindeordnung");
+    assertThat(TextBereiniger.bereinige("Artikel 2 ²) Die Kreisordnung"))
+        .isEqualTo("Artikel 2\nDie Kreisordnung");
+  }
+
+  @Test
+  void entferntSeitenkopfDesGvoblSchleswigHolstein() {
+    var roh =
+        """
+        Erster Satz.
+        Gesetz- und Verordnungsblatt für Schleswig-Holstein
+        2026/27 vom 30. März
+        Zweiter Satz.""";
+
+    assertThat(TextBereiniger.bereinige(roh)).isEqualTo("Erster Satz.\nZweiter Satz.");
+  }
+
+  @Test
   void repariertInvertierteZitatzeichenAnAbsatzmarkern() {
     // BMJV-Vorlagen zeichnen das hängende „ nach dem Absatzmarker bzw. der Paragraphenangabe.
     assertThat(TextBereiniger.bereinige("(1) „ Ungeachtet des § 8 gilt.“"))
