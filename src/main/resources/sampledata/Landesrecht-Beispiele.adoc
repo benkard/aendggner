@@ -128,11 +128,14 @@ Ergebnis lässt sich gegen die amtliche Nachfassung prüfen. Die Slugs findet di
 Vorfassung kommt über die Wayback-CDX-API: Fassungs-IDs abfragen, die zum Zeitraum passende wählen,
 per `…id_/…`-Rohform laden. Achtung, `WebFetch` erreicht `web.archive.org` nicht — nur `curl`.
 
-juris-Landesportale (Schleswig-Holstein, Berlin, Baden-Württemberg, Hessen, Thüringen, Niedersachsen):: Sackgasse.
-Seit etwa Ende 2022 reine Single-Page-Anwendungen; sämtliche Dokument-URLs liefern nur die leere
-Anwendungshülle, die Inhalte hängen an einer tokenpflichtigen Schnittstelle. Auch archivierte
+juris-Landesportale:: Sackgasse — *geprüft* für `gesetze-rechtsprechung.sh.juris.de`
+(Schleswig-Holstein) und `gesetze.berlin.de` (Berlin, trotz Eigennamen dieselbe Anwendung). Beide
+sind seit etwa Ende 2022 reine Single-Page-Anwendungen; sämtliche Dokument-URLs liefern nur die
+leere Anwendungshülle, die Inhalte hängen an einer tokenpflichtigen Schnittstelle. Auch archivierte
 Einzelnorm-Seiten sind bereits Hüllen. Brauchbar sind allenfalls Wayback-Snapshots aus der Zeit
-*vor* der Umstellung — die sind aber meist zu alt für die gesuchte Fassung.
+*vor* der Umstellung — die sind aber meist zu alt für die gesuchte Fassung. Für
+`landesrecht-bw.de`, `hessenrecht.hessen.de`, `landesrecht.thueringen.de` und `voris.niedersachsen.de`
+ist dasselbe zu erwarten, aber *nicht* nachgeprüft: Ein Versuch lohnt, bevor man aufgibt.
 
 Fällt das Portal aus, bleibt der Weg über das Gesetzblatt selbst: Trägt der Einleitungssatz des
 Änderungsgesetzes kein „zuletzt geändert durch“, so ist die Originalfassung zugleich die
