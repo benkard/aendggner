@@ -111,6 +111,34 @@ folgt geändert").
 * Baden-Württemberg (GBl 2026 Nr. 26): großes Anlage-lastiges Änderungsgesetz (§§ 4–57a + Anlagen
   1/3b/4b); Stammfassung/Akzeptanztest noch offen.
 
+== Beschaffung der Stammfassungen
+
+Für einen vollen Akzeptanztest wird die Fassung *vor* dem Änderungsgesetz gebraucht. Welcher Weg
+dafür trägt, hängt allein vom Portal ab; die drei erprobten Wege:
+
+`recht.nrw.de` (Nordrhein-Westfalen):: Der bequemste Fall. Serverseitig gerendertes HTML, keine
+Single-Page-Anwendung, `robots.txt` erlaubt alles. Das URL-Schema
+`recht.nrw.de/lrgv/gesetz/<TTMMJJJJ>-<Kurztitel-Slug>` trägt den *Gültigkeitsbeginn der jeweiligen
+Fassung* im Datumspräfix — Vor- und Nachfassung sind damit unmittelbar adressierbar, und das
+Ergebnis lässt sich gegen die amtliche Nachfassung prüfen. Die Slugs findet die Suchmaske nicht
+(Formular); sie stehen im Sitemap-Index (`robots.txt` listet `sitemap/page/1..47/sitemap.xml`, je
+1000 Einträge). Alte `lmi/owa/br_*`-URLs leiten auf die neuen Slugs um.
+
+`revosax.sachsen.de` (Sachsen):: Liefert Volltext-PDFs je Fassung, aber nur die aktuelle live. Die
+Vorfassung kommt über die Wayback-CDX-API: Fassungs-IDs abfragen, die zum Zeitraum passende wählen,
+per `…id_/…`-Rohform laden. Achtung, `WebFetch` erreicht `web.archive.org` nicht — nur `curl`.
+
+juris-Landesportale (Schleswig-Holstein, Berlin, Baden-Württemberg, Hessen, Thüringen, Niedersachsen):: Sackgasse.
+Seit etwa Ende 2022 reine Single-Page-Anwendungen; sämtliche Dokument-URLs liefern nur die leere
+Anwendungshülle, die Inhalte hängen an einer tokenpflichtigen Schnittstelle. Auch archivierte
+Einzelnorm-Seiten sind bereits Hüllen. Brauchbar sind allenfalls Wayback-Snapshots aus der Zeit
+*vor* der Umstellung — die sind aber meist zu alt für die gesuchte Fassung.
+
+Fällt das Portal aus, bleibt der Weg über das Gesetzblatt selbst: Trägt der Einleitungssatz des
+Änderungsgesetzes kein „zuletzt geändert durch“, so ist die Originalfassung zugleich die
+Stammfassung (so bei Niedersachsen). Die Extraktion zweispaltiger Hefte übernimmt `--extract-only`
+des Werkzeugs selbst; `pdftotext -layout` verschränkt dort die Spalten.
+
 == Noch offen
 
 * *Schleswig-Holstein — Stammfassung nicht beschaffbar*: Das Landesportal
@@ -122,6 +150,10 @@ folgt geändert").
   vom 05.02.2025 eingefügt). Auch die archivierten Einzelnorm-Seiten (113 Stück) sind bereits
   SPA-Hüllen ohne Inhalt. Ein voller Akzeptanztest bleibt daher offen, bis die konsolidierte
   Fassung aus einer anderen Quelle vorliegt.
+* *Berlin — Stammfassung nicht beschaffbar*: `gesetze.berlin.de` ist trotz des Eigennamens dieselbe
+  juris-Anwendung wie das schleswig-holsteinische Portal (Kennung `bsbe`) und ebenso
+  anmeldepflichtig. In der Wayback Machine gibt es keine serverseitig gerenderten Volltexte des
+  ASOG oder des LAF-Errichtungsgesetzes.
 * *Anlagen im kanonischen Klartext*: Anlagen sind als Änderungsziel unterstützt — im gii-XML sind
   sie eigene Normen („Anlage 8“, „Anhang“), und `Stelle.anlagenEnbez()` löst sie auf; im GEG werden
   anlagenbezogene Befehle angewandt. Der `LandesRechtTextParser` kennt jedoch nur „§“- und
@@ -143,3 +175,25 @@ folgt geändert").
   01.07.2026 elektronisch; ältere GVBl-Hefte liegen nicht als freie Direkt-PDF vor.
 * Bremen, Hamburg, Mecklenburg-Vorpommern, Saarland, Brandenburg, Sachsen-Anhalt: noch nicht
   erfasst.
+
+== Wo weitermachen
+
+Kein Land scheitert noch an reiner Extraktionsschwäche; offen sind Modell- und Beschaffungsfragen.
+Nach absteigendem Nutzen:
+
+. *Struktureinfügung mit Wortanker* (siehe „Noch offen“). Rein im Modell zu lösen, ohne neue
+  Stammfassung: `StrukturEinfuegung` um einen Wortanker ergänzen, wie ihn `WoerterEinfuegung`
+  bereits trägt. Belegfall ist Berlin Artikel 1 Nr. 2 b) bb); prüfbar bis zur Befehlserkennung.
+. *Weitere Artikel des NRW-Heftes* (WDR-Gesetz, Landesmediengesetz). Die Stammfassungen sind über
+  das oben beschriebene recht.nrw.de-Rezept unmittelbar greifbar, und die Nachfassungen erlauben
+  wieder den Abgleich gegen den amtlichen Text. Ergibt einen Massentest mit über hundert Befehlen.
+. *Anlagen-Normköpfe im `LandesRechtTextParser`* — lohnt erst zusammen mit (2) oder sobald für
+  Berlin bzw. Baden-Württemberg eine Stammfassung vorliegt, sonst nicht end-to-end prüfbar.
+. *Hessen* als Sperrsatz-Härtetest („3 . F e bru a r 2 02 6“). Betrifft nur Datums- und
+  Signaturzeilen, nicht die Befehle — kosmetisch, aber ein eigener Extraktionsfall.
+
+Regressionsschutz: `./mvnw verify` prüft die bestehenden Belegfälle mit. Gepinnt ist dabei nicht
+überall dieselbe Art von Zahl — für UWG, AGG und ProdHaftG, dass *kein* Befehl manuell bleibt; für
+das BayJG die 154 erkannten Befehle und namentlich die fünf Umnummerierungs-Residuen; für Sachsen,
+Niedersachsen und Nordrhein-Westfalen die vollständige Anwendung ohne Rest. Wer eine dieser Zahlen
+ändern muss, sollte den Grund im Test vermerken.

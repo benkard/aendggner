@@ -62,13 +62,15 @@ Eingaben:
 
 * Stammgesetz (Bundesrecht): XML im gii-norm-Format von
   https://www.gesetze-im-internet.de/[gesetze-im-internet.de]
-* Stammgesetz (Landesrecht Bayern): konsolidierte Fassung von
-  https://www.gesetze-bayern.de/[gesetze-bayern.de] als PDF oder als
-  kanonischer Klartext im Format der `--extract-only`-Ausgabe; amtliche
+* Stammgesetz (Landesrecht): konsolidierte Fassung als PDF oder als
+  kanonischer Klartext im Format der `--extract-only`-Ausgabe. Amtliche
   Satznummern und Fußnotenmarker stehen als Unicode-Superskripte im
-  Text („¹Die freilebende Tierwelt …“, „Enteignung⁶)“)
+  Text („¹Die freilebende Tierwelt …“, „Enteignung⁶)“); ob sie erhalten
+  bleiben, ergibt sich aus der geladenen Stammfassung, nicht aus einer
+  Länderkennung. Ebenso folgt das Zitiersigel (§ oder Art.) aus den
+  Normköpfen der Stammfassung.
 * Änderungsgesetz: BGBl-, GVBl- oder Drucksachen-PDF (Bundestag,
-  Bundesrat, Bayerischer Landtag) oder Klartext
+  Bundesrat, Landtage) oder Klartext
 
 [source,shell script]
 ----
@@ -133,6 +135,17 @@ gemeinsamem Schlussverb) sowie das Fortführungszeichen des GVBl (jedes
 neugefasste Aufzählungsglied öffnet erneut mit „). Meta-Änderungen an
 Drucksachen (Änderungsanträge des Landtags) sind bewusst noch nicht
 abgedeckt.
+
+Die übrigen Länder gliedern ihre Stammgesetze wie der Bund in
+Paragraphen; die Unterschiede liegen im Gesetzblatt-Satz und in
+Befehlsidiomen. Belegt sind Sachsen (SächsBeamtVG), Niedersachsen
+(NEFG) und Nordrhein-Westfalen (Telemedienzuständigkeitsgesetz) mit
+vollen Akzeptanztests ohne Rest; für Schleswig-Holstein und Berlin
+reicht die Prüfung bis zur Befehlserkennung, weil deren Landesportale
+ihre Stammfassungen nur über eine anmeldepflichtige Schnittstelle
+ausgeben. Welche Konvention welches Land beisteuert, welche
+Stammfassungen woher stammen und was noch offen ist, verzeichnet
+`src/main/resources/sampledata/Landesrecht-Beispiele.adoc`.
 
 
 == Running the Tests
