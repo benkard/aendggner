@@ -190,6 +190,15 @@ public final class TextBereiniger {
   private static final Pattern INVERTIERTES_LISTEN_ZITAT =
       Pattern.compile("(?m)^(\\s*)(\\d+[a-z]?\\.|[a-z]{1,3}\\))[ \\t]+„[ \\t]+");
 
+  // GVBl. für Berlin (Wolters-Kluwer-Satz): Der laufende Seitenkopf („235Gesetz- und Verordnungs-
+  // blatt für Berlin  82. Jahrgang  Nr. 17  11. Juni 2026“) steht im Inhaltsstrom nicht als eigene
+  // Zeile, sondern klebt samt Seitenzahl mitten im Fließtext der folgenden Spalte. Er ist deshalb
+  // nicht als Kolumnentitel zu entfernen, sondern als Textstück herauszuschneiden.
+  private static final Pattern GVBL_BERLIN_KOPF =
+      Pattern.compile(
+          "\\s*\\d{0,4}\\s*Gesetz- und Verordnungsblatt für Berlin\\s+\\d+\\. Jahrgang"
+              + "\\s+Nr\\.\\s*\\d+\\s+\\d{1,2}\\. \\p{L}+ \\d{4}\\s*");
+
   // Sachnummern mit Leerzeichen: Niedersachsen zitiert eingeschobene Paragraphen als „§ 2 a“, der
   // Rest der Rechtssprache als „§ 2a“. Auf die kanonische Form ziehen, damit Stellen- und
   // Ebenenparser greifen. Ein folgendes „)“ oder „.“ schließt Aufzählungsmarker des
@@ -209,6 +218,7 @@ public final class TextBereiniger {
     text = INVERTIERTES_LISTEN_ZITAT.matcher(text).replaceAll("$1„$2 ");
     text = trenneVerklebteZitatgrenzen(text);
     text = VORABFASSUNG.matcher(text).replaceAll("\n");
+    text = GVBL_BERLIN_KOPF.matcher(text).replaceAll("\n");
     var zeilen = entferneKolumnentitel(zerlegeInZeilen(text));
     var verbunden = verbindeUmbrueche(zeilen);
     // Falsch-positive markerlose Zusammenzüge („durch“ + „die“ → „durchdie“) reparieren — die

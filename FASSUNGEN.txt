@@ -21,6 +21,60 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 26. Juli 2026,
+ zuletzt geändert durch die am 26. Juli 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Der zweispaltige Belegfall Berlin (Gesetz zur Änderung des Allgemeinen
+Sicherheits- und Ordnungsgesetzes und des LAF-Errichtungsgesetzes vom 3. Juni
+2026, GVBl. S. 234) wird untersucht. Der Befund widerlegt die bisherige Annahme:
+Die Reihenfolge des Inhaltsstroms ist bereits die Lesereihenfolge; eine
+koordinatenbasierte Spaltenerkennung ist nicht erforderlich. Die tatsächlichen
+Hindernisse liegen anderswo — davon werden zwei behoben.
+
+
+Artikel 1
+Eingebettetes Rahmenziel in Paragraphenform
+
+Der Änderungsgesetz-Parser (AenderungsgesetzParser) übernahm ein in der
+Änderungsformel selbst genanntes Ziel („§ 2 Satz 1 des Gesetzes zur Errichtung
+eines Landesamtes … wird wie folgt geändert:“) nicht als Kontext der
+nachfolgenden Gliederungspunkte. Ursache war die vordere Wortgrenze des Musters
+EINGEBETTETES_ZIEL: „§“ ist selbst kein Wortzeichen, eine Wortgrenze davor
+verlangte also ein vorangehendes Wortzeichen. Der §-Zweig des Musters war damit
+unerreichbar und allein der bayerische „Art.“-Zweig wirksam. An die Stelle der
+Wortgrenze tritt nunmehr die Bedingung, dass kein Buchstabe und keine Ziffer
+vorangeht.
+
+
+Artikel 2
+Laufender Seitenkopf des Gesetz- und Verordnungsblatts für Berlin
+
+Der laufende Seitenkopf des GVBl. für Berlin („235Gesetz- und Verordnungsblatt
+für Berlin  82. Jahrgang  Nr. 17  11. Juni 2026“) steht im Inhaltsstrom nicht auf
+einer eigenen Zeile, sondern klebt samt Seitenzahl mitten im Fließtext der
+folgenden Spalte. Er ist deshalb nicht als Kolumnentitel zu entfernen, sondern
+aus dem laufenden Text herauszuschneiden (TextBereiniger, Muster
+GVBL_BERLIN_KOPF).
+
+
+Artikel 3
+Prüffall Berlin
+
+Ein Test bis einschließlich der Befehlserkennung tritt hinzu
+(EndToEndTest.asogLafAendGBerlin). Er hält das Ergebnis des Spaltenspikes fest —
+die Befehle beider Artikel stehen unverschränkt in Lesereihenfolge — und prüft,
+dass die beiden Punkte des Artikels 2 ihr Ziel aus der Änderungsformel erben.
+
+Ein voller Akzeptanztest ist nicht möglich: gesetze.berlin.de ist wie das
+schleswig-holsteinische Portal eine anmeldepflichtige juris-Anwendung. Artikel 1
+ändert überdies eine Anlage mit eigener Nummern-Gliederung; Anlagen sind kein
+Änderungsziel des Modells. Dieselbe Lücke hatte die Zurückstellung von
+Baden-Württemberg veranlasst; sie ist damit als größte verbleibende Modelllücke
+des Landesrechts bezeichnet (sampledata/Landesrecht-Beispiele.adoc).
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 25. Juli 2026,
  zuletzt geändert durch die am 25. Juli 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

@@ -17,6 +17,37 @@ class AenderungsgesetzParserTest {
           "UWG", "Gesetz gegen den unlauteren Wettbewerb", "UWG-Langtitel", List.of(), List.of());
 
   @Test
+  void nimmtEingebettetesParagraphenZielAlsKontext() {
+    // Berliner Zuschnitt: Die Änderungsformel trägt ihr Ziel selbst („§ 2 Satz 1 des Gesetzes zur
+    // Errichtung … wird wie folgt geändert“), die Punkte nennen nur noch die Feinstelle. Der
+    // §-Zweig des Musters war bislang unerreichbar (\b vor dem Nicht-Wortzeichen „§“).
+    var laf =
+        new Gesetz(
+            "LAF-ErrichtungsG",
+            "Gesetz zur Errichtung eines Landesamtes für Flüchtlingsangelegenheiten und"
+                + " Unterbringung",
+            null,
+            List.of(),
+            List.of());
+    var text =
+        """
+        Artikel 1
+        Änderung des Gesetzes zur Errichtung eines Landesamtes für Flüchtlingsangelegenheiten und Unterbringung
+        § 2 Satz 1 des Gesetzes zur Errichtung eines Landesamtes für Flüchtlingsangelegenheiten und Unterbringung vom 14. März 2016 (GVBl. S. 93), das zuletzt durch Artikel 2 des Gesetzes vom 1. April 2026 (GVBl. S. 154) geändert worden ist, wird wie folgt geändert:
+        1. In der Nummer 2 wird der Punkt am Ende durch ein Semikolon ersetzt.
+        2. Nach Nummer 2 wird folgende Nummer 3 eingefügt:
+        „3. Beratung sowie Hilfen zur freiwilligen Rückkehr.“
+        """;
+
+    var ergebnis = new AenderungsgesetzParser().parse(text, laf, null);
+
+    assertThat(ergebnis.artikel()).containsExactly("1");
+    assertThat(ergebnis.befehle())
+        .extracting(b -> b.stelle().anzeigeText())
+        .containsExactly("§ 2 Satz 1 Nummer 2", "§ 2 Satz 1 Nummer 2");
+  }
+
+  @Test
   void teiltParagraphenGegliedertesAenderungsgesetz() {
     // Bayerischer Stil: das Änderungsgesetz gliedert sich in §§; § 1 und § 2 treffen dasselbe
     // Stammgesetz, § 3 ein anderes; Inkrafttretens-§ ohne Änderungsformel wird nicht gewählt.

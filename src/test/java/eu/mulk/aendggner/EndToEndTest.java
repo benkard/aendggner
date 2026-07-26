@@ -554,4 +554,48 @@ class EndToEndTest {
     var synopse = SynopseBuilder.baue(gesetz, anwendung, parseErgebnis.warnungen(), false);
     assertThat(HtmlRenderer.rendere(synopse, "E2E-Test TMZ-Gesetz")).contains("§ 2");
   }
+
+  /**
+   * Berlin: Das GVBl. ist zweispaltig gesetzt (Wolters-Kluwer-Satz). Der Test hält das Ergebnis des
+   * Spaltenspikes fest — die Spaltenreihenfolge des Inhaltsstroms ist bereits die Lesereihenfolge,
+   * eine koordinatenbasierte Spaltenerkennung ist dafür nicht nötig.
+   *
+   * <p>Kein voller Akzeptanztest: gesetze.berlin.de ist wie das schleswig-holsteinische Portal eine
+   * anmeldepflichtige juris-Anwendung, die Stammfassungen sind daraus nicht zu beschaffen. Artikel 1
+   * ändert zudem eine *Anlage* mit eigener Nummern-Gliederung — ein Änderungsziel, das ÄndGgner
+   * nicht modelliert (dieselbe Grenze, an der Baden-Württemberg zurückgestellt wurde).
+   */
+  @Test
+  void asogLafAendGBerlin() throws Exception {
+    var pdf = SAMPLEDATA.resolve("Berlin/GVBl-2026-17_ASOG-LAF-AendG.pdf");
+    assumeTrue(Files.exists(pdf), "GVBl-Berlin-Beispiel-PDF fehlt");
+
+    var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(pdf));
+
+    // Spaltenspike: Die Befehle beider Artikel stehen in Lesereihenfolge im Text — die linke Spalte
+    // läuft vollständig vor der rechten, ohne Verschränkung.
+    assertThat(text.indexOf("§ 67 Absatz 2 wird wie folgt gefasst"))
+        .isLessThan(text.indexOf("Die Anlage zu § 2 Absatz 4 Satz 1 wird wie folgt geändert"));
+    assertThat(text.indexOf("Die Anlage zu § 2 Absatz 4 Satz 1 wird wie folgt geändert"))
+        .isLessThan(text.indexOf("In der Nummer 2 wird der Punkt am Ende"));
+    // Der laufende Seitenkopf ist auch dort entfernt, wo er mitten im Fließtext klebt.
+    assertThat(text).doesNotContain("Gesetz- und Verordnungsblatt für Berlin");
+
+    // Artikel 2 trägt sein Ziel in der Änderungsformel („§ 2 Satz 1 des Gesetzes zur Errichtung
+    // …“); beide Punkte erben es als Kontext.
+    var laf =
+        new Gesetz(
+            "LAF-ErrichtungsG",
+            "Gesetz zur Errichtung eines Landesamtes für Flüchtlingsangelegenheiten und"
+                + " Unterbringung",
+            null,
+            List.of());
+    var ergebnis = new AenderungsgesetzParser().parse(text, laf, null);
+    assertThat(ergebnis.artikel()).containsExactly("2");
+    assertThat(ergebnis.befehle()).hasSize(2);
+    assertThat(ergebnis.befehle()).noneMatch(b -> b instanceof UnbekannterBefehl);
+    assertThat(ergebnis.befehle())
+        .extracting(b -> b.stelle().anzeigeText())
+        .containsExactly("§ 2 Satz 1 Nummer 2", "§ 2 Satz 1 Nummer 2");
+  }
 }

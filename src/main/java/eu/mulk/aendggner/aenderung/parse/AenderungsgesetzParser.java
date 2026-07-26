@@ -102,12 +102,15 @@ public final class AenderungsgesetzParser {
   }
 
   // Eingebettetes Rahmenziel in der Änderungsformel selbst: „Art. 7 Abs. 2 des Bayerischen
-  // Umweltinformationsgesetzes … wird wie folgt geändert:“. Der Lookbehind auf „durch “ schließt
-  // die Zitierkette der Änderungshistorie aus („das zuletzt durch § 5 des Gesetzes vom … geändert
-  // worden ist“) — dort ist die Norm nie das Subjekt der Formel.
+  // Umweltinformationsgesetzes … wird wie folgt geändert:“, „§ 2 Satz 1 des Gesetzes zur
+  // Errichtung … wird wie folgt geändert:“. Der Lookbehind auf „durch “ schließt die Zitierkette
+  // der Änderungshistorie aus („das zuletzt durch § 5 des Gesetzes vom … geändert worden ist“) —
+  // dort ist die Norm nie das Subjekt der Formel. Die vordere Grenze darf nicht \b sein: „§“ ist
+  // selbst kein Wortzeichen, ein \b davor verlangte also ein vorangehendes Wortzeichen und machte
+  // den §-Zweig unerreichbar.
   private static final Pattern EINGEBETTETES_ZIEL =
       Pattern.compile(
-          "(?<!durch )\\b((?:§|Art\\.)\\s*\\d+[a-z]?"
+          "(?<!durch )(?<![\\p{L}\\d])((?:§|Art\\.)\\s*\\d+[a-z]?"
               + "(?:\\s+(?:Absatz|Abs\\.|Satz|Nummer|Nr\\.|Buchstabe|Buchst\\.)\\s+\\d+[a-z]?)*)"
               + "\\s+(?:des|der)\\s+\\p{Lu}");
 

@@ -224,6 +224,19 @@ class TextBereinigerTest {
   }
 
   @Test
+  void schneidetDenBerlinerSeitenkopfAusDemFliesstext() {
+    // Im GVBl. für Berlin steht der laufende Seitenkopf nicht auf einer eigenen Zeile, sondern
+    // klebt samt Seitenzahl mitten im Text der folgenden Spalte.
+    var roh =
+        "zur Sicherung des Betriebs\n"
+            + "235Gesetz- und Verordnungsblatt für Berlin      82. Jahrgang      Nr. 17"
+            + "     11. Juni 2026 von Unterkünften.";
+
+    assertThat(TextBereiniger.bereinige(roh))
+        .isEqualTo("zur Sicherung des Betriebs\nvon Unterkünften.");
+  }
+
+  @Test
   void ziehtSachnummernMitLeerzeichenZusammen() {
     // Niedersachsen zitiert eingeschobene Paragraphen als „§ 2 a“; kanonisch ist „§ 2a“.
     assertThat(TextBereiniger.bereinige("Nach § 2 wird der folgende § 2 a eingefügt:"))
