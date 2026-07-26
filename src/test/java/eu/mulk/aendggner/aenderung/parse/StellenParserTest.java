@@ -110,6 +110,21 @@ class StellenParserTest {
   }
 
   @Test
+  void parstUnnummerierteBenannteAnlage() {
+    // Ein Gesetz mit einer einzigen Anlage benennt sie nach der Vorschrift, zu der sie gehört.
+    // Der Zusatz identifiziert die Anlage und ist nicht selbst Ziel — sonst würde das darin
+    // genannte „§ 2“ als Ziel gelesen und die falsche Norm geändert.
+    var anlage = StellenParser.parse("Die Anlage zu § 2 Absatz 4 Satz 1").orElseThrow();
+    assertThat(anlage.anzeigeText()).isEqualTo("Anlage");
+    assertThat(anlage.anlagenEnbez()).contains("Anlage");
+    assertThat(anlage.paragraph()).isEmpty();
+
+    // Nummerierte Anlagen bleiben unverändert.
+    assertThat(StellenParser.parse("Anlage 8 Nummer 1 Buchstabe b").orElseThrow().anzeigeText())
+        .isEqualTo("Anlage 8 Nummer 1 Buchstabe b");
+  }
+
+  @Test
   void ignoriertChapeauZusatz() {
     // „in der Angabe vor Nummer 1“ ist ein verfeinernder Zusatz ohne eigene Komponente.
     assertThat(StellenParser.parse("Absatz 1 in der Angabe vor Nummer 1").orElseThrow().anzeigeText())

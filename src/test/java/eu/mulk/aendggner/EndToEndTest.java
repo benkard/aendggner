@@ -597,5 +597,27 @@ class EndToEndTest {
     assertThat(ergebnis.befehle())
         .extracting(b -> b.stelle().anzeigeText())
         .containsExactly("§ 2 Satz 1 Nummer 2", "§ 2 Satz 1 Nummer 2");
+
+    // Artikel 1 ändert die unnummerierte, nach ihrer Vorschrift benannte Anlage („Die Anlage zu
+    // § 2 Absatz 4 Satz 1 wird wie folgt geändert“). Der Zusatz benennt die Anlage nur — er darf
+    // nicht als Ziel „§ 2“ gelesen werden; die Punkte erben „Anlage“ als Kontext.
+    var asog =
+        new Gesetz(
+            "ASOG Bln", "Allgemeines Sicherheits- und Ordnungsgesetz", null, List.of());
+    var artikel1 = new AenderungsgesetzParser().parse(text, asog, null);
+    assertThat(artikel1.artikel()).containsExactly("1");
+    assertThat(artikel1.befehle())
+        .extracting(b -> b.stelle().anzeigeText())
+        .containsExactly(
+            "§ 67 Absatz 2",
+            "Anlage Nummer 6 Absatz 2",
+            "Anlage Nummer 23 Absatz 4a",
+            "Anlage Nummer 23");
+    // Bekannte Grenze: „Vor den Wörtern „…“ wird folgender Absatz 5 eingefügt“ — eine
+    // Struktureinfügung, deren Position ein Wortanker statt einer Stelle bestimmt.
+    assertThat(artikel1.befehle().stream().filter(b -> b instanceof UnbekannterBefehl).toList())
+        .singleElement()
+        .extracting(b -> b.provenienz().gliederungsPfad())
+        .isEqualTo("2. b) bb)");
   }
 }

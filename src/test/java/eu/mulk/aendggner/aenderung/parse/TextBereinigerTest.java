@@ -224,6 +224,15 @@ class TextBereinigerTest {
   }
 
   @Test
+  void entferntSteuerzeichenUndRepariertZerrisseneBefehlsvokabeln() {
+    // Im GVBl. für Berlin trägt der Einzug der Aufzählungsglieder ein U+0007; es steht unsichtbar
+    // vor dem Befehl und ließ dessen Zeilenanfangs-Anker ins Leere greifen. Im selben Heft ist
+    // „eingefügt“ als „ein ge-“ + „fügt“ gesetzt — ein Leerzeichen mitten in der Befehlsvokabel.
+    assertThat(TextBereiniger.bereinige("a)\t Nach Nummer 6 wird folgender Absatz ein ge-\nfügt:"))
+        .isEqualTo("a)\t Nach Nummer 6 wird folgender Absatz eingefügt:");
+  }
+
+  @Test
   void schneidetDenBerlinerSeitenkopfAusDemFliesstext() {
     // Im GVBl. für Berlin steht der laufende Seitenkopf nicht auf einer eigenen Zeile, sondern
     // klebt samt Seitenzahl mitten im Text der folgenden Spalte.

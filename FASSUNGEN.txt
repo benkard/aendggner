@@ -30,7 +30,8 @@ Sicherheits- und Ordnungsgesetzes und des LAF-Errichtungsgesetzes vom 3. Juni
 2026, GVBl. S. 234) wird untersucht. Der Befund widerlegt die bisherige Annahme:
 Die Reihenfolge des Inhaltsstroms ist bereits die Lesereihenfolge; eine
 koordinatenbasierte Spaltenerkennung ist nicht erforderlich. Die tatsächlichen
-Hindernisse liegen anderswo — davon werden zwei behoben.
+Hindernisse liegen anderswo — davon werden vier behoben. Von den sechs Befehlen
+des Heftes werden danach fünf erkannt.
 
 
 Artikel 1
@@ -67,11 +68,44 @@ die Befehle beider Artikel stehen unverschränkt in Lesereihenfolge — und prü
 dass die beiden Punkte des Artikels 2 ihr Ziel aus der Änderungsformel erben.
 
 Ein voller Akzeptanztest ist nicht möglich: gesetze.berlin.de ist wie das
-schleswig-holsteinische Portal eine anmeldepflichtige juris-Anwendung. Artikel 1
-ändert überdies eine Anlage mit eigener Nummern-Gliederung; Anlagen sind kein
-Änderungsziel des Modells. Dieselbe Lücke hatte die Zurückstellung von
-Baden-Württemberg veranlasst; sie ist damit als größte verbleibende Modelllücke
-des Landesrechts bezeichnet (sampledata/Landesrecht-Beispiele.adoc).
+schleswig-holsteinische Portal eine anmeldepflichtige juris-Anwendung.
+
+
+Artikel 4
+Unnummerierte, benannte Anlagen
+
+Ein Gesetz mit einer einzigen Anlage benennt sie nach der Vorschrift, zu der sie
+gehört („Die Anlage zu § 2 Absatz 4 Satz 1“). Der Stellenparser (StellenParser)
+verlangte hinter „Anlage“ stets eine Nummer und wies solche Angaben zurück; der
+Rahmenbefehl des Artikels 1 blieb deshalb unerkannt und seine Unterpunkte ohne
+Kontext. Die Anlage trägt nunmehr — wie der „Anhang“ — die Bezeichnung „Anlage“.
+Der benennende Zusatz wird übersprungen: Er reicht bis zum Ende der
+Stellenangabe, und würde er mitgelesen, so läse der Parser das darin genannte
+„§ 2“ als Änderungsziel und änderte die falsche Norm.
+
+Damit ist zugleich die Annahme der Fassung vom 26. Juli 2026 richtigzustellen:
+Anlagen sind als Änderungsziel unterstützt (im gii-XML sind sie eigene Normen,
+Stelle.anlagenEnbez() löst sie auf). Offen bleibt allein, dass der
+Landesrecht-Textparser keine Anlagen-Normköpfe kennt, eine handgepflegte
+Stammfassung also keine Anlage tragen kann.
+
+
+Artikel 5
+Steuerzeichen und zerrissene Befehlsvokabeln
+
+Der Textbereiniger (TextBereiniger) entfernt nunmehr C0-Steuerzeichen außer
+Tabulator und Zeilenumbruch (Muster STEUERZEICHEN). Im GVBl. für Berlin trägt
+der Einzug der Aufzählungsglieder ein U+0007; es steht unsichtbar vor dem Befehl
+und ließ dessen Zeilenanfangs-Anker ins Leere greifen. Ebenso werden
+Befehlsvokabeln zusammengeführt, die der amtliche Satz durch ein Leerzeichen
+zerreißt („ein gefügt“ statt „eingefügt“) — beschränkt auf Fügungen, die als
+Wortfolge im Deutschen nicht vorkommen.
+
+Von den vier Befehlen des Artikels 1 werden damit drei erkannt. Der vierte
+bestimmt die Einfügestelle über einen Wortanker („Vor den Wörtern „Aus dem
+Bereich Verkehr:“ wird folgender Absatz 5 eingefügt“); eine Struktureinfügung
+trägt bislang nur eine Stellenangabe. Beides ist in
+sampledata/Landesrecht-Beispiele.adoc vermerkt.
 
 
 ════════════════════════════════════════════════════════════════════════════════

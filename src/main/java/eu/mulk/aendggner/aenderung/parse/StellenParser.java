@@ -133,13 +133,30 @@ public final class StellenParser {
           i++;
         }
         case "Teil", "Teils", "Buch", "Buches", "Kapitel", "Kapitels", "Abschnitt", "Abschnitts",
-            "Unterabschnitt", "Unterabschnitts", "Anlage", "Anlagen" -> {
+            "Unterabschnitt", "Unterabschnitts" -> {
           var wert = naechstesWort(woerter, i);
           if (wert == null || !NUMMER_WERT.matcher(wert).matches()) {
             return Optional.empty();
           }
           komponenten.add(new Stelle.Gliederungseinheit(gliederungsArt(wort), wert));
           i++;
+        }
+        case "Anlage", "Anlagen" -> {
+          var wert = naechstesWort(woerter, i);
+          if (wert != null && NUMMER_WERT.matcher(wert).matches()) {
+            komponenten.add(new Stelle.Gliederungseinheit("Anlage", wert));
+            i++;
+            continue;
+          }
+          // „die Anlage zu § 2 Absatz 4 Satz 1“ — ein Gesetz mit einer einzigen Anlage benennt sie
+          // nach der Vorschrift, zu der sie gehört. Wie beim „Anhang“ trägt sie dann die enbez
+          // „Anlage“; der Zusatz identifiziert sie nur und ist nicht selbst Änderungsziel. Er
+          // reicht bis zum Ende der Stellenangabe und wird deshalb übersprungen — sonst läse der
+          // Parser das darin genannte „§ 2“ als Ziel und änderte die falsche Norm.
+          komponenten.add(new Stelle.Gliederungseinheit("Anlage", ""));
+          if ("zu".equals(wert)) {
+            i = woerter.length;
+          }
         }
         case "Anhang" -> komponenten.add(new Stelle.Gliederungseinheit("Anhang", ""));
         case "Inhaltsübersicht" -> komponenten.add(new Stelle.Inhaltsuebersicht());

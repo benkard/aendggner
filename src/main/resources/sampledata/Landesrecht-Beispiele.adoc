@@ -106,7 +106,8 @@ folgt geändert").
   abgeglichen. Die übrigen Artikel (WDR-Gesetz, Landesmediengesetz, 17. RÄStV-AusfG) bleiben offen.
 * *Berlin* ist bis zur Befehlserkennung umgesetzt (`EndToEndTest.asogLafAendGBerlin`): Artikel 2
   (LAF-Errichtungsgesetz) wird vollständig erkannt, beide Punkte erben ihr Ziel aus der
-  Änderungsformel. Artikel 1 bleibt offen — er ändert eine Anlage (siehe „Noch offen“).
+  Änderungsformel. Von Artikel 1 werden drei der vier Befehle erkannt, einschließlich der
+  Änderungen an der unnummerierten Anlage; der vierte nutzt einen Wortanker (siehe „Noch offen“).
 * Baden-Württemberg (GBl 2026 Nr. 26): großes Anlage-lastiges Änderungsgesetz (§§ 4–57a + Anlagen
   1/3b/4b); Stammfassung/Akzeptanztest noch offen.
 
@@ -121,10 +122,15 @@ folgt geändert").
   vom 05.02.2025 eingefügt). Auch die archivierten Einzelnorm-Seiten (113 Stück) sind bereits
   SPA-Hüllen ohne Inhalt. Ein voller Akzeptanztest bleibt daher offen, bis die konsolidierte
   Fassung aus einer anderen Quelle vorliegt.
-* *Anlagen als Änderungsziel*: Berlin Artikel 1 („Die Anlage zu § 2 Absatz 4 Satz 1 wird wie folgt
-  geändert“ mit Unterpunkten auf „Nummer 23 Absatz 4a“) und Baden-Württemberg (Anlagen 1/3b/4b)
-  scheitern an derselben Stelle: ÄndGgner modelliert Anlagen nicht als eigene Einheiten mit
-  interner Nummern-Gliederung. Das ist die größte verbleibende Modelllücke im Landesrecht.
+* *Anlagen im kanonischen Klartext*: Anlagen sind als Änderungsziel unterstützt — im gii-XML sind
+  sie eigene Normen („Anlage 8“, „Anhang“), und `Stelle.anlagenEnbez()` löst sie auf; im GEG werden
+  anlagenbezogene Befehle angewandt. Der `LandesRechtTextParser` kennt jedoch nur „§“- und
+  „Art.“-Normköpfe: Eine handgepflegte Stammfassung kann *keine* Anlage tragen. Das ist die
+  konkrete Lücke für Berlin (Artikel 1) und Baden-Württemberg (Anlagen 1/3b/4b) — sie wird erst
+  behebbar, wenn für eines der beiden eine Stammfassung vorliegt.
+* *Struktureinfügung mit Wortanker*: „Vor den Wörtern „Aus dem Bereich Verkehr:“ wird folgender
+  Absatz 5 eingefügt“ (Berlin Artikel 1 Nr. 2 b) bb)) — die Position der neuen Einheit bestimmt
+  ein Wortanker statt einer Stellenangabe. `StrukturEinfuegung` trägt bislang nur eine Stelle.
 * *Unbalancierte Anführungszeichen innerhalb eines Artikels*: Die Strukturgrenze des
   Zitatextraktors greift nur an Artikel-Überschriften. In Berlin Artikel 1 fehlt bei Nummer 2 b) bb)
   das schließende Anführungszeichen; das Zitat verschlingt daher die folgenden Punkte cc) und c).

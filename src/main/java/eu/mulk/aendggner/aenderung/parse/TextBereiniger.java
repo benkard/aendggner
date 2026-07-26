@@ -206,12 +206,19 @@ public final class TextBereiniger {
   private static final Pattern SACHNUMMER_MIT_LEERZEICHEN =
       Pattern.compile("(§|Art\\.) (\\d+) ([a-z])(?![a-zäöüß).])");
 
+  /** C0-Steuerzeichen außer Tabulator und Zeilenumbruch; im Fließtext stets Extraktionsmüll. */
+  private static final Pattern STEUERZEICHEN = Pattern.compile("[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]");
+
   private TextBereiniger() {}
 
   public static String bereinige(String rohText) {
     // Geschützte Leerzeichen (GVBl-Satz: „§  1“, „Abs.  2“) sind für Javas \s und
     // String.strip unsichtbar — früh auf gewöhnliche Leerzeichen normalisieren.
     var text = rohText.replace(' ', ' ').replace(' ', ' ');
+    // Steuerzeichen aus fehlgeleiteten Glyphenzuordnungen (im GVBl. für Berlin trägt der Einzug
+    // der Aufzählungsglieder ein U+0007). Sie sind unsichtbar, stehen aber vor dem Befehlstext und
+    // ließen dessen Zeilenanfangs-Anker ins Leere greifen.
+    text = STEUERZEICHEN.matcher(text).replaceAll("");
     text = normalisiereAnfuehrungszeichen(text);
     text = INVERTIERTES_ZITAT.matcher(text).replaceAll("$1„($2) ");
     text = INVERTIERTES_PARAGRAPH_ZITAT.matcher(text).replaceAll("$1„$2");
@@ -290,6 +297,12 @@ public final class TextBereiniger {
         .replace("undwird ", "und wird ")
         .replace("Kommaeingefügt", "Komma eingefügt")
         .replace("Kommaersetzt", "Komma ersetzt")
+        // Umgekehrter Satzfehler: ein Leerzeichen mitten in der Befehlsvokabel („ein ge-“ +
+        // „fügt“ → „ein gefügt“, GVBl. Berlin 2026/17). Nur Fügungen, die als Wortfolge im
+        // Deutschen nicht vorkommen — „er setzt“ etwa bliebe unangetastet.
+        .replace("ein gefügt", "eingefügt")
+        .replace("an gefügt", "angefügt")
+        .replace("auf gehoben", "aufgehoben")
         // Kontextrahmen, an den der folgende Unterpunkt geklebt wurde („geändertaa) In …“).
         .replaceAll("(wie folgt geändert:?)(?=[a-z]{1,3}\\)|\\d+[a-z]?\\.)", "$1\n");
   }
