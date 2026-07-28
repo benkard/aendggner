@@ -4,10 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.UnbekannterBefehl;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortAnker;
 import eu.mulk.aendggner.aenderung.parse.AenderungsgesetzParser;
 import eu.mulk.aendggner.aenderung.parse.PatchTextExtraktor;
 import eu.mulk.aendggner.aenderung.parse.TextBereiniger;
+import eu.mulk.aendggner.aenderung.parse.ZitatExtraktor;
 import eu.mulk.aendggner.anwendung.BefehlAnwender;
 import eu.mulk.aendggner.gesetz.Gesetz;
 import eu.mulk.aendggner.gesetz.gii.GiiXmlLoader;
@@ -517,10 +520,12 @@ class EndToEndTest {
     assertThat(parseErgebnis.befehle()).hasSize(4);
     assertThat(parseErgebnis.befehle()).noneMatch(b -> b instanceof UnbekannterBefehl);
 
-    // Im amtlichen Satz fehlt bei Artikel 2 Nr. 11 das schließende Anführungszeichen. Ohne die
-    // Artikel-Grenze im ZitatExtraktor verschlänge dieses Zitat die Artikel 3 bis 5.
+    // Im amtlichen Satz fehlt bei Artikel 2 Nr. 11 das schließende Anführungszeichen. Ohne eine
+    // Strukturgrenze im ZitatExtraktor verschlänge dieses Zitat die Artikel 3 bis 5. Die Grenze
+    // greift seit der Aufzählungs-Grenze schon am nächsten Punkt desselben Artikels („12.“) und
+    // nicht mehr erst an der Überschrift „Artikel 3“ — Artikel 2 Nr. 12 bleibt damit erhalten.
     assertThat(parseErgebnis.warnungen())
-        .anyMatch(w -> w.startsWith("Zitat vor einer Artikel-Überschrift nicht geschlossen"));
+        .anyMatch(w -> w.startsWith("Zitat vor dem Aufzählungspunkt „12.“ nicht geschlossen"));
 
     var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
     assertThat(anwendung.anzahlAngewandt()).isEqualTo(4);
@@ -562,8 +567,10 @@ class EndToEndTest {
    *
    * <p>Kein voller Akzeptanztest: gesetze.berlin.de ist wie das schleswig-holsteinische Portal eine
    * anmeldepflichtige juris-Anwendung, die Stammfassungen sind daraus nicht zu beschaffen. Artikel 1
-   * ändert zudem eine *Anlage* mit eigener Nummern-Gliederung — ein Änderungsziel, das ÄndGgner
-   * nicht modelliert (dieselbe Grenze, an der Baden-Württemberg zurückgestellt wurde).
+   * ändert zudem eine *Anlage*; anlagenbezogene Befehle wendet ÄndGgner an (siehe GEG), doch der
+   * {@link eu.mulk.aendggner.gesetz.land.LandesRechtTextParser} kennt nur „§“- und
+   * „Art.“-Normköpfe — eine handgepflegte Stammfassung könnte diese Anlage nicht tragen (dieselbe
+   * Grenze, an der Baden-Württemberg zurückgestellt wurde).
    */
   @Test
   void asogLafAendGBerlin() throws Exception {
@@ -612,12 +619,29 @@ class EndToEndTest {
             "§ 67 Absatz 2",
             "Anlage Nummer 6 Absatz 2",
             "Anlage Nummer 23 Absatz 4a",
-            "Anlage Nummer 23");
-    // Bekannte Grenze: „Vor den Wörtern „…“ wird folgender Absatz 5 eingefügt“ — eine
-    // Struktureinfügung, deren Position ein Wortanker statt einer Stelle bestimmt.
-    assertThat(artikel1.befehle().stream().filter(b -> b instanceof UnbekannterBefehl).toList())
-        .singleElement()
-        .extracting(b -> b.provenienz().gliederungsPfad())
-        .isEqualTo("2. b) bb)");
+            "Anlage Nummer 23",
+            "Anlage Nummer 23 Absatz 9",
+            "Anlage Nummer 31");
+    assertThat(artikel1.befehle()).noneMatch(b -> b instanceof UnbekannterBefehl);
+
+    // Nr. 2 b) bb) ist die Struktureinfügung mit Wortanker: „Vor den Wörtern „Aus dem Bereich
+    // Verkehr:“ wird folgender Absatz 5 eingefügt“ — die Position bestimmt der Wortanker, das Ziel
+    // erbt der Befehl aus dem Rahmen („Nummer 23“ der Anlage).
+    var bb =
+        artikel1.befehle().stream()
+            .filter(b -> b.provenienz().gliederungsPfad().equals("2. b) bb)"))
+            .findFirst()
+            .orElseThrow();
+    assertThat(bb).isInstanceOf(StrukturEinfuegung.class);
+    var einfuegung = (StrukturEinfuegung) bb;
+    assertThat(einfuegung.vorher()).isTrue();
+    assertThat(einfuegung.bezeichnung()).isEqualTo("5");
+    assertThat(einfuegung.anker())
+        .isEqualTo(new WortAnker.VorWoertern("Aus dem Bereich Verkehr:"));
+
+    // Bei diesem Punkt fehlt im amtlichen Satz das schließende Anführungszeichen. Ohne die Grenze
+    // am nächsten Aufzählungspunkt verschlänge das offene Zitat die Punkte cc) und c).
+    assertThat(ZitatExtraktor.extrahiere(text).warnungen())
+        .anyMatch(w -> w.startsWith("Zitat vor dem Aufzählungspunkt „cc)“ nicht geschlossen"));
   }
 }

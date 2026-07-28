@@ -106,8 +106,10 @@ folgt geändert").
   abgeglichen. Die übrigen Artikel (WDR-Gesetz, Landesmediengesetz, 17. RÄStV-AusfG) bleiben offen.
 * *Berlin* ist bis zur Befehlserkennung umgesetzt (`EndToEndTest.asogLafAendGBerlin`): Artikel 2
   (LAF-Errichtungsgesetz) wird vollständig erkannt, beide Punkte erben ihr Ziel aus der
-  Änderungsformel. Von Artikel 1 werden drei der vier Befehle erkannt, einschließlich der
-  Änderungen an der unnummerierten Anlage; der vierte nutzt einen Wortanker (siehe „Noch offen“).
+  Änderungsformel. Artikel 1 wird seit der Wortanker-Einfügung und der Zitatgrenze am
+  Aufzählungspunkt *vollständig* erkannt — alle sechs Befehle, einschließlich der Änderungen an der
+  unnummerierten Anlage. Ein voller Akzeptanztest bleibt an der Stammfassung hängen (siehe „Noch
+  offen“).
 * Baden-Württemberg (GBl 2026 Nr. 26): großes Anlage-lastiges Änderungsgesetz (§§ 4–57a + Anlagen
   1/3b/4b); Stammfassung/Akzeptanztest noch offen.
 
@@ -142,6 +144,13 @@ Fällt das Portal aus, bleibt der Weg über das Gesetzblatt selbst: Trägt der E
 Stammfassung (so bei Niedersachsen). Die Extraktion zweispaltiger Hefte übernimmt `--extract-only`
 des Werkzeugs selbst; `pdftotext -layout` verschränkt dort die Spalten.
 
+Ein Fallstrick beim Prüfen extrahierter Hefte: Das GV.-NRW.-Heft 7/2026 kodiert einen Teil seiner
+Umlaute *zerlegt* (`u` + U+0308 statt `ü`, 79 Stellen, darunter dutzende „eingefügt:“/„angefügt:“).
+Im Text ist das unsichtbar, für jedes Befehlsmuster aber ein anderes Wort. `TextBereiniger.bereinige`
+normalisiert deshalb ganz früh nach NFC — nicht NFKC, das plättete die amtlichen Satznummern ¹²³ zu
+gewöhnlichen Ziffern. Wer Klartext von Hand aufbereitet, sollte ihn ebenfalls in NFC ablegen; der
+Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
+
 == Noch offen
 
 * *Schleswig-Holstein — Stammfassung nicht beschaffbar*: Das Landesportal
@@ -163,14 +172,6 @@ des Werkzeugs selbst; `pdftotext -layout` verschränkt dort die Spalten.
   „Art.“-Normköpfe: Eine handgepflegte Stammfassung kann *keine* Anlage tragen. Das ist die
   konkrete Lücke für Berlin (Artikel 1) und Baden-Württemberg (Anlagen 1/3b/4b) — sie wird erst
   behebbar, wenn für eines der beiden eine Stammfassung vorliegt.
-* *Struktureinfügung mit Wortanker*: „Vor den Wörtern „Aus dem Bereich Verkehr:“ wird folgender
-  Absatz 5 eingefügt“ (Berlin Artikel 1 Nr. 2 b) bb)) — die Position der neuen Einheit bestimmt
-  ein Wortanker statt einer Stellenangabe. `StrukturEinfuegung` trägt bislang nur eine Stelle.
-* *Unbalancierte Anführungszeichen innerhalb eines Artikels*: Die Strukturgrenze des
-  Zitatextraktors greift nur an Artikel-Überschriften. In Berlin Artikel 1 fehlt bei Nummer 2 b) bb)
-  das schließende Anführungszeichen; das Zitat verschlingt daher die folgenden Punkte cc) und c).
-  Eine Grenze an Aufzählungsmarkern ist nicht möglich — zitierter Gesetzestext enthält selbst
-  Aufzählungen (dafür gibt es die Fortführungszeichen-Erkennung).
 * *Berlin, ganzseitenbreite Rahmen*: Titelblock und Impressum stehen im Inhaltsstrom an anderer
   Stelle als im Satzbild (der Titelblock mitten im Fließtext der ersten Seite). Das zu beheben
   verlangt eine geometrische Lesereihenfolge (XY-Cut), nicht bloß eine Spaltenerkennung.
@@ -184,13 +185,13 @@ des Werkzeugs selbst; `pdftotext -layout` verschränkt dort die Spalten.
 Kein Land scheitert noch an reiner Extraktionsschwäche; offen sind Modell- und Beschaffungsfragen.
 Nach absteigendem Nutzen:
 
-. *Struktureinfügung mit Wortanker* (siehe „Noch offen“). Rein im Modell zu lösen, ohne neue
-  Stammfassung: `StrukturEinfuegung` um einen Wortanker ergänzen, wie ihn `WoerterEinfuegung`
-  bereits trägt. Belegfall ist Berlin Artikel 1 Nr. 2 b) bb); prüfbar bis zur Befehlserkennung.
 . *Weitere Artikel des NRW-Heftes* (WDR-Gesetz, Landesmediengesetz). Die Stammfassungen sind über
   das oben beschriebene recht.nrw.de-Rezept unmittelbar greifbar, und die Nachfassungen erlauben
-  wieder den Abgleich gegen den amtlichen Text. Ergibt einen Massentest mit über hundert Befehlen.
-. *Anlagen-Normköpfe im `LandesRechtTextParser`* — lohnt erst zusammen mit (2) oder sobald für
+  wieder den Abgleich gegen den amtlichen Text. Ergibt einen Massentest mit über hundert Befehlen:
+  Seit der NFC-Normalisierung erkennt der Parser in Artikel 1 (WDR-Gesetz) 103 Befehle, davon 20
+  noch nicht, in Artikel 2 (Landesmediengesetz) 18 Befehle, davon 5 noch nicht — diese Reste sind
+  der eigentliche Ertrag des Massentests.
+. *Anlagen-Normköpfe im `LandesRechtTextParser`* — lohnt erst zusammen mit (1) oder sobald für
   Berlin bzw. Baden-Württemberg eine Stammfassung vorliegt, sonst nicht end-to-end prüfbar.
 . *Hessen* als Sperrsatz-Härtetest („3 . F e bru a r 2 02 6“). Betrifft nur Datums- und
   Signaturzeilen, nicht die Befehle — kosmetisch, aber ein eigener Extraktionsfall.

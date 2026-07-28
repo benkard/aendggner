@@ -162,6 +162,31 @@ class BefehlErkennerTest {
   }
 
   @Test
+  void erkenntStrukturEinfuegungMitWortanker() {
+    // Echter Befehl aus Artikel 1 Nr. 2 b) bb) des ASOG-/LAF-Änderungsgesetzes (GVBl. für Berlin
+    // 17/2026): Die Position der neuen Einheit bestimmt ein Wortanker, das Ziel erbt der Befehl aus
+    // dem Rahmen („Nummer 23“ der Anlage).
+    var kontext =
+        new Stelle(
+            List.of(new Stelle.Gliederungseinheit("Anlage", ""), new Stelle.NummerNr("23")));
+    var befehl =
+        erkenne(
+            "Vor den Wörtern „Aus dem Bereich Verkehr:“ wird folgender Absatz 5 eingefügt:"
+                + " „(5) die Identifizierung unerlaubt eingereister Ausländerinnen und Ausländer.“",
+            kontext);
+
+    assertThat(befehl).containsInstanceOf(StrukturEinfuegung.class);
+    var einfuegung = (StrukturEinfuegung) befehl.orElseThrow();
+    assertThat(einfuegung.stelle().anzeigeText()).isEqualTo("Anlage Nummer 23");
+    assertThat(einfuegung.vorher()).isTrue();
+    assertThat(einfuegung.ebene()).isEqualTo(Ebene.ABSATZ);
+    assertThat(einfuegung.bezeichnung()).isEqualTo("5");
+    assertThat(einfuegung.anker())
+        .isEqualTo(new WortAnker.VorWoertern("Aus dem Bereich Verkehr:"));
+    assertThat(einfuegung.text()).startsWith("(5) die Identifizierung");
+  }
+
+  @Test
   void erkenntWoerterEinfuegung() {
     var befehl =
         erkenne(

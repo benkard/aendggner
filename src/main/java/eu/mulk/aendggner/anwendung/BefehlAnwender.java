@@ -706,6 +706,10 @@ public final class BefehlAnwender {
 
   private static AngewandteAenderung wendeStrukturEinfuegungAn(
       List<Norm> normen, StrukturEinfuegung befehl) {
+    var wortAnker = befehl.anker();
+    if (wortAnker != null) {
+      return wendeWortankerEinfuegungAn(normen, befehl, wortAnker);
+    }
     return switch (befehl.ebene()) {
       case PARAGRAPH -> {
         var aufloesung = loeseNormAuf(normen, befehl.stelle());
@@ -792,6 +796,52 @@ public final class BefehlAnwender {
                         : text.substring(0, position) + "\n" + block + text.substring(position));
               });
     };
+  }
+
+  /**
+   * „Vor den Wörtern „Aus dem Bereich Verkehr:“ wird folgender Absatz 5 eingefügt: „…““ — die
+   * Position der neuen Einheit bestimmt hier ein Wortanker, nicht die Struktur. Der Einfügeblock
+   * tritt deshalb als eigene Zeile vor bzw. hinter die Zeile des Ankers; welche strukturelle Ebene
+   * der Befehl nennt, ist dabei ohne Belang (in einer Anlage stehen Absätze und Nummern als Zeilen
+   * eines Textes).
+   */
+  private static AngewandteAenderung wendeWortankerEinfuegungAn(
+      List<Norm> normen, StrukturEinfuegung befehl, WortAnker anker) {
+    return bearbeiteText(
+        normen,
+        befehl,
+        ohneFussnoten(
+            text -> {
+              var woerter =
+                  switch (anker) {
+                    case WortAnker.NachWoertern nach -> nach.woerter();
+                    case WortAnker.VorWoertern vor -> vor.woerter();
+                    // „am Ende“ ist kein Einfügeanker für ganze Einheiten — dafür gibt es die
+                    // Anfügung.
+                    case WortAnker.AmEnde ignoriert -> null;
+                    case WortAnker.VorKommaAmEnde ignoriert -> null;
+                  };
+              if (woerter == null) {
+                return TextErgebnis.fehler(
+                    "Einfügeanker ohne Wortlaut wird für Struktureinfügungen nicht unterstützt.");
+              }
+              var pruefung = eindeutigeFundstelle(text, woerter);
+              if (pruefung.fehler() != null) {
+                return TextErgebnis.fehler(pruefung.fehler());
+              }
+              int zeilenAnfang = text.lastIndexOf('\n', pruefung.index()) + 1;
+              int zeilenEnde = text.indexOf('\n', pruefung.index());
+              if (zeilenEnde < 0) {
+                zeilenEnde = text.length();
+              }
+              var block =
+                  rueckeZitatEin(
+                      normalisiereZitatText(befehl.text()), einrueckungVon(text, zeilenAnfang));
+              return TextErgebnis.ok(
+                  befehl.vorher()
+                      ? text.substring(0, zeilenAnfang) + block + "\n" + text.substring(zeilenAnfang)
+                      : text.substring(0, zeilenEnde) + "\n" + block + text.substring(zeilenEnde));
+            }));
   }
 
   private static AngewandteAenderung wendeAnfuegungAn(List<Norm> normen, Anfuegung befehl) {

@@ -94,6 +94,68 @@ class ZitatExtraktorTest {
   }
 
   @Test
+  void schliesstOffenesZitatVorDemNaechstenAufzaehlungspunkt() {
+    // GVBl. für Berlin 17/2026 Artikel 1 Nr. 2 b) bb): Am Ende des neu gefassten Absatzes fehlt das
+    // schließende Anführungszeichen, das Zitat verschlänge sonst die Punkte cc) und c).
+    var ergebnis =
+        ZitatExtraktor.extrahiere(
+            "Artikel 1\n"
+                + "bb) Vor den Wörtern „Aus dem Bereich Verkehr:“ wird folgender Absatz 5"
+                + " eingefügt:\n"
+                + "„(5) Die Sicherheitskontrolle.\n"
+                + "cc) Die bisherigen Absätze 5 bis 9 werden die Absätze 6 bis 10.\n"
+                + "c) Nummer 31 wird wie folgt gefasst:\n"
+                + "„Nummer 31\nNeuer Text.“\n");
+
+    // Zitat 0 ist der Wortanker, Zitat 1 der unvollständig zitierte neue Absatz, Zitat 2 die
+    // Neufassung aus Punkt c) — dieser Punkt bleibt also erhalten.
+    assertThat(ergebnis.zitate()).hasSize(3);
+    assertThat(ergebnis.zitat(1)).isEqualTo("(5) Die Sicherheitskontrolle.");
+    assertThat(ergebnis.zitat(2)).isEqualTo("Nummer 31\nNeuer Text.");
+    assertThat(ergebnis.text())
+        .contains("cc) Die bisherigen Absätze 5 bis 9 werden die Absätze 6 bis 10.")
+        .contains("c) Nummer 31 wird wie folgt gefasst:");
+    assertThat(ergebnis.warnungen()).hasSize(1);
+    assertThat(ergebnis.warnungen().get(0))
+        .startsWith("Zitat vor dem Aufzählungspunkt „cc)“ nicht geschlossen");
+  }
+
+  @Test
+  void raetNichtImAusbalanciertenAbschnitt() {
+    // Ein zitiertes Änderungsgesetz trägt selbst Befehlssprache in seinen Aufzählungspunkten (so in
+    // den bayerischen GVBl-Heften). Solange die Anführungszeichen des Artikels aufgehen, wird
+    // deshalb nicht geraten — das Zitat läuft über die Punkte hinweg.
+    var ergebnis =
+        ZitatExtraktor.extrahiere(
+            "Artikel 1\n"
+                + "2. § 5 wird wie folgt gefasst:\n"
+                + "„Die Verordnung wird wie folgt geändert:\n"
+                + "1. § 2 wird wie folgt geändert:\n"
+                + "2. § 3 wird aufgehoben.“\n");
+
+    assertThat(ergebnis.zitate()).hasSize(1);
+    assertThat(ergebnis.zitat(0)).contains("1. § 2 wird wie folgt geändert:");
+    assertThat(ergebnis.warnungen()).isEmpty();
+  }
+
+  @Test
+  void schliesstNichtAnTieferemAufzaehlungspunkt() {
+    // Der Marker der Folgezeile muss auf derselben oder einer flacheren Ebene liegen als der Punkt,
+    // auf dem das Zitat aufging: eine zitierte Untergliederung setzt das Zitat nicht ab.
+    var ergebnis =
+        ZitatExtraktor.extrahiere(
+            "Artikel 1\n"
+                + "2. § 5 wird wie folgt gefasst:\n"
+                + "„(1) Es gilt:\n"
+                + "aa) § 7 wird aufgehoben.\n");
+
+    assertThat(ergebnis.zitate()).hasSize(1);
+    assertThat(ergebnis.zitat(0)).contains("aa) § 7 wird aufgehoben.");
+    assertThat(ergebnis.warnungen()).hasSize(1);
+    assertThat(ergebnis.warnungen().get(0)).contains("offen");
+  }
+
+  @Test
   void stelltZitateWiederHer() {
     var original = "Das Wort „alt“ wird durch das Wort „neu“ ersetzt.";
     var ergebnis = ZitatExtraktor.extrahiere(original);

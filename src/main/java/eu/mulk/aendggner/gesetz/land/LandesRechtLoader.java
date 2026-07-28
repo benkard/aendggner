@@ -6,6 +6,7 @@ import eu.mulk.aendggner.aenderung.parse.TextBereiniger;
 import eu.mulk.aendggner.gesetz.Gesetz;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.text.Normalizer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.tika.Tika;
@@ -40,7 +41,11 @@ public final class LandesRechtLoader {
               nachSatzendeGetrennteNormkoepfe(
                   TextBereiniger.bereinige(
                       new PatchTextExtraktor(SuperskriptModus.BEHALTEN).extrahiere(datei)));
-          case "text/plain" -> Files.readString(datei, StandardCharsets.UTF_8);
+          // Auch der handgepflegte Klartext wird kanonisch zusammengesetzt (NFC), damit Stammtext
+          // und Befehlstext gleich kodiert sind — der PDF-Zweig erledigt das über bereinige().
+          case "text/plain" ->
+              Normalizer.normalize(
+                  Files.readString(datei, StandardCharsets.UTF_8), Normalizer.Form.NFC);
           default ->
               throw new IOException(
                   "Nicht unterstützter Dateityp %s für Stammgesetz %s (unterstützt: PDF, Klartext)"

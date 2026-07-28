@@ -219,6 +219,91 @@ class BefehlAnwenderTest {
   }
 
   @Test
+  void fuegtEinheitVorWortankerEin() {
+    // „Vor den Wörtern „…“ wird folgende Nummer 1a eingefügt: „…““ — die Position bestimmt der
+    // Wortanker, nicht die Struktur (GVBl. für Berlin 17/2026, Artikel 1 Nr. 2 b) bb)).
+    var befehl =
+        new StrukturEinfuegung(
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2")),
+            true,
+            Ebene.NUMMER,
+            "1a",
+            "1a. die Prüfung von Zitaten,",
+            new WortAnker.VorWoertern("die Anwendung von Befehlen"),
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "§ 1", 1))
+        .isEqualTo(
+            "Die Erprobung umfasst\n"
+                + "  1. das Einlesen von Gesetzen,\n"
+                + "  1a. die Prüfung von Zitaten,\n"
+                + "  2. die Anwendung von Befehlen und\n"
+                + "  3. die Ausgabe von Synopsen.");
+  }
+
+  @Test
+  void fuegtEinheitNachWortankerEin() {
+    var befehl =
+        new StrukturEinfuegung(
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2")),
+            false,
+            Ebene.NUMMER,
+            "1a",
+            "1a. die Prüfung von Zitaten,",
+            new WortAnker.NachWoertern("das Einlesen von Gesetzen"),
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "§ 1", 1))
+        .contains("  1. das Einlesen von Gesetzen,\n  1a. die Prüfung von Zitaten,\n  2. die"
+            + " Anwendung von Befehlen und");
+  }
+
+  @Test
+  void meldetFehlendenWortankerEinerEinfuegung() {
+    var befehl =
+        new StrukturEinfuegung(
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2")),
+            true,
+            Ebene.NUMMER,
+            "1a",
+            "1a. die Prüfung von Zitaten,",
+            new WortAnker.VorWoertern("gibt es nicht"),
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+
+    var eintrag = ergebnis.protokoll().get(0);
+    assertThat(eintrag.status()).isEqualTo(Status.MANUELL_PRUEFEN);
+    assertThat(eintrag.begruendung()).contains("kommt im Zieltext nicht vor");
+  }
+
+  @Test
+  void meldetMehrdeutigenWortankerEinerEinfuegung() {
+    // „Prüfung“ steht zweimal im Wortlaut des § 2 — die Position wäre nicht bestimmt.
+    var befehl =
+        new StrukturEinfuegung(
+            stelle(new Stelle.Paragraph("2")),
+            true,
+            Ebene.SATZ,
+            null,
+            "Die Prüfung ist zu dokumentieren.",
+            new WortAnker.VorWoertern("Prüfung"),
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+
+    var eintrag = ergebnis.protokoll().get(0);
+    assertThat(eintrag.status()).isEqualTo(Status.MANUELL_PRUEFEN);
+    assertThat(eintrag.begruendung()).contains("mehrdeutig");
+  }
+
+  @Test
   void fuegtWoerterNachAnkerEin() {
     var befehl =
         new WoerterEinfuegung(

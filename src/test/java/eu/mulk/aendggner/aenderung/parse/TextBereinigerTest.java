@@ -20,6 +20,25 @@ class TextBereinigerTest {
   }
 
   @Test
+  void setztZerlegteUmlauteKanonischZusammen() {
+    // Das GV.-NRW.-Heft 7/2026 kodiert einen Teil seiner Umlaute zerlegt; für die Befehlsmuster wäre
+    // „angefügt“ dann ein anderes Wort und dutzende Befehle könnten nie matchen.
+    // Der Umlaut steht hier bewusst zerlegt (u + U+0308), wie im Heft.
+    var roh = "Dem § 128 wird folgender Absatz 3 angefu\u0308gt:";
+
+    assertThat(TextBereiniger.bereinige(roh))
+        .isEqualTo("Dem § 128 wird folgender Absatz 3 angefügt:");
+  }
+
+  @Test
+  void erhaeltAmtlicheSatznummernBeiDerNormalisierung() {
+    // NFC, nicht NFKC: Letzteres plättete die amtlichen Satznummern zu gewöhnlichen Ziffern und
+    // nähme SatzTeiler und Superskript ihre Grundlage.
+    assertThat(TextBereiniger.bereinige("¹Erster Satz. ²Zweiter Satz."))
+        .isEqualTo("¹Erster Satz. ²Zweiter Satz.");
+  }
+
+  @Test
   void ziehtSilbentrennungZusammen() {
     assertThat(TextBereiniger.bereinige("die Bundes-\nregierung")).isEqualTo("die Bundesregierung");
   }

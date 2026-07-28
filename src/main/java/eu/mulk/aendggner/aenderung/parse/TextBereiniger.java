@@ -1,6 +1,7 @@
 package eu.mulk.aendggner.aenderung.parse;
 
 import eu.mulk.aendggner.gesetz.Superskript;
+import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -212,6 +213,13 @@ public final class TextBereiniger {
   private TextBereiniger() {}
 
   public static String bereinige(String rohText) {
+    // Manche Gesetzblatt-PDFs kodieren einen Teil ihrer Umlaute zerlegt (GV. NRW. 2026 S. 202:
+    // „angefu“ + U+0308 + „gt“, 79 Stellen). Für die Befehlsmuster ist ein solches „angefügt“ ein
+    // anderes Wort — dutzende Einfüge- und Anfügebefehle könnten nie matchen. Deshalb ganz früh
+    // kanonisch zusammensetzen. NFC, nicht NFKC: NFKC plättete die amtlichen Satznummern ¹²³ zu
+    // gewöhnlichen Ziffern und nähme SatzTeiler und Superskript ihre Grundlage. Die Umbruch-Marker
+    // des FontgroessenFilters liegen im Private-Use-Bereich und bleiben unberührt.
+    rohText = Normalizer.normalize(rohText, Normalizer.Form.NFC);
     // Geschützte Leerzeichen (GVBl-Satz: „§  1“, „Abs.  2“) sind für Javas \s und
     // String.strip unsichtbar — früh auf gewöhnliche Leerzeichen normalisieren.
     var text = rohText.replace(' ', ' ').replace(' ', ' ');

@@ -206,6 +206,19 @@ final class BefehlErkenner {
               + Z
               + "\\.?$");
 
+  // „Vor den Wörtern „Aus dem Bereich Verkehr:“ wird folgender Absatz 5 eingefügt: „…““ (GVBl. für
+  // Berlin 17/2026, Artikel 1 Nr. 2 b) bb)) — die Position der neuen Einheit bestimmt ein Wortanker
+  // statt einer Stellenangabe; das Ziel selbst erbt der Befehl aus dem Kontextrahmen.
+  private static final Pattern STRUKTUR_EINFUEGUNG_WORTANKER =
+      Pattern.compile(
+          "^(Nach|Vor) (?:dem Wort|den Wörtern|der Angabe|der Zahl) "
+              + Z
+              + " (?:wird|werden) (?:der |die |das )?folgende[nrs]? (?:neue[nrs]? )?(.+?) "
+              + "(?:ein|an)gefügt: "
+              + ENUM
+              + Z
+              + "\\.?$");
+
   // „In Kapitel 4 wird nach § 12 der folgende neue § 13 angefügt: „…““ — gliederungsbezogene
   // Einfügung. Die Gliederungsangabe nennt nur den Abschnitt, in dem die neue Einheit landet;
   // maßgeblich für die Position ist der Anker („nach § 12“), der ohnehin eindeutig ist.
@@ -906,6 +919,35 @@ final class BefehlErkenner {
               Ebene.PARAGRAPH,
               null,
               zitat(zitate, m.group(3)),
+              provenienz));
+    }
+
+    // Vor STRUKTUR_EINFUEGUNG: dort scheitert die Wortanker-Form am StellenParser („den Wörtern
+    // «0»“) und verließe die Erkennung mit Optional.empty(), sodass kein späteres Muster mehr zum
+    // Zuge käme.
+    if ((m = STRUKTUR_EINFUEGUNG_WORTANKER.matcher(text)).matches()) {
+      var ebeneBez = ebeneUndBezeichnung(m.group(3));
+      if (ebeneBez.isEmpty()) {
+        return Optional.empty();
+      }
+      var ankerWoerter = wortZitat(zitate, m.group(2));
+      var anker =
+          m.group(1).equalsIgnoreCase("nach")
+              ? new WortAnker.NachWoertern(ankerWoerter)
+              : new WortAnker.VorWoertern(ankerWoerter);
+      var textInhalt =
+          mitEnumerator(
+              m.group(4),
+              labelFuer(ebeneBez.get().ebene(), ebeneBez.get().bezeichnung()),
+              zitat(zitate, m.group(5)));
+      return Optional.of(
+          new StrukturEinfuegung(
+              kontext,
+              m.group(1).equalsIgnoreCase("vor"),
+              ebeneBez.get().ebene(),
+              ebeneBez.get().bezeichnung(),
+              textInhalt,
+              anker,
               provenienz));
     }
 

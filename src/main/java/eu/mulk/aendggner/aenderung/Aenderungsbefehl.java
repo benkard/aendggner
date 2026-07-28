@@ -73,6 +73,9 @@ public sealed interface Aenderungsbefehl {
    * @param vorher {@code true} bei „Vor …“, {@code false} bei „Nach …“.
    * @param bezeichnung die Bezeichnung des neuen Elements (z.B. „28a“, „5a“); {@code null}, wenn
    *     der Befehl keine nennt (z.B. „folgender Satz“).
+   * @param anker bei „Vor den Wörtern „Aus dem Bereich Verkehr:“ wird folgender Absatz 5
+   *     eingefügt“ der Wortanker, der die Position innerhalb von {@code stelle} bestimmt;
+   *     {@code null}, wenn die Position wie üblich aus der Struktur folgt.
    */
   record StrukturEinfuegung(
       Stelle stelle,
@@ -80,8 +83,21 @@ public sealed interface Aenderungsbefehl {
       Ebene ebene,
       @Nullable String bezeichnung,
       String text,
+      @Nullable WortAnker anker,
       Provenienz provenienz)
-      implements Aenderungsbefehl {}
+      implements Aenderungsbefehl {
+
+    /** Konstruktor für die strukturbestimmte Position (kein Wortanker). */
+    public StrukturEinfuegung(
+        Stelle stelle,
+        boolean vorher,
+        Ebene ebene,
+        @Nullable String bezeichnung,
+        String text,
+        Provenienz provenienz) {
+      this(stelle, vorher, ebene, bezeichnung, text, null, provenienz);
+    }
+  }
 
   /** „Folgender Absatz 9 wird angefügt: „…““ / „Dem Absatz 3 wird folgender Satz angefügt: …“ */
   record Anfuegung(
