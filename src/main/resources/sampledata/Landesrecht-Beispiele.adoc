@@ -99,11 +99,28 @@ folgt geändert").
   (`EndToEndTest.kommunalrechtAendGSchleswigHolstein`): Artikel 1 trifft die Gemeindeordnung,
   Artikel 2 die Kreisordnung, je ein Neufassungsbefehl, kein unbekannter Befehl. Ein voller
   Akzeptanztest ist *nicht* möglich — siehe „Noch offen“.
-* *Nordrhein-Westfalen* ist umgesetzt: `NRW/TMZ-Gesetz-alt.txt` (Telemedienzuständigkeitsgesetz in
-  der Fassung vom 27.04.2022, aus der Fassungshistorie von recht.nrw.de) und
-  `EndToEndTest.tmzGesetzAcceptance` (Artikel 3 des 22. Rundfunkänderungsgesetzes; alle vier
-  Befehle angewandt, kein Rest). Das Ergebnis ist gegen die amtliche Fassung vom 01.04.2026
-  abgeglichen. Die übrigen Artikel (WDR-Gesetz, Landesmediengesetz, 17. RÄStV-AusfG) bleiben offen.
+* *Nordrhein-Westfalen* ist der Massentest-Fall: aus demselben Heft sind drei Artikel als
+  Akzeptanzfälle hinterlegt.
++
+--
+`EndToEndTest.tmzGesetzAcceptance`:: Artikel 3 (Telemedienzuständigkeitsgesetz), vier Befehle,
+kein Rest. Stamm `NRW/TMZ-Gesetz-alt.txt`.
+`EndToEndTest.wdrGesetzAcceptance`:: Artikel 1 (WDR-Gesetz), 101 Befehle an 31 Normen, davon 100
+angewandt. Stamm `NRW/WDR-Gesetz-alt.txt` (Fassung vom 01.01.2025). Der Fall trägt die
+Umnummerierungs-Kaskaden (§ 3: Absatz 2 → zwei Absätze, die Absätze 3 bis 11 rücken auf, ein neuer
+Absatz 13 kommt hinzu; § 15 Absatz 3: Nummer 22 entfällt, 23 bis 37 rücken auf), den Sammelrahmen
+„Es werden ersetzt:“ und die Angabe-Befehle auf die Inhaltsübersicht. Einziges Residuum ist
+Nr. 13 e) aa): „der Punkt am Ende des Satzes“ ist in einer zweisätzigen Nummer nicht eindeutig.
+`EndToEndTest.lmgNrwAcceptance`:: Artikel 2 (Landesmediengesetz), 18 Befehle, kein Rest. Stamm
+`NRW/LMG-NRW-alt.txt` (Fassung vom 01.01.2025).
+--
++
+Alle drei Ergebnisse sind normweise gegen die amtliche Fassung vom 01.04.2026 abgeglichen. Es
+bleiben nur Abweichungen, in denen die amtliche Nachfassung selbst vom Befehlswortlaut abweicht
+(§ 15 WDR-Gesetz: „des“ vor „Bundesreisekostengesetzes“ entfallen; § 7 und § 21 WDR-Gesetz: ein
+überzähliges Anführungszeichen aus dem Änderungsgesetz; § 93 LMG NRW: zusätzlich die Wörter
+„Film (“ gestrichen) — ÄndGgner wendet dort den Wortlaut an. Offen bleibt Artikel 4
+(17. RÄStV-AusfG).
 * *Berlin* ist bis zur Befehlserkennung umgesetzt (`EndToEndTest.asogLafAendGBerlin`): Artikel 2
   (LAF-Errichtungsgesetz) wird vollständig erkannt, beide Punkte erben ihr Ziel aus der
   Änderungsformel. Artikel 1 wird seit der Wortanker-Einfügung und der Zitatgrenze am
@@ -185,19 +202,15 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
 Kein Land scheitert noch an reiner Extraktionsschwäche; offen sind Modell- und Beschaffungsfragen.
 Nach absteigendem Nutzen:
 
-. *Weitere Artikel des NRW-Heftes* (WDR-Gesetz, Landesmediengesetz). Die Stammfassungen sind über
-  das oben beschriebene recht.nrw.de-Rezept unmittelbar greifbar, und die Nachfassungen erlauben
-  wieder den Abgleich gegen den amtlichen Text. Ergibt einen Massentest mit über hundert Befehlen:
-  Seit der NFC-Normalisierung erkennt der Parser in Artikel 1 (WDR-Gesetz) 103 Befehle, davon 20
-  noch nicht, in Artikel 2 (Landesmediengesetz) 18 Befehle, davon 5 noch nicht — diese Reste sind
-  der eigentliche Ertrag des Massentests.
-. *Anlagen-Normköpfe im `LandesRechtTextParser`* — lohnt erst zusammen mit (1) oder sobald für
-  Berlin bzw. Baden-Württemberg eine Stammfassung vorliegt, sonst nicht end-to-end prüfbar.
+. *Anlagen-Normköpfe im `LandesRechtTextParser`* — der Parser kennt jetzt neben „§“/„Art.“ auch
+  die Inhaltsübersicht als Norm; die Anlage fehlt noch. Lohnt, sobald für Berlin bzw.
+  Baden-Württemberg eine Stammfassung vorliegt, sonst nicht end-to-end prüfbar.
 . *Hessen* als Sperrsatz-Härtetest („3 . F e bru a r 2 02 6“). Betrifft nur Datums- und
   Signaturzeilen, nicht die Befehle — kosmetisch, aber ein eigener Extraktionsfall.
 
 Regressionsschutz: `./mvnw verify` prüft die bestehenden Belegfälle mit. Gepinnt ist dabei nicht
 überall dieselbe Art von Zahl — für UWG, AGG und ProdHaftG, dass *kein* Befehl manuell bleibt; für
-das BayJG die 154 erkannten Befehle und namentlich die fünf Umnummerierungs-Residuen; für Sachsen,
-Niedersachsen und Nordrhein-Westfalen die vollständige Anwendung ohne Rest. Wer eine dieser Zahlen
+das BayJG die 154 erkannten Befehle und namentlich die drei Umnummerierungs-Residuen; für Sachsen,
+Niedersachsen und die drei NRW-Artikel die vollständige Anwendung bis auf das eine benannte
+Residuum im WDR-Gesetz. Wer eine dieser Zahlen
 ändern muss, sollte den Grund im Test vermerken.

@@ -74,4 +74,48 @@ class SatzTeilerTest {
     assertThat(saetze.get(0)).contains("2. die Anwendung und");
     assertThat(saetze.get(1)).isEqualTo("Weitere Einzelheiten regelt die Verordnung.");
   }
+
+  @Test
+  void aufzaehlungsmarkeAmZeilenanfangBeendetKeinenSatz() {
+    // Anders als im Test darüber beginnen die Glieder großgeschrieben — erst die Marke am
+    // Zeilenanfang unterscheidet sie von einer Zahl am Satzende.
+    var text =
+        "Dem Rundfunkrat obliegen insbesondere folgende Aufgaben\n"
+            + "1. Erlaß von Satzungen,\n"
+            + "2. Wahl der Intendantin oder des Intendanten.\n"
+            + "Vor Beschlüssen ist Gelegenheit zur Stellungnahme zu geben.";
+    var saetze = SatzTeiler.teileTexte(text);
+
+    assertThat(saetze).hasSize(2);
+    assertThat(saetze.get(0)).contains("2. Wahl der Intendantin");
+    assertThat(saetze.get(1)).startsWith("Vor Beschlüssen");
+  }
+
+  @Test
+  void zahlAmSatzendeBeendetDenSatz() {
+    var saetze = SatzTeiler.teileTexte("Die Frist beträgt 30. Der Lauf beginnt am Folgetag.");
+
+    assertThat(saetze).containsExactly("Die Frist beträgt 30.", "Der Lauf beginnt am Folgetag.");
+  }
+
+  @Test
+  void fundstellenAbkuerzungTeiltDenSatzNicht() {
+    var saetze =
+        SatzTeiler.teileTexte(
+            "Es gilt das Gesetz vom 23. Juni 2021 (BGBl. I S. 1982) in der geltenden Fassung."
+                + " Näheres regelt die Satzung.");
+
+    assertThat(saetze).hasSize(2);
+    assertThat(saetze.get(0)).endsWith("in der geltenden Fassung.");
+  }
+
+  @Test
+  void paragraphenzeichenEroeffnetEinenSatz() {
+    var saetze =
+        SatzTeiler.teileTexte(
+            "Die Angebote können zusammengefasst werden. § 27 Absatz 2 bleibt unberührt.");
+
+    assertThat(saetze).containsExactly(
+        "Die Angebote können zusammengefasst werden.", "§ 27 Absatz 2 bleibt unberührt.");
+  }
 }

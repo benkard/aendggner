@@ -193,4 +193,65 @@ class LandesRechtTextParserTest {
     assertThat(mitGedankenstrich.jurabk()).isEqualTo("GO");
     assertThat(mitGedankenstrich.kurzue()).isEqualTo("Gemeindeordnung");
   }
+
+  /**
+   * Die Inhaltsübersicht ist eine eigene Norm — nur unter diesem Namen finden sie die
+   * Angabe-Befehle. Sie führt auch die Gliederungs-Überschriften des Gesetzes mit; daran darf sie
+   * nicht zerfallen.
+   */
+  @Test
+  void liestInhaltsuebersichtAlsNorm() {
+    var gesetz =
+        LandesRechtTextParser.parse(
+            """
+            Landesmediengesetz Nordrhein-Westfalen
+            (LMG NRW)
+            Vom 2. Juli 2002
+            Inhaltsübersicht
+            Abschnitt 1 Allgemeine Vorschriften
+            § 1 | Geltungsbereich
+            Abschnitt 2 Zulassung
+            § 4 | Grundsätze
+            Abschnitt 1 Allgemeine Vorschriften
+            § 1  Geltungsbereich
+            (1) Dieses Gesetz gilt für die Veranstaltung von Rundfunk.
+            """);
+
+    var uebersicht = gesetz.norm("Inhaltsübersicht").orElseThrow();
+    assertThat(uebersicht.gesamtText())
+        .contains("Abschnitt 1 Allgemeine Vorschriften")
+        .contains("§ 1 | Geltungsbereich")
+        .contains("Abschnitt 2 Zulassung")
+        .contains("§ 4 | Grundsätze");
+    // Nur die Gliederung des Textteils zählt, nicht die zitierte in der Übersicht.
+    assertThat(gesetz.gliederungen()).hasSize(1);
+    assertThat(gesetz.norm("§ 1").orElseThrow().titel()).isEqualTo("Geltungsbereich");
+  }
+
+  /** Römische Gliederung ohne Schlüsselwort — sie ist nur an ihrer Stellung erkennbar. */
+  @Test
+  void erkenntRoemischeGliederungOhneSchluesselwort() {
+    var gesetz =
+        LandesRechtTextParser.parse(
+            """
+            Gesetz über den Westdeutschen Rundfunk Köln
+            (WDR-Gesetz)
+            Vom 25. April 1998
+            I. Rechtsform und Aufgaben
+            § 1  Name, Rechtsform
+            (1) Der WDR ist eine Anstalt des öffentlichen Rechts.
+            II. Organisation
+            1. Der Rundfunkrat
+            § 15  Zusammensetzung
+            (1) Der Rundfunkrat besteht aus Mitgliedern.
+            """);
+
+    assertThat(gesetz.gliederungen())
+        .extracting(Gliederung::bezeichnung, Gliederung::titel)
+        .containsExactly(
+            org.assertj.core.groups.Tuple.tuple("I.", "Rechtsform und Aufgaben"),
+            org.assertj.core.groups.Tuple.tuple("II.", "Organisation"),
+            org.assertj.core.groups.Tuple.tuple("1.", "Der Rundfunkrat"));
+    assertThat(gesetz.norm("§ 15").orElseThrow().gliederung().titel()).isEqualTo("Der Rundfunkrat");
+  }
 }

@@ -1,0 +1,46 @@
+Änderungsgesetz:
+- Gesetz zur Änderung des Gesetzes über den „Westdeutschen Rundfunk
+  Köln“, des Landesmediengesetzes Nordrhein-Westfalen und zur Änderung
+  weiterer Gesetze (22. Rundfunkänderungsgesetz) vom 24.03.2026,
+  verkündet am 31.03.2026 (GV. NRW. 2026 Nr. 7 S. 202), in Kraft seit
+  01.04.2026
+- https://recht.nrw.de/gvnrw/2026-7
+  (GV-NRW-2026-S202_22-Rundfunkaenderungsgesetz.pdf)
+- Das Heft ändert fünf Gesetze; Artikel 1 (WDR-Gesetz), Artikel 2
+  (Landesmediengesetz) und Artikel 3 (Telemedienzuständigkeitsgesetz)
+  sind als Akzeptanzfälle hinterlegt, Artikel 4 (17. RÄStV-AusfG) und
+  Artikel 5 (Inkrafttreten) nicht.
+
+Stammfassungen (jeweils die vor dem Änderungsgesetz geltende Fassung):
+- recht.nrw.de gibt jede Fassung unter
+  recht.nrw.de/lrgv/gesetz/<TTMMJJJJ>-<Kurztitel-Slug> aus; der
+  Datumspräfix ist der Gültigkeitsbeginn. Die Seiten sind serverseitig
+  gerendertes HTML (keine Single-Page-Anwendung); die Slugs stehen im
+  Sitemap-Index (robots.txt → sitemap/page/1..47/sitemap.xml), die
+  Suchmaske findet sie nicht.
+- WDR-Gesetz-alt.txt: Gesetz über den „Westdeutschen Rundfunk Köln“
+  (WDR-Gesetz) in der Fassung der Bekanntmachung vom 25.04.1998
+  (GV. NRW. S. 265), Stand 01.01.2025, aus
+  .../01012025-gesetz-ueber-den-westdeutschen-rundfunk-koeln-wdr-gesetz-bekanntmachung-der
+- LMG-NRW-alt.txt: Landesmediengesetz Nordrhein-Westfalen (LMG NRW) vom
+  02.07.2002 (GV. NRW. S. 334), Stand 01.01.2025, aus
+  .../01012025-landesmediengesetz-nordrhein-westfalen-lmg-nrw
+- TMZ-Gesetz-alt.txt: Telemedienzuständigkeitsgesetz vom 29.03.2007
+  (GV. NRW. S. 137), Stand 27.04.2022, aus
+  .../27042022-gesetz-zur-regelung-der-zustaendigkeit-fuer-die-ueberwachung-von-telemedien
+- Aufbereitung ins kanonische Klartextformat des LandesRechtLoaders:
+  je <section class="legaldoc-article"> ein Normkopf aus
+  field_num + field_headline, darunter die <p>-Absätze; die
+  Inhaltsübersicht der ersten Sektion wird zur Norm „Inhaltsübersicht“
+  mit Zeilen „§ N | Titel“. Einzelne Normen führen auf recht.nrw.de
+  keinen Kopf (WDR § 3a, LMG § 33e) — ihre Bezeichnung stammt dann aus
+  der Inhaltsübersicht.
+
+Abgleich:
+- Die Nachfassungen vom 01.04.2026 (Datumspräfix 01042026) dienten als
+  Sollwert; verglichen wurde normweise der Gesamttext. Es bleiben nur
+  Abweichungen, in denen die amtliche Nachfassung selbst über den
+  Befehlswortlaut hinausgeht (WDR-Gesetz § 15: „des“ vor
+  „Bundesreisekostengesetzes“ entfallen; §§ 7 und 21: ein überzähliges
+  Anführungszeichen aus dem Änderungsgesetz übernommen; LMG NRW § 93
+  Absatz 3 Nummer 11: zusätzlich die Wörter „Film (“ gestrichen).

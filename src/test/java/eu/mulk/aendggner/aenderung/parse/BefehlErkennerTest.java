@@ -26,6 +26,8 @@ class BefehlErkennerTest {
 
   private static final Provenienz PROV = new Provenienz("1", "1.", "(Test)");
 
+  private static final Stelle PARAGRAPH_5 = new Stelle(List.of(new Stelle.Paragraph("5")));
+
   /** Erkennt einen Befehl aus echtem Gesetzestext (mit „…“-Zitaten). */
   private static Optional<Aenderungsbefehl> erkenne(String befehlsSatz, Stelle kontext) {
     var zitate = ZitatExtraktor.extrahiere(befehlsSatz);
@@ -1203,5 +1205,124 @@ class BefehlErkennerTest {
 
     var abs = erkenne("Abs. 3 wird Abs. 2.", ART_22);
     assertThat(abs).containsInstanceOf(Umnummerierung.class);
+  }
+
+  // --- Idiome des nordrhein-westfälischen Gesetz- und Verordnungsblatts --------------------
+
+  /** „wird wie folgt neu gefasst“ und das im amtlichen Satz fehlende „wird“. */
+  @Test
+  void erkenntNeufassungMitNeuUndOhneVerb() {
+    assertThat(erkenne("§ 10 Absatz 2 wird wie folgt neu gefasst: „(2) Neuer Text.“", Stelle.LEER))
+        .containsInstanceOf(Neufassung.class);
+    assertThat(erkenne("Nummer 9 wie folgt gefasst: „9. Neuer Text,“.", Stelle.LEER))
+        .containsInstanceOf(Neufassung.class);
+  }
+
+  /** Geteilte Fundstelle: der Rahmen vor dem Verb, die adressierte Einheit dahinter. */
+  @Test
+  void erkenntNeufassungMitGeteilterStelle() {
+    var befehl = erkenne("In Absatz 2 wird Satz 1 wie folgt gefasst: „Neuer Satz.“", PARAGRAPH_5);
+
+    assertThat(befehl).containsInstanceOf(Neufassung.class);
+    assertThat(befehl.orElseThrow().stelle().anzeigeText()).isEqualTo("§ 5 Absatz 2 Satz 1");
+  }
+
+  /** Struktur-Einfügung mit vorangestelltem Fundstellen-Rahmen und Artikel vor dem Anker. */
+  @Test
+  void erkenntEinfuegungMitVorangestellterStelle() {
+    var befehl =
+        erkenne(
+            "In Absatz 1 wird nach dem Satz 1 folgender Satz eingefügt: „Neuer Satz.“",
+            PARAGRAPH_5);
+
+    assertThat(befehl).containsInstanceOf(StrukturEinfuegung.class);
+    assertThat(befehl.orElseThrow().stelle().anzeigeText()).isEqualTo("§ 5 Absatz 1 Satz 1");
+    assertThat(((StrukturEinfuegung) befehl.orElseThrow()).vorher()).isFalse();
+  }
+
+  /** Das Satzzeichen ist selbst das Subjekt; die Fundstelle liefert der Kontextrahmen. */
+  @Test
+  void erkenntSatzzeichenErsetzungOhneStelle() {
+    var befehl =
+        erkenne("Der Punkt am Ende wird durch die Angabe „(Gesellschaftsdialog).“ ersetzt.",
+            PARAGRAPH_5);
+
+    assertThat(befehl).containsInstanceOf(Ersetzung.class);
+    var ersetzung = (Ersetzung) befehl.orElseThrow();
+    assertThat(ersetzung.alt()).isEqualTo(".");
+    assertThat(ersetzung.neu()).isEqualTo("(Gesellschaftsdialog).");
+    assertThat(ersetzung.stelle().anzeigeText()).isEqualTo("§ 5");
+  }
+
+  /** Rahmen und Folgebefehl stehen in einem Punkt statt in Punkt und Unterpunkt. */
+  @Test
+  void erkenntRahmenMitFolgebefehlInEinemSatz() {
+    var befehl =
+        erkenne(
+            "Die bisherige Nummer 26 wird zu Nummer 25 und wird wie folgt geändert: Die Angabe"
+                + " „alt“ wird durch die Angabe „neu“ ersetzt.",
+            PARAGRAPH_5);
+
+    assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile.get(0)).isInstanceOf(Umnummerierung.class);
+    assertThat(teile.get(1).stelle().anzeigeText()).isEqualTo("§ 5 Nummer 25");
+  }
+
+  /** Verb-Rahmen „Es werden ersetzt:“ — der Unterpunkt trägt nur die Fundstelle. */
+  @Test
+  void vervollstaendigtVerbRahmenPunkt() {
+    assertThat(BefehlErkenner.verbRahmen("Es werden ersetzt:")).contains("ersetzt");
+    var zitate =
+        ZitatExtraktor.extrahiere(
+            "in § 35 Absatz 3 sowie § 44 Absatz 1 die Angabe „schriftlichen“ jeweils durch die"
+                + " Angabe „schriftlichen oder elektronischen“,");
+    var satz =
+        BefehlErkenner.vervollstaendigeVerbRahmenPunkt(
+            zitate.text().replaceAll("\\s+", " ").strip(), "ersetzt");
+    assertThat(satz).isPresent();
+    var befehl = BefehlErkenner.erkenne(satz.orElseThrow(), Stelle.LEER, zitate, PROV);
+    assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile.stream().map(t -> t.stelle().anzeigeText()))
+        .containsExactly("§ 35 Absatz 3", "§ 44 Absatz 1");
+  }
+
+  /** Nach einer Absatz-Umnummerierung erbt die lokative Folgeklausel die neue Bezeichnung. */
+  @Test
+  void erbtNeueAbsatzbezeichnungInFolgeklausel() {
+    var befehl =
+        erkenne(
+            "Der bisherige Absatz 8 wird Absatz 9 und in Satz 3 wird die Angabe „32a“ durch die"
+                + " Angabe „30b“ ersetzt.",
+            PARAGRAPH_5);
+
+    assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile.get(1).stelle().anzeigeText()).isEqualTo("§ 5 Absatz 9 Satz 3");
+  }
+
+  /** „Dem Wortlaut des Absatzes 3 …“ nennt die Fundstelle selbst. */
+  @Test
+  void erkenntWortlautVoranstellungMitAbsatzangabe() {
+    var befehl =
+        erkenne(
+            "Dem Wortlaut des Absatzes 3 werden die folgenden Sätze vorangestellt: „Erster Satz.“",
+            PARAGRAPH_5);
+
+    assertThat(befehl).containsInstanceOf(Aenderungsbefehl.WortlautVoranstellung.class);
+    assertThat(befehl.orElseThrow().stelle().anzeigeText()).isEqualTo("§ 5 Absatz 3");
+  }
+
+  /** Ein überzähliges schließendes Anführungszeichen am Satzende ist Beiwerk. */
+  @Test
+  void toleriertUeberzaehligesSchlussAnfuehrungszeichen() {
+    var zitate =
+        ZitatExtraktor.extrahiere(
+            "In Absatz 7 Satz 3 wird die Angabe „schriftlich“ durch die Angabe „schriftlich oder"
+                + " elektronisch“ ersetzt.“");
+    var text = zitate.text().replaceAll("\\s+", " ").strip();
+    assertThat(BefehlErkenner.erkenne(text, Stelle.LEER, zitate, PROV))
+        .containsInstanceOf(Ersetzung.class);
   }
 }

@@ -104,18 +104,31 @@ public final class BefehlAnwender {
    * Umnummerierung geht der Neubesetzung sachlich also voraus. In der Textreihenfolge angewandt
    * liefen beide Befehle dagegen auf zwei Paragraphen gleicher Bezeichnung hinaus.
    */
+  /**
+   * Anwendungsreihenfolge der Befehle. Sie folgt dem Dokument, mit einer Ausnahme: Umnummerierungen
+   * beziehen sich stets auf die ursprüngliche Zählung, nicht auf den Stand nach den vorangegangenen
+   * Punkten. Wer eine Bezeichnung räumt, muss daher vor den kommen, der sie neu besetzt — sonst
+   * trüge das Gesetz vorübergehend zwei gleich bezeichnete Einheiten und die Fundstelle wäre
+   * mehrdeutig. Aus dieser einen Regel folgt beides: die absteigende Reihenfolge einer
+   * aufsteigenden Kaskade („Abs. 3 wird 4“, „Abs. 4 wird 5“, …) und der Vorrang einer
+   * Umnummerierung vor einer Einfügung, die deren Bezeichnung neu vergibt.
+   *
+   * <p>Verschoben wird stets nur nach vorn: ein Befehl rückt vor den ersten, mit dem er kollidiert.
+   * So bleibt jede Folgeänderung hinter der Umnummerierung, auf deren neue Bezeichnung sie zeigt
+   * („Der bisherige Absatz 3 wird Absatz 4 und wie folgt geändert: …“).
+   */
   private static List<Integer> anwendungsReihenfolge(List<Aenderungsbefehl> befehle) {
     var reihenfolge = new ArrayList<Integer>(befehle.size());
     for (int i = 0; i < befehle.size(); i++) {
       reihenfolge.add(i);
     }
     for (int j = 0; j < befehle.size(); j++) {
-      if (!(befehle.get(j) instanceof Umnummerierung u) || !nurParagraph(u.stelle())) {
+      var raeumt = geraeumteBezeichnungen(befehle.get(j));
+      if (raeumt.isEmpty()) {
         continue;
       }
-      var quelle = u.stelle().paragraph().get().enbez();
       for (int i = 0; i < j; i++) {
-        if (quelle.equals(neuerParagraph(befehle.get(i)))) {
+        if (belegteBezeichnungen(befehle.get(i)).stream().anyMatch(raeumt::contains)) {
           reihenfolge.remove(Integer.valueOf(j));
           reihenfolge.add(reihenfolge.indexOf(i), j);
           break;
@@ -125,15 +138,169 @@ public final class BefehlAnwender {
     return reihenfolge;
   }
 
-  /** Bezeichnung des Paragraphen, den {@code befehl} neu anlegt — sonst {@code null}. */
-  private static @Nullable String neuerParagraph(Aenderungsbefehl befehl) {
-    if (!(befehl instanceof StrukturEinfuegung s)
-        || s.ebene() != Ebene.PARAGRAPH
-        || s.bezeichnung() == null) {
-      return null;
+  /** Bezeichnungen, die ein Befehl freigibt — die Ausgangsstellen seiner Umnummerierungen. */
+  private static Set<String> geraeumteBezeichnungen(Aenderungsbefehl befehl) {
+    var raeumt = new LinkedHashSet<String>();
+    for (var u : umnummerierungen(befehl)) {
+      raeumt.add(u.stelle().anzeigeText());
     }
-    var sigel = s.stelle().paragraph().map(Stelle.Paragraph::sigel).orElse("§");
-    return sigel + " " + s.bezeichnung();
+    return raeumt;
+  }
+
+  /** Bezeichnungen, die ein Befehl neu vergibt — Umnummerierungsziele und eingefügte Einheiten. */
+  private static Set<String> belegteBezeichnungen(Aenderungsbefehl befehl) {
+    var belegt = new LinkedHashSet<String>();
+    for (var u : umnummerierungen(befehl)) {
+      belegt.add(u.neu().anzeigeText());
+    }
+    for (var e : einfuegungen(befehl)) {
+      var bezeichnungen = neueBezeichnungen(e);
+      // Nennt der Befehl keine Einzelbezeichnung („die folgenden Nrn. 5 bis 7“), stehen sie als
+      // Aufzählungsmarken im eingefügten Block.
+      if (bezeichnungen.isEmpty()) {
+        bezeichnungen = markenBezeichnungen(e.stelle(), e.ebene(), e.text());
+      }
+      for (var bezeichnung : bezeichnungen) {
+        // Trägt die neue Einheit die Bezeichnung ihres eigenen Ankers („Dem Abs. 1 wird folgender
+        // Abs. 1 vorangestellt“), so setzt der Befehl die alte Zählung voraus: er muss vor der
+        // Umnummerierung laufen, die sie auflöst, nicht danach.
+        if (!bezeichnung.equals(e.stelle().anzeigeText())) {
+          belegt.add(bezeichnung);
+        }
+      }
+    }
+    // „Absatz 2 wird durch die folgenden Absätze 2 und 3 ersetzt: „(2) … (3) …““ — welche
+    // Bezeichnungen der Ersatzblock vergibt, steht ebenfalls in seinen Marken.
+    for (var e : ersetzungen(befehl)) {
+      belegt.addAll(markenBezeichnungen(e.stelle(), e.ebene(), e.text()));
+    }
+    return belegt;
+  }
+
+  // Aufzählungsmarken in Zitatblöcken, je Ebene.
+  private static final Pattern NUMMER_MARKER = Pattern.compile("(?m)^[ \\t]*(\\d+[a-z]?)\\.[ \\t]");
+  private static final Pattern BUCHSTABE_MARKER =
+      Pattern.compile("(?m)^[ \\t]*([a-z]{1,3})\\)[ \\t]");
+
+  /** Die Bezeichnungen, die die Marken eines Zitatblocks vergeben, relativ zur Ankerstelle. */
+  private static List<String> markenBezeichnungen(Stelle stelle, Ebene ebene, String text) {
+    var muster =
+        switch (ebene) {
+          case ABSATZ -> ABSATZ_MARKER;
+          case NUMMER -> NUMMER_MARKER;
+          case BUCHSTABE -> BUCHSTABE_MARKER;
+          default -> null;
+        };
+    if (muster == null) {
+      return List.of();
+    }
+    var bezeichnungen = new ArrayList<String>();
+    var marker = muster.matcher(text);
+    while (marker.find()) {
+      bezeichnungen.add(mitMarke(stelle, ebene, marker.group(1)));
+    }
+    return bezeichnungen;
+  }
+
+  /** Die Stelle mit ausgetauschter feinster Komponente („§ 3 Absatz 2“ → „§ 3 Absatz 3“). */
+  private static String mitMarke(Stelle stelle, Ebene ebene, String bezeichnung) {
+    Stelle.Komponente komponente =
+        ebene == Ebene.BUCHSTABE
+            ? new Stelle.BuchstabeNr(bezeichnung)
+            : ebene == Ebene.NUMMER
+                ? new Stelle.NummerNr(bezeichnung)
+                : new Stelle.AbsatzNr(bezeichnung);
+    var komponenten = new ArrayList<>(stelle.komponenten());
+    komponenten.removeIf(k -> rang(k) >= rang(komponente));
+    komponenten.add(komponente);
+    return new Stelle(komponenten).anzeigeText();
+  }
+
+  private static final Pattern BEZEICHNUNGS_BEREICH =
+      Pattern.compile("(\\d+)(?:[a-z])? bis (\\d+)(?:[a-z])?");
+
+  /**
+   * Die vollen Bezeichnungen der eingefügten Einheiten: die Ankerstelle, deren feinste Komponente
+   * durch die neue Bezeichnung ersetzt ist („Nach Art. 29a Abs. 5 Satz 1 … folgender Satz 2“ →
+   * „Art. 29a Abs. 5 Satz 2“). Ein Block („die folgenden Nrn. 5 bis 7“) belegt alle Bezeichnungen
+   * des Bereichs.
+   */
+  private static List<String> neueBezeichnungen(StrukturEinfuegung s) {
+    if (s.bezeichnung() == null) {
+      return List.of();
+    }
+    var bereich = BEZEICHNUNGS_BEREICH.matcher(s.bezeichnung());
+    var nummern = new ArrayList<String>();
+    if (bereich.matches()) {
+      int von = Integer.parseInt(bereich.group(1));
+      int bis = Integer.parseInt(bereich.group(2));
+      for (int n = von; n <= bis && n - von < 100; n++) {
+        nummern.add(String.valueOf(n));
+      }
+    } else {
+      nummern.add(s.bezeichnung());
+    }
+    return nummern.stream().map(n -> volleBezeichnung(s, n)).toList();
+  }
+
+  private static String volleBezeichnung(StrukturEinfuegung s, String bezeichnung) {
+    var komponente =
+        switch (s.ebene()) {
+          case PARAGRAPH ->
+              new Stelle.Paragraph(
+                  bezeichnung, s.stelle().paragraph().map(Stelle.Paragraph::sigel).orElse("§"));
+          case ABSATZ -> new Stelle.AbsatzNr(bezeichnung);
+          case SATZ -> new Stelle.SatzNr(bezeichnung);
+          case NUMMER -> new Stelle.NummerNr(bezeichnung);
+          case BUCHSTABE -> new Stelle.BuchstabeNr(bezeichnung);
+        };
+    var komponenten = new ArrayList<>(s.stelle().komponenten());
+    if (!komponenten.isEmpty()
+        && rang(komponenten.get(komponenten.size() - 1)) >= rang(komponente)) {
+      komponenten.remove(komponenten.size() - 1);
+    }
+    komponenten.add(komponente);
+    return new Stelle(komponenten).anzeigeText();
+  }
+
+  private static int rang(Stelle.Komponente komponente) {
+    return switch (komponente) {
+      case Stelle.Paragraph p -> 1;
+      case Stelle.AbsatzNr a -> 2;
+      case Stelle.SatzNr s -> 3;
+      case Stelle.NummerNr n -> 4;
+      case Stelle.BuchstabeNr b -> 5;
+      default -> 0;
+    };
+  }
+
+  /** Die Umnummerierungen eines Befehls — auch die in einem Verbund ({@link Sammelbefehl}). */
+  private static List<Umnummerierung> umnummerierungen(Aenderungsbefehl befehl) {
+    return switch (befehl) {
+      case Umnummerierung u -> List.of(u);
+      case Sammelbefehl s ->
+          s.teilbefehle().stream().flatMap(t -> umnummerierungen(t).stream()).toList();
+      default -> List.of();
+    };
+  }
+
+  /** Die Struktur-Einfügungen eines Befehls — auch die in einem Verbund. */
+  private static List<StrukturEinfuegung> einfuegungen(Aenderungsbefehl befehl) {
+    return switch (befehl) {
+      case StrukturEinfuegung e -> List.of(e);
+      case Sammelbefehl s ->
+          s.teilbefehle().stream().flatMap(t -> einfuegungen(t).stream()).toList();
+      default -> List.of();
+    };
+  }
+
+  /** Die Struktur-Ersetzungen eines Befehls — auch die in einem Verbund. */
+  private static List<StrukturErsetzung> ersetzungen(Aenderungsbefehl befehl) {
+    return switch (befehl) {
+      case StrukturErsetzung e -> List.of(e);
+      case Sammelbefehl s -> s.teilbefehle().stream().flatMap(t -> ersetzungen(t).stream()).toList();
+      default -> List.of();
+    };
   }
 
   private static boolean istNurUeberschrift(Stelle stelle) {
@@ -381,8 +548,17 @@ public final class BefehlAnwender {
             if (!gestutzt.endsWith(befehl.alt())) {
               return TextErgebnis.fehler("Der Text endet nicht mit „" + befehl.alt() + "“.");
             }
-            return TextErgebnis.ok(
-                gestutzt.substring(0, gestutzt.length() - befehl.alt().length()) + befehl.neu());
+            var rumpf = gestutzt.substring(0, gestutzt.length() - befehl.alt().length());
+            // Tritt an die Stelle des Satzzeichens ein Klammerzusatz („Der Punkt am Ende wird
+            // durch die Angabe „(Gesellschaftsdialog).“ ersetzt“), gehört davor ein Leerzeichen —
+            // so setzt es auch die amtliche Nachfassung.
+            var fuge =
+                befehl.neu().startsWith("(")
+                        && !rumpf.isEmpty()
+                        && Character.isLetterOrDigit(rumpf.charAt(rumpf.length() - 1))
+                    ? " "
+                    : "";
+            return TextErgebnis.ok(rumpf + fuge + befehl.neu());
           }
           int anzahl = zaehleVorkommen(text, befehl.alt());
           if (anzahl == 0) {
@@ -431,7 +607,8 @@ public final class BefehlAnwender {
                 }
                 int ende = pruefung.index() + nach.woerter().length();
                 yield TextErgebnis.ok(
-                    text.substring(0, ende) + " " + befehl.woerter() + text.substring(ende));
+                    text.substring(0, ende) + fuge(befehl.woerter()) + befehl.woerter()
+                        + text.substring(ende));
               }
               case WortAnker.VorWoertern vor -> {
                 var pruefung = eindeutigeFundstelle(text, vor.woerter());
@@ -1015,6 +1192,34 @@ public final class BefehlAnwender {
       normen.set(fundstelle.normIndex(), norm.mitAbsaetzen(absaetze));
       return angewandt(befehl, norm.enbez());
     }
+    // Nummer-/Buchstaben-Umnummerierung: anders als ein Absatz trägt eine Aufzählungseinheit ihre
+    // Bezeichnung als Marke im Absatztext („22. den Sozialverband …“); sie wird dort ausgetauscht.
+    // Ein weggefallener Platzhalter mit der Zielmarke weicht dabei — genau wie bei der
+    // Absatz-Umnummerierung, und wie es die amtliche Nachfassung zeigt.
+    var alteMarke = aufzaehlungsMarke(befehl.stelle());
+    var neueMarke = aufzaehlungsMarke(befehl.neu());
+    if (alteMarke != null && neueMarke != null && !alteMarke.equals(neueMarke)) {
+      return bearbeiteBereich(
+          normen,
+          befehl,
+          (text, bereich) -> {
+            var marke =
+                Pattern.compile("^([ \\t]*)" + Pattern.quote(alteMarke))
+                    .matcher(text.substring(bereich.von(), bereich.bis()));
+            if (!marke.find()) {
+              return TextErgebnis.fehler(
+                  "„" + alteMarke + "“ steht nicht am Anfang von "
+                      + befehl.stelle().anzeigeText() + ".");
+            }
+            var umbenannt =
+                text.substring(0, bereich.von())
+                    + marke.group(1)
+                    + neueMarke
+                    + text.substring(bereich.von() + marke.end());
+            return TextErgebnis.ok(entferneWeggefallenenPlatzhalter(umbenannt, neueMarke));
+          });
+    }
+
     // Satz-Umnummerierung: unnummerierte Sätze brauchen keine Textänderung; amtlich nummerierte
     // (bayerisches Landesrecht, „Satz 5 wird Satz 4.“) erhalten die neue Satznummer im Text.
     var altSatz = letzteKomponente(befehl.stelle(), Stelle.SatzNr.class);
@@ -1044,6 +1249,38 @@ public final class BefehlAnwender {
       }
     }
     return angewandt(befehl, "(keine Textänderung nötig)");
+  }
+
+  /**
+   * Die Fuge vor einem hinter einen Wortanker eingefügten Text: ein Leerzeichen, außer wenn der
+   * Einschub mit einem Satzzeichen beginnt („nach der Angabe „§ 39 Absatz 5“ die Angabe „, bei der
+   * Erstellung …““ ergibt „§ 39 Absatz 5, bei der …“, nicht „§ 39 Absatz 5 , bei der …“).
+   */
+  private static String fuge(String einschub) {
+    return einschub.isEmpty() || ",;.:!?".indexOf(einschub.charAt(0)) < 0 ? " " : "";
+  }
+
+  /** Die Aufzählungsmarke der feinsten Komponente („Nummer 25“ → „25.“, „Buchstabe b“ → „b)“). */
+  private static @Nullable String aufzaehlungsMarke(Stelle stelle) {
+    var komponenten = stelle.komponenten();
+    if (komponenten.isEmpty()) {
+      return null;
+    }
+    return switch (komponenten.get(komponenten.size() - 1)) {
+      case Stelle.NummerNr n -> n.nummer() + ".";
+      case Stelle.BuchstabeNr b -> b.kennung() + ")";
+      default -> null;
+    };
+  }
+
+  /**
+   * Entfernt die weggefallene Aufzählungszeile mit der gegebenen Marke — die soeben umbenannte
+   * Zeile bleibt stehen, weil nur ein leerer Platzhalter getroffen wird.
+   */
+  private static String entferneWeggefallenenPlatzhalter(String text, String marke) {
+    return text.replaceFirst(
+        "(?m)^[ \\t]*" + Pattern.quote(marke) + "[ \\t]+\\((?:weggefallen|gegenstandslos|aufgehoben)\\)\\n?",
+        "");
   }
 
   /** Ein leerer Platzhalter-Absatz ohne Inhalt („(weggefallen)“, „(gegenstandslos)“). */
@@ -1129,11 +1366,30 @@ public final class BefehlAnwender {
     if (aufloesung.fehler() != null) {
       return manuell(befehl, aufloesung.fehler());
     }
+    var norm = normen.get(aufloesung.normIndex());
+
+    // „Dem Wortlaut des Absatzes 3 werden die folgenden Sätze vorangestellt“ — nennt der Befehl
+    // einen Absatz, treten die neuen Sätze vor dessen Text, nicht vor die ganze Norm.
+    if (befehl.stelle().absatz().isPresent()) {
+      var ergebnis = StellenAufloeser.aufloese(gesetzAus(normen), befehl.stelle());
+      if (ergebnis instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
+        return manuell(befehl, nicht.begruendung());
+      }
+      var fundstelle = ((StellenAufloeser.Ergebnis.Gefunden) ergebnis).fundstelle();
+      var absaetze = new ArrayList<>(norm.absaetze());
+      var absatz = absaetze.get(fundstelle.absatzIndex());
+      absaetze.set(
+          fundstelle.absatzIndex(),
+          absatz.mitText(
+              normalisiereZitatText(befehl.text()).strip() + " " + absatz.text().stripLeading()));
+      normen.set(fundstelle.normIndex(), norm.mitAbsaetzen(absaetze));
+      return angewandt(befehl, norm.enbez());
+    }
+
     var neue = parseAbsaetze(befehl.text());
     if (neue.isEmpty()) {
       return manuell(befehl, "Im Zitat wurde kein Absatz erkannt.");
     }
-    var norm = normen.get(aufloesung.normIndex());
     var absaetze = new ArrayList<>(neue);
     absaetze.addAll(norm.absaetze());
     normen.set(aufloesung.normIndex(), norm.mitAbsaetzen(absaetze));
@@ -1208,14 +1464,25 @@ public final class BefehlAnwender {
       List<Norm> normen, List<Gliederung> gliederungen, Sammelbefehl befehl) {
     var betroffene = new LinkedHashSet<String>();
     var fehler = new ArrayList<String>();
-    int i = 1;
-    for (var teil : befehl.teilbefehle()) {
+    // Auch innerhalb eines Verbunds gilt die Bezeichnungs-Reihenfolge: „Die bisherigen Nrn. 13 und
+    // 14 werden die Nrn. 14 und 15“ zerfällt in zwei Umnummerierungen, die aufsteigend angewandt
+    // eine doppelte Nr. 14 erzeugten.
+    var teile = befehl.teilbefehle();
+    var meldungen = new String[teile.size()];
+    for (int index : anwendungsReihenfolge(teile)) {
+      var teil = teile.get(index);
       var ergebnis = wendeAn(normen, gliederungen, teil);
       betroffene.addAll(ergebnis.betroffeneEnbez());
       if (ergebnis.status() != Status.ANGEWANDT) {
-        fehler.add("Teil " + i + " (" + teil.stelle().anzeigeText() + "): " + ergebnis.begruendung());
+        meldungen[index] =
+            "Teil " + (index + 1) + " (" + teil.stelle().anzeigeText() + "): "
+                + ergebnis.begruendung();
       }
-      i++;
+    }
+    for (var meldung : meldungen) {
+      if (meldung != null) {
+        fehler.add(meldung);
+      }
     }
     if (fehler.isEmpty()) {
       return new AngewandteAenderung(befehl, Status.ANGEWANDT, "", betroffene);

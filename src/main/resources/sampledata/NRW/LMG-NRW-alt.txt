@@ -1,0 +1,976 @@
+Landesmediengesetz Nordrhein-Westfalen
+(LMG NRW)
+Vom 2. Juli 2002
+Inhaltsübersicht
+Abschnitt 1 Allgemeine Vorschriften
+§ 1 | Geltungsbereich
+§ 2 | Grundsätze
+§ 3 | Begriffsbestimmungen
+Abschnitt 2 Zulassung
+§ 4 | Grundsätze
+§ 5 | Zulassungsvoraussetzungen
+§ 6 | Inkompatibilität
+§ 7 | Zulassungsverfahren
+§ 8 | Zulassungsbescheid
+§ 9 | Änderungen nach der Zulassung
+Abschnitt 3 Übertragungskapazitäten
+Unterabschnitt 1 Zuordnung
+§ 10 | Grundsätze
+§ 10a | Zuordnung digitaler terrestrischer Übertragungskapazitäten
+§ 10b | Pilotversuch zur Einführung und Weiterentwicklung digitaler terrestrischer Übertragungstechniken
+§ 11 | Zuordnungsverfahren
+Unterabschnitt 2 Zuweisung
+§ 12 | Zuweisungserfordernis
+§ 13 | Zuweisungsvoraussetzungen
+§ 14 | Grundsätze
+§ 15 | Ausschreibung
+§ 16 | Zuweisungsverfahren
+§ 17 | Zuweisungsbescheid
+Unterabschnitt 3 Belegung von Kabelanlagen und terrestrisch verbreitenden Medienplattformen
+§ 18 | Analoge Übertragung in Kabelanlagen
+§ 19 | Ausnahmen bei analoger Übertragung in Kabelanlagen
+§ 20 | Verfahren bei analoger Übertragung in Kabelanlagen
+§ 21 | Digitalisierte Kabelanlagen
+§ 22 | Terrestrisch verbreitende Medienplattformen
+Unterabschnitt 4 Weiterverbreitung in Kabelanlagen in analoger Technik
+§ 23 | Grundsätze
+§ 24 | Anzeigepflicht
+§ 25 | Beanstandung und Aussetzung
+§ 26 | Untersagung
+Abschnitt 4 Umstellung von analoger auf digitale Übertragung, Experimentierklausel
+§ 27 | Aufgabe der LfM
+§ 28 | Zuweisung im Rahmen von Pilotversuchen zur Einführung und Weiterentwicklung digitaler terrestrischer Übertragungstechniken
+§ 29 | (weggefallen)
+§ 30 | Experimentierklausel
+Abschnitt 5 Anforderungen an das Programm und Veranstalterpflichten
+§ 31 | Programmauftrag und Programmgrundsätze
+§ 31a | Regionalfensterprogramme
+§ 32 | Redaktionell Beschäftigte
+§ 33 | Sicherung der Meinungsvielfalt
+§ 33a | Veranstaltung von und Beteiligung an Rundfunkprogrammen durch Presseunternehmen
+§ 33b | Sendezeit für unabhängige Dritte
+§ 33c | Programmbeirat
+§ 33d | Aufgaben des Programmbeirates
+§ 33e | Verpflichtungszusagen
+§ 34 | (weggefallen)
+§ 35 | Unzulässige Angebote, Jugendschutz
+§ 36 | Verlautbarungsrecht, Sendezeit für Dritte
+§ 37 | Kurzberichterstattung, europäische Produktionen, Eigen-, Auftrags- und Gemeinschaftsproduktionen
+§ 38 | Finanzierung, Werbung und Gewinnspiele
+§ 38a | Auskunftsrechte
+Abschnitt 6 Medienkompetenz, Bürgermedien und Mediennutzerschutz
+Unterabschnitt 1 Grundsätze
+§ 39 | Medienkompetenz
+§ 39a | Medienversammlung
+§ 40 | Bürgermedien
+§ 40a | Bürgerfunk im lokalen Hörfunk
+§ 40b | Programmbeiträge für lokalen Hörfunk
+§ 40c | Lehr- und Lernsender
+§ 40d | Rundfunkprogramme in Hochschulen
+§ 41 | (weggefallen)
+Unterabschnitt 2 Programmbeschwerde und Auskunftsrechte
+§ 42 | Programmbeschwerde
+§ 43 | Einsichtnahmerecht und Aufzeichnungspflicht
+Unterabschnitt 3 Recht auf Gegendarstellung
+§ 44 | Gegendarstellung
+§ 45 | Rechtsweg
+Unterabschnitt 4 Datenschutz und Datenschutzrechte
+§ 46 | Datenverarbeitung für publizistische Zwecke
+§ 47 | Geheimhaltung
+§ 48 | Betriebliche Datenschutzbeauftragte der Veranstalter
+§ 49 | Datenschutzaufsicht über den privaten Rundfunk, über journalistisch-redaktionell gestaltete Angebote bei Telemedien und über die LfM
+§ 50 | Überwachung des Datenschutzes bei der LfM, Jahresbericht über die gesamte Aufsichtstätigkeit
+§ 51 | Unabhängigkeit
+§ 51a | Datenschutz bei sonstigen Anbietern von Telemedien
+Abschnitt 7 Lokaler Hörfunk
+§ 52 | Veranstalter
+§ 53 | Programmgrundsätze
+§ 54 | Verbreitungsgebiet
+§ 55 | Programmdauer
+§ 56 | Rahmenprogramm
+§ 57 | Sendezeit für Dritte
+§ 58 | Zulassung zum lokalen Hörfunk
+§ 58a | Besondere Zulassungsvoraussetzungen für Veranstaltergemeinschaften
+§ 59 | Betriebsgesellschaft
+§ 60 | Rechte und Pflichten
+§ 61 | Kündigung der Vereinbarung
+§ 62 | Zusammensetzung der Veranstaltergemeinschaft
+§ 63 | Bestimmung der Gründungsmitglieder
+§ 64 | Mitgliedschaft
+§ 65 | Mitgliederversammlung
+§ 66 | Vorstand
+§ 67 | Chefredakteurin oder Chefredakteur, Redaktionsstatut
+§ 68 | Stellen- und Wirtschaftsplan
+§ 69 | Informationspflichten
+§ 70 | Anwendbare Vorschriften
+Abschnitt 8 (weggefallen)
+Abschnitt 9 Rundfunkprogramme in Einrichtungen, Wohnanlagen und bei örtlichen Veranstaltungen
+§ 83 | Vereinfachtes Zulassungsverfahren
+§ 84 | Rundfunkprogramme in Einrichtungen
+§ 85 | Rundfunkprogramme in Wohnanlagen
+§ 86 | Rundfunkprogramme bei örtlichen Veranstaltungen
+Abschnitt 10 Landesanstalt für Medien Nordrhein-Westfalen
+Unterabschnitt 1 Allgemeine Vorschriften
+§ 87 | Rechtsform
+§ 88 | Aufgaben
+§ 89 | Beteiligungen
+§ 90 | Organe
+§ 91 | Inkompatibilität
+§ 92 | Vorzeitige Beendigung der Organmitgliedschaft
+Unterabschnitt 2 Medienkommission
+§ 93 | Zusammensetzung
+§ 94 | Aufgabe
+§ 95 | Rechte und Pflichten, Kontrahierungsverbot
+§ 96 | Amtszeit
+§ 97 | Vorsitz und Verfahren
+§ 98 | Beschlussfassung und Sitzungen
+§ 99 | Aufwendungen
+Unterabschnitt 3 Direktorin oder Direktor
+§ 100 | Wahl
+§ 101 | Inkompatibilität
+§ 102 | Vertretung
+§ 103 | Aufgaben
+§ 104 | Stellvertretende Direktorin oder stellvertretender Direktor
+Unterabschnitt 4 (weggefallen)
+Unterabschnitt 5 Haushalts- und Wirtschaftsführung, Rechtsaufsicht
+§ 109 | Haushaltsplan
+§ 110 | Grundsatz der Sparsamkeit und Wirtschaftlichkeit
+§ 111 | Ermächtigung
+§ 112 | Jahresabschluss und Geschäftsbericht
+§ 113 | Prüfung des Jahresabschlusses
+§ 114 | Prüfungsverfahren
+§ 115 | Veröffentlichung
+§ 116 | Finanzierung
+§ 117 | Rechtsaufsicht
+Abschnitt 11 Verfahren bei Rechtsverstößen, Rücknahme und Widerruf
+§ 118 | Rechtsverstoß
+§ 119 | Rücknahme der Zulassung
+§ 120 | Widerruf der Zulassung
+§ 121 | Vertreter
+§ 122 | Rücknahme der Zuweisung einer Übertragungskapazität
+§ 123 | Widerruf der Zuweisung einer Übertragungskapazität
+§ 124 | Vermögensnachteile
+Abschnitt 12 Ordnungswidrigkeiten
+§ 125 | Ordnungswidrigkeiten
+§ 126 | Strafbestimmung
+Abschnitt 13 Übergangs- und Schlussvorschriften
+§ 127 | Übergangsregelung zur Neukonstituierung der Medienkommission und zum Beschlussverfahren
+§ 128 | Übergangsregelung zu laufenden Zuweisungsverfahren und bestehenden Zulassungen
+§ 129 | Landesrundfunkgesetz
+§ 130 | Inkrafttreten
+Abschnitt I Allgemeine Vorschriften
+§ 1  Geltungsbereich
+(1) Dieses Gesetz gilt für die Veranstaltung und das Angebot, die Verbreitung und die Zugänglichmachung von Rundfunk und Telemedien in Nordrhein-Westfalen.
+(2) Soweit dieses Gesetz keine besonderen Bestimmungen enthält, gelten für bundesweite, länderübergreifende und nicht länderübergreifende Angebote die Bestimmungen des Medienstaatsvertrages vom 14./28. April 2020 (GV. NRW. 2020 S. 524), des Jugendmedienschutz-Staatsvertrages vom 10./27. September 2002 (GV. NRW. 2003 S. 84), des ARD-Staatsvertrages vom 31. August 1991 (GV. NW. 1991 S. 408), des ZDF-Staatsvertrages vom 31. August 1991 (GV. NW. 1991 S. 408), des Deutschlandradio-Staatsvertrages vom 17. Juni 1993 (GV. NW. 1993 S. 874), des Rundfunkfinanzierungsstaatsvertrages vom 26. November 1996 (GV. NW. S. 484) und des Rundfunkbeitragsstaatsvertrages vom 13. Dezember 2011 (GV. NRW. 2011 S. 675) in der jeweils geltenden Fassung. Soweit dieses Gesetz auf Normen nach Satz 1 verweist, gilt jeweils die aktuelle Fassung. § 8 Absatz 1 und 2 bleiben unberührt.
+(3) Auf den Westdeutschen Rundfunk Köln findet dieses Gesetz keine Anwendung, soweit nicht ausdrücklich etwas anderes geregelt ist.
+(4) Von den Bestimmungen der Abschnitte 5 und 6 gelten für Teleshoppingkanäle nur die §§ 34, 35 und 38 Abs.1 sowie die §§ 46 bis 51.
+§ 2  Grundsätze
+Ziel dieses Gesetzes ist es, die Meinungs- und Angebots- und Anbietervielfalt des Rundfunks sowie die Vielfalt der rundfunkähnlichen Telemedien in Nordrhein-Westfalen zu garantieren und zu stärken. Es stellt sicher, dass der Rundfunk Medium und Faktor der freien individuellen und öffentlichen Meinungsbildung auch nach der Einführung digitaler Techniken ist. Es ermöglicht die Teilhabe der Telemedien an der Einführung und Weiterentwicklung digitaler Techniken. Weiterhin dient es den Nutzerinnen und Nutzern im Umgang mit herkömmlichen und neuen Medien und fördert ihre Medienkompetenz.
+§ 3  Begriffsbestimmungen
+(1) Im Sinne dieses Gesetzes ist
+1. Fensterprogramm ein zeitlich und räumlich begrenztes Rundfunkprogramm mit im Wesentlichen auf Nordrhein-Westfalen oder Teile davon bezogenen Inhalten im Rahmen eines Hauptprogramms,
+2. Programmschema die nach Wochentagen gegliederte Übersicht über die Verteilung der täglichen Sendezeit auf die Bereiche Information, Bildung, Beratung und Unterhaltung mit einer Darstellung der vorgesehenen wesentlichen Anteile von Sendungen mit regionalem und lokalem Bezug,
+3. Multiplex die technische Zusammenfassung von Programmen, Telemedien und sonstigen Diensten in einem gemeinsamen Datencontainer, mit dem Daten aller Art über beliebige digitale Verbreitungswege übertragen werden können.
+(2) Im Sinne dieses Gesetzes sind
+1. Programmarten Fernsehen und Hörfunk,
+2. Programmkategorien Vollprogramme, Spartenprogramme, Satellitenfensterprogramme, Regionalfensterprogramme und Fensterprogramme,
+3. unabhängige Produzentinnen und Produzenten Hersteller von Beiträgen zu einem Fernsehprogramm, an deren Kapital oder Stimmrechten Fernsehveranstalter und ihnen zuzurechnende Unternehmen (§ 62 des Medienstaatsvertrages) nicht oder insgesamt mit weniger als 25 vom Hundert beteiligt sind, und die nicht an Fernsehveranstaltern oder ihnen zuzurechnenden Unternehmen (§ 62 des Medienstaatsvertrages) mit insgesamt 25 vom Hundert oder mehr am Kapital oder den Stimmrechten beteiligt sind,
+4. lokale, regionale, landesweite oder bundesweite Rundfunkprogramme, Rundfunkprogramme mit lokaler, regionaler, landesweiter oder bundesweiter Ausrichtung.
+(3) Soweit in diesem Gesetz die Zuordnung oder Zuweisung von Übertragungskapazitäten geregelt ist, umfasst dies bei digitalen Übertragungskapazitäten auch die Zuordnung oder Zuweisung von Teilen einer Übertragungskapazität.
+Abschnitt 2 Zulassung
+§ 4  Grundsätze
+(1) Wer Rundfunkprogramme veranstalten will, bedarf einer Zulassung durch die Landesanstalt für Medien Nordrhein-Westfalen (LfM). Absatz 5 sowie § 106 Absatz 1 und 2 des Medienstaatsvertrages bleiben unberührt.
+(2) Jedes nach diesem Gesetz zugelassene landesweite, regionale oder lokale Rundfunkprogramm hat zu einem angemessenen Anteil auf das politische, wirtschaftliche, soziale und kulturelle Leben im Sendegebiet Bezug zu nehmen. Bei der Beurteilung der Angemessenheit sind vor allem die Programmkategorie und der im Programmschema vorgesehene Anteil an Information und Berichterstattung zu berücksichtigen. Das Nähere regelt die LfM durch Satzung.
+(3) Absatz 1 Satz 1 gilt nicht, wenn ein Veranstalter nach Artikel 5 des Europäischen Übereinkommens über das grenzüberschreitende Fernsehen vom 27. Mai 1994 (BGBl. 1994 II S. 639) der Rechtshoheit einer anderen Vertragspartei oder nach Artikel 2 der Richtlinie 2010/13/EU des Europäischen Parlaments und des Rates vom 10. März 2010 zur Koordinierung bestimmter Rechts- und Verwaltungsvorschriften der Mitgliedstaaten über die Bereitstellung audiovisueller Mediendienste (ABl. L 95 vom 15. April 2010, S. 1), die durch die Richtlinie (EU) 2018/1808 (ABl. L 303 vom 28. November 2018, S. 69) geändert worden ist, der Rechtshoheit eines anderen Mitgliedstaats der Europäischen Union oder eines anderen Vertragsstaats des Abkommens über den Europäischen Wirtschaftsraum unterliegt.
+(4) Abweichend von Absatz 2 gelten für lokalen Hörfunk, Bürgermedien, Rundfunkprogramme in Einrichtungen, Wohnanlagen und bei örtlichen Veranstaltungen die Abschnitte 6 bis 9 dieses Gesetzes.
+(5) Für ausschließlich im Internet verbreitete, nicht bundesweite Hörfunkprogramme gilt § 54 Absatz 1 und Absatz 2 des Medienstaatsvertrages entsprechend; das Angebot ist der LfM anzuzeigen. Die Vorschriften der §§ 36 und 37 finden auf Programme nach Satz 1 keine Anwendung, § 5 mit Ausnahme seines Absatzes 2 Nr. 1 erste Alternative und § 6 finden entsprechende Anwendung. Die LfM kann von Veranstaltern von Hörfunkprogrammen im Sinne des Satzes 1 entsprechend § 7 Absatz 3 Informationen und Unterlagen verlangen. Vor dem Inkrafttreten dieses Gesetzes angezeigte, ausschließlich im Internet verbreitete, nicht bundesweite Hörfunkprogramme gelten als zugelassene Programme im Sinne des Absatzes 1.
+§ 5  Zulassungsvoraussetzungen
+(1) Zugelassen werden dürfen
+1. natürliche Personen,
+2. nicht rechtsfähige Personenvereinigungen des Privatrechts, die auf Dauer angelegt sind,
+3. juristische Personen des Privatrechts,
+4. Kirchen, andere öffentlich-rechtliche Religions- und Weltanschauungsgemeinschaften, jüdische Kultusgemeinden,
+5. Hochschulen.
+(2) Die Zulassung setzt voraus, dass der Antragsteller oder die Antragstellerin
+1. unbeschränkt geschäftsfähig ist, die Fähigkeit zur Bekleidung öffentlicher Ämter nicht durch Richterspruch verloren und das Grundrecht der freien Meinungsäußerung nicht verwirkt (Art. 18 Grundgesetz) hat,
+2. gerichtlich unbeschränkt verfolgt werden kann,
+3. einen Wohnsitz oder Sitz in einem Mitgliedstaat der Europäischen Union oder einem anderen Vertragsstaat des Abkommens über den Europäischen Wirtschaftsraum hat,
+4. nicht aufgrund von Tatsachen Anlass zu Bedenken gegen die zuverlässige Erfüllung seiner Pflicht nach diesem Gesetz gibt,
+5. erwarten lässt, jederzeit wirtschaftlich und organisatorisch in der Lage zu sein, eine Rundfunkveranstaltung durchzuführen, die den programmlichen Anforderungen dieses Gesetzes entspricht.
+(3) Öffentlich-rechtliche Rundfunkveranstalter und von diesen abhängige Unternehmen und Vereinigungen (§ 17 Aktiengesetz) dürfen sich an Veranstaltern, die der Zulassung nach diesem Gesetz bedürfen, im Rahmen der für sie geltenden Bestimmungen mit bis zu einem Drittel der Kapital- und Stimmrechtsanteile beteiligen.
+§ 6  Inkompatibilität
+Nicht zugelassen werden dürfen
+1. Veranstalter, deren Mitglieder, Gesellschafter, gesetzliche oder satzungsmäßige Vertreter zugleich gesetzliche oder satzungsmäßige Vertreter von juristischen Personen des öffentlichen Rechts sind oder zu diesen in einem Arbeits- oder Dienstverhältnis in leitender Stellung stehen. § 5 Abs. 1 Nr. 4, 5 bleibt unberührt,
+2. Unternehmen und Vereinigungen, die von juristischen Personen des öffentlichen Rechts abhängig sind (§ 17 Aktiengesetz),
+3. Veranstalter, deren Mitglieder, Gesellschafter, gesetzliche oder satzungsmäßige Vertreter zugleich Mitglieder der Bundesregierung, einer Landesregierung oder einer ausländischen Regierung sind,
+4. Veranstalter, deren Mitglieder, Gesellschafter, gesetzliche oder satzungsmäßige Vertreter zugleich Mitglieder eines Organs eines öffentlich-rechtlichen Rundfunkveranstalters sind oder zu diesem in einem Arbeits- oder Dienstverhältnis stehen,
+5. politische Parteien und Wählervereinigungen und von diesen abhängige Unternehmen und Vereinigungen (§ 17 Aktiengesetz).
+§ 7  Zulassungsverfahren
+(1) Das Zulassungsverfahren setzt einen schriftlichen Antrag voraus. Im Rahmen der Verfahren nach Abschnitt 9 ist ein Antrag auch in Textform möglich.
+(2) Der Antragsteller oder die Antragstellerin hat alle Angaben zu machen, alle Auskünfte zu erteilen und alle Unterlagen vorzulegen, die zur Prüfung des Zulassungsantrags erforderlich sind.
+(3) Für die Zulassung gelten § 26 Verwaltungsverfahrensgesetz für das Land Nordrhein-Westfalen in der jeweils geltenden Fassung und § 55 Absatz 1 bis 5 und 6 Satz 1 erste Alternative, Satz 2 sowie § 56 des Medienstaatsvertrages entsprechend.
+(4) Das Nähere regelt die LfM durch Satzung.
+§ 8  Zulassungsbescheid
+(1) Die Zulassung wird durch schriftlichen Bescheid der LfM für die Programmart, die Programmkategorie und das Sendegebiet erteilt. Soweit dieses Gesetz nichts anderes bestimmt, wird die Zulassung unbefristet erteilt.
+(2) Die Zulassung ist nicht übertragbar.
+§ 9  Änderungen nach der Zulassung
+(1) Der Veranstalter hat der LfM geplante Veränderungen der für die Zulassung maßgeblichen Umstände vor ihrem Vollzug schriftlich anzuzeigen. Es gelten § 55 Absatz 6 Satz 1 zweite Alternative, Satz 2, Absatz 7 sowie die §§ 56 und 63 des Medienstaatsvertrages entsprechend. Das Nähere regelt die LfM durch Satzung.
+(2) Kann dem Veranstalter die Zulassung auch bei Vollzug der Änderung erteilt werden, bestätigt die LfM die Unbedenklichkeit der Änderung. Ist dies nicht der Fall, stellt die LfM fest, dass die Zulassung bei Vollzug der Änderung nicht erteilt werden kann.
+(3) Vollzieht der Veranstalter eine Änderung, die nicht nach Absatz 2 Satz 1 als unbedenklich bestätigt werden kann, wird die Zulassung von der LfM widerrufen.
+(4) Für die Veränderungen wirtschaftlicher und organisatorischer Art (§ 5 Absatz 2 Nummer 5), die der Veranstalter plant oder durchführt, nachdem er die Rundfunkveranstaltung aufgenommen hat, gelten die Absätze 1 bis 3 nur, sofern es sich um wesentliche Veränderungen handelt. Welche Umstände für die Erfüllung der Kriterien nach § 5 Absatz 2 Nummer 5 wesentlich sind, legt die LfM in der Zulassung fest.
+Abschnitt 3 Übertragungskapazitäten
+Unterabschnitt 1 Zuordnung
+§ 10  Grundsätze
+(1) Freie terrestrische und Satelliten-Übertragungskapazitäten, die dem Land Nordrhein-Westfalen für Rundfunk und rundfunkähnliche Telemedien zur Verfügung stehen, sind der LfM für die privaten Veranstalter von Rundfunkprogrammen und Anbieter rundfunkähnlicher Telemedien und den zur programmlichen Versorgung des Landes Nordrhein-Westfalen zuständigen öffentlich-rechtlichen Rundfunkveranstaltern zuzuordnen.
+(2) Die Sicherstellung der funktionsgerechten Erfüllung des gesetzlichen Auftrags des öffentlich-rechtlichen Rundfunks hat Vorrang. Im Rahmen der Zuordnung analoger Übertragungskapazitäten gilt der Vorrang nur für die Aufrechterhaltung der zum 31. Dezember 2013 bestehenden Versorgungsgebiete der einzelnen gesetzlich bestimmten Programme; darüber hinausgehende analoge Übertragungskapazitäten können dem öffentlich-rechtlichen Rundfunk nur im Fall, dass die LfM ihrerseits keinen Bedarf für eine konkrete Übertragungskapazität geltend macht, zugeordnet werden. Im Übrigen werden Übertragungskapazitäten nach folgender Priorisierung zugeordnet:
+1. Sicherung einer möglichst umfassenden Versorgung der Bevölkerung mit einem vielfältigen Programmangebot und programmbegleitenden Diensten des privaten Rundfunks; 2. Sicherung der Fortentwicklung des Rundfunks durch neue Rundfunktechniken.
+(3) Die Zuordnung von Übertragungskapazitäten erfolgt befristet. Die Befristung soll in der Regel 15 Jahren betragen. Die Zuordnung kann mit weiteren Nebenbestimmungen versehen werden.
+(4) Wird die Zuordnung mit Nebenbestimmungen versehen, so sind dabei die berechtigten Interessen der Begünstigten angemessen zu berücksichtigen.
+§ 10a  Zuordnung digitaler terrestrischer Übertragungskapazitäten
+Bei der Zuordnung digitaler, terrestrischer Übertragungskapazitäten sind neben den in § 10 Abs. 2 genannten Kriterien folgende Gesichtspunkte zu berücksichtigen:
+1. die Ergebnisse eines Pilotversuchs nach § 10b;
+2. Investitionen, die zum Aufbau des Sendenetzes eingesetzt wurden;
+3. im Rahmen der Zuordnung digitaler Übertragungskapazitäten für den lokalen Hörfunk ist eine flächendeckende Versorgung anzustreben.
+§ 10b  Pilotversuche zur Einführung und Weiterentwicklungdigitaler terrestrischer Übertragungstechniken
+(1) Zum Zwecke der Einführung und Weiterentwicklung digitaler terrestrischer Übertragungstechniken ist die Durchführung von befristeten Pilotversuchen zulässig. Die Befristung soll drei Jahre in der Regel nicht überschreiten. Diese Pilotversuche dienen der Vorbereitung von Entscheidungen über die künftige Nutzung digitaler terrestrischer Übertragungstechniken.
+(2) Die Ministerpräsidentin oder der Ministerpräsident gibt die für den Versuchszweck zur Verfügung stehenden Übertragungskapazitäten bekannt und wirkt darauf hin, dass sich die Beteiligten über eine sachgerechte Zuordnung einigen. Kommt eine Einigung zustande, ordnet die Ministerpräsidentin oder der Ministerpräsident die Übertragungskapazitäten zu und unterrichtet den im Landtag zuständigen Ausschuss entsprechend.
+(3) Kommt eine Einigung zwischen den Beteiligten innerhalb eines Monats nach der Bekanntgabe nicht zustande, entscheidet die Ministerpräsidentin oder der Ministerpräsident unter Berücksichtigung des Versuchszwecks und der Stellungnahmen der Beteiligten. Hierbei sind die in § 10 Abs. 2 und § 10a genannten Gesichtspunkte zu berücksichtigen und eine ausgewogene Verteilung der Übertragungskapazitäten zwischen öffentlich-rechtlichen und privaten Veranstaltern anzustreben.
+§ 11  Zuordnungsverfahren
+(1) Die Ministerpräsidentin oder der Ministerpräsident ordnet die dem Land Nordrhein-Westfalen zur Verfügung stehenden Übertragungskapazitäten zu. Der im Landtag zuständige Ausschuss wird über die Zuordnung unterrichtet.
+(2) Die dem Land Nordrhein-Westfalen zur Verfügung stehenden Übertragungskapazitäten sind den öffentlich-rechtlichen Veranstaltern und der LfM bekannt zu machen.
+(3) Die Zuordnung von Übertragungskapazitäten erfolgt auf schriftlichen Antrag eines öffentlich-rechtlichen Veranstalters oder der LfM. In dem Antrag ist der konkrete Bedarf für die Übertragungskapazitäten, insbesondere das Versorgungsgebiet, die Übertragungstechnik, die Versorgungsqualität und der Zeitrahmen der beabsichtigten Nutzung, darzulegen.
+(4) Liegen mehrere Anträge vor, die nach den Vorgaben des § 10 zu berücksichtigen sind, wirkt die Ministerpräsidentin oder der Ministerpräsident darauf hin, dass sich die Beteiligten über eine sachgerechte Zuordnung einigen. Kommt eine Einigung zustande, ordnet die Ministerpräsidentin oder der Ministerpräsident die Übertragungskapazität zu. Kommt eine Einigung zwischen den Beteiligten innerhalb von drei Monaten nach der Bekanntgabe nicht zustande, entscheidet die Ministerpräsidentin oder der Ministerpräsident nach Anhörung des im Landtag zuständigen Ausschusses.
+(5) Die Ministerpräsidentin oder der Ministerpräsident soll die Zuordnung einer Übertragungskapazität aufheben, wenn sie für einen Zeitraum von mehr als zwölf Monaten nach der Zuordnung nicht genutzt wurde. Der öffentlich-rechtliche Veranstalter, der die Nutzung innerhalb des Zeitraums nach Satz 1 unterlässt, hat dies der Ministerpräsidentin oder dem Ministerpräsidenten anzuzeigen. Satz 2 gilt entsprechend für die LfM, die von den privaten Veranstaltern Auskunft über die Nutzung von Übertragungskapazitäten verlangen kann.
+(6) Die dem Land voraussichtlich zur Verfügung stehenden Übertragungskapazitäten können auf Antrag unter der aufschiebenden Bedingung zugeordnet werden, dass diese innerhalb von 30 Monaten dem Land tatsächlich zur Verfügung gestellt werden. Die Absätze 1 bis 5 gelten entsprechend.
+(7) Die Landesregierung wird ermächtigt, zur besseren Nutzung zugeordneter und zur Schaffung zusätzlich nutzbarer Übertragungskapazitäten Vereinbarungen mit Regierungen anderer Länder über Verlagerungen und die Einräumung von Standortnutzungen zu schließen. Soweit bestehende Nutzungen berührt sind, ist vor Abschluss der Vereinbarung die Zustimmung des öffentlich-rechtlichen Veranstalters oder der LfM einzuholen.
+(8) Auch außerhalb des Zuordnungsverfahrens koordiniert die LfM die Interessen der privaten Anbieter und wirkt unter diesen auf sachgerechte Lösungen hin.
+Unterabschnitt 2 Zuweisung
+§ 12  Zuweisungserfordernis
+(1) Die Nutzung terrestrischer Übertragungskapazitäten für Versorgungsbedarfe privater Anbieter setzt eine Zuweisung voraus. Eine Zuweisung kann an Rundfunkveranstalter, Anbieter rundfunkähnlicher Telemedien oder Anbieter von Medienplattformen erfolgen. Satz 1 gilt auch für die Verbreitung in analogen Kabelanlagen, soweit die Belegungsentscheidung nicht auf § 18 Absatz 9 beruht. Satz 1 gilt nicht für Bürgermedien, mit Ausnahme von Rundfunkprogrammen nach § 40d, und nicht für Rundfunkprogramme nach Abschnitt 9.
+(2) Anbietern von Medienplattformen können digitale terrestrische Übertragungskapazitäten zugewiesen werden. Die Zuweisung der Übertragungskapazitäten kann durch öffentlich-rechtlichen Vertrag erfolgen, in dem die an das Gesamtangebot und an die benutzte Technik zu stellenden Anforderungen festgelegt werden. Das Nähere regelt die LfM durch Satzung.
+(3) Für die Weiterverbreitung von nicht bundesweit empfangbaren terrestrischen Rundfunkprogrammen oder rundfunkähnlichen Telemedien gelten die §§ 23, 24 Absatz 4 und §§ 25, 26 entsprechend.
+§ 13  Zuweisungsvoraussetzungen
+Eine Übertragungskapazität zur Verbreitung oder Weiterverbreitung von Rundfunkprogrammen oder rundfunkähnlichen Telemedien darf nur solchen Rundfunkveranstaltern, Anbietern rundfunkähnlicher Telemedien oder Anbietern von Medienplattformen zugewiesen werden, die erwarten lassen, dass sie jederzeit wirtschaftlich und organisatorisch in der Lage sind, die Anforderungen an die antragsgemäße Verbreitung oder Weiterverbreitung der Programme oder Telemedienangebote zu erfüllen. Rundfunkveranstaltern dürfen für die Verbreitung von Rundfunkprogrammen Übertragungskapazitäten nur zugewiesen werden, sofern eine entsprechende Zulassung hierfür vorliegt oder auf andere Weise der Nachweis erbracht ist, dass die Veranstaltung rechtmäßig erfolgt. Anbietern von Medienplattformen dürfen Übertragungskapazitäten nur zugewiesen werden, wenn sichergestellt ist, dass den Anforderungen an die Sicherung der Angebots- und Anbietervielfalt entsprochen wird.
+§ 14  Grundsätze
+(1) Die LfM entscheidet über die Verwendung der ihr zur Verfügung stehenden Übertragungskapazitäten entsprechend den Zielen des § 2. Hierbei nimmt sie folgende Priorisierung vor:
+1. Sicherstellung einer flächendeckenden Versorgung mit lokalem Hörfunk im Sinne des § 54 Absatz 2; 2. Versorgung mit einem analogen landesweiten Hörfunkprogramm; 3. Versorgung mit Rundfunkprogrammen in Hochschulen (§ 40d); 4. Versorgung mit Rundfunkprogrammen unter Berücksichtigung landesweiter, regionaler und lokaler Belange; 5. Versorgung mit rundfunkähnlichen Telemedien.
+(2) Bestehen keine ausreichenden Übertragungskapazitäten für alle Programmveranstalter, die die Voraussetzungen nach § 13 erfüllen, wirkt die LfM auf eine Verständigung zwischen den Antragstellenden hin. Kommt eine Verständigung zustande, legt sie diese ihrer Entscheidung über die Aufteilung der Übertragungskapazitäten zugrunde, wenn nach den vorgelegten Unterlagen erwartet werden kann, dass in der Gesamtheit der Angebote die Meinungsvielfalt in den Programmen und die Vielfalt der Programmanbieter auch unter Beachtung der Priorisierung in § 14 Absatz 1 Satz 2 zum Ausdruck kommt. Im Übrigen trifft die LfM eine Vorrangentscheidung. Dabei berücksichtigt die LfM die Meinungsvielfalt in den Programmen (Programmvielfalt) und die Vielfalt der Programmanbieter (Anbietervielfalt). Sie trägt dabei auch dem Gedanken der Anreizregulierung Rechnung. Das Nähere hierzu regelt die LfM durch Satzung.
+(3) Die LfM beurteilt den Beitrag eines Programms zur Programmvielfalt nach folgenden Gesichtspunkten:
+1. Inhaltliche Vielfalt des Programms, insbesondere sein Anteil an Information, Bildung, Beratung und Unterhaltung, die räumlichen Bezüge der Berichterstattung, die Behandlung von Minderheiten- und Zielgruppeninteressen, 2. Beitrag zur Vielfalt des Gesamtangebots, insbesondere der Beitrag zur Angebots- oder Spartenvielfalt, zur Vielfalt im Sendegebiet, zur kulturellen und Sprachenvielfalt.
+(4) Die LfM beurteilt Bestehen und Umfang von Anbietervielfalt nach folgenden Gesichtspunkten:
+1. Beitrag des Antragstellenden zur publizistischen Vielfalt und zur Angebotsvielfalt, 2. Einrichtung eines Programmbeirats und sein Einfluss auf die Programmgestaltung, 3. Einfluss der redaktionell Beschäftigten oder von ihnen gewählter Vertreterinnen und Vertreter auf die Programmgestaltung und Programmverantwortung, 4. Anteil von ausgestrahlten Beiträgen, die von unabhängigen Produzenten zugeliefert werden, an der Sendezeit eines Programms.
+(5) Bei der Zuweisung landesweiter analoger terrestrischer Übertragungskapazitäten berücksichtigt die LfM im Rahmen ihrer Vorrangentscheidung neben den Maßgaben des Absatzes 2 Satz 4,
+1. inwieweit das Angebot strukturell zur Sicherung lokalen Hörfunks in Nordrhein-Westfalen beiträgt, 2. inwieweit das Angebot landesweit zur Versorgung mit journalistischen Inhalten durch redaktionelle Strukturen in Nordrhein-Westfalen beiträgt und 3. ob der Anbieter über ein Digitalkonzept für die Versorgung mit Hörfunkprogrammen und hörfunkähnlichen Telemedien in Nordrhein-Westfalen verfügt, insbesondere auch digitale terrestrische Übertragungswege nutzt.
+(6) Bei der Zuweisung regionaler digitaler terrestrischer Übertragungskapazitäten berücksichtigt die LfM im Rahmen ihrer Vorrangentscheidung neben den Maßgaben des Absatzes 2 Satz 4 auch den jeweiligen Beitrag des Angebots
+1. zur Versorgung mit lokalen, regionalen oder landesweiten journalistischen Inhalten und 2. zu einer landesweit möglichst flächendeckenden Abdeckung mit Angeboten.
+(7) Wird eine für die Versorgung mit lokalem Hörfunk nach Absatz 1 Satz 2 Nummer 1 vorgesehene Übertragungskapazität nicht von einem Veranstalter nach § 52 genutzt, soll diese Übertragungskapazität dem jeweiligen Rahmenprogrammveranstalter nach § 56 zur Verbreitung seines Rahmenprogramms zugewiesen werden. Im Übrigen finden Absatz 1 Satz 1 und Satz 2 Nummer 2 bis 5 Anwendung.
+(8) Teleshoppingkanäle sind entsprechend ihres Beitrags zur Angebots- und Anbietervielfalt angemessen zu berücksichtigen. Absatz 4 Nummer 2, 3 und 4 ist bei der Beurteilung des Beitrages von Teleshoppingkanälen zur Anbietervielfalt nicht zu berücksichtigen.
+(9) Für rundfunkähnliche Telemedien gelten die Absätze 2 bis 4 entsprechend. Für die Entscheidung über die Zuweisung von Übertragungskapazitäten an Anbieter von Medienplattformen gelten Absatz 6 sowie § 102 Absatz 3 und 4 des Medienstaatsvertrages entsprechend.
+§ 15  Ausschreibung
+(1) Die LfM schreibt terrestrische Übertragungskapazitäten, die ihr zur Verfügung stehen oder voraussichtlich in den nächsten 18 Monaten zur Verfügung stehen werden, mindestens einmal jährlich aus. Ihr neu zur Verfügung gestellte Übertragungskapazitäten schreibt sie innerhalb von sechs Monaten aus. Die Sätze 1 und 2 gelten nicht für Optimierungen sowie für Erweiterungen bereits bestehender Versorgungen, die nach § 14 Absatz 1 Satz 2 Nummer 1 bis 3 zu berücksichtigen sind. Die Ausschreibung wird im Online-Angebot der LfM bekanntgemacht. Das Nähere regelt die LfM durch Satzung. Auf diese Bekanntmachung ist jeweils im Ministerialblatt für das Land Nordrhein-Westfalen hinzuweisen.
+(2) In der Bekanntmachung werden Beginn und Ende der Antragsfrist, die mindestens zwei Monate beträgt, mitgeteilt. Die Frist kann nicht verlängert werden. Wiedereinsetzung in den vorigen Stand ist ausgeschlossen.
+§ 16  Zuweisungsverfahren
+(1) Das Zuweisungsverfahren setzt einen schriftlichen Antrag voraus.
+(2) Der Antrag muss enthalten:
+1. Angaben über das vorgesehene Verbreitungsgebiet;
+2. Angaben über die Übertragungstechnik und die Versorgungsqualität;
+3. Angaben über die zu nutzende Übertragungskapazität, sofern diese dem Antragsteller bekannt ist;
+4. Angaben zum Zeitrahmen der beabsichtigten Nutzung.
+(3) Der Antragsteller oder die Antragstellerin haben alle Angaben zu machen, alle Auskünfte zu erteilen und alle Unterlagen vorzulegen, die zur Prüfung des Zuweisungsantrags und der Beurteilung der Programm-, Angebots- und Anbietervielfalt erforderlich sind. Das Nähere regelt die LfM durch Satzung.
+(4) Die Medienkommission ist über neu gemeldete Versorgungsbedarfe unverzüglich zu informieren.
+§ 17  Zuweisungsbescheid
+(1) Die Zuweisung einer Übertragungskapazität erfolgt durch schriftlichen Bescheid der LfM. Dieser bestimmt das Verbreitungsgebiet, die Übertragungstechnik und die zugeordnete Übertragungskapazität ganz oder in Teilen. Der Bescheid kann mit Nebenbestimmungen versehen werden.
+(2) Die Zuweisung von Übertragungskapazitäten an Rundfunkveranstalter oder Anbieter von rundfunkähnlichen Telemedien erfolgt befristet für höchstens zehn Jahre; bei Rundfunkprogrammen darf die Zuweisung den Zeitraum, für den die Zulassung zur Veranstaltung des Rundfunkprogramms erteilt ist, nicht überschreiten. Eine Verlängerung der Zuweisung um jeweils höchstens zehn Jahre ist möglich. Die Zuweisung von Übertragungskapazitäten, die für den lokalen Hörfunk nach § 14 Absatz 1 Satz 2 Nummer 1 benötigt werden, darf für andere Zwecke nur für die Dauer von höchstens einem Jahr erfolgen; Gleiches gilt für die Zuweisung nach § 14 Absatz 7 Satz 1. Eine Verlängerung ist in den Fällen des Satzes 3 um jeweils höchstens ein Jahr zulässig. Die Zuweisung von Übertragungskapazitäten an Anbieter von Medienplattformen erfolgt für die Dauer von bis zu zehn Jahren; eine einmalige Verlängerung um bis zu zehn Jahre ist zulässig.
+(3) Die Zuweisung ist nicht übertragbar. Eine Änderung der zugewiesenen Übertragungstechnik und des Verbreitungsgebiets ist unzulässig. Für sonstige Änderungen der nach § 16 Abs. 2 und 3 für die Zuweisung maßgeblichen Umstände gilt § 9 entsprechend.
+Unterabschnitt 3 Belegung von Kabelanlagen und terrestrisch verbreitenden Medienplattformen
+§ 18  Analoge Übertragung in Kabelanlagen
+(1) Der Betreiber einer Kabelanlage hat die für analoge Verbreitung genutzten Kanäle der Kabelanlage so zu belegen, dass alle angeschlossenen Teilnehmerinnen und Teilnehmer vorrangig die für Nordrhein-Westfalen gesetzlich bestimmten öffentlich-rechtlichen Rundfunkprogramme, die lokalen Hörfunkprogramme und Hochschulprogramme in deren jeweiligem Verbreitungsgebiet empfangen können.
+(2) Reicht die Kapazität einer Kabelanlage nicht für die Verbreitung und Weiterverbreitung aller weiteren Rundfunkprogramme aus, die in sie eingespeist werden sollen, trifft die LfM für höchstens 17 Kanäle die Vorrangentscheidung nach § 14 Absatz 2 bis 4. Im Rahmen der Vorrangentscheidung legt die LfM auch fest, welche Kanäle für die Belegung nach Satz 1 zur Verfügung stehen. Das Nähere regelt die LfM durch die Satzung nach § 14 Absatz 2 Satz 4.
+(3) Bis zu zwei der nach Absatz 2 zu belegenden Kanäle sind mit lokalen oder regionalen Fernsehprogrammen zu belegen, die im Geltungsbereich dieses Gesetzes zugelassen sind. Die Entscheidung über die Anzahl der Kanäle nach Satz 1 und die Auswahl des Programms nach Maßgabe des § 14 Absatz 2 bis 4 trifft die LfM.
+(4) In den an das Ausland angrenzenden Gebieten soll einer der nach Absatz 2 zu belegenden Kanäle mit einem Programm belegt werden, das im angrenzenden Ausland verbreitet wird und einen inhaltlichen Bezug zu diesem aufweist.
+(5) Mindestens ein Kanal der nach Absatz 2 zu belegenden Kanäle ist mit direkten Angeboten an die Öffentlichkeit für den Verkauf, den Kauf, die Miete oder Pacht von Waren oder Erzeugnissen oder für die Erbringung von Dienstleistungen zu belegen.
+(6) Die LfM kann bestimmen, dass von den von ihr nach Absatz 2 zu belegenden Kanälen bis zu zwei fremdsprachige Programme, die für ausländische Bürgerinnen und Bürger bestimmt sind, in solche Kabelanlagen unter Beachtung der Grundsätze nach § 14 Absatz 2 bis 4 eingespeist werden, in deren Verbreitungsgebiet diese Bürgerinnen und Bürger einen bedeutenden Anteil an der Bevölkerung stellen.
+(7) Die LfM kann einen Kanal zur Nutzung zu unterschiedlichen Zeiten oder in turnusmäßigem Wechsel für mehrere Programme zuweisen.
+(8) Bei den Entscheidungen nach Absatz 2 bis 7 ist auch die Akzeptanz der Rundfunkprogramme und rundfunkähnlichen Telemedien bei den an der Kabelanlage angeschlossenen Teilnehmerinnen und Teilnehmern zu berücksichtigen.
+(9) Die Entscheidung über die Belegung der verbleibenden Kanäle, auch mit rundfunkähnlichen Telemedien, trifft der Betreiber der Kabelanlage nach Maßgabe der allgemeinen Gesetze. § 20 Absatz 3 und 4 gilt entsprechend.
+(10) Im Übrigen gelten die Vorschriften des Medienstaatsvertrages über die Gestaltung und Offenlegung von Entgelten und Tarifen für Rundfunkprogramme und Telemedien entsprechend.
+§ 19  Ausnahmen bei analoger Übertragung in Kabelanlagen
+(1) Für Einrichtungen (§ 84) und Wohnanlagen (§ 85) lässt die LfM auf Antrag des Betreibers der Kabelanlagen Ausnahmen von der Rangfolge des § 18 zu. Dabei sollen die Wünsche der angeschlossenen Teilnehmerinnen und Teilnehmer angemessen berücksichtigt werden.
+(2) §§ 24 bis 26 gelten nicht für die inhaltlich unveränderte, vollständige und zeitgleiche Weiterverbreitung von Programmen in Kabelanlagen mit bis zu 500 angeschlossenen Wohneinheiten.
+§ 20  Verfahren bei analoger Übertragung in Kabelanlagen
+(1) Der Betreiber einer Kabelanlage hat der LfM die zur Beurteilung der Programm-, Angebots- und Anbietervielfalt gemäß § 14 Abs. 2 bis 4 erforderlichen Auskünfte zu erteilen.
+(2) Die LfM entscheidet im Benehmen mit dem Kabelanlagenbetreiber über die Belegung der Kanäle in Kabelanlagen nach § 18 Abs. 1 bis 7. Hinsichtlich der öffentlich-rechtlichen Rundfunkprogramme stellt sie das Benehmen mit dem WDR, dem ZDF oder dem DeutschlandRadio her.
+(3) Die LfM soll für Veranstalter oder Anbieter, deren Programm oder rundfunkähnliches Telemedium aufgrund einer Rangfolgeentscheidung nicht mehr verbreitet oder weiterverbreitet werden kann, Übergangsfristen für den Vollzug der Rangfolgeentscheidung setzen.
+(4) Die LfM überprüft ihre Rangfolgeentscheidung für die Belegung von Kabelanlagen in regelmäßigen Abständen, mindestens aber alle 24 Monate.
+(5) §§ 48, 49 Verwaltungsverfahrensgesetz für das Land Nordrhein-Westfalen finden keine Anwendung.
+(6) Klagen gegen Entscheidungen nach Absatz 2 haben keine aufschiebende Wirkung.
+(7) Das Nähere regelt die LfM durch Satzung.
+§ 21  Digitalisierte Kabelanlagen
+(1) Die Belegung digitalisierter Kabelanlagen mit Hörfunk- und Fernsehprogrammen richtet sich nach § 81 des Medienstaatsvertrages.
+(2) Der Betreiber hat sicherzustellen, dass die erforderlichen Übertragungskapazitäten für Bürgermedien nach § 40c zur Verfügung stehen. Die Verbreitung der in Satz 1 genannten Bürgermedien erfolgt unentgeltlich. Dies gilt nicht für die Heranführung. Das Nähere regelt die LfM durch Satzung.
+(3) Für die Weiterverbreitung von Fernsehprogrammen in nicht bundesweit empfangbaren Angeboten in digitalisierten Kabelanlagen gilt § 103 des Medienstaatsvertrages entsprechend.
+§ 22  Terrestrisch verbreitende Medienplattformen
+Für regionale und lokale Medienplattformen, die Hörfunk- und Fernsehprogramme ausschließlich terrestrisch verbreiten, gilt abweichend von § 81 Absatz 4 Nummer 2 des Medienstaatsvertrages, dass das Gebot der Meinungsvielfalt und Angebotsvielfalt bereits im Rahmen einer Zuordnungsentscheidung nach §§ 10, 10a oder einer Zuweisungsentscheidung nach § 14 berücksichtigt sein muss.
+Unterabschnitt 4 Weiterverbreitung in Kabelanlagen in analoger Technik
+§ 23  Grundsätze
+(1) In einer Kabelanlage dürfen folgende Angebote inhaltlich unverändert und vollständig weiterverbreitet werden:
+1. außerhalb des Geltungsbereichs dieses Gesetzes im Inland rechtmäßig veranstaltete Rundfunkprogramme,
+2. in einem anderen Mitgliedsstaat der Europäischen Union rechtmäßig veranstaltete Fernsehprogramme,
+3. entsprechend den Bestimmungen des Europäischen Übereinkommens über das grenzüberschreitende Fernsehen veranstaltete Fernsehprogramme,
+4. sonstige im Ausland rechtmäßig veranstaltete Rundfunkprogramme, die, soweit anwendbar (§ 1 Absatz 3), den Anforderungen der Programmgrundsätze (§ 31) und den Regelungen des Medienstaatsvertrages und des Jugendmedienschutz-Staatsvertrages über unzulässige Sendungen und Jugendschutz und über Rundfunkwerbung und Sponsoring entsprechen sowie einem § 44 entsprechenden Gegendarstellungsrecht unterliegen,
+5. rundfunkähnliche Telemedien.
+(2) Für die inhaltlich veränderte oder unvollständige Weiterverbreitung gelten die Regelungen dieses Gesetzes über die Veranstaltung und Verbreitung von Rundfunkprogrammen.
+§ 24  Anzeigepflicht
+(1) Betreiber von Kabelanlagen haben der LfM die im Geltungsbereich dieses Gesetzes für die Verbreitung oder Weiterverbreitung von Rundfunk oder rundfunkähnlichen Telemedien genutzten oder zur Verfügung stehenden Übertragungskapazitäten, das Verbreitungsgebiet und die Anzahl der versorgten Wohneinheiten mindestens einen Monat vor Inbetriebnahme, die Belegung spätestens einen Monat vor ihrem Beginn anzuzeigen. Änderungen sind unverzüglich anzuzeigen.
+(2) Veranstalter, die Rundfunkprogramme durch Kabelanlagen weiterverbreiten, müssen die LfM spätestens einen Monat vor Beginn der Weiterverbreitung hierüber schriftlich unterrichten. Anstelle des Veranstalters kann auch der Betreiber der Kabelanlage die Weiterverbreitung anzeigen, wenn dies mit dem Veranstalter vereinbart ist.
+(3) In der Anzeige sind die Person des Veranstalters und des Weiterverbreitenden, das Weiterverbreitungsgebiet und Art und Inhalt des Programms mitzuteilen.
+(4) In der Anzeige ist glaubhaft zu machen, dass Rechte Dritter der Weiterverbreitung nicht entgegenstehen. Der Anzeigende muss sich verpflichten, die LfM von Urheberrechtsansprüchen Dritter freizustellen. In Zweifelsfällen kann die LfM verlangen, dass ihr innerhalb einer von ihr bestimmten Frist Sicherheit geleistet wird.
+(5) Der Anzeigende ist verpflichtet, der LfM unverzüglich die zur Erfüllung ihrer Aufgaben erforderlichen Auskünfte zu erteilen und entsprechende Unterlagen vorzulegen.
+(6) Die Absätze 2 bis 5 gelten entsprechend für Änderungen der Person des Veranstalters oder des Weiterverbreitenden, des Weiterverbreitungsgebiets und der Art und des Inhalts des Programms.
+§ 25  Beanstandung und Aussetzung
+(1) Verstößt ein durch eine Landesmedienanstalt zugelassenes Programm, das nach § 23 Absatz 1 weiterverbreitet wird, gegen eine Bestimmung des Medienstaatsvertrages, beanstandet die LfM den Verstoß gegenüber der für die Zulassung des Veranstalters zuständigen Stelle.
+(2) Für die Weiterverbreitung von Fernsehprogrammen oder rundfunkähnlichen Telemedien nach § 23 Absatz 1 gilt § 103 des Medienstaatsvertrages entsprechend.
+§ 26  Untersagung
+(1) Die Weiterverbreitung eines Fernsehprogramms ist unzulässig, wenn
+1. entgegen § 24 Anzeigen oder Unterlagen nicht vollständig oder nicht fristgerecht vorgelegt, Auskünfte nicht vollständig oder nicht fristgerecht erteilt, vorsätzlich unrichtige Angaben gemacht oder Sicherheiten nicht fristgerecht geleistet werden,
+2. die Regelungen dieses Gesetzes über die Rangfolge von Programmen nicht eingehalten werden,
+3. gegen Weiterverbreitungsgrundsätze nach § 23 verstoßen wird,
+4. der Veranstalter nach dem für ihn geltenden Recht zur Veranstaltung von Rundfunk nicht befugt ist oder die im Ursprungsland zuständige Stelle festgestellt hat, dass das Programm den dort geltenden Rechtsvorschriften nicht entspricht.
+(2) Liegt ein Untersagungsgrund vor Beginn der Weiterverbreitung vor, ordnet die LfM an, dass die Weiterverbreitung erst erfolgen darf, wenn sie festgestellt hat, dass dieses Gesetz der Weiterverbreitung nicht entgegensteht.
+(3) Besteht ein Untersagungsgrund nach Absatz 1 Nummer 1 oder 3 nach Beginn der Weiterverbreitung, weist die LfM den Veranstalter schriftlich oder elektronisch darauf hin. Liegt der Untersagungsgrund in der Person des Betreibers einer Kabelanlage vor, wird dieser von der LfM unterrichtet. Dauert der Rechtsverstoß fort oder wiederholt er sich, hat die LfM nach Anhörung die Weiterverbreitung endgültig zu untersagen.
+(4) Besteht ein Untersagungsgrund nach Absatz 1 Nummer 2 oder 4, erfolgt die Untersagung nach vorheriger Anhörung. Im Fall des Absatz 1 Nummer 2 werden die Programme untersagt, die der Rangfolge nicht entsprechen.
+(5) Im Fall des Absatz 1 Nummer 1 und 3 erfolgt die Untersagung unter Berücksichtigung der Schwere und Häufigkeit des Verstoßes für einen bestimmten Zeitraum, der einen Monat nicht überschreiten darf. Hat die LfM dreimal die Weiterverbreitung für einen bestimmten Zeitraum untersagt, erfolgt bei einem erneuten Verstoß die endgültige Untersagung.
+(6) Die Untersagung ist dem Veranstalter und dem Betreiber der Kabelanlage bekannt zu geben.
+(7) §§ 48, 49 Verwaltungsverfahrensgesetz für das Land Nordrhein-Westfalen finden keine Anwendung.
+Abschnitt 4 Umstellung von analoger auf digitale Übertragung, Experimentierklausel
+§ 27  Aufgabe der LfM
+(1) Die LfM unterstützt und begleitet die Umstellung der analogen auf digitale Übertragung sowie die Einführung neuer digitaler Übertragungstechniken. Hierbei koordiniert sie die Interessen der privaten Anbieter und wirkt unter diesen auf sachgerechte Lösungen hin. Zum Zwecke der Beschleunigung der Digitalisierung unterstützt die LfM insbesondere den Ausbau von Hörfunkangeboten, welche digital terrestrisch für die zeitgleiche Nutzung beliebig vieler Nutzerinnen und Nutzer verbreitet werden, insbesondere durch Informationskampagnen und die Beratung von Nutzerinnen und Nutzern sowie Anbietern.
+(2) Die Umstellung in den Regionen ist so zu fördern, dass die Versorgung mit vielfältigen Angeboten durch das Zusammenspiel der verschiedenen Übertragungswege zu angemessenen Bedingungen sichergestellt ist. Insbesondere im Bereich der Hörfunkversorgung berücksichtigt die LfM die zunehmende Bedeutung von Angeboten, welche über das Internet verbreitet werden, im Zusammenspiel der verschiedenen Übertragungswege.
+(3) Der Kabelanlagenbetreiber kann im Rahmen des § 18 Absatz 9 für analoge Übertragung genutzte Kanäle digitalisieren. Die stufenweise Digitalisierung in den durch § 18 Absatz 2 bis 8 bestimmten Bereichen bedarf der Einwilligung der LfM. Hierzu legt der Kabelanlagenbetreiber ein Konzept vor, das von der LfM für verbindlich erklärt werden kann. Die LfM erteilt die Einwilligung zum Digitalisierungskonzept nur, wenn in allen Stadien der Digitalisierung Meinungsvielfalt gewährleistet wird und die Programm- und Anbietervielfalt gewahrt ist. Das Digitalisierungskonzept hat den Interessen der Veranstalter und der Mediennutzerinnen und Mediennutzer Rechnung zu tragen. Es hat insbesondere konkrete Zeitpläne für die Umstellung zu enthalten und angemessene Übergangsfristen zugunsten der Veranstalter vorzusehen. Das Digitalisierungskonzept bedarf der Zustimmung der Veranstalter, deren Rundfunkprogramme im Zeitpunkt der Entscheidung analog übertragen werden.
+(4) Das Nähere zur Förderung der zügigen Umstellung auf die digitale Übertragungstechnik regelt die LfM durch Satzung.
+§ 28  Zuweisung im Rahmen von Pilotversuchen zur Einführung und Weiterentwicklung digitaler terrestrischer Übertragungstechniken
+(1) Bei der erstmaligen Zuweisung digitaler terrestrischer Übertragungskapazitäten im Rahmen eines Pilotversuchs gemäß § 10b sind diejenigen Veranstalter und Anbieter vorrangig zu berücksichtigen, die in dem jeweils betroffenen Verbreitungsgebiet analog verbreitet werden. Die technischen Übertragungskapazitäten für diese Programme müssen im Verhältnis zu den übrigen Übertragungskapazitäten gleichwertig sein.
+(2) Während der Laufzeit des Pilotversuchs kann die LfM auf die Erfordernisse der §§ 17 Abs. 3 Satz 2, 40a Abs. 4 verzichten.
+(3) Werden nach der Durchführung eines Pilotversuchs gemäß § 10b digitale terrestrische Übertragungskapazitäten erstmals für den Regelbetrieb zugewiesen, sind Anbieter, die sich bereits an dem Pilotversuch beteiligt haben und vor dessen zeitlichen Ablauf gegenüber der LfM angezeigt haben, dass sie zur Fortführung im Regelbetrieb bereit sind, vorrangig zu behandeln.
+§ 29  - aufgehoben -
+§ 30  Experimentierklausel
+(1) Neben Pilotversuchen nach § 10b ist die Durchführung von Modell- und Betriebsversuchen mit neuen Techniken, Programmen und rundfunkähnlichen Telemedien zulässig. Modell- und Betriebsversuche sind auf eine Dauer von bis zu 6 Monaten zu befristen. Eine Verlängerung um bis zu drei Monate ist zulässig. Für Modell- und Betriebsversuche gelten die Bestimmungen dieses Gesetzes entsprechend. Die LfM kann mit Ausnahmen der §§ 4 Absatz 1, 5, 6, 31, 33 bis 33e, 35, 38, 42 bis 51 und 118 bis 126 von gesetzlichen Vorgaben abweichen, wenn dies zur Erreichung des Projekt- oder Versuchsziels erforderlich ist. Das Nähere regelt die LfM durch Satzung.
+(2) Die LfM soll von den Veranstaltern und Anbietern in angemessenen zeitlichen Abständen einen Erfahrungsbericht über die laufenden Modell- und Betriebsversuche und nach deren Abschluss eine jeweilige Auswertung verlangen.
+Abschnitt 5 Anforderungen an das Programm und Veranstalterpflichten
+§ 31  Programmauftrag und Programmgrundsätze
+(1) Die Veranstalter verbreiten Rundfunk als Medium und Faktor des Prozesses freier Meinungsbildung und als Sache der Allgemeinheit. Die Rundfunkprogramme haben das politische, wirtschaftliche, soziale und kulturelle Leben in ihrem jeweiligen Sendegebiet darzustellen und entsprechend der jeweiligen Programmkategorie zu einer umfassenden Information und freien individuellen und öffentlichen Meinungsbildung beizutragen, der Bildung, Beratung und Unterhaltung zu dienen und dem kulturellen Auftrag des Rundfunks zu entsprechen. Sie nehmen insofern eine öffentliche Aufgabe wahr. Rundfunkprogramme sollen auch Beiträge unabhängiger Produzentinnen und Produzenten umfassen.
+(2) Für alle Rundfunkprogramme gilt die verfassungsmäßige Ordnung. Die Vorschriften der allgemeinen Gesetze und die gesetzlichen Bestimmungen zum Schutz der persönlichen Ehre sind einzuhalten. Unterschwellige Techniken dürfen nicht eingesetzt werden.
+(3) Die Rundfunkprogramme haben die Würde des Menschen zu achten und sollen dazu beitragen, die Achtung vor Leben, Freiheit und körperlicher Unversehrtheit, vor Glauben und Meinung anderer zu stärken. Die sittlichen, weltanschaulichen und religiösen Überzeugungen der Bevölkerung sowie Ehe und Familie sind zu achten. Die Rundfunkprogramme sollen die Zusammengehörigkeit im vereinten Deutschland, die internationale Verständigung, ein diskriminierungsfreies Miteinander und die tatsächliche Gleichstellung von Frauen und Männern sowie die gleichberechtigte Teilhabe der Menschen mit Behinderung fördern, zum Frieden und zur sozialen Gerechtigkeit mahnen, die demokratischen Freiheiten verteidigen und der Wahrheit verpflichtet sein. Dem Gedanken der Integration von Menschen mit unterschiedlichem kulturellem Hintergrund ist Rechnung zu tragen. Kein Rundfunkprogramm darf einseitig nur einzelne Meinungsrichtungen berücksichtigen oder einseitig einer Partei oder Gruppe, einer Interessengemeinschaft, einem Bekenntnis oder einer Weltanschauung dienen.
+(4) Jedes Vollprogramm muss die Vielfalt der Meinungen in möglichster Breite und Vollständigkeit zum Ausdruck bringen. Die bedeutsamen politischen, religiösen, weltanschaulichen und gesellschaftlichen Kräfte und Gruppen müssen in jedem Vollprogramm angemessen zu Wort kommen. Auffassungen von Minderheiten sind zu berücksichtigen. Jedes Vollprogramm soll in der Berichterstattung angemessene Zeit für die Behandlung kontroverser Themen von allgemeiner Bedeutung vorsehen.
+(5) Informationssendungen haben den anerkannten journalistischen Grundsätzen zu entsprechen. Sie müssen unabhängig und sachlich sein. Nachrichten sind vor ihrer Verbreitung mit der nach den Umständen gebotenen Sorgfalt auf Wahrheit und Herkunft zu prüfen. Kommentare sind von der Berichterstattung deutlich zu trennen und unter Nennung der Verfasserin oder des Verfassers als solche zu kennzeichnen. Bei der Wiedergabe von Meinungsumfragen, die vom Rundfunkveranstalter durchgeführt werden, ist ausdrücklich anzugeben, ob sie repräsentativ sind.
+(6) Jeder Veranstalter muss der LfM eine für den Inhalt des Rundfunkprogramms verantwortliche Person benennen. Werden mehrere Verantwortliche benannt, ist zusätzlich anzugeben, welche Person für welchen Teil des Rundfunkprogramms verantwortlich ist. Als verantwortliche Person darf nur benannt werden, wer die Voraussetzungen des § 5 Abs. 2 erfüllt. Am Ende jeder Sendung ist die für den Inhalt verantwortliche Person anzugeben.
+(7) Für Veranstalter nicht bundesweiter Rundfunkprogramme gelten die Bestimmungen des Medienstaatsvertrages zur Barrierefreiheit entsprechend.
+§ 31a  Regionalfensterprogramme
+(1) In den beiden bundesweit verbreiteten reichweitenstärksten Programmen sind mindestens im zeitlichen und differenzierten Umfang der Programmaktivitäten zum 1. Juli 2002 Regionalfensterprogramme zur aktuellen und authentischen Darstellung der Ereignisse des politischen, wirtschaftlichen, sozialen und kulturellen Lebens in Nordrhein-Westfalen aufzunehmen.
+(2) Der Hauptprogrammveranstalter hat organisatorisch sicherzustellen, dass die redaktionelle Unabhängigkeit des Fensterprogrammveranstalters gewährleistet ist. Die redaktionelle Unabhängigkeit wird vermutet, wenn Fenster- und Hauptprogrammveranstalter nicht im Verhältnis eines verbundenen Unternehmens nach § 62 des Medienstaatsvertrages stehen. Die Programmverantwortlichen für die Regionalfensterprogramme sind für die Dauer der Zulassung zu berufen und gegenüber der LfM zu benennen. Eine Abberufung ist nur aus wichtigem Grund zulässig und gegenüber der LfM anzuzeigen.
+(3) Liegen die Voraussetzungen des Abs. 2 Satz 2 nicht vor, ist die redaktionelle Unabhängigkeit des Fensterveranstalters durch geeignete organisatorische Maßnahmen sicherzustellen. Die Entscheidung hierüber trifft die Landesanstalt für Medien. Zur Sicherung der redaktionellen Unabhängigkeit soll an dem Regionalfensterprogrammveranstalter neben dem Hauptprogrammveranstalter mindestens ein weiterer Gesellschafter mit 25 von Hundert der Kapital- oder Stimmrechtsanteile beteiligt sein. Der Dienst- oder Arbeitsvertrag des Geschäftsführers und der Programmverantwortlichen für das Regionalfensterprogramm darf nur aus wichtigem Grund gekündigt werden. Der programmverantwortliche Geschäftsführer darf abweichend von § 38 Abs. 1 GmbHG nur aus wichtigem Grund abberufen werden. Daneben kann die Landesanstalt für Medien weitere Maßnahmen treffen, die für die Sicherung der redaktionellen Unabhängigkeit erforderlich sind. Liegen die Voraussetzungen des Satz 3 nicht vor, ist die redaktionelle Unabhängigkeit des Fensterprogrammveranstalters neben den in Abs. 2 Satz 3 genannten Voraussetzungen durch die nachfolgenden organisatorischen Maßnahmen zu sichern. Es muss gewährleistet sein, dass die Programmverantwortlichen des Regionalfensterprogramms im Rahmen einer für die Dauer der Lizenz vorgegebenen finanziellen Ausstattung ihre Entscheidungen ohne Mitwirkungs- oder Zustimmungsbefugnisse des Hauptprogrammveranstalters treffen können. Dies schließt das Recht ein, eigenverantwortlich das redaktionelle Personal einzustellen sowie die technischen und studiotechnischen Dienstleister zu bestimmen. Der Dienst- oder Arbeitsvertrag des Geschäftsführers und der Programmverantwortlichen für das Regionalfensterprogramm darf nur aus wichtigem Grund gekündigt werden. Der programmverantwortliche Geschäftsführer darf abweichend von § 38 Abs. 1 GmbHG nur aus wichtigem Grund abberufen werden.
+(4) Dem Fensterprogrammveranstalter ist eine gesonderte Zulassung zu erteilen. Das Regionalfensterprogramm ist nach Anhörung des Hauptprogrammveranstalters getrennt auszuschreiben. Die LfM überprüft die eingehenden Anträge auf ihre Vereinbarkeit mit den Bestimmungen des Medienstaatsvertrages sowie der sonstigen landesrechtlichen Bestimmungen und teilt dem Hauptprogrammveranstalter die zulassungsfähigen Anträge mit. Nach Anhörung des Hauptveranstalters wählt sie aus den Vorschlägen denjenigen Bewerber aus, dessen Programm durch eine aktuelle und authentische Darstellung der Ereignisse des politischen, wirtschaftlichen, sozialen und kulturellen Lebens in Nordrhein-Westfalen den größtmöglichen Beitrag zur Vielfalt erwarten lässt. Sie berücksichtigt dabei insbesondere den regionalen Bezug der Programme. Sind bei einer Auswahlentscheidung Bewerber nach den vorgenannten Kriterien gleich zu bewerten, so erhält der Bewerber Vorrang, welcher dem Hauptprogrammveranstalter nicht nach § 62 des Medienstaatsvertrages zuzurechnen ist. Die Zulassung wird auf zehn Jahre erteilt. Eine Verlängerung der Zulassung ist möglich; Satz 7 gilt entsprechend.
+(5) Mit der Organisation der Fensterprogramme ist zugleich die Finanzierung durch den Hauptprogrammveranstalter für die gesamte Laufzeit der Zulassung sicherzustellen. Die LfM weist dem Fensterprogrammveranstalter die für die Verbreitung des Fensterprogramms erforderlichen Übertragungskapazitäten zu.
+§ 32  Redaktionell Beschäftigte
+Die redaktionell Beschäftigten haben die ihnen übertragenen Programmaufgaben im Rahmen der Gesamtverantwortung des Veranstalters in eigener journalistischer Verantwortung unter Beachtung der Programmgrundsätze nach § 31 zu erfüllen. Unberührt bleiben vertragliche Vereinbarungen und Weisungsrechte des Veranstalters.
+§ 33  Sicherung der Meinungsvielfalt
+(1) Landesweiter oder in Teilen des Landes veranstalteter Rundfunk kann über alle technischen Übertragungswege in Nordrhein-Westfalen verbreitet werden. Zur Sicherung der Meinungsvielfalt gelten die nachfolgenden Zulassungsbeschränkungen.
+(2) Kein Unternehmen (natürliche oder juristische Person oder Personenvereinigung) darf selbst oder durch ein anderes Unternehmen vorherrschende Meinungsmacht im Geltungsbereich dieses Gesetzes erlangen.
+(3) Ein Unternehmen, das mit ihm zurechenbaren Programmen im Durchschnitt eines Jahres im Fernsehen bundesweit einen Zuschaueranteil von mindestens 15 vom Hundert erreicht, darf sich an Rundfunkveranstaltern nur mit weniger als 25 vom Hundert der Kapital- und Stimmrechtsanteile beteiligen. Dies gilt nicht für die Beteiligung an Hörfunkveranstaltern, wenn durch wirksame Vorkehrungen eine Verhinderung vorherrschender Meinungsmacht sichergestellt ist; § 33a Abs. 2 Satz 3 gilt entsprechend. Für die Zurechnung von Programmen gilt § 62 des Medienstaatsvertrages entsprechend.
+(4) Die Beteiligung von Presseunternehmen am Rundfunk unterliegt den Vorgaben der §§ 33a bis 33d. Die Vorschriften zum lokalen Hörfunk bleiben unberührt.
+(5) Die LfM gibt der zuständigen Kartellbehörde vor Abschluss des Verfahrens die Gelegenheit zur Stellungnahme.
+(6) Für bundesweit verbreitetes Fernsehen gelten die Bestimmungen des Medienstaatsvertrages zur Sicherung der Meinungsvielfalt im Fernsehen.
+§ 33a  Veranstaltung von und Beteiligung an Rundfunkprogrammen durch Presseunternehmen
+(1) Unternehmen, die im Zeitungs- oder Zeitschriftenmarkt in einem Verbreitungsgebiet oder einem abgrenzbaren Teil des Verbreitungsgebietes eine marktbeherrschende Stellung entsprechend § 19 GWB innehaben, sowie mit diesen Unternehmen verbundene Unternehmen im Sinne des § 17 Aktiengesetz, dürfen
+1. selbst keinen Rundfunk in diesem Verbreitungsgebiet veranstalten und sich an einem Unternehmen, das in diesem Verbreitungsgebiet Rundfunk veranstaltet, höchstens mit bis zu 25 vom Hundert der Kapital- oder Stimmrechtsanteile beteiligen.
+2. einzelne Rundfunkprogramme in diesem Verbreitungsgebiet, insbesondere durch zugelieferte Programmbeiträge mit lokalem oder regionalem Bezug, nur mit bis zu 25 vom Hundert der wöchentlichen Sendezeit gestalten, hinsichtlich der Programmbeiträge gilt § 62 Absatz 4 des Medienstaatsvertrages entsprechend.
+(2) Von den Beschränkungen des Absatzes 1 Nr. 1 ist abzusehen, wenn durch wirksame Vorkehrungen eine Verhinderung vorherrschender Meinungsmacht sichergestellt ist. In diesem Fall entfällt für dieses Unternehmen in Bezug auf die konkrete Beteiligung auch die Beschränkung des Absatzes 1 Nr. 2. Als wirksame Vorkehrungen zur Verhinderung vorherrschender Meinungsmacht gelten:
+1. die Einräumung von Sendezeiten für unabhängige Dritte (§ 33b) oder
+2. die Einrichtung eines Programmbeirates mit wirksamem Einfluss auf das Programm (§§ 33c und 33d) oder
+3. im Einzelfall die Zusage sonstiger gleich wirksamer Mittel (§ 33e).
+(3) Die LfM hat auf Antrag des Veranstalters von den Erfordernissen des Absatzes 2 abzusehen, wenn im Verbreitungsgebiet oder dem abgrenzbaren Teil des Verbreitungsgebiets Außenpluralität besteht. Davon ist in der Regel auszugehen, wenn im Regelungsbereich dieses Gesetzes mindestens ein anderer privater Anbieter im Verbreitungsgebiet oder dem abgrenzbaren Teil des Verbreitungsgebiets, in dem der Antragsteller die Voraussetzungen des Absatzes 1 erfüllt, mit einem vergleichbar meinungsrelevanten Programm Rundfunk veranstaltet. Ein vergleichbar meinungsrelevantes Programm liegt insbesondere dann vor, wenn
+1. es sich um ein Programm der gleichen Programmart (Hörfunk oder Fernsehen) und der gleichen Programmkategorie (Voll- oder Spartenprogramm) handelt,
+2. es von Inhalt und Umfang vergleichbar ist,
+3. die Verbreitung über denselben Übertragungsweg und in derselben Verbreitungsart erfolgt und der Empfang auf demselben Endgerät unmittelbar und ohne zusätzlichen Aufwand möglich ist und
+4. der erzielte Zuschaueranteil nicht wesentlich hinter dem des Programms des Antragstellers zurücksteht.
+(4) Die Entscheidung nach Abs. 3 ist unverzüglich zu widerrufen, wenn die Voraussetzungen hierfür entfallen sind oder begründete Anhaltspunkte dafür gegeben sind, dass sie in absehbarer Zukunft entfallen werden.
+(5) Vorstehende Absätze finden keine Anwendung auf Zulassungsanträge, die der LfM vor dem Zeitpunkt des Inkrafttretens dieses Gesetzes zugegangen sind. Bestehende Zulassungen bleiben unberührt.
+§ 33b  Sendezeit für unabhängige Dritte
+(1) Ein Fensterprogramm, das auf Grund der Verpflichtung zur Einräumung von Sendezeit nach den vorstehenden Bestimmungen ausgestrahlt wird, muss unter Wahrung der Programmautonomie des Hauptveranstalters einen zusätzlichen Beitrag zur Vielfalt in dessen Programm, insbesondere in den Bereichen Kultur, Bildung und Information, leisten. Die Gestaltung des Fensterprogramms hat in redaktioneller Unabhängigkeit vom Hauptprogramm zu erfolgen. Im Hörfunk müssen die Fensterprogramme pro Fenster einen angemessenen Umfang von Wortbeiträgen enthalten; das Nähere regelt die LfM durch Satzung.
+(2) Die Dauer des Fensterprogramms beträgt bei einer Überschreitung des in § 33a Abs. 1 Nr. 1 genannten Schwellenwertes mindestens 3 bis höchstens 10 vom Hundert der zugewiesenen Sendezeit, wovon mindestens 30 vom Hundert in der Hauptsendezeit liegen müssen. Wird der in § 33a Abs.1 Nr. 1 genannte Schwellenwert um mehr als das Zweifache überschritten, beträgt die Dauer des Fensterprogramms mindestens 6 bis höchstens 20 vom Hundert der zugewiesenen Sendezeit, wovon mindestens 30 vom Hundert in der Hauptsendezeit liegen müssen. Über die Dauer des Fensterprogramms entscheidet die LfM unter Berücksichtigung des Beitrages, den das Fensterprogramm wirksam zur Wahrung der Meinungsvielfalt leistet. § 33a Abs. 4 findet entsprechende Anwendung.
+(3) Die Hauptsendezeit im Sinne des Abs. 2 liegt im Hörfunk regelmäßig in der Zeit zwischen 6:00 Uhr und 12:00 Uhr, im Fernsehen regelmäßig in der Zeit zwischen 19:00 Uhr und 23:00 Uhr. Das Nähere regelt die LfM durch Satzung.
+(4) § 65 Absatz 3 bis 6 des Medienstaatsvertrages gilt entsprechend.
+§ 33c  Programmbeirat
+(1) Die Mitglieder des Programmbeirats müssen aufgrund ihrer Zugehörigkeit zu gesellschaftlichen Gruppen in ihrer Gesamtheit die Gewähr dafür bieten, dass die wesentlichen Meinungen in der Gesellschaft vertreten sind.
+Sie sollen über Sachkunde im Medienbereich verfügen und im Verbreitungsgebiet ihre Wohnung oder ihren ständigen Aufenthalt haben. Je ein Mitglied wird bestimmt:
+1. durch die Evangelischen Kirchen, die Katholische Kirche und die Jüdischen Kultusgemeinden,
+2. durch den gewerkschaftlichen Spitzenverband mit der höchsten Mitgliederzahl im Verbreitungsgebiet,
+3. durch den Arbeitgeberverband mit der höchsten Mitgliederzahl im Verbreitungsgebiet, die Vereinigung der Industrie- und Handelskammern in Nordrhein-Westfalen e.V. und den Nordrhein-Westfälischen Handwerkstag e.V.,
+4. aus den Bereichen Kunst und Kultur (Landesmusikrat Nordrhein-Westfalen; Bundesverband bildender Künstlerinnen und Künstler, Landesverband Nordrhein-Westfalen; Kulturrat Nordrhein-Westfalen),
+5. durch den Landesbehindertenrat e.V.,
+6. durch den Deutschen Kinderschutzbund, Landesverband Nordrhein-Westfalen, und den Landesjugendring Nordrhein-Westfalen,
+7. durch den Landessportbund Nordrhein-Westfalen,
+8. aus dem Kreis der anerkannten Naturschutzvereinigungen im Sinne des § 66 Absatz 1 des Landesnaturschutzgesetzes vom 21. Juli 2000 (GV. NRW. S. 568), das durch Artikel 1 des Gesetzes vom 15. November 2016 (GV. NRW. S. 934) neu gefasst worden ist, im Verbreitungsgebiet,
+9. aus dem Kreis der Migrantinnen und Migranten (Landesintegrationsrat Nordrhein-Westfalen).
+Die Bestimmung erfolgt durch diejenigen örtlichen Gliederungen der genannten Stellen, die für das gesamte Verbreitungsgebiet zuständig sind. Erfüllen mehrere Gliederungen einzeln oder gemeinsam die Voraussetzung des Satzes 4, so sind jeweils die untersten Gliederungen zuständig. Die Bestimmung der Mitglieder richtet sich nach den jeweiligen Vorschriften der Stellen. Die entsendungsberechtigten Organisationen sollen Frauen und Männer im Turnus der Amtsperioden alternierend berücksichtigen; diese Anforderung entfällt nur, wenn der jeweiligen Institution wegen ihrer Zusammensetzung eine Entsendung von Frauen oder Männern regelmäßig oder im Einzelfall nicht möglich ist. Mehrere Stellen können nur gemeinsam ein Mitglied bestimmen. Die LfM stellt die ordnungsgemäße Bestimmung fest. Erfolgt diese nicht innerhalb eines Monats nach Zugang der Aufforderung, kann der Veranstalter der LfM im Einzelfall eine Vorschlagsliste mit drei Personen unterbreiten, die die persönlichen Voraussetzungen des Satzes 2 erfüllen und der oder den jeweiligen nach Satz 2 und 3 genannten Stellen zugehören. Die LfM bestimmt innerhalb von zwei Wochen nach deren Eingang ein Mitglied aus dieser Vorschlagsliste.
+(2) Die Amtsperiode des Programmbeirats beträgt 6 Jahre. Die Wiederbenennung von Mitgliedern ist zulässig. Mitglieder können von den entsendungsberechtigten Organisationen vorzeitig abberufen werden, wenn sie aus der betreffenden Organisation ausgeschieden sind.
+(3) Dem Programmbeirat darf nicht angehören, wer beim Veranstalter, bei den unmittelbar oder mittelbar Beteiligten, bei einem anderen Rundfunkveranstalter oder Presseunternehmen im Verbreitungsgebiet, bei öffentlich-rechtlichen Rundfunkanstalten oder bei Landesmedienanstalten Mitglied eines Organs ist, zu ihnen in einem Dienst- oder Arbeitsverhältnis steht, sonst von ihnen abhängig oder an ihnen beteiligt ist. Dem Programmbeirat dürfen auch nicht angehören: Mitglieder gesetzgebender Körperschaften, Mitglieder der Bundes- oder einer Landesregierung, Beamtinnen und Beamte, die jederzeit in den einstweiligen Ruhestand versetzt werden können, Wahlbeamtinnen und Wahlbeamte, mit Ausnahme solcher an Hochschulen und in Religionsgemeinschaften, sowie Personen, die in Parteien im Sinne des § 2 des Parteiengesetzes in der Fassung der Bekanntmachung vom 31. Januar 1994 (BGBl. I S. 149) in der jeweils geltenden Fassung Vorstandsämter auf Landes- oder Bundesebene bekleiden. Die Mitglieder dürfen keine wirtschaftlichen oder sonstigen Interessen haben, die geeignet sind, die Erfüllung ihrer Aufgaben als Mitglieder des Programmbeirats zu gefährden. Die §§ 20, 21 Verwaltungsverfahrensgesetz für das Land Nordrhein-Westfalen gelten entsprechend.
+(4) Der Programmbeirat wählt aus seiner Mitte eine Vorsitzende oder einen Vorsitzenden und eine Stellvertreterin oder einen Stellvertreter.
+(5) Die Mitglieder des Programmbeirates sind ehrenamtlich tätig. Sie haben bei der Wahrnehmung ihrer Aufgaben die Interessen der Allgemeinheit zu vertreten und sind hierbei an Aufträge oder Weisungen nicht gebunden. Sie haben Anspruch auf angemessene Aufwandsentschädigung gegenüber dem Veranstalter.
+§ 33d  Aufgaben des Programmbeirates
+(1) Der Programmbeirat ist über alle Fragen, die das veranstaltete Programm betreffen, durch die Geschäftsführung zu unterrichten. Er ist bei wesentlichen Änderungen der Programmstruktur, der Programminhalte, des Programmschemas sowie bei programmbezogenen Anhörungen durch die LfM und bei Programmbeschwerden zu hören.
+(2) Der Programmbeirat kann zur Erfüllung seiner Aufgaben Auskünfte von der Geschäftsführung verlangen und hinsichtlich des Programms oder einzelner Sendungen oder Beiträge Beanstandungen gegenüber der Geschäftsführung aussprechen. Zu Auskunftsersuchen und Beanstandungen hat die Geschäftsführung innerhalb angemessener Frist Stellung zu nehmen. Die Geschäftsführung des Veranstalters hat die vom Programmbeirat erbetenen Auskünfte zu erteilen, wenn dies mindestens ein Drittel der Mitglieder des Programmbeirates verlangen. Über Beanstandungen entscheidet der Programmbeirat mit der Mehrheit seiner Mitglieder. Trägt die Geschäftsführung den Auskunftsersuchen und Beanstandungen nach Auffassung des Programmbeirats nicht ausreichend Rechnung, kann er in dieser Angelegenheit einen Beschluss des Kontrollorgans über die Geschäftsführung, sofern ein solches nicht vorhanden ist, der Gesellschafterversammlung, sowie die Veröffentlichung der Beanstandung im Programm verlangen.
+(3) Bei Aufstellung und wesentlicher Änderung der Programmstruktur, der Programminhalte oder des Programmschemas und bei der Entscheidung über Programmbeschwerden ist vor der Entscheidung der Geschäftsführung die Zustimmung des Programmbeirats einzuholen. Wird der Programmbeirat nicht oder nicht binnen angemessener Frist tätig, kann die Geschäftsführung die betreffende Maßnahme nur mit Zustimmung des Kontrollorgans über die Geschäftsführung, sofern ein solches nicht vorhanden ist, der Gesellschafterversammlung, für die eine Mehrheit von 75 vom Hundert der angegebenen Stimmen erforderlich ist, treffen. Der Veranstalter hat das Ergebnis der Befassung des Programmbeirats oder die Entscheidung nach Satz 2 der LfM mitzuteilen.
+(4) Der Programmbeirat kann innerhalb eines Monats nach Mitteilung durch die Geschäftsführung die Bestellung des Chefredakteurs oder der Chefredakteurin aus Gründen ablehnen, die befürchten lassen, dass der Chefredakteur oder die Chefredakteurin die Grundsätze der Objektivität, die Unparteilichkeit des Gesamtprogramms, die Meinungsvielfalt oder die Ausgewogenheit des Programms nicht zu gewährleisten vermag. Ebenso kann der Programmbeirat aus diesen Gründen die Entlassung des Chefredakteurs oder der Chefredakteurin verlangen. Diese Entscheidungen bedürfen einer Mehrheit von zwei Dritteln der Mitglieder des Programmbeirates. Die Gründe sind dem Veranstalter und der LfM schriftlich mitzuteilen.
+(5) Der Programmbeirat wird auf Verlangen seiner Vorsitzenden oder seines Vorsitzenden oder eines Drittels seiner Mitglieder oder auf Verlangen des Veranstalters einberufen. Er tagt mindestens viermal im Jahr. Der Veranstalter hat die Funktionsfähigkeit des Programmbeirats durch finanzielle, personelle und räumliche Mittel ausreichend sicherzustellen.
+(6) Der Programmbeirat gibt sich eine Geschäftsordnung, die Fristen, Einladungen, Beschlussfähigkeit, Beschlüsse und Wahlen, Aufstellung und Genehmigung der Tagesordnung, Niederschriften und deren Genehmigung regelt. Die Geschäftsordnung regelt ferner Einzelheiten zum Verfahren zur Feststellung einer Befangenheit nach § 33c Abs. 3 Satz 4. Die Beschlussfassung über die Geschäftsordnung oder ihre Änderung bedarf der Mehrheit der Mitglieder des Programmbeirats. Die Geschäftsordnung ist der LfM vorzulegen.
+(7) Im Gesellschaftsvertrag oder der Satzung kann der Veranstalter dem Programmbeirat weitere Aufgaben und Rechte übertragen, sofern diese der Wahrnehmung der gesetzlichen Aufgaben des Programmbeirats nicht entgegenstehen. Die Aufgabenzuweisung bedarf der Zustimmung der LfM.
+(8) Wird den Anliegen des Programmbeirats durch das Kontrollorgan über die Geschäftsführung oder die Gesellschafterversammlung nach Abs. 2 nicht entsprochen oder über sie nicht in angemessener Zeit entschieden oder ist der Programmbeirat der Ansicht, dass ihm keine angemessene Frist zur Entscheidung nach Abs. 3 gewährt wurde, kann er den Sachverhalt der LfM binnen eines Monats nach Zugang der Mitteilung zur Entscheidung vorlegen. Die Entscheidung über die Anrufung der LfM bedarf der Mehrheit der abgegebenen Stimmen.
+Das gleiche Recht steht der Geschäftsführung im Fall einer ablehnenden Entscheidung des Programmbeirats nach Abs. 5 zu, wenn sie der Ansicht ist, dass die Ablehnung aus unzulässigen Gründen erfolgte.
+(9) Handelt es sich bei dem Veranstalter, bei dem ein Programmbeirat eingerichtet werden soll, um ein einzelkaufmännisch betriebenes Unternehmen, so gelten die Abs. 2 und 3 mit der Maßgabe, dass im Fall des Abs. 2 vom Programmbeirat, im Fall des Abs. 3 vom Veranstalter die LfM statt der Gesellschafterversammlung oder des Kontrollorgans über die Geschäftsführung angerufen werden kann, die über die Maßnahme entscheidet.
+§ 33e  Verpflichtungszusagen
+(1) Bietet ein Unternehmen, das die Voraussetzungen des § 33a Abs. 1 erfüllt, an, Verpflichtungen einzugehen, die eine vorherrschende Meinungsmacht wirksam verhindern, so kann die LfM für diese Unternehmen die Verpflichtungszusagen durch Verfügung für bindend erklären.
+(2) Die LfM hat die Verfügung nach Absatz 1 aufzuheben, wenn
+1. sich die tatsächlichen Verhältnisse in einem für die Verfügung wesentlichen Punkt nachträglich geändert haben,
+2. die zugesagte Verpflichtung nicht eingehalten wird oder
+3. die Verfügung auf unvollständigen, unrichtigen oder irreführenden Angaben beruht.
+§ 34  - aufgehoben -
+§ 35  Unzulässige Angebote, Jugendschutz
+(1) Es gelten die Bestimmungen des Jugendmedienschutz-Staatsvertrags über unzulässige Angebote und Jugendschutz.
+(2) Auf nicht bundesweite Fernsehprogramme findet § 7 Jugendmedienschutz-Staatsvertrag entsprechende Anwendung.
+(3) Rechtbehelfe gegen Maßnahmen der LfM nach § 20 Abs. 1 Jugendmedienschutz-Staatsvertrag, die sich gegen unzulässige Angebote gemäß § 4 Jugendmedienschutz-Staatsvertrag in Telemedien richten, haben keine aufschiebende Wirkung.
+§ 36  Verlautbarungsrecht, Sendezeit für Dritte
+(1) Jeder Veranstalter hat der Bundesregierung und den obersten Landesbehörden für amtliche Verlautbarungen angemessene Sendezeit unverzüglich einzuräumen.
+(2) Jeder Veranstalter eines landesweiten Vollprogramms hat Parteien oder Wählergruppen während ihrer Beteiligung an Wahlen zum Europäischen Parlament, zum Deutschen Bundestag oder zum Landtag Nordrhein-Westfalen angemessene Sendezeit zur Wahlwerbung einzuräumen, wenn sie in Nordrhein-Westfalen mit a) einem Listenwahlvorschlag, einer Landesliste oder einer Landesreserveliste oder b) in einem Sechstel der Wahlkreise mit Kreiswahlvorschlägen zugelassen sind. Alle Parteien und Wählergruppen sind gleich zu behandeln; § 5 Abs. 1 Satz 2 bis 4 Parteiengesetz gilt entsprechend. Für Sendezeiten zur Wahlwerbung, die ein Veranstalter ohne Verpflichtung nach diesem Gesetz oder über die Verpflichtung nach Satz 1 hinaus einräumt, gilt Satz 2 entsprechend.
+(3) Ein Veranstalter kann den in seinem Verbreitungsgebiet zur Kommunalwahl zugelassenen Parteien, Wählergruppen oder Einzelbewerbern während ihrer Beteiligung an Kommunalwahlen Sendezeit zur Wahlwerbung einräumen; in diesem Fall gilt Abs. 2 Satz 2 für die in den Wahlgebieten zugelassenen Wahlvorschläge entsprechend.
+(4) Jeder Veranstalter eines Vollprogramms hat den Evangelischen Kirchen, der Katholischen Kirche und den jüdischen Kultusgemeinden, wenn diese nicht als Veranstalter eines landesweiten Rundfunkprogramms zugelassen sind, auf deren Wunsch angemessene Sendezeiten zur Übertragung gottesdienstlicher Handlungen und Feierlichkeiten sowie sonstiger religiöser Sendungen einzuräumen.
+(5) In den Fällen der Absätze 1 bis 4 kann der Veranstalter die Erstattung seiner Selbstkosten verlangen.
+(6) Für den Inhalt einer Sendung nach den Absätzen 1 bis 4 ist verantwortlich, wem die Sendezeit gewährt worden ist.
+(7) Unbeschadet der Regelung des Absatzes 6 hat der Veranstalter die Ausstrahlung einer Sendung nach Absatz 2 und 3 abzulehnen, wenn deren Inhalt offenkundig und schwerwiegend gegen die allgemeinen Gesetze verstößt oder nicht ausschließlich dem Zweck der Wahlwerbung dient. Gegen die Ablehnung kann innerhalb eines Monats schriftlich oder elektronisch Beschwerde bei der LfM eingelegt werden. Die LfM bestätigt die Ablehnung oder ordnet die Verbreitung der Sendung an.
+§ 37  Kurzberichterstattung, europäische Produktionen, Eigen-, Auftrags- und Gemeinschaftsproduktionen
+Es gelten die Bestimmungen des Medienstaatsvertrages über Kurzberichterstattung, europäische Produktionen sowie über Eigen-, Auftrags- und Gemeinschaftsproduktionen.
+§ 38  Finanzierung, Werbung und Gewinnspiele
+(1) Es gelten die Bestimmungen des Medienstaatsvertrages über Finanzierung, Werbung und Gewinnspiele privater Veranstalter.
+(2) Für regionale und lokale Fernsehprogramme kann die LfM Ausnahmen von § 8 Absatz 4 Satz 2, § 9 Absatz 3 und § 70 Absatz 1 des Medienstaatsvertrages zulassen. Bei der Einfügung von Rundfunkwerbung und Teleshopping-Spots in laufende Sendungen dürfen der gesamte Zusammenhang und der Charakter der Sendung nicht beeinträchtigt werden, wobei die natürlichen Programmunterbrechungen und die Länge des Programms zu berücksichtigen sind. Das Nähere regelt die LfM durch Satzung.
+§ 38a  Auskunftsrechte
+Rundfunkveranstaltern und den in § 18 Absatz 2 des Medienstaatsvertrages genannten Anbietern von Telemedien stehen die sich aus dem Medienstaatsvertrag ergebenden Auskunftsrechte gegenüber Behörden zu.
+Abschnitt 6 Medienkompetenz, Bürgermedien und Mediennutzerschutz
+Unterabschnitt 1 Grundsätze
+§ 39  Medienkompetenz
+Dieses Gesetz dient nach Maßgabe des § 2 dem Ziel, Medienkompetenz im Land zu fördern. Mediennutzerinnen und Mediennutzer sollen befähigt werden, selbstbestimmt und verantwortlich mit Medien umzugehen und an der Informationsgesellschaft gleichberechtigt und barrierearm teilzuhaben. Dieser Aufgabe dienen Projekte der Medienerziehung und -bildung, der Aus- und Weiterbildung sowie eine die Institutionen und Einrichtungen übergreifende Vernetzung und Zusammenarbeit. Projekte und Fördermaßnahmen richten sich an alle Mediennutzerinnen und Mediennutzer. Das schließt Medienschaffende ein, die bei der Erschließung der Chancen und Potentiale der digitalen Medienentwicklung unterstützt werden sollen. Bei der Vermittlung von Medienkompetenz sowie zur Integration von Menschen mit unterschiedlichem Hintergrund leisten auch die Bürgermedien einen Beitrag.
+§ 39a  Medienversammlung
+Die Medienversammlung initiiert und fördert den Diskurs zwischen den Mediennutzerinnen und Mediennutzern und den Akteuren der Medienbranche unter Einbeziehung der Wissenschaft und der Politik über den Stand und die Entwicklung der Medien in Nordrhein-Westfalen.
+§ 40  Bürgermedien
+(1) Bürgermedien ermöglichen Bürgerinnen und Bürgern, sich an der Schaffung und Veröffentlichung von Inhalten in Medien zu beteiligen und tragen so zur Ausbildung ihrer Medienkompetenz bei. Bürgermedien ergänzen durch innovative, kreative und vielfältige Inhalte das publizistische Angebot für Nordrhein-Westfalen und leisten einen Beitrag zur gesellschaftlichen Meinungsbildung.
+(2) Wer nicht zur Veranstaltung und Verbreitung von Rundfunk nach diesem Gesetz oder anderen Gesetzen zugelassen ist, kann sich mit Beiträgen an den Bürgermedien beteiligen.
+(3) Bürgermedien dürfen nicht auf einen wirtschaftlichen Geschäftsbetrieb gerichtet sein und die Beiträge keine Werbung enthalten. In Bürgermedien finden Gewinnspiele nicht statt.
+(4) Unzulässig sind Beiträge staatlicher Stellen und Beiträge, die der Öffentlichkeitsarbeit von Parteien, Wählergruppen oder an Wahlen beteiligter Vereinigungen dienen.
+(5) § 40b und § 40c bleiben unberührt.
+(6) Die LfM soll im Rahmen ihres Haushalts Zuschüsse für Bürgermedien nach diesem Abschnitt gewähren. Sie fördert Maßnahmen und Projekte für die Bürgermedien mit dem Ziel ihrer insgesamt generationenübergreifenden und integrativen Nutzung; hierzu gehören auch Schul- und Jugendprojekte zur Förderung von Medienkompetenz, die in Kooperation mit einer Veranstaltergemeinschaft durchgeführt werden, sowie die Förderung der Grundlagen technischer und organisatorischer Infrastruktur, welche der Produktion von Beiträgen und der kontinuierlichen Arbeit der Einrichtungen der Bürgermedien dienen. Ferner unterstützt die LfM Ausbildungs- und Qualifizierungsprojekte und -maßnahmen. Das Nähere zur Ausgestaltung, Verbreitung, Förderung und Organisation der Bürgermedien regelt die LfM durch Satzung.
+(7) Bei Meinungsverschiedenheiten zwischen den an den Bürgermedien Beteiligten entscheidet die LfM.
+§ 40a  Bürgerfunk im lokalen Hörfunk
+(1) Der Bürgerfunk im lokalen Hörfunk dient dazu, das lokale Informationsangebot zu ergänzen und den Erwerb von Medienkompetenz, insbesondere von Schülerinnen und Schülern, zu ermöglichen und damit auch zur gesellschaftlichen Meinungsbildung beizutragen.
+(2) Bürgerfunk im lokalen Hörfunk wird von Gruppen betrieben, die im Verbreitungsgebiet eines lokalen Hörfunkprogramms tätig sind, über eine geeignete Qualifizierung verfügen und keine Zulassung zur Veranstaltung von Rundfunk haben. Die Mitglieder der Gruppen müssen ihre Wohnung oder ihren ständigen Aufenthalt im Verbreitungsgebiet haben; für Teilnehmer an Schul- und Jugendprojekten wird dies vermutet, wenn die Schule oder Jugendeinrichtung ihren Sitz im Verbreitungsgebiet hat. Das Nähere regelt die LfM durch Satzung. Darin ist auch zu regeln, wann eine geeignete Qualifizierung gegeben ist oder wie eine solche durch Teilnahme an einer Qualifizierungsmaßnahme erworben werden kann.
+(3) § 6 gilt entsprechend mit der Maßgabe, dass Theater, Schulen, Volkshochschulen und sonstige kulturelle Einrichtungen nicht ausgeschlossen sind.
+(4) Die Veranstalter lokalen Hörfunks (§ 52) sollen in ihr Programm Programmbeiträge von Gruppen im Sinne der Abs. 1 bis 3 von täglich höchstens 60 Minuten abzüglich der Sendezeiten für Nachrichten, Wetter- und Verkehrsmeldungen und Rundfunkwerbung einbeziehen. Nicht in Anspruch genommene Sendezeit kann der Veranstalter selbst nutzen. Die Programmbeiträge sind im lokalen Programm anzukündigen; auf digitale Angebote der Gruppen soll der Veranstalter lokalen Hörfunks in seinem Online-Angebot hinweisen. Das Nähere regelt die LfM durch Satzung.
+(5) Der Bürgerfunk soll im Programmschema der lokalen Hörfunkprogramme werktags in der Zeit zwischen 20 Uhr und 21 Uhr verbreitet werden. An Sonntagen und gesetzlichen Feiertagen soll der Bürgerfunk gemäß Absatz 4 zwischen 19 Uhr und 21 Uhr verbreitet werden. Satz 1 und 2 gelten nicht, wenn sich die Beteiligten anderweitig einigen. Andere oder zusätzliche Sendezeiten können im Einvernehmen mit dem Veranstalter auch für Schul- und Jugendprojekte zur Förderung der Medienkompetenz oder für die Gestaltung von Live-Sendungen mit Bürgerbeiträgen vereinbart werden. Das Nähere regelt die LfM durch Satzung.
+§ 40b  Programmbeiträge für lokalen Hörfunk
+(1) Die Programmbeiträge nach § 40a Absatz 4 müssen von den Gruppen selbst hergestellt und eigenständig gestaltet werden und ausschließlich für die Ausstrahlung im Verbreitungsgebiet oder in einem Teil hiervon bestimmt sein. Die redaktionellen Inhalte der Programmbeiträge müssen einen lokalen Bezug zu dem Verbreitungsgebiet haben und sind grundsätzlich in deutscher Sprache zu gestalten. Das Nähere regelt die LfM durch Satzung.
+(2) Veranstalter lokalen Hörfunks oder Mitglieder einer Veranstaltergemeinschaft oder Personen, die zu einem Veranstalter lokalen Hörfunks in einem Arbeits- oder Dienstverhältnis oder in einem arbeitnehmerähnlichen Verhältnis stehen, dürfen an der Herstellung von Programmbeiträgen nach Abs. 1 nicht mitwirken. Satz 1 2. Alternative gilt nicht für die Vertreterin oder den Vertreter der Bürgermedien nach § 62 Absatz 3 Satz 1.
+(3) Die Veranstalter lokalen Hörfunks sind für den Inhalt der Programmbeiträge verantwortlich. Sie haben Programmbeiträge abzulehnen, die den gesetzlichen Bestimmungen nicht entsprechen. Das Nähere regelt die LfM durch Satzung.
+§ 40c  Lehr- und Lernsender
+(1) Die LfM kann für die Veranstaltung von Hörfunk und Fernsehen jeweils einen landesweiten Lehr- und Lernsender zulassen, deren Zweck die Qualifizierung, die Vermittlung von Medienkompetenz sowie die Erprobung innovativer Programm-, Partizipations- und Ausbildungsmodelle ist.
+(2) Die LfM unterstützt die Nutzung digitaler Verbreitungswege durch die Bürgermedien. Sie fördert insbesondere das Entstehen einer gemeinsamen Plattform, mit der die Auffindbarkeit von Beiträgen der Bürgermedien verbessert und die Teilhabe von Bürgerinnen und Bürgern durch Interaktivität gestärkt wird. Im Übrigen gelten für die Zulassung nach Absatz 1 die Vorschriften des Abschnitts 2.
+(3) Die Zulassung erfolgt in der Regel für einen Zeitraum von vier Jahren. Eine Verlängerung ist möglich; Satz 1 gilt entsprechend. Die Zulassung kann mit Nebenbestimmungen versehen werden. Im Übrigen gelten die Vorschriften des Abschnitts 2.
+§ 40d  Rundfunkprogramme in Hochschulen
+(1) Die LfM erteilt für Rundfunkprogramme, die im örtlichen Bereich einer Hochschule veranstaltet und in diesem Bereich terrestrisch verbreitet werden, die Zulassung in einem vereinfachten Zulassungsverfahren. § 83 gilt entsprechend.
+(2) Rundfunkprogramme in Hochschulen müssen in funktionellem Zusammenhang mit den von den Hochschulen zu erfüllenden Aufgaben stehen.
+(3) Die Zulassung wird Mitgliedern von Hochschulen (§ 9 Hochschulgesetz) für höchstens vier Jahre erteilt. Erfüllen mehrere Antragstellende die Zulassungsvoraussetzungen, wirkt die LfM auf eine Einigung hin. Kommt diese nicht zustande, kann die Nutzung der Übertragungskapazitäten zeitlich auf die Antragstellenden aufgeteilt werden.
+(4) Rundfunkwerbung, Teleshopping und Gewinnspiele sind in den Programmen unzulässig, Sponsoring ist zulässig. Sendungen, die der Öffentlichkeitsarbeit von Parteien, Wählergruppen oder an Wahlen beteiligter Vereinigungen dienen, sind nicht zulässig.
+(5) Öffentlich-rechtliche Rundfunkveranstalter dürfen sich im Rahmen der für sie geltenden gesetzlichen Bestimmungen an den Programmen beteiligen.
+(6) §§ 31, 35, 38, 42, 43, 54 Absatz 4 gelten entsprechend.
+§ 41  (weggefallen)
+Unterabschnitt 2 Programmbeschwerde und Auskunftsrechte
+§ 42  Programmbeschwerde
+(1) Jeder hat das Recht, sich mit Eingaben, Anregungen und Beschwerden zum Rundfunkprogramm an den Veranstalter zu wenden. Die LfM teilt auf Verlangen den Namen und die Anschrift des Veranstalters und der für den Inhalt des Rundfunkprogramms verantwortlichen Person mit.
+(2) Über Beschwerden, in denen die Verletzung der Vorschriften des Jugendmedienschutz-Staatsvertrages, der Programmgrundsätze (§ 31) und der Vorschriften über Werbung (§§ 8, 9, 10, 70 und 71 des Medienstaatsvertrages) und Gewinnspiele (§ 11 des Medienstaatsvertrages) behauptet wird, entscheidet der Veranstalter innerhalb eines Monats mit schriftlicher Begründung. Wird die Beschwerde in Textform eingelegt, so genügt für die Entscheidung auch die Textform. Diese Beschwerden sind nur innerhalb von drei Monaten nach Ausstrahlung der Sendung zulässig. Der Programmveranstalter legt der LfM nach Abschluss jedes Kalenderjahres einen Bericht über die in diesem Zeitraum eingegangenen Beschwerden nach Satz 1 vor. Dies gilt nicht für Veranstalter nach § 40d.
+(3) Wird der Beschwerde nicht oder nicht innerhalb der Frist nach Absatz 2 Satz 1 abgeholfen, so kann die Beschwerdeführerin oder der Beschwerdeführer innerhalb eines Monats die LfM anrufen. Die LfM soll vor einer Entscheidung über Beschwerden, in denen die Verletzung der Vorschriften über unzulässige Sendungen und den Jugendschutz behauptet wird, einen Antrag auf gutachterliche Befassung der Kommission für Jugendmedienschutz (KJM) stellen und das Ergebnis der gutachterlichen Befassung ihrer Entscheidung zugrunde legen. Wird der Beschwerde durch die LfM stattgegeben, kann diese bestimmen, dass der Veranstalter ihre Entscheidung in seinem Programm verbreitet. § 118 Abs. 3 Satz 2 gilt entsprechend. Entscheidungen nach Satz 3 sind im Online-Angebot der LfM zu veröffentlichen.
+(4) Wird in einer Beschwerde die Verletzung von Vorschriften des Datenschutzes behauptet, so holt der Veranstalter vor seiner Entscheidung eine Stellungnahme der oder des Datenschutzbeauftragten der LfM ein. Für das weitere Verfahren gelten die Abs. 2 und 3.
+(5) Das Nähere regelt die LfM durch Satzung.
+§ 43  Einsichtnahmerecht und Aufzeichnungspflicht
+(1) Die Sendungen sind vom Veranstalter in Ton und Bild vollständig aufzuzeichnen und aufzubewahren. Bei Sendungen, die unter Verwendung einer Aufzeichnung oder eines Films verbreitet werden, kann abweichend von Satz 1 die Aufzeichnung oder der Film aufbewahrt oder die Wiederbeschaffung sichergestellt werden.
+(2) Die Pflichten nach Absatz 1 enden drei Monate nach dem Tag der Verbreitung. Wird innerhalb dieser Frist eine Sendung beanstandet, enden die Pflichten nach Absatz 1 erst, wenn dieBeanstandung durch rechtskräftige gerichtliche Entscheidung, durch gerichtlichen Vergleich oder auf andere Weise erledigt ist.
+(3) Die LfM kann innerhalb der Fristen des Absatz 2 Aufzeichnungen und Filme jederzeit kostenlos einsehen oder ihre kostenlose Übersendung verlangen.
+(4) Wer schriftlich glaubhaft macht, in seinen Rechten berührt zu sein, kann vom Veranstalter innerhalb der Fristen nach Absatz 2 Einsicht in die Aufzeichnungen und Filme verlangen. Auf Antrag sind ihm gegen Erstattung der Selbstkosten Ausfertigungen, Abzüge oder Abschriften von der Aufzeichnung oder dem Film zu übersenden.
+Unterabschnitt 3 Recht auf Gegendarstellung
+§ 44  Gegendarstellung
+(1) Der Veranstalter ist verpflichtet, durch Rundfunk die Gegendarstellung der Person oder Stelle zu verbreiten, die durch eine vom Veranstalter in einer Sendung verbreitete Tatsachenbehauptung betroffen ist.
+(2) Die Pflicht zur Verbreitung der Gegendarstellung besteht nicht, wenn die betroffene Person oder Stelle kein berechtigtes Interesse an der Verbreitung hat oder die Gegendarstellung ihrem Umfang nach nicht angemessen ist, insbesondere den Umfang des beanstandeten Teils der Sendung wesentlich überschreitet.
+(3) Die Gegendarstellung muss sich auf tatsächliche Angaben beschränken und darf keinen strafbaren Inhalt haben. Sie bedarf der Schriftform und muss von der betroffenen Person, Stelle oder ihrem gesetzlichen Vertreter unterzeichnet sein. Die Verbreitung kann nur verlangt werden, wenn die Gegendarstellung unverzüglich, spätestens innerhalb von zwei Monaten nach Ausstrahlung der Sendung, dem Veranstalter zugeht. Die Gegendarstellung muss die beanstandete Sendung und Tatsachenbehauptung bezeichnen.
+(4) Die Gegendarstellung muss unverzüglich innerhalb des gleichen Programms und der gleichen Programmsparte wie die beanstandete Tatsachenbehauptung sowie zur gleichen Tageszeit oder, wenn dies nicht möglich ist, zu einer Sendezeit verbreitet werden, die der Zeit der beanstandeten Sendung gleichwertig ist. Die Verbreitung erfolgt ohne Einschaltungen und Weglassungen.
+(5) Die Verbreitung der Gegendarstellung erfolgt unentgeltlich. Dies gilt nicht, wenn sich die Gegendarstellung gegen eine Tatsachenbehauptung richtet, die in einer Werbesendung verbreitet worden ist.
+(6) Die vorstehenden Bestimmungen gelten nicht für wahrheitsgetreue Berichte über öffentliche Sitzungen des Europäischen Parlaments, der gesetzgebenden Organe des Bundes, der Länder und der Vertretungen der Gemeinden und Gemeindeverbände sowie der Gerichte.
+§ 45  Rechtsweg
+(1) Für die Durchsetzung des vergeblich geltend gemachten Gegendarstellungsanspruchs ist der Rechtsweg zu den Zivilgerichten gegeben. Auf das Verfahren sind die Vorschriften der Zivilprozessordnung über das Verfahren auf Erlass einer einstweiligen Verfügung entsprechend anzuwenden. Eine Gefährdung des Anspruchs braucht nicht glaubhaft gemacht zu werden. Ein Verfahren zur Hauptsache findet nicht statt.
+(2) Auf Antrag kann das Gericht anordnen, dass der Veranstalter in der Form des § 44 Abs. 4 eine Gegendarstellung verbreitet.
+Unterabschnitt 4 Datenschutz und Datenschutzrechte
+§ 46  Datenverarbeitung für publizistische Zwecke
+Die Verarbeitung personenbezogener Daten zu journalistischen Zwecken durch private Rundfunkveranstalter bestimmt sich nach Maßgabe der §§ 12 und 23 des Medienstaatsvertrages.
+§ 47  Geheimhaltung
+Die bei einer speichernden Stelle tätigen Personen sind zur Geheimhaltung der bei ihrer Tätigkeit bekannt gewordenen Tatsachen verpflichtet. Diese Geheimhaltungspflicht besteht nicht, wenn die Tatsachen offenkundig sind oder ihrer Natur nach der Geheimhaltung nicht bedürfen. Satz 2 gilt nicht im Anwendungsbereich des Datengeheimnisses nach §§ 12 Absatz 1 Satz 1 bis Satz 3 und nach § 23 Absatz 1 Satz 1 bis Satz 3 des Medienstaatsvertrages.
+§ 48  Betriebliche Datenschutzbeauftragte der Veranstalter
+Jeder private Rundfunkveranstalter oder dessen Hilfs- und Beteiligungsunternehmen, der im Rahmen seiner Betätigung personenbezogene Daten verarbeitet, hat eine Person zur oder zum betrieblichen Datenschutzbeauftragten im Sinne des Artikels 37 der Verordnung (EU) 2016/679 des Europäischen Parlaments und des Rates vom 27. April 2016 zum Schutz der natürlichen Personen bei der Verarbeitung personenbezogener Daten, zum freien Datenverkehr und zur Aufhebung der Richtlinie 95/46/EG (Datenschutz-Grundverordnung) (ABl. L 119 vom 4. Mai 2016, S. 1, L 314 vom 22. November 2016, S. 72; L 127 vom 23. Mai 2018, S. 2) zu bestellen und der LfM deren Namen mitzuteilen.
+§ 49  Datenschutzaufsicht über den privaten Rundfunk, überjournalistisch-redaktionellgestaltete Angebote bei Telemedien und über die LfM
+(1) Die Medienkommission ernennt eine Person zur oder zum Datenschutzbeauftragten der LfM für die Dauer von vier Jahren. Eine dreimalige Wiederernennung ist zulässig. Die oder der Datenschutzbeauftragte der LfM ist zuständige Aufsichtsbehörde im Sinne des Artikels 51 der Verordnung (EU) 2016/679 und tritt damit an die Stelle der oder des Landesbeauftragten für Datenschutz und Informationsfreiheit des Landes Nordrhein-Westfalen (LDI). Die oder der Datenschutzbeauftragte der LfM muss über die für die Erfüllung der Aufgaben und Ausübung der Befugnisse erforderliche Qualifikation, nachgewiesen durch ein abgeschlossenes Hochschulstudium, sowie über Erfahrung und Sachkunde insbesondere im Bereich des Schutzes personenbezogener Daten verfügen. Das Amt der oder des Datenschutzbeauftragten der LfM kann nicht neben anderen Aufgaben innerhalb der LfM und ihrer Hilfs- und Beteiligungsunternehmen wahrgenommen werden. Sonstige Aufgaben müssen mit dem Amt der oder des Datenschutzbeauftragten der LfM zu vereinbaren sein und dürfen ihre oder seine Unabhängigkeit nicht gefährden.
+(2) Die oder der Datenschutzbeauftragte der LfM überwacht bei der LfM und bei den privaten Rundfunkveranstaltern und deren Beteiligungsunternehmen die Einhaltung der Datenschutzvorschriften dieses Gesetzes, des Medienstaatsvertrages, der Datenschutz-Grundverordnung, der §§ 19 bis 25 des Telekommunikation-Telemedien-Datenschutz-Gesetzes vom 23. Juni 2021 (BGBl. I S. 1982) in der jeweils geltenden Fassung und anderer Vorschriften über den Datenschutz bei ihrer gesamten Tätigkeit. Die Zuständigkeit der oder des Datenschutzbeauftragten der LfM für die Aufsicht über die Einhaltung der Vorschriften nach Satz 1 besteht auch bei journalistisch-redaktionell gestalteten Angeboten bei Telemedien im Sinne des § 113 Satz 2 und 3 des Medienstaatsvertrages. Sie oder er unterstützt die betrieblichen Datenschutzbeauftragten der LfM, der privaten Rundfunkveranstalter sowie deren Hilfs- und Beteiligungsunternehmen und der Anbieter journalistisch-redaktionell gestalteter Telemedien bei der Erfüllung ihrer Aufgaben. Sie oder er hat die Aufgaben und die Befugnisse entsprechend der Artikel 57 und 58 Absatz 1 bis 5 der Datenschutz-Grundverordnung. Sie oder er kann gegenüber der LfM keine Geldbußen verhängen.
+(3) Jedermann hat das Recht, sich unmittelbar an die Datenschutzbeauftragte oder den Datenschutzbeauftragten der LfM zu wenden, wenn er der Ansicht ist, bei der Verarbeitung seiner personenbezogenen Daten durch die LfM oder durch einen privaten Rundfunkveranstalter oder seine Beteiligungsunternehmen in seinen schutzwürdigen Belangen verletzt zu sein.
+(4) Das Amt endet mit Ablauf der Amtszeit, mit Rücktritt vom Amt oder mit Erreichen des gesetzlichen Renteneintrittsalters. Tarifvertragliche Regelungen bleiben unberührt. Die oder der Datenschutzbeauftragte der LfM kann des Amtes nur enthoben werden, wenn sie oder er eine schwere Verfehlung begangen hat oder die Voraussetzungen für die Wahrnehmung der Aufgaben nicht mehr erfüllt. Die Amtsenthebung geschieht durch Beschluss der Medienkommission. Die oder der Datenschutzbeauftragte der LfM ist vor der Entscheidung zu hören.
+(5) Das Nähere, insbesondere die Stellvertretung der oder des Datenschutzbeauftragten, regelt die Satzung.
+(6) Die Direktorin oder der Direktor benennt für die LfM eine weitere Person zum betrieblichen Datenschutzbeauftragten gemäß Artikel 37 der Verordnung (EU) 2016/679.
+(7) Die oder der Datenschutzbeauftragte der LfM arbeitet zur Gewährleistung des Datenschutzes mit den allgemeinen Datenschutzbehörden zusammen. Sie gehen im Rahmen ihrer Zuständigkeiten wechselseitig Hinweisen auf Verstöße gegen Datenschutzvorschriften nach und unterrichten sich wechselseitig über das Ergebnis ihrer Prüfung. Die Unterrichtung erfolgt über die zuständige oberste Landesbehörde. Der Informantenschutz ist bei der Zusammenarbeit der Aufsichtsbehörden zu wahren.
+(8) Die oder der Datenschutzbeauftragte der LfM ist befugt, den Justizbehörden Verstöße gegen die allgemeinen Datenschutzbestimmungen zur Kenntnis zu bringen und die Einleitung eines gerichtlichen Verfahrens zu betreiben.
+(9) Die oder der Datenschutzbeauftragte der LfM ist sowohl während als auch nach Beendigung der Tätigkeit verpflichtet, über die ihr oder ihm während der Dienstzeit bekanntgewordenen Angelegenheiten und vertraulichen Informationen Verschwiegenheit zu bewahren.
+§ 50  Überwachung des Datenschutzes bei der LfM,Jahresbericht über die gesamte Aufsichtstätigkeit
+(1) Die oder der Datenschutzbeauftragte der LfM beanstandet gegenüber der Direktorin oder dem Direktor bevorstehende und feststehende Verstöße der LfM gegen die Datenschutzvorschriften dieses Gesetzes oder anderer Gesetze oder sonstige Mängel bei der Verarbeitung personenbezogener Daten und fordert unter angemessener Fristsetzung eine Stellungnahme an. Gleichzeitig wird die Medienkommission unterrichtet. Mit der Beanstandung können Vorschläge zur Beseitigung der Mängel oder sonstigen Verbesserung des Datenschutzes verbunden werden.
+(2) Handelt es sich um unerhebliche Mängel oder ist ihre Behebung sichergestellt, kann von einer Beanstandung abgesehen werden.
+(3) Die von der Direktorin oder dem Direktor abzugebende Stellungnahme soll, wenn die Beanstandung von ihr oder ihm für berechtigt erachtet wird, eine Darstellung der Maßnahmen enthalten, die aufgrund der Beanstandung veranlasst wurden. Die Direktorin oder der Direktor leitet der Medienkommission eine Abschrift der Stellungnahme zu.
+(4) Die oder der Datenschutzbeauftragte der LfM erstattet auch der Medienkommission jährlich einen schriftlichen Bericht im Sinne des Artikels 59 der Verordnung (EU) 2016/679 über die gesamte Aufsichtstätigkeit. Der Bericht wird veröffentlicht, wobei eine Veröffentlichung im Online-Angebot der LfM ausreichend ist.
+§ 51  Unabhängigkeit
+(1) Die oder der Datenschutzbeauftragte der LfM ist in Ausübung ihres oder seines Amtes unabhängig und nur dem Gesetz unterworfen. Sie oder er unterliegt keiner Rechts- oder Fachaufsicht. Der Dienstaufsicht der Medienkommission untersteht sie oder er nur insoweit, als die Unabhängigkeit bei der Ausübung des Amtes dadurch nicht beeinträchtigt wird.
+(2) Der oder dem Datenschutzbeauftragten der LfM ist die für die Erfüllung ihrer oder seiner Aufgaben und Befugnisse notwendige Personal-, Finanz- und Sachausstattung zur Verfügung zu stellen. Die erforderlichen Mittel sind jährlich, öffentlich und gesondert im Haushaltsplan der LfM auszuweisen und der oder dem Datenschutzbeauftragten der LfM im Haushaltsvollzug zuzuweisen. Einer Finanzkontrolle durch die Medienkommission unterliegt die oder der Datenschutzbeauftragte der LfM nur insoweit, als die Unabhängigkeit bei der Ausübung des Amtes dadurch nicht beeinträchtigt wird.
+(3) Die oder der Datenschutzbeauftragte der LfM ist in der Wahl der Mitarbeiter frei. Sie unterstehen allein ihrer oder seiner Leitung.
+§ 51a  Datenschutz bei sonstigen Anbietern von Telemedien
+(1) § 23 Absatz 1 Satz 1 bis Satz 5, Absatz 2 Satz 1 bis Satz 4 und Absatz 3 des Medienstaatsvertrages gelten entsprechend, soweit sonstige Anbieter von Telemedien mit journalistisch-redaktionell gestalteten Angeboten personenbezogene Daten für journalistische Zwecke verarbeiten.
+(2) Im Fall des Absatzes 1 überwacht die oder der Datenschutzbeauftragte der LfM die Einhaltung der Datenschutzvorschriften dieses Gesetzes, des Medienstaatsvertrages, der Datenschutz-Grundverordnung, der §§ 19 bis 25 des Telekommunikation-Telemedien-Datenschutz-Gesetzes in der jeweils geltenden Fassung und anderer Vorschriften über den Datenschutz. § 49 Absatz 2 Satz 3 und 4 sowie Absatz 3 gelten entsprechend.
+Abschnitt 7 Lokaler Hörfunk
+§ 52  Veranstalter
+(1) Lokaler Hörfunk darf nur von einer Veranstaltergemeinschaft (§§ 58, 62 bis 66) veranstaltet und verbreitet werden, die sich zur Durchführung ihrer gesetzlichen Aufgaben einer Betriebsgesellschaft (§ 59) bedient. Die Veranstaltergemeinschaft ist Veranstalterin des Programms und trägt hierfür die alleinige Verantwortung. Die Betriebsgesellschaft darf auf Inhalt und Programm keinen Einfluss nehmen. Die Sätze 2 und 3 gelten für programmbegleitende Telemedienangebote entsprechend.
+(2) Soweit lokaler Hörfunk digital verbreitet wird, kann er sowohl von Veranstaltergemeinschaften als auch von Veranstaltern, welche die in den §§ 33 bis 33d genannten Voraussetzungen erfüllen, veranstaltet werden.
+§ 53  Programmgrundsätze
+(1) Lokaler Hörfunk ist dem Gemeinwohl verpflichtet. Lokale Programme müssen das öffentliche Geschehen im Verbreitungsgebiet darstellen und wesentliche Anteile an Information, Bildung, Beratung und Unterhaltung enthalten. Sie sollen den publizistischen Wettbewerb fördern. Sie dürfen sich nicht ausschließlich an bestimmte Zielgruppen wenden und sollen darauf ausgerichtet sein, bei den Hörfunkteilnehmerinnen und -teilnehmern angenommen zu werden. In jedem lokalen Programm muss die Vielfalt der Meinungen in möglichster Breite und Vollständigkeit zum Ausdruck gebracht werden. Die bedeutsamen politischen, religiösen, weltanschaulichen und gesellschaftlichen Kräfte und Gruppen im Verbreitungsgebiet müssen in jedem lokalen Programm zu Wort kommen können. Die Sätze 1 bis 4 gelten für programmbegleitende Telemedienangebote des lokalen Hörfunks entsprechend.
+(2) Kann im Falle der digitalen Verbreitung in einem Verbreitungsgebiet mehr als ein Programm zugelassen werden, ist darauf hinzuwirken, dass die Programme in ihrer Gesamtheit das öffentliche Geschehen im Verbreitungsgebiet abbilden. § 54 Abs. 3 bleibt unberührt.
+(3) § 31 gilt entsprechend.
+§ 54  Verbreitungsgebiet
+(1) Das Verbreitungsgebiet für analog terrestrisch verbreitete lokale Hörfunkprogramme legt die LfM durch Satzung fest. Hierbei sollen zusammenhängende Kommunikations-, Kultur- und Wirtschaftsräume und die kommunalen Gebietsgrenzen berücksichtigt werden.
+(2) Sofern die Übertragungskapazitäten und die örtlichen Verhältnisse einen wirtschaftlich leistungsfähigen lokalen Hörfunk ermöglichen, ist das Verbreitungsgebiet das Gebiet eines Kreises oder einer kreisfreien Stadt. Verbreitungsgebiet im Sinne des Satz 1 können auch eine sonstige kommunale Gebietskörperschaft auf Kreisebene oder Teile davon sein. Die LfM trägt Sorge, dass die Voraussetzungen für einen flächendeckenden analog terrestrisch verbreiteten lokalen Hörfunk geschaffen werden.
+(3) Umfasst das Verbreitungsgebiet mehrere kommunale Gebietskörperschaften oder Teile davon nach Abs. 2, kann die LfM die Zulassung unter der Auflage erteilen, dass im Rahmen des lokalen Programms Fensterprogramme für Teile des Verbreitungsgebiets verbreitet werden.
+(4) Die zusätzliche Verbreitung der lokalen Hörfunkprogramme auf digitalem terrestrischen sowie auf einem anderen Übertragungsweg über die nach Absatz 1 festgelegten Verbreitungsgebiete hinaus, ist nicht ausgeschlossen.
+§ 55  Programmdauer
+(1) Ein lokales Hörfunkprogramm muss eine tägliche Programmdauer von mindestens acht Stunden haben.
+(2) Unter Berücksichtigung redaktioneller Notwendigkeiten im Sendegebiet kann die LfM auf Antrag eine tägliche Programmdauer von mindestens acht Stunden im Wochendurchschnitt bei einer täglichen Programmdauer von Montag bis Freitag von mindestens acht Stunden zulassen.
+(3) Ist ein wirtschaftlich leistungsfähiger lokaler Hörfunk nur mit einer kürzeren Programmdauer möglich, kann die LfM auf Antrag
+a) eine tägliche Programmdauer von mindestens fünf Stunden oder im Fall des Absatzes 2 eine tägliche Programmdauer von mindestens fünf Stunden im Wochendurchschnitt bei einer täglichen Programmdauer von Montag bis Freitag von mindestens fünf Stunden zulassen oder
+b) an Sonnabenden, Sonntagen und gesetzlichen Feiertagen (§ 2 Feiertagsgesetz NW) eine tägliche Programmdauer von drei Stunden zulassen oder
+c) ein abweichendes Verbreitungsgebiet festlegen.
+Ist eine Maßnahme nicht ausreichend, kann die LfM abweichend von Satz 1 Buchstabe a befristet eine tägliche Programmdauer von mindestens drei Stunden, im Fall des Absatzes 2 eine tägliche Programmdauer von mindestens drei Stunden im Wochendurchschnitt bei einer täglichen Programmdauer von Montag bis Freitag von mindestens drei Stunden oder eine Verbindung der Maßnahmen nach Satz 1 Buchstabe a bis c zulassen.
+(4) Die Programmdauer schließt die in Anspruch genommene Sendezeit für den Bürgerfunk nach § 40a Absatz 4 Satz 1 ein.
+§ 56  Rahmenprogramm
+(1) Im Einvernehmen mit der Betriebsgesellschaft können Veranstaltergemeinschaften untereinander und mit Dritten Vereinbarungen über die Veranstaltung und Verbreitung eines Rahmenprogramms oder über die Veranstaltung und Verbreitung von eigener Werbung im Programm des Dritten treffen. Veranstalter eines Rahmenprogramms müssen sich gegenüber der LfM verpflichten, jeder Veranstaltergemeinschaft die Verbreitung des Rahmenprogramms zu gleichen Bedingungen anzubieten.
+(2) Für das Rahmenprogramm gelten die den Hörfunk betreffenden Vorschriften der Abschnitte 2 und 5 mit Ausnahme des § 36 Absatz 2, 3, 5 bis 7 und des Abschnitts 6 Unterabschnitte 2 bis 4.
+(3) Die LfM erhebt von dem Veranstalter des Rahmenprogramms für jedes Verbreitungsgebiet, in dem sein Rahmenprogramm übernommen wird, eine Ausgleichsleistung. Die Leistung wird anteilig für die Sende- und Leitungskosten erhoben, die auf die Sendezeit entfallen, in der die Veranstaltergemeinschaft das Rahmenprogramm verbreitet. Die Erhebung der Ausgleichsleistung unterbleibt, wenn zwischen Veranstaltergemeinschaft und dem Veranstalter des Rahmenprogramms eine Satz 2 entsprechende Vereinbarung besteht. Das Nähere regelt die LfM durch Satzung.
+§ 57  Sendezeit für Dritte
+(1) Jeder Veranstalter hat den obersten Landesbehörden sowie den Kreisen, Gemeinden und sonstigen kommunalen Gebietskörperschaften im Verbreitungsgebiet unverzüglich für amtliche Verlautbarungen angemessene Sendezeit einzuräumen. Für die Einräumung von Sendezeit an die Evangelische Kirche, die Katholische Kirche und die jüdischen Kultusgemeinden gilt § 36 Abs. 4 entsprechend.
+(2) § 36 Abs. 3, 5 bis 7 gilt entsprechend.
+§ 58  Zulassung zum lokalen Hörfunk
+(1) Die Zulassung wird für die Programmdauer, das Programmschema, das Verbreitungsgebiet und die Übertragungskapazität erteilt. Die erste Zulassung wird für mindestens vier und höchstens zehn Jahre erteilt. Verlängerungen der Zulassung sind jeweils auf höchstens zehn Jahre zu befristen.
+(2) Der Zulassungsantrag kann erst gestellt werden, wenn die LfM festgestellt hat, dass eine terrestrische Übertragungskapazität im Verbreitungsgebiet zur Verfügung steht oder voraussichtlich innerhalb der nächsten 18 Monate zur Verfügung stehen wird. Die Feststellung wird in der Regel jährlich getroffen und im Online-Angebot der LfM bekannt gemacht. Auf diese Bekanntmachung ist jeweils im Ministerialblatt für das Land Nordrhein-Westfalen hinzuweisen.
+§ 58a  Besondere Zulassungsvoraussetzungen für Veranstaltergemeinschaften
+(1) Die Zulassung wird nur einer Veranstaltergemeinschaft erteilt, deren alleiniger Zweck die Veranstaltung und Verbreitung lokalen Hörfunks im Sinne dieses Abschnitts ist und deren Zusammensetzung und Satzung den Vorschriften dieses Gesetzes entsprechen.
+(2) Die Veranstaltergemeinschaft muss eine für die beantragte Dauer verbindliche Vereinbarung mit einer Betriebsgesellschaft abgeschlossen haben. Sie muss als Verein (§ 21 Bürgerliches Gesetzbuch) in das Vereinsregister eingetragen sein.
+(3) Der Antrag muss die notwendigen Angaben dazu enthalten, dass die Betriebsgesellschaft wirtschaftlich und organisatorisch die Erfüllung der mit der Veranstaltergemeinschaft getroffenen Vereinbarungen gewährleistet. Die Vereinbarungen sind der LfM vorzulegen.
+§ 59  Betriebsgesellschaft
+(1) Eine Betriebsgesellschaft muss erwarten lassen, dass sie zur Gewährleistung einer freien und vielfältigen Presse den Belangen aller im Verbreitungsgebiet (§ 54) erscheinenden Tageszeitungen mit Lokalausgaben angemessen Rechnung trägt.
+(2) Kann in einem Verbreitungsgebiet mehr als ein Programm zugelassen werden, gilt Absatz 1 nur für das Programm mit der größten technischen Reichweite; bei mehreren Programmen mit gleicher technischer Reichweite legt die LfM das Programm fest, für das Absatz 1 gilt.
+(3) Unternehmen mit einer oder mehreren Tageszeitungen sollen an der Betriebsgesellschaft insgesamt nicht mehr als 75 vom Hundert der Kapital- und Stimmrechtsanteile besitzen. Erscheinen im Verbreitungsgebiet mehrere Tageszeitungen mit Lokalausgaben, müssen sie entsprechend ihren Marktanteilen beteiligt sein. Handelt es sich um ein abhängiges oder herrschendes Unternehmen oder um ein Konzernunternehmen im Sinne des Aktiengesetzes, sind ihm die Anteile zuzurechnen, die von den mit ihm verbundenen Unternehmen gehalten werden.
+(4) Besteht keine Betriebsgesellschaft, die den Anforderungen der Absätze 1 und 3 Satz 2 entspricht, entscheidet die LfM unter Berücksichtigung einer möglichst großen örtlichen Medienvielfalt, ob von diesen Anforderungen abgesehen werden kann. Dasselbe gilt, wenn nach angemessener Fristsetzung durch die LfM keine Vereinbarung abgeschlossen wird.
+(5) Gemeinden und Gemeindeverbände sowie Unternehmen und Vereinigungen, an denen eine oder mehrere Gemeinden oder Gemeindeverbände beteiligt sind (kommunale Träger), haben bis zur Zulassung der Veranstaltergemeinschaft das Recht, eine Beteiligung an der Betriebsgesellschaft mit insgesamt bis zu 25 vom Hundert der Kapital- und Stimmrechtsanteile zu verlangen. §§ 107, 108 Gemeindeordnung finden keine Anwendung.
+§ 60  Rechte und Pflichten
+(1) Eine Veranstaltergemeinschaft darf Hörfunkwerbung nur von der Betriebsgesellschaft übernehmen.
+(2) Die Betriebsgesellschaft muss für die Dauer der Zulassung
+1. die zur Produktion und Verbreitung des lokalen Programms erforderlichen technischen Einrichtungen beschaffen und der Veranstaltergemeinschaft zur Verfügung stellen,
+2. der Veranstaltergemeinschaft die zur Wahrnehmung ihrer gesetzlichen und durch die Vereinbarung bestimmten Aufgaben erforderlichen Mittel in vertraglich bestimmtem Umfang zur Verfügung stellen; dies umfasst auch die Mittel dafür, dass organisatorische Aufgaben der Veranstaltergemeinschaft personell wahrgenommen werden können,
+3. der Veranstaltergemeinschaft die zur Wahrnehmung der gesetzlichen und durch die Vereinbarung bestimmten Aufgaben erforderlichen Auskünfte erteilen und Unterlagen zur Verfügung stellen,
+4. eine Vertreterin oder einen Vertreter der Veranstaltergemeinschaft an den Sitzungen der Organe der Betriebsgesellschaft teilnehmen lassen.
+(3) Die Betriebsgesellschaft darf die Vereinbarung nur mit einer Veranstaltergemeinschaft treffen.
+(4) Veranstaltergemeinschaften können Vereinbarungen über einen Programmaustausch treffen.
+§ 61  Kündigung der Vereinbarung
+(1) Die Vereinbarung kann nur mit einer Frist von einem halben Jahr zum Ende des Kalenderjahres gekündigt werden.
+(2) Beabsichtigen die Veranstaltergemeinschaft oder die Betriebsgesellschaft die Vereinbarung nach Absatz 1 oder aus wichtigem Grund zu kündigen, haben sie ihre Kündigungsabsicht der LfM vor Erklärung der Kündigung schriftlich anzuzeigen. Diese hat auf eine Fortdauer der Vereinbarung hinzuwirken. Die LfM kann von der Durchführung eines solchen Einigungsverfahrens in begründeten Ausnahmefällen absehen. Das Nähere regelt die LfM durch Satzung.
+(3) Kündigt die Veranstaltergemeinschaft die Vereinbarung nach Absatz 1 oder vor Abschluss des Einigungsverfahrens widerruft die LfM deren Zulassung.
+(4) Kündigt die Veranstaltergemeinschaft aus wichtigem Grund, entscheidet die LfM binnen zwei Monaten nach Erklärung der Kündigung darüber, ob § 59 Abs. 1 auf die von der Veranstaltergemeinschaft vorzulegende neue Vereinbarung Anwendung findet. Sie hat dabei Bedeutung und Gewicht des Kündigungsgrundes und die in § 59 Absatz 1 genannten Belange abzuwägen.
+(5) Kündigt die Betriebsgesellschaft vor Abschluss des Einigungsverfahrens, findet § 59 Abs. 1 auf die von der Veranstaltergemeinschaft vorzulegende neue Vereinbarung keine Anwendung.
+(6) Kündigt die Betriebsgesellschaft nach Abschluss des Einigungsverfahrens, entscheidet die LfM binnen zwei Monaten nach Erklärung der Kündigung über den Widerruf der Zulassung der Veranstaltergemeinschaft. Absatz 4 Satz 2 gilt entsprechend. Wird die Zulassung nicht widerrufen, findet § 59 Abs. 1 auf die von der Veranstaltergemeinschaft vorzulegende neue Vereinbarung keine Anwendung.
+(7) Der Kündigende hat die LfM unverzüglich schriftlich über die Kündigung zu unterrichten.
+(8) Legt die Veranstaltergemeinschaft die nach den vorstehenden Absätzen vorzulegende Vereinbarung nicht innerhalb angemessener Frist, die von der LfM festzusetzen ist, vor, widerruft die LfM die Zulassung.
+§ 62  Zusammensetzung der Veranstaltergemeinschaft
+(1) Die Veranstaltergemeinschaft muss von mindestens acht natürlichen Personen gegründet werden, die von folgenden Stellen bestimmt worden sind:
+1. Evangelische Kirchen,
+2. Katholische Kirche
+3. Jüdische Kultusgemeinden
+4. Kreistag, Rat der kreisfreien Stadt, Vertretungskörperschaft einer sonstigen kommunalen Gebietskörperschaft oder mehreren Gebietskörperschaften nach § 63 Abs. 1 Satz 3,
+5. Gewerkschaftliche Spitzenorganisation mit der höchsten Mitgliederzahl im Verbreitungsgebiet,
+6. Arbeitgeberverband mit der höchsten Mitgliederzahl im Verbreitungsgebiet,
+7. Jugendring des Kreises, der kreisfreien Stadt oder der sonstigen kommunalen Gebietskörperschaft,
+8. Sportbund des Kreises, der kreisfreien Stadt oder der sonstigen kommunalen Gebietskörperschaft,
+9. Wohlfahrtsverbände (Arbeiterwohlfahrt, Caritasverband, Deutscher Paritätischer Wohlfahrtsverband, Deutsches Rotes Kreuz, Diakonisches Werk),
+10. anerkannte Naturschutzvereinigungen im Sinne des § 66 Absatz 1 des Landesnaturschutzgesetzes,
+11. Verbraucherzentrale Nordrhein-Westfalen e.V.,
+12. Verlegerinnen und Verleger von Tageszeitungen mit Lokalausgaben im Verbreitungsgebiet,
+13. Gewerkschaft ver.di, Landesbezirk Nordrhein-Westfalen, sowie Deutscher Journalisten-Verband, Landesverband Nordrhein-Westfalen e.V.
+(2) Die Stellen, die kein Gründungsmitglied bestimmt haben, können eine natürliche Person als Mitglied, im Falle des Absatz 1 Nummer 4 zwei natürliche Personen als Mitglieder der Veranstaltergemeinschaft bestimmen. Der Verein muss diese Stellen unverzüglich nach der Gründung auffordern, die Bestimmung vorzunehmen. Erfolgt die Bestimmung nicht innerhalb von zwei Monaten nach Zugang der Aufforderung, bedarf die Aufnahme einer Mehrheit von zwei Dritteln der nach Absatz 1 bestimmten Mitglieder. § 63 gilt entsprechend.
+(3) Dem Verein muss als Mitglied je eine weitere natürliche Person aus dem Bereich Kultur und Kunst, aus dem Bereich Bildung und Wissenschaft, aus dem Kreis der Mitbürgerinnen und Mitbürger mit Migrationshintergrund, aus dem Kreis der örtlichen Organisationen von Menschen mit Behinderungen sowie aus dem Bereich der Bürgermedien im Verbreitungsgebiet angehören. Über die Aufnahme kann erst nach Abschluss des Verfahrens nach Absatz 2 beschlossen werden. Sie bedarf einer Mehrheit von zwei Dritteln der von den in Absatz 1 genannten Stellen bestimmten Mitglieder.
+(4) Dem Verein können bis zu vier weitere natürliche Personen als Mitglieder angehören. Absatz 3 Satz 2 findet entsprechende Anwendung. Der Aufnahmebeschluss bedarf einer Mehrheit von zwei Dritteln der in Absatz 1 und 3 genannten Mitglieder.
+(5) Die weiteren Mitglieder nach Absatz 3 und 4 werden für sechs Jahre gewählt. Die Wiederwahl ist zulässig.
+(6) Dem Verein dürfen höchstens 23 Mitglieder angehören.
+(7) Die LfM regelt die Einzelheiten über die Einberufung einer Gründungsversammlung.
+§ 63  Bestimmung der Gründungsmitglieder
+(1) Von den in § 62 Abs. 1 Nr. 4 genannten Stellen werden zwei Mitglieder bestimmt, die nach den Grundsätzen der Verhältniswahl (d`Hondtsches Höchstzahlverfahren) gewählt werden. Umfasst das Verbreitungsgebiet nur einen Kreis, eine kreisfreie Stadt oder eine sonstige kommunale Gebietskörperschaft, erfolgt die Bestimmung durch die jeweilige kommunale Vertretungskörperschaft. Umfasst das Verbreitungsgebiet mehrere Gebietskörperschaften oder Teile davon, die nicht über eine gemeinsame kommunale Vertretungskörperschaft verfügen, erfolgt die Bestimmung gemeinsam durch diese Gebietskörperschaften.
+(2) In den übrigen Fällen wird nur ein Mitglied bestimmt. Soweit nach § 62 Abs. 1 Nr. 1 bis 3 und 5 bis 13 mehrere Stellen genannt sind, können sie nur gemeinsam ein Mitglied bestimmen. Die Bestimmung richtet sich nach den jeweiligen Vorschriften der Stellen. Sie erfolgt durch die Gliederung, die für das gesamte Verbreitungsgebiet zuständig ist. Erfüllen mehrere Gliederungen diese Voraussetzung, werden sie durch die unterste Gliederung bestimmt.
+(3) Die Gründungsmitglieder werden für sechs Jahre bestimmt. Die erneute Bestimmung ist zulässig. Nach Mitgliedschaft in zwei aufeinander folgenden Amtsperioden soll ein Wechsel vorgenommen werden.
+(4) Die in § 62 Abs. 1 Nr. 4 genannten Stellen sollen ebenso viele Frauen wie Männer benennen. Die anderen in § 62 Abs. 1 genannten Stellen sollen Frauen und Männer alternierend benennen. Die Anforderungen nach Satz 2 entfallen nur, wenn der jeweiligen Institution wegen ihrer Zusammensetzung eine Entsendung von Frauen oder Männern regelmäßig oder im Einzelfall nicht möglich ist.
+(5) Die Mitglieder müssen den Stellen, die sie bestimmt haben, nicht angehören.
+§ 64  Mitgliedschaft
+(1) Die Mitglieder sind ehrenamtlich für den Verein tätig. Sie haben bei der Wahrnehmung ihrer Aufgaben die Interessen der Allgemeinheit zu vertreten und sind hierbei an Aufträge oder Weisungen nicht gebunden. § 95 Abs. 1 und 2 Satz 1 und 2 findet entsprechende Anwendung.
+(2) Sie müssen die Voraussetzungen des § 5 Abs. 2 Nr. 1 und 4 erfüllen, im Verbreitungsgebiet ihre Wohnung oder ihren ständigen Aufenthalt haben und dürfen nicht zu den Personen gehören, deretwegen Veranstalter nach § 6 Nr. 1, 3 und 4 von der Zulassung ausgeschlossen sind. Mitglieder des Europäischen Parlamentes, des Bundestags oder eines Landtags, Beamtinnen und Beamte, die jederzeit in den einstweiligen Ruhestand versetzt werden können, Wahlbeamtinnen und Wahlbeamte, mit Ausnahme solcher an Hochschulen und in Religionsgemeinschaften, sowie Personen, die in Parteien im Sinne des § 2 des Parteiengesetzes Vorstandsämter auf Landes- oder Bundesebene bekleiden, dürfen der Veranstaltergemeinschaft nicht angehören. Satz 2 gilt nicht für Mitglieder der Veranstaltergemeinschaft nach § 62 Abs. 1 Nr. 4 sowie für höchstens eines der nach § 62 Abs. 3 zu entsendenden Mitglieder.
+(3) Die Mitgliedschaft im Verein endet, wenn die Frist nach § 62 Abs. 5 und § 63 Abs. 3 abgelaufen ist, die Dauer der Zulassung abgelaufen ist, die Zulassung zurückgenommen oder widerrufen ist oder wenn ein Mitglied aus der Stelle oder Organisation, von der es bestimmt worden ist und der es zu diesem Zeitpunkt angehörte, ausgeschieden ist.
+(4) Scheidet ein Mitglied aus dem Verein aus, richtet sich die Nachfolge nach §§ 62, 63.
+(5) Für nach § 62 Abs. 1 Nr. 4 bestimmte Mitglieder finden §§ 63 Absatz 2, 113 Absatz 1 Satz 2 und 3, Absatz 2 Satz 2 der Gemeindeordnung und § 26 Absatz 5 Satz 1, 3, 4 und 5 der Kreisordnung für das Land Nordrhein-Westfalen keine Anwendung.
+(6) Der LfM ist die ordnungsgemäße Bestimmung beziehungsweise Wahl der Mitglieder der Veranstaltergemeinschaft unverzüglich anzuzeigen. Einzelheiten werden in einer Satzung geregelt; diese Satzung bedarf der Genehmigung der für die Rechtsaufsicht zuständigen Behörde.
+§ 65  Mitgliederversammlung
+(1) Die Mitgliederversammlung berät und beschließt über alle Fragen von grundsätzlicher Bedeutung für die Veranstaltergemeinschaft, insbesondere:
+1. Verabschiedung und Änderung der Satzung,
+2. Wahl und Abberufung des Vorstands,
+3. Einstellung und Entlassung der leitenden Beschäftigten und aller redaktionell Beschäftigten,
+4. Aufstellung des jährlichen Stellen- und Wirtschaftsplans,
+5. Abschluss von Tarifverträgen,
+6. Grundsatzfragen der Programmplanung und der Hörfunktechnik,
+7. Überwachung der Erfüllung des Programmauftrags, der Einhaltung der Programmgrundsätze und der Grundsätze für lokalen Hörfunk,
+8. Aufstellung und Änderung des Programmschemas,
+9. Änderung der Programmdauer,
+10. Abschluss, Änderung und Kündigung der Vereinbarung mit der Betriebsgesellschaft,
+11. Aufstellung des Redaktionsstatuts,
+12. Abschluss, Änderung und Kündigung von Vereinbarungen gemäß § 56,
+13. Auflösung des Vereins.
+(2) Die Mitgliederversammlung ist beschlussfähig, wenn die Hälfte der Mitglieder anwesend ist und alle Mitglieder nach näherer Vorschrift der Satzung geladen wurden. Ist nicht mindestens die Hälfte der Mitglieder anwesend, sind alle Mitglieder innerhalb angemessener Frist erneut zu laden. In der darauf stattfindenden Sitzung ist die Mitgliederversammlung ohne Rücksicht auf die Zahl der anwesenden Mitglieder beschlussfähig.
+(3) Jedes Mitglied hat eine Stimme. Beschlüsse nach Absatz 1 Nummer 2 und 10 und über die Einstellung und Entlassung der Chefredakteurin oder des Chefredakteurs bedürfen einer Mehrheit von mindestens zwei Dritteln der anwesenden Mitglieder. In den übrigen Fällen entscheidet die Mehrheit der anwesenden Mitglieder.
+(4) Beschlüsse nach Absatz 1 Nummer 3 dürfen erst nach Abschluss des Verfahrens nach § 67 Abs. 3 und 4 erfolgen.
+(5) Die Satzung kann vorsehen, dass die Mitgliederversammlung die Aufgaben nach Absatz 1 Nummer 3, 5 bis 9 und 11 durch Beschluss mit einer Mehrheit von zwei Dritteln der anwesenden Mitglieder dem Vorstand übertragen und mit den Stimmen der Mehrheit der anwesenden Mitglieder wieder an sich ziehen kann.
+(6) Eine Vertreterin oder ein Vertreter der Betriebsgesellschaft hat das Recht, an den Mitgliederversammlungen teilzunehmen.
+§ 66  Vorstand
+(1) Der Vorstand besteht aus drei Personen; höchstens ein Vorstandsmitglied darf Mitglied des Europäischen Parlaments sein oder dem Bundestages oder einem Landtag angehören. Er vertritt den Verein gerichtlich und außergerichtlich und nimmt die ihm nach diesem Gesetz und nach der Satzung übertragenen Aufgaben wahr. Er bereitet die Mitgliederversammlung vor. Die Amtszeit des Vorstandes ist auf drei Jahre befristet. Die Wiederwahl ist zulässig.
+(2) § 64 Abs. 1 gilt entsprechend.
+(3) Für die Teilnahme an Vorstandssitzungen gilt § 65 Abs. 6 entsprechend.
+§ 67  Chefredakteurin oder Chefredakteur, Redaktionsstatut
+(1) Die Veranstaltergemeinschaft muss eine Beschäftigte oder einen Beschäftigten mit der redaktionellen Leitung betrauen (Chefredakteurin oder Chefredakteur).
+(2) Die Einstellung und Entlassung der Chefredakteurin oder des Chefredakteurs bedarf der Zustimmung der Betriebsgesellschaft. Diese darf die Zustimmung nur aus Gründen verweigern, die nicht mit der publizistischen Einstellung der Chefredakteurin oder des Chefredakteurs zusammenhängen.
+(3) Die Chefredakteurin oder der Chefredakteur können im Rahmen des Stellenplans Vorschläge für die Einstellung und Entlassung von redaktionell Beschäftigten unterbreiten.
+(4) Gegen den Widerspruch der Chefredakteurin oder des Chefredakteurs dürfen redaktionell Beschäftigte weder eingestellt noch entlassen werden. Dies gilt nicht für die Person der Chefredakteurin oder des Chefredakteurs selbst.
+(5) Im Einvernehmen mit ihren redaktionell Beschäftigten stellt die Veranstaltergemeinschaft ein Redaktionsstatut auf.
+§ 68  Stellen- und Wirtschaftsplan
+(1) Die Veranstaltergemeinschaft stellt für jedes Kalenderjahr einen Stellenplan und einen Wirtschaftsplan auf, in den alle zu erwartenden Aufwendungen und Erträge einzustellen sind; die veranschlagten Aufwendungen sollen die Erträge nicht übersteigen. Die Grundsätze der Sparsamkeit und Wirtschaftlichkeit sind zu beachten. Die Veranstaltergemeinschaft ist an die Ansätze des Stellen- und Wirtschaftsplans gebunden.
+(2) Der Vorstand der Veranstaltergemeinschaft stellt den Entwurf beider Pläne in Abstimmung mit der Betriebsgesellschaft auf und legt der Mitgliederversammlung zusammen mit dem Entwurf unerledigte Einwände der Betriebsgesellschaft zur Beschlussfassung vor. Beide Pläne bedürfen der Zustimmung der Betriebsgesellschaft. Im Falle eines Schiedsverfahrens ist die LfM zu beteiligen.
+(3) Die Vereinbarung der Betriebsgesellschaft und der Veranstaltergemeinschaft hat sicherzustellen, dass der Veranstaltergemeinschaft bis zum Abschluss eines jeweils neuen Stellen- und Wirtschaftsplans angemessene Finanzmittel im Sinne der §§ 58a, 60 Absatz 2 Nummer 2 zur Verfügung stehen. Hierzu sieht die Vereinbarung entsprechende Verfahrensregeln für die Bestimmung eines Übergangshaushalts vor.
+(4) Die Betriebsgesellschaft ist verpflichtet, der Veranstaltergemeinschaft alle nach Absatz 1 erforderlichen Auskünfte umfassend und rechtzeitig zu erteilen und ihr die erforderlichen Unterlagen (insbesondere Jahresabschlüsse) rechtzeitig zur Verfügung zu stellen. Dies gilt auch, soweit sie sich zur Erledigung ihrer Aufgaben Dritter bedient. Die mit diesen abgeschlossenen Vereinbarungen hat sie der Veranstaltergemeinschaft unverzüglich vorzulegen.
+(5) Die Mitglieder der Veranstaltergemeinschaft sind zur Verschwiegenheit über ihnen nach Absatz 3 bekannt gewordene vertrauliche Angaben und Geheimnisse, insbesondere Betriebs- und Geschäftsgeheimnisse, der Betriebsgesellschaft und Dritter, deren sie sich zur Erledigung ihrer Aufgaben bedient, verpflichtet. Dies gilt nicht gegenüber der LfM. Die Veranstaltergemeinschaft darf der LfM die ihr nach Absatz 3 überlassenen Unterlagen zur Verfügung stellen.
+§ 69  Informationspflichten
+(1) Die Betriebsgesellschaft hat der Veranstaltergemeinschaft Änderungen ihrer Kapital- und Stimmrechtsverhältnisse unverzüglich mitzuteilen. Die Veranstaltergemeinschaft unterrichtet die LfM hierüber.
+(2) Die Veranstaltergemeinschaft hat die LfM über Änderungen der Vereinbarung mit der Betriebsgesellschaft zu unterrichten.
+§ 70  Anwendbare Vorschriften
+Für lokale Programme gelten die Bestimmungen des Abschnitts 2, des Abschnitts 3 Unterabschnitt 2 und der Abschnitte 5 und 6 entsprechend, soweit in Abschnitt 7 nichts anderes geregelt ist. § 9 gilt mit der Maßgabe entsprechend, dass die LfM die Unbedenklichkeit der Änderung des Programmschemas und der Programmdauer bestätigt, wenn die Meinungsvielfalt mindestens in gleicher Weise gewährleistet ist wie bei dem Programmschema und der Programmdauer, für das oder die die Zulassung erteilt worden ist.
+Abschnitt 8 (weggefallen)
+Abschnitt 9 Rundfunkprogramme in Einrichtungen, Wohnanlagen und bei örtlichen Veranstaltungen
+§ 83  Vereinfachtes Zulassungsverfahren
+(1) Die LfM erteilt für nicht bundesweite Rundfunkprogramme, die nach Maßgabe der §§ 84, 85, 86 veranstaltet und verbreitet werden, die Zulassung in einem vereinfachten Zulassungsverfahren.
+(2) Als Veranstalter gelten die Personen, die die Rundfunkprogramme verbreiten.
+(3) Wer aufgrund anderer Vorschriften zur Veranstaltung von Rundfunk zugelassen ist, wird zu Rundfunk nach diesem Abschnitt nicht zugelassen.
+(4) §§ 4 Absatz 1, 5, 6, 7 Absatz 1 Satz 1 und Absatz 2 gelten für das vereinfachte Zulassungsverfahren entsprechend.
+§ 84  Rundfunkprogramme in Einrichtungen
+(1) Rundfunkprogramme in Einrichtungen dürfen nur dort empfangbar sein und müssen im funktionellen Zusammenhang mit den in ihnen zu erfüllenden Aufgaben stehen.
+(2) Die Zulassung wird für längstens vier Jahre erteilt.
+(3) Sendungen, die der Öffentlichkeitsarbeit von Parteien, Wählergruppen oder an Wahlen beteiligter Vereinigungen dienen, sind nur in deren Einrichtungen zulässig.
+(4) §§ 31, 35, 42, 43, 54 Abs. 4 gelten entsprechend.
+§ 85  Rundfunkprogramme in Wohnanlagen
+(1) Rundfunkprogramme außerhalb von Einrichtungen, die in einem Gebäude oder zusammengehörigen Gebäudekomplex mittels einer Kabelanlage mit bis zu 100 angeschlossenen Wohneinheiten veranstaltet werden, bedürfen keiner Zulassung.
+(2) Rundfunkwerbung, Teleshopping und Sponsoring sind unzulässig.
+(3) Die Gebäudeeigentümerin oder der Gebäudeeigentümer ist verpflichtet, der LfM vor Aufnahme des Sendebetriebs Art und Umfang der Rundfunkprogramme sowie Name und Anschrift der Person oder Personen, die die Sendungen verbreiten, schriftlich oder elektronisch anzuzeigen. Spätere Änderungen sind unverzüglich anzuzeigen.
+(4) §§ 31, 35, 42, 43, 54 Abs. 4 gelten entsprechend.
+§ 86  Rundfunkprogramme bei örtlichen Veranstaltungen
+(1) Rundfunkprogramme bei Veranstaltungen müssen im örtlichen Bereich einer öffentlichen Veranstaltung und im zeitlichen Zusammenhang damit veranstaltet und verbreitet werden.
+(2) Die Zulassung darf für dieselbe Veranstaltung nur einmalig und nur für ein bestimmtes Veranstaltungsgelände im jeweiligen örtlichen Verbreitungsgebiet (§ 54) sowie längstens für die Dauer der Veranstaltung, höchstens für einen Monat, erteilt werden.
+(3) Die Zulassung zur Verbreitung über terrestrische Übertragungskapazitäten wird nur erteilt, soweit diese nicht für lokalen Hörfunk benötigt werden oder nach Abschnitt 3 zugewiesen sind und wenn das Rundfunkprogramm nicht wesentlich über das in der Zulassung bestimmte Veranstaltungsgelände hinaus empfangbar ist; dies gilt nicht für die Übertragung von Gottesdiensten.
+(4) §§ 31, 35, 38, 42, 43, 54 Abs. 4 gelten entsprechend.
+Abschnitt 10 Landesanstalt für Medien Nordrhein-Westfalen
+Unterabschnitt 1 Allgemeine Vorschriften
+§ 87  Rechtsform
+Die Landesanstalt für Medien Nordrhein-Westfalen (LfM) ist eine rechtsfähige Anstalt des öffentlichen Rechts mit Sitz in Düsseldorf. Sie hat das Recht der Selbstverwaltung nach Maßgabe dieses Gesetzes. Ein Insolvenzverfahren über das Vermögen der LfM ist unzulässig.
+§ 88  Aufgaben
+(1) Die LfM trifft im Interesse der Allgemeinheit die nach den Vorschriften dieses Gesetzes und den aufgrund dieses Gesetzes erlassenen Rechtsvorschriften sowie die ihr nach dem Medienstaatsvertrag und anderen Rechtsvorschriften übertragenen erforderlichen Entscheidungen und Maßnahmen.
+(2) Die LfM ist verpflichtet, für eine größtmögliche Transparenz gegenüber der Öffentlichkeit Sorge zu tragen. Zu diesem Zweck macht sie insbesondere ihre Organisationsstruktur, einschließlich der Zusammensetzung der Medienkommission und der von ihr eingesetzten Ausschüsse, alle Satzungen, gesetzlich bestimmte Berichte sowie sonstige Informationen, die von wesentlicher Bedeutung für die LfM sind, in ihrem Online-Angebot bekannt. Dabei ist die Schutzwürdigkeit von personenbezogenen Daten und Betriebsgeheimnissen zu wahren. Im Übrigen soll die LfM die Öffentlichkeit über ihre Arbeit und deren Ergebnisse in geeigneter Form informieren.
+(3) Die LfM hat mit den Landesmedienanstalten der anderen Länder zusammenzuarbeiten und die den Landesmedienanstalten im Medienstaatsvertrag zugewiesenen Aufgaben wahrzunehmen. Zur Gewährleistung eines den Zielen des § 2 entsprechenden Zugangs aller Nutzerinnen und Nutzer zu Rundfunk und Telemedien setzt sich die LfM für eine enge Zusammenarbeit mit anderen zuständigen Stellen ein. Hierzu gehört auch eine Zusammenarbeit im Hinblick auf die Entwicklung von Anforderungen an Netzneutralität. Zuständige Stelle nach § 123 Absatz 2 Satz 3 des Telekommunikationsgesetzes vom 22. Juni 2004 (BGBl. I S. 1190) in der jeweils geltenden Fassung ist insoweit die LfM. Die LfM leistet einen Beitrag zur Fortentwicklung der Medien und der Vielfaltssicherung auch im Zusammenhang mit digitalen Diensten, die der Vermittlung zwischen eigenen oder fremden Inhalten und Nutzern dienen und strukturell relevant für die öffentliche Meinungsbildung sind. Hierzu gehören insbesondere die Beobachtung der Auswirkungen dieser Entwicklungen, die Beratung der Nutzerinnen und Nutzer und die Förderung und Begleitung von Diskussionsprozessen. Die LfM kann zur Erreichung der Ziele des § 2 Maßnahmen zur Sicherstellung der Netzneutralität treffen.
+(4) Im Rahmen ihrer Aufsichtsfunktion ist die LfM kontinuierlich zur Beobachtung von Rundfunkprogrammen und Telemedienangeboten verpflichtet.
+(5) Die LfM fördert Medienkompetenz von Mediennutzerinnen und Mediennutzern im Sinne des § 39. Die LfM initiiert, unterstützt und fördert insbesondere innovative Projekte der Medienerziehung und Formen selbstorganisierten Lernens. Dabei trägt sie dafür Sorge, dass es auch frei zugängliche Lernangebote und Gelegenheiten zum Erwerb von Medienkompetenz gibt. Sie unterstützt zudem ehrenamtliche Initiativen zur Förderung der Medienkompetenz in der Durchführung.
+(5a) Die LfM fördert Medienkompetenz von Medienschaffenden im Sinne des § 39. Die LfM initiiert, unterstützt und fördert insbesondere Qualifizierungs- und Weiterbildungsmaßnahmen, einschließlich Projekten, die Medienschaffende bei der Nutzung und Entwicklung neuartiger oder innovativer Medienformate, Medienprodukte oder Distributionswege unterstützen.
+(6) Die LfM leistet einen Beitrag zur Vernetzung von Projekten zur Förderung von Medienkompetenz und -erziehung in Nordrhein-Westfalen. Zur Erfüllung ihrer Aufgaben arbeitet die LfM mit anderen Einrichtungen und Institutionen, insbesondere mit Schulen und den Trägern der öffentlichen und der freien Jugendhilfe, zusammen. Sie informiert Mediennutzerinnen und Mediennutzer als zentrale Anlaufstelle über die verschiedenen Medienkompetenzprojekte in Nordrhein-Westfalen. Sie legt jährlich einen Bericht über ihre Tätigkeit hierzu vor.
+(7) Die LfM fördert Bürgermedien nach Maßgabe der §§ 40 bis 40c.
+(8) Zur Umsetzung der Ziele des § 2 hat die LfM die Aufgabe, Vielfalt und Partizipation insbesondere im lokalen und regionalen Raum zu fördern. Sie soll den Transformationsprozess des lokalen und regionalen Journalismus in Nordrhein-Westfalen beobachten und analysieren. Auf dieser Basis sollen Handlungsempfehlungen für die Gewährleistung von lokalem und regionalem Journalismus in Nordrhein-Westfalen und Anreize für eine Berichterstattung über den lokalen und regionalen Raum in Nordrhein-Westfalen im Rundfunk und den rundfunkähnlichen Telemedien entwickelt werden. Die Wahrnehmung dieser Aufgabe erfolgt durch die LfM.
+(9) Die LfM berät Veranstalter, Betriebsgesellschaften, Anbieter, Betreiber von Kabelanlagen und andere, deren Rechte und Pflichten dieses Gesetz regelt, und erteilt allgemeine Auskünfte über die Rechte von Rundfunkteilnehmerinnen und -teilnehmern und die Möglichkeiten der Rechtswahrnehmung.
+(10) Die LfM unterstützt Maßnahmen und Projekte, die eine möglichst flächendeckende Versorgung mit lokalem Rundfunk gewährleisten oder die der Einführung und Erprobung neuer Rundfunktechniken dienen. Sie kann die technische Infrastruktur zur Versorgung des Landes, insbesondere zur Sicherung einer möglichst flächendeckenden Versorgung mit lokalen und regionalen journalistischen Inhalten, sowie Projekte für neuartige Rundfunkübertragungstechniken fördern.
+(11) Die Landesanstalt für Medien berichtet jährlich über die technische Reichweite und den Empfang der regionalen Fensterprogramme gemäß § 31a.
+(12) Die LfM kann wissenschaftliche Untersuchungen zur Veranstaltung, Verbreitung und Weiterverbreitung von Rundfunkprogrammen und rundfunkähnlichen Telemedien durchführen, soweit dies zur Wahrnehmung ihrer Aufgaben erforderlich ist. Hierzu gehören auch die Erforschung der Medienwirkung, insbesondere mit Blick auf neue Programmformen und -strukturen, sowie für die Umsetzung der Ziele des § 2 relevante Fragen der Netzneutralität sowie Fragen im Zusammenhang mit digitalen Diensten, die der Vermittlung zwischen eigenen oder fremden Inhalten und Nutzern dienen und strukturell relevant für die öffentliche Meinungsbildung sind. Forschung zu Fragen der Netzneutralität soll auch in Zusammenarbeit mit anderen zuständigen Stellen auf Bundes- und Europaebene durchgeführt werden. Die LfM stellt die für ihre Forschungstätigkeit erforderlichen Mittel im Rahmen ihres Haushalts zur Verfügung.
+(13) Die LfM leistet einen Beitrag zur Diskussion über die Fortentwicklung der Medien. Hierzu führt die LfM regelmäßig eine Medienversammlung nach Maßgabe des § 39a durch. Die Medienkommission beschließt über die Konzeption und Ausgestaltung der Medienversammlung.
+(14) Die LfM legt jährlich einen Bericht zur Entwicklung der Angebots- und Anbieterstruktur der Medien in Nordrhein-Westfalen (Medienkonzentrationsbericht) vor.
+§ 89  Beteiligungen
+(1) Die LfM kann sich an Unternehmen in der Rechtsform einer juristischen Person beteiligen, deren Zweck die Förderung der Aufgaben gemäß § 88 ist.
+(2) Der Gesellschaftsvertrag oder die Satzung müssen einen Aufsichtsrat oder ein entsprechendes Organ vorsehen, falls dies nicht gesetzlich für das Unternehmen bestimmt ist.
+(3) Bei der Beteiligung hat die LfM eine angemessene Vertretung ihrer Interessen, insbesondere eine Vertretung im Aufsichtsrat oder dem entsprechenden Organ, und eine Prüfung ihrer Betätigung bei dem Unternehmen unter Beachtung kaufmännischer Grundsätze durch einen Abschlussprüfer im Sinne des § 318 Handelsgesetzbuch sicherzustellen.
+(4) Absätze 1 bis 3 gelten entsprechend für juristische Personen des Privatrechts, die von der LfM gegründet werden oder deren Geschäftsanteile sich ausschließlich in der Hand der Anstalt befinden.
+(5) Der Landesrechnungshof prüft die Wirtschaftsführung bei solchen Unternehmen des privaten Rechts, an denen die LfM unmittelbar, mittelbar oder zusammen mit anderen Landesmedienanstalten, Anstalten oder Körperschaften des öffentlichen Rechts mit Mehrheit beteiligt ist, soweit deren Gesellschaftsvertrag oder Satzung diese Prüfungen durch den Landesrechnungshof verlangt und deren wirtschaftliche Betätigung Auswirkungen auf die Einnahmen und Ausgaben der LfM hat. Prüft der Landesrechnungshof ein Unternehmen nicht selbst, wird es durch einen von seinem Aufsichtsrat oder seinem entsprechenden Organ im Einvernehmen mit dem Landesrechnungshof beauftragten Wirtschaftsprüfer geprüft. Die LfM ist verpflichtet, für die Aufnahme der erforderlichen Regelungen in den Gesellschaftsvertrag oder die Satzung der Unternehmen zu sorgen.
+(6) Bei Unternehmen in der Rechtsform des privaten oder des öffentlichen Rechts, an denen die LfM unmittelbar oder mittelbar mehrheitlich beteiligt ist, wirkt die LfM darauf hin, dass die für die Tätigkeit im Geschäftsjahr gewährten Bezüge, Leistungszusagen und Leistungen jedes einzelnen Mitglieds der Geschäftsführung, des Aufsichtsrates, des Beirates oder einer ähnlichen Einrichtung entsprechend § 112 Abs. 3 angegeben werden. Das Gleiche gilt, wenn die LfM nur zusammen mit anderen Anstalten oder Körperschaften des öffentlichen Rechts unmittelbar oder mittelbar mehrheitlich beteiligt ist. Die auf Veranlassung der LfM gewählten oder entsandten Mitglieder setzen diese Verpflichtung um. Ist die LfM nicht mehrheitlich, jedoch in Höhe von mindestens 25 vom Hundert an einem Unternehmen im Sinne des Satzes 1 unmittelbar oder mittelbar beteiligt, soll sie auf eine Veröffentlichung entsprechend Satz 1 hinwirken. Die LfM soll sich an der Gründung oder an einem bestehenden Unternehmen im Sinne der Sätze 1 bis 4 nur beteiligen, wenn gewährleistet ist, dass die für die Tätigkeit im Geschäftsjahr gewährten Bezüge und Leistungszusagen entsprechend Satz 1 angegeben werden.
+(7) Die LfM legt über ihre Beteiligungen jährlich einen Bericht zusammen mit dem Prüfvermerk des Abschlussprüfers vor.
+§ 90  Organe
+Organe der LfM sind:
+1. die Medienkommission,
+2. die Direktorin oder der Direktor.
+§ 91  Inkompatibilität
+(1) Den Organen der LfM dürfen nicht angehören:
+1. Mitglieder der Bundesregierung oder einer Landesregierung,
+2. Mitglieder der gesetzgebenden oder beschließenden Organe der Europäischen Gemeinschaften, des Europarats, des Bundes oder eines Landes, es sei denn, sie sind nach § 93 Abs. 2 gewählt,
+3. Wahlbeamtinnen und Wahlbeamte, mit Ausnahme solcher an Hochschulen und in Religionsgemeinschaften, Bedienstete oberster Bundesbehörden, oberster Landesbehörden sowie Beamtinnen und Beamte, die jederzeit in den einstweiligen Ruhestand versetzt werden können,
+4. Personen, die in Parteien im Sinne des § 2 des Parteiengesetzes Vorstandsämter auf Landes- oder Bundesebene bekleiden, es sei denn, sie sind nach § 93 Absatz 2 entsandt,
+5. Rundfunkveranstalter, deren Gesellschafter und Organmitglieder und bei diesen in leitender Stellung Beschäftigte,
+6. Betreiber einer Kabelanlage, deren Gesellschafter und Organmitglieder und bei diesen in leitender Stellung Beschäftigte,
+7. Inhaber, Gesellschafter, Organmitglieder und Beschäftigte in leitender Stellung von Unternehmen, die mit einem in Nummer 5 oder 6 genannten Unternehmen verbunden sind (§ 15 Aktiengesetz),
+8. Organmitglieder und Beschäftigte eines öffentlich-rechtlichen Veranstalters,
+9. Gesellschafter, Organmitglieder und Beschäftigte eines mit einem öffentlich-rechtlichen Veranstalter verbundenen Unternehmens (§ 15 Aktiengesetz),
+10. Beschäftigte der LfM und Organmitglieder und Beschäftigte anderer Landesmedienanstalten,
+11. Geschäftsunfähige, beschränkt Geschäftsfähige, Personen, für die eine Betreuung bestellt ist,
+12. Personen, die die Fähigkeit verloren haben, Rechte aus öffentlichen Wahlen zu erlangen oder öffentliche Ämter zu bekleiden.
+Ausgeschlossen sind auch Personen, die die Kriterien des Satzes 1 Nummer 1 bis 4 innerhalb der letzten 18 Monate vor Amtsantritt erfüllten.
+(2) Treten nachträglich die Voraussetzungen nach Absatz 1 ein, endet das Amt des Organmitglieds an dem Tag, an dem sie eingetreten sind.
+(3) Die Feststellungen nach Absatz 1 trifft die Medienkommission.
+§ 92  Vorzeitige Beendigung der Organmitgliedschaft
+(1) Außer in den Fällen des § 91 Abs. 2 endet das Amt eines Organmitglieds vorzeitig durch Tod, Niederlegung des Amtes oder Abberufung.
+(2) Die Feststellung nach Absatz 1 1. und 2. Fall trifft die oder der Vorsitzende der Medienkommission und gibt die Feststellung der Medienkommission bekannt. Die Feststellung nach Absatz 1 3. Fall trifft die Medienkommission.
+(3) Endet das Amt eines Mitglieds der Medienkommission vorzeitig, wird die im Amt nachfolgende Person für den Rest der laufenden Amtsperiode nach Maßgabe der für die Medienkommission geltenden Vorschriften gewählt.
+Unterabschnitt 2 Medienkommission
+§ 93  Zusammensetzung
+(1) Die Medienkommission besteht aus 41 Mitgliedern.
+(2) Acht Mitglieder, davon mindestens drei Frauen und drei Männer, werden vom Landtag entsandt. Hiervon wird je ein Mitglied durch jede Fraktion benannt. Im Übrigen oder wenn die Zahl der Fraktionen die Zahl der zu entsendenden Mitglieder übersteigt, werden die Mitglieder aufgrund von Vorschlagslisten nach den Grundsätzen der Verhältniswahl (d'Hondtsches Höchstzahlverfahren) bestimmt. Bei gleicher Höchstzahl entscheidet über die Bestimmung des letzten Mitglieds das von der Präsidentin oder dem Präsidenten des Landtags zu ziehende Los.
+(3) Je ein Mitglied wird entsandt:
+1. durch die Evangelischen Kirchen in Nordrhein-Westfalen,
+2. durch die Katholische Kirche,
+3. durch die Landesverbände der Jüdischen Gemeinden von Nordrhein und Westfalen-Lippe K.d.ö.R. und die Synagogen-Gemeinde Köln K.d.ö.R.,
+4. durch den Deutschen Gewerkschaftsbund, Bezirk Nordrhein-Westfalen,
+5. durch die Gewerkschaft ver.di, Landesbezirk Nordrhein-Westfalen, Fachgruppe Medien, Deutsche Journalistinnen- und Journalisten-Union,
+6. durch den Deutschen Journalisten-Verband Landesverband NRW e.V.,
+7. durch die Landesvereinigung der Unternehmerverbände Nordrhein-Westfalen e.V. und Handwerk NRW e.V.,
+8. aus dem Bereich der Wissenschaft (Universität NRW – Landesrektorenkonferenz der Universitäten e.V.; Hochschulen NRW – Landesrektor_innenkonferenz der Hochschulen für Angewandte Wissenschaften e.V.),
+9. aus dem Bereich der Weiterbildung (Landesverband der Volkshochschulen von NRW e.V.; Gesprächskreis für Landesorganisationen der Weiterbildung in Nordrhein-Westfalen),
+10. aus den Bereichen Kunst und Kultur (Landesmusikrat Nordrhein-Westfalen e.V.; Bundesverband Bildender Künstlerinnen und Künstler e.V., Landesverband Nordrhein-Westfalen; Kulturrat NRW e.V.),
+11. aus dem Bereich Film (Film und Medienverband NRW e.V.; Filmbüro NW e.V.; Arbeitsgemeinschaft Dokumentarfilm e. V. / AG DOK, Region West),
+12. aus dem Bereich der Förderung der Medienkompetenz (Landesarbeitsgemeinschaft Lokale Medienarbeit NRW e.V.; Gesellschaft für Medienpädagogik und Kommunikationskultur (GMK) e.V., Landesgruppe Nordrhein-Westfalen),
+13. aus dem Bereich Bürgermedien (Landesverband Bürgerfunk NRW e.V.; Landesarbeitsgemeinschaft Bürger- und Ausbildungsmedien NRW e.V. (LABAM); Campusradios NRW e.V.),
+14. aus dem Bereich Soziales (Arbeitsgemeinschaft der Spitzenverbände der Freien Wohlfahrtspflege des Landes Nordrhein-Westfalen),
+15. durch den FrauenRat NRW e.V. und die Landesarbeitsgemeinschaft der Familienverbände in Nordrhein-Westfalen,
+16. durch den Deutschen Kinderschutzbund Landesverband NRW e.V. und die Arbeitsgemeinschaft Kinder- und Jugendschutz (AJS) Nordrhein-Westfalen e.V.,
+17. durch den Landesjugendring NRW e.V.,
+18. durch den Sozialverband Deutschland, Landesverband Nordrhein-Westfalen e.V. und den Sozialverband VdK Landesverband Nordrhein-Westfalen e.V.,
+19. durch die Landesseniorenvertretung NRW e.V.,
+20. aus dem Kreis der Verbraucherinnen und Verbraucher (Verbraucherzentrale Nordrhein-Westfalen e.V.),
+21. durch den Landessportbund Nordrhein-Westfalen e.V.,
+22. durch die anerkannten Naturschutzvereinigungen im Sinne des § 66 Absatz 1 des Landesnaturschutzgesetzes vom 21. Juli 2000 (GV. NRW. S. 568), das durch Artikel 1 des Gesetzes vom 15. November 2016 (GV. NRW. S. 934) neu gefasst worden ist,
+23. aus dem Kreis der Migrantinnen und Migranten (Landesintegrationsrat Nordrhein-Westfalen),
+24. durch den Landesbehindertenrat NRW e.V.,
+25. durch die IHK NRW – Die Industrie- und Handelskammern in Nordrhein-Westfalen e.V.,
+26. durch den Bitkom – Bundesverband Informationswirtschaft, Telekommunikation und neue Medien e.V. und eco – Verband der Internetwirtschaft e.V.,
+27. Digitalpublisher und Zeitungsverleger Verband NRW (DZV. NRW).
+(4) Fünf Mitglieder werden durch gesellschaftlich relevante Gruppen entsandt, die in der Gesamtsicht mit den nach den Absätzen 1 bis 3 bestimmten entsendeberechtigten Stellen die Vielfalt der aktuellen gesellschaftlichen Strömungen und Kräften in Nordrhein-Westfalen widerspiegeln. Verbände und sonstige nicht öffentlich-rechtliche Organisationen, die nicht bereits nach Absatz 3 entsendeberechtigt sind, können sich bis spätestens neun Monate vor Ablauf der jeweiligen Amtszeit der Medienkommission für die jeweils nachfolgende Amtszeit beim Landtag um einen Sitz in der Medienkommission bewerben. Die gemeinsame Bewerbung mehrerer Verbände oder Organisationen ist zulässig; Parteien im Sinne des § 2 des Parteiengesetzes sind von einer Bewerbung ausgeschlossen. Das Bewerbungsverfahren und die Bewerbungsfrist sollen zwölf Monate vor Ablauf der jeweiligen Amtszeit der Medienkommission im Ministerialblatt für das Land Nordrhein-Westfalen und im Online-Angebot des Landtages sowie der LfM bekannt gemacht werden. Der Landtag beschließt spätestens sechs Monate vor Ablauf der jeweiligen Amtszeit der Medienkommission mit Zwei-Drittel-Mehrheit, welchem der Bewerber für die neue Amtsperiode der Medienkommission ein Sitz zusteht. Das zu entsendende Mitglied sowie seine Stellvertretung gemäß § 93 Absatz 8 dürfen durch die entsendeberechtigte Stelle erst nach dem Beschluss des Landtags bestimmt werden.
+(5) Ein Mitglied wird durch die Medienkommission bestimmt. Natürliche Personen können sich bis spätestens sechs Monate vor Ablauf der jeweiligen Amtszeit der Medienkommission für die jeweils nachfolgende Amtszeit bei der LfM um die Mitgliedschaft in der Medienkommission bewerben. Das Bewerbungsverfahren und die Bewerbungsfrist sollen zwölf Monate vor Ablauf der jeweiligen Amtszeit der Medienkommission im Online-Angebot der LfM bekannt gemacht werden. Die amtierende Medienkommission bestimmt spätestens zwei Monate vor Ablauf ihrer Amtszeit, welcher der zugelassenen Bewerberinnen oder welchem der zugelassenen Bewerber für die jeweils nachfolgende Amtsperiode der Medienkommission ein Sitz zusteht. Die nach Absatz 3 entsandten Mitglieder wählen in geheimer Abstimmung eine Bewerberin oder einen Bewerber, eine Stellvertreterin oder einen Stellvertreter sowie mindestens zwei weitere Personen als Nachrücker für den Fall des vorzeitigen Ausscheidens des Mitglieds oder des stellvertretenden Mitglieds. Das Nähere regelt die LfM durch Satzung.
+(6) Sind nach Absatz 3 und 4 mehrere Organisationen entsendungsberechtigt, können sie für die jeweilige Amtszeit nur ein Mitglied bestimmen.
+(7) Die entsendungsberechtigten Organisationen nach Absatz 3 müssen Frauen und Männer im Turnus der Amtsperioden alternierend berücksichtigen. Dies gilt nicht, wenn einer Organisation aufgrund ihrer Zusammensetzung eine Entsendung von Frauen oder Männern regelmäßig oder im Einzelfall nicht möglich ist. Wird vom turnusmäßigen Wechsel der Geschlechter abgewichen, hat die entsendungsberechtigte Organisation der LfM die Gründe schriftlich mitzuteilen. Die oder der Vorsitzende unterrichtet die Medienkommission.
+(8) Für jedes Mitglied ist zugleich eine Stellvertreterin oder ein Stellvertreter zu bestimmen. Die Stellvertreterin oder der Stellvertreter nimmt bei Verhinderung des ordentlichen Mitglieds vollberechtigt an den Sitzungen der Medienkommission und ihrer Ausschüsse sowie den stillen Verfahren teil.
+(9) Solange und soweit Mitglieder der Medienkommission nicht bestimmt werden, verringert sich deren Mitgliederzahl entsprechend.
+(10) Die ordentlichen und stellvertretenden Mitglieder der Medienkommission sollen Kenntnisse auf den Gebieten des Rundfunks und der Telemedien besitzen. Sie haben bei Wahrnehmung ihrer Aufgaben die Interessen der Allgemeinheit zu vertreten und sind hierbei an Aufträge nicht gebunden.
+§ 94  Aufgaben
+(1) Die Medienkommission nimmt die Aufgaben der LfM wahr, soweit sie nicht der Direktorin oder dem Direktor übertragen sind.
+(2) Folgende Maßnahmen der Direktorin oder des Direktors bedürfen der Zustimmung der Medienkommission:
+1. Erwerb, Veräußerung und Belastung von Grundstücken,
+2. Abschluss von Darlehensverträgen und Inanspruchnahme von Bankkrediten,
+3. Abschluss von Bürgschaftsverträgen und Schuldübernahmeverträgen,
+4. Abschluss von Verträgen, deren Gesamtaufwand 50.000 Euro jährlich überschreitet; dies gilt nicht für Dienst- und Arbeitsverträge; durch Satzung kann der Betrag nach Maßgabe der wirtschaftlichen Entwicklung erhöht werden,
+5. über- und außerplanmäßige Ausgaben,
+6. die Bestimmung oder die Abberufung einer stellvertretenden Direktorin oder eines stellvertretenden Direktors,
+7. Erstellung, Überprüfung und Fortschreibung des Gleichstellungsplans nach § 5 des Landesgleichstellungsgesetzes vom 9. November 1999 (GV. NRW. 1999 S. 590), das zuletzt durch Artikel 16 des Gesetzes vom 23. Januar 2018 (GV. NRW. S. 90) geändert worden ist.
+(3) Die Unabhängigkeit der Entscheidungen der Medienkommission ist organisatorisch und finanziell sicherzustellen. Dazu ist die Medienkommission mit den erforderlichen finanziellen und personellen Ressourcen auszustatten.
+(4) Die oder der Vorsitzende der Medienkommission schlägt dieser unter Beachtung des für die LfM geltenden Rechts und des Grundsatzes der Sparsamkeit und Wirtschaftlichkeit die Einstellung und Entlassung des Personals im Gremienbüro vor. Die Umsetzung der von der Medienkommission beschlossenen Maßnahmen obliegt der Direktorin oder dem Direktor. Die oder der Vorsitzende der Medienkommission übt das fachliche Weisungsrecht gegenüber den im Gremienbüro tätigen Personen aus.
+(5) Zur Erfüllung ihrer Aufgaben kann die Medienkommission von der Direktorin oder dem Direktor die erforderlichen Auskünfte verlangen und Einsicht in die Unterlagen der LfM nehmen. Mit der Wahrnehmung dieser Aufgaben kann sie in bestimmten Fällen auch einzelne Mitglieder beauftragen oder unter Beachtung des Grundsatzes der Sparsamkeit und Wirtschaftlichkeit beschließen, auch Sachverständige und Gutachten zu beauftragen. Diese Beauftragungen kann auch die oder der Vorsitzende der Medienkommission umsetzen; §§ 102 bis 104 bleiben unberührt. Satz 1 gilt entsprechend für die Überwachung der Geschäftsführung der Direktorin oder des Direktors; die Direktorin oder der Direktor hat die Medienkommission unverzüglich über die Vergabe von Aufträgen, deren Auftragswert 25 000 Euro übersteigt, und vierteljährlich über sämtliche Ausgaben der LfM zu unterrichten. Das Nähere regelt die LfM durch Satzung.
+(6) Die Medienkommission kann Ausschüsse bilden, die der Vorbereitung von Sitzungen und Beschlüssen der Medienkommission dienen. Bei der Zusammensetzung der Ausschüsse ist dem Gebot der Staatsferne Rechnung zu tragen und auf eine hinreichend plurale Besetzung Bedacht zu nehmen; insbesondere darf der Anteil der nach § 93 Absatz 2 entsandten Mitglieder jeweils nicht mehr als ein Drittel betragen. Gleiches gilt sowohl für die Bestimmung der Vorsitzenden der Medienkommission und der Ausschüsse als auch für die Bestimmung der stellvertretenden Vorsitzenden. Näheres regelt die LfM durch Satzung.
+(7) Die Medienkommission kann über ihre Arbeit Presse- und Öffentlichkeitsarbeit betreiben. § 102 bleibt unberührt.
+(8) Ein Vorverfahren findet gegen Entscheidungen der Medienkommission nicht statt.
+§ 95  Rechte und Pflichten, Kontrahierungsverbot
+(1) Die ordentlichen oder stellvertretenden Mitglieder der Medienkommission sind ehrenamtlich tätig. Sie haben bei der Wahrnehmung ihrer Aufgaben die Interessen der Allgemeinheit zu vertreten und sind hierbei an Aufträge oder Weisungen nicht gebunden.
+(2) Sie dürfen an der Übernahme und Ausübung ihrer Tätigkeit nicht gehindert und hierdurch nicht benachteiligt werden. Insbesondere ist eine Kündigung oder Entlassung aus diesem Grund unzulässig. Stehen sie in einem Dienst- oder Arbeitsverhältnis, ist ihnen die für ihr Amt erforderliche freie Zeit zu gewähren.
+(3) Die Medienkommission stellt eine regelmäßige Fort- und Weiterbildung ihrer Mitglieder zu medienrelevanten, insbesondere zu journalistischen, technischen und datenschutzrelevanten Themen sicher.
+(4) Kein ordentliches oder stellvertretendes Mitglied der Medienkommission darf unmittelbar oder mittelbar mit der LfM für eigene oder fremde Rechnung Geschäfte machen, und zwar weder als Inhaberin oder Inhaber noch als Gesellschafterin oder Gesellschafter, Vorstandsmitglied, Angestellte oder Angestellter, Vertreterin oder Vertreter eines Unternehmens oder als Organ einer juristischen Person des privaten oder öffentlichen Rechts, oder eine andere Person hierbei vertreten. Kein ordentliches oder stellvertretendes Mitglied der Medienkommission darf wirtschaftliche oder sonstige Interessen haben, die geeignet sind, die Erfüllung seiner Aufgaben als Mitglied des Organs zu gefährden. Verträge über die Beratung, Vertretung oder ähnliche Tätigkeiten sind bei der oder dem Vorsitzenden anzuzeigen, soweit diese nicht in Ausübung eines bereits angezeigten Berufes erfolgen. Auch sonstige Tatsachen, die eine dauerhafte Interessenkollision begründen können, sind durch das Mitglied unverzüglich der oder dem Vorsitzenden der Medienkommission anzuzeigen. Liegen die Tatsachen in der Person der oder des Vorsitzenden der Medienkommission vor, hat sie oder er unverzüglich die Mitglieder der Medienkommission sowie die für die Rechtsaufsicht zuständige Behörde zu informieren. Über das Vorliegen einer dauerhaften Interessenkollision entscheidet die Medienkommission, wobei die oder der Betroffene nicht mitwirkt. Wird eine dauerhafte Interessenkollision festgestellt, erlischt die Mitgliedschaft in der Medienkommission.
+(5) Abweichend von § 7 des Korruptionsbekämpfungsgesetzes erteilen die Mitglieder der Medienkommission die in dieser Vorschrift geforderten Auskünfte gegenüber dem oder der Vorsitzenden; der oder die Vorsitzende erteilt die Auskünfte gegenüber der für die Rechtsaufsicht zuständigen Behörde. Die Angaben sind jährlich im Online-Auftritt der LfM zu veröffentlichen.
+(6) §§ 20 und 21 VwVfG NRW finden entsprechend Anwendung. Die Mitglieder der Medienkommission haben die Vorsitzende oder den Vorsitzenden unverzüglich darauf hinzuweisen, wenn Grund zu der Annahme besteht, dass im Einzelfall die Voraussetzungen der §§ 20, 21 VwVfG NRW vorliegen könnten. Über das Vorliegen eines Ausschlussgrundes oder der Besorgnis der Befangenheit entscheidet die Medienkommission, wobei die oder der Betroffene nicht mitwirkt. Wird das Vorliegen eines Ausschlussgrundes oder der Besorgnis der Befangenheit festgestellt, ist die oder der Betroffene von der weiteren Beschlussfassung ausgeschlossen.
+§ 96  Amtszeit
+(1) Die Amtszeit der ordentlichen Mitglieder der Medienkommission und ihrer Stellvertreterinnen und Stellvertreter beträgt fünf Jahre. Sie beginnt mit dem ersten Zusammentritt der Medienkommission und endet mit dem ersten Zusammentritt der nachfolgenden Medienkommission. Dieser erste Zusammentritt erfolgt in der letzten Woche der Amtszeit der vorangegangenen Medienkommission. Jede Person darf in insgesamt höchstens drei Amtsperioden Mitglied oder stellvertretendes Mitglied der Medienkommission sein.
+(2) Mitglieder können von den nach § 93 Absatz 3 und 4 jeweils entsendungsberechtigten Organisationen vorzeitig abberufen werden, wenn sie aus der betreffenden Organisation ausgeschieden sind oder entgegen § 95 Absatz 4 tätig geworden sind. Im Fall der Neukonstituierung des Landtags während der laufenden Amtszeit der Medienkommission scheiden die bisherigen nach § 93 Absatz 2 entsandten Mitglieder und deren Stellvertreterinnen oder Stellvertreter mit der Neubenennung von Mitgliedern und deren Stellvertreterinnen oder Stellvertretern, spätestens jedoch drei Monate nach Neukonstituierung des Landtags, aus der Medienkommission aus. Für die Abberufung und Neubenennung gilt der Zeitpunkt der Mitteilung an die Vorsitzende oder den Vorsitzenden der Medienkommission.
+(3) Scheidet ein Mitglied oder ein stellvertretendes Mitglied während der laufenden Amtszeit aus der Medienkommission aus, wird, wer ihm nachfolgen soll, für den Rest der laufenden Medienkommission nach § 93 Absatz 2 bis 4 bestimmt. Scheidet ein auf der Grundlage einer Liste nach § 93 Absatz 2 oder Absatz 5 bestimmtes Mitglied während der laufenden Amtszeit aus der Medienkommission aus, wird es durch das nächste auf derselben Liste vorgeschlagene Mitglied ersetzt.
+(4) Scheidet ein Mitglied aus, scheidet auch seine Stellvertreterin oder sein Stellvertreter aus. Die Stellvertretung erfolgt während der laufenden Amtszeit bis zur Neubenennung des Mitglieds und seiner Stellvertreterin oder seines Stellvertreters, längstens jedoch für drei Monate nach Ausscheiden des vorherigen Mitglieds, § 93 Absatz 8 Satz 2 gilt entsprechend.
+§ 97  Vorsitz und Verfahren
+(1) Die Medienkommission wählt aus ihrer Mitte eine Vorsitzende oder einen Vorsitzenden und eine stellvertretende Vorsitzende oder einen stellvertretenden Vorsitzenden. Die Abwahl ist mit zwei Dritteln der Stimmen der Mitglieder der Medienkommission möglich.
+(2) Die oder der amtierende Vorsitzende der Medienkommission stellt zu Beginn der Amtsperiode für die nach § 93 Absatz 3 und 4 entsandten Mitglieder die nach den Satzungen, Statuten oder vergleichbaren Regelungen der entsendungsberechtigten Stellen ordnungsgemäße Entsendung fest und gibt die Feststellungen der Medienkommission bekannt. Die gemäß § 93 Absatz 3 und 4 entsendenden Stellen haben alle Angaben zu machen, die zur Nachprüfung der Voraussetzungen des § 91 Absatz 1 erforderlich sind. Weitere Einzelheiten des Verfahrens über die Entsendung werden in einer Satzung geregelt, die insoweit der Genehmigung der für die Rechtsaufsicht zuständigen Behörde bedarf.
+(3) Die Medienkommission gibt sich eine Geschäftsordnung.
+§ 98  Beschlussfassung und Sitzungen
+(1) Beschlüsse werden in Sitzungen gefasst. Sitzungen erfolgen als Präsenzsitzung. Sie können als digitale Sitzung unter Nutzung synchroner Bild- und Tonübertragung durchgeführt werden. Über die Durchführung einer Sitzung als digitale Sitzung entscheidet die oder der Vorsitzende unter Einbeziehung der Ausschussvorsitzenden. Einzelheiten können durch Satzung geregelt werden. Ist die Medienkommission aus unvermeidbaren Gründen an einem Zusammentritt gehindert, können Beschlüsse zu einzelnen Angelegenheiten, die unaufschiebbar sind, im stillen Verfahren gefasst werden. Im stillen Verfahren ist die Textform nach § 126b des Bürgerlichen Gesetzbuches zu wahren; zuständige Ausschüsse sind einzubeziehen.
+(2) Die Sitzungen der Medienkommission werden nach Bedarf von der oder dem Vorsitzenden einberufen. Auf Antrag von mindestens einem Viertel der Mitglieder oder auf Antrag der Direktorin oder des Direktors muss die Medienkommission einberufen werden. Der Antrag muss den Beratungsgegenstand angeben.
+(3) Die Sitzungen sind öffentlich. In begründeten Ausnahmefällen kann die Medienkommission mit der Mehrheit der Stimmen ihrer Mitglieder den Ausschluss der Öffentlichkeit beschließen. Personalangelegenheiten, die aus Gründen des Persönlichkeitsschutzes des Personals der Landesmedienanstalt vertraulich sind, sind stets unter Ausschluss der Öffentlichkeit zu behandeln. Durch Satzung kann die Öffentlichkeit für solche Angelegenheiten ausgeschlossen werden, bei denen die Erörterung von Betriebs- oder Geschäftsgeheimnissen Dritter unvermeidlich ist. Die Sätze 2 bis 4 gelten entsprechend für Beschlüsse im stillen Verfahren.
+(4) Sämtliche Beschlüsse und Ergebnisse der Beratungen der Medienkommission sind gemeinsam mit einer Teilnehmerliste in geeigneter Form im Online-Angebot der LfM bekannt zu machen; § 88 Absatz 2 Satz 3 gilt entsprechend. Die Tagesordnungen der Sitzungen der Medienkommission sind jeweils mindestens zwei Wochen zuvor im Online-Angebot der LfM zu veröffentlichen; der für ein stilles Verfahren vorgesehene Beschlussgegenstand ist unverzüglich im Online-Angebot der LfM anzukündigen. Satz 1 gilt nicht für Angelegenheiten nach Absatz 3 Satz 2 bis 5.
+(5) Die Direktorin oder der Direktor nimmt an den Sitzungen mit dem Recht, sich jederzeit zu den Beratungsthemen zu äußern, teil. Die für die Rechtsaufsicht zuständige Behörde ist zur Entsendung einer Vertreterin oder eines Vertreters berechtigt; Satz 1 gilt entsprechend. Die Teilnahme weiterer Personen wird durch Satzung geregelt. Im Fall einer Beschlussfassung im stillen Verfahren erfolgt abweichend von den Sätzen 1 bis 3 eine unverzügliche Unterrichtung über Beschlussgegenstand und Beschlussfassung.
+(6) Die Medienkommission ist in ihren Sitzungen beschlussfähig, wenn alle Mitglieder nach näherer Bestimmung der Satzung geladen sind und mindestens zwei Drittel der Mitglieder teilnehmen. Für Beschlüsse im stillen Verfahren liegt Beschlussfähigkeit vor, wenn alle Mitglieder nach näherer Bestimmung der Satzung über das stille Verfahren informiert sind und mindestens zwei Drittel der Mitglieder dem Verfahren zum jeweiligen Beschlussgegenstand zustimmen; Absatz 2 Satz 2 findet keine Anwendung.
+(7) Ist die Medienkommission beschlussunfähig, sind alle Mitglieder innerhalb angemessener Frist mit derselben Tagesordnung erneut zu laden. In der darauf stattfindenden Sitzung ist die Medienkommission ohne Rücksicht auf die Zahl der teilnehmenden Mitglieder beschlussfähig. Beschlüsse dürfen jedoch nicht ausschließlich mit den Stimmen der nach § 93 Abs. 2 gewählten Mitglieder gefasst werden. Die Sätze 1 und 2 gelten nicht für Beschlüsse im stillen Verfahren.
+(8) Beschlüsse der Medienkommission kommen durch Zustimmung der Mehrheit der an der Sitzung oder dem stillen Verfahren teilnehmenden Mitglieder zustande. Beschlüsse über die Erteilung, die Rücknahme oder den Widerruf einer Zulassung oder der Zuweisung einer Übertragungskapazität, über Untersagungen, die Sicherung der Meinungsvielfalt im Fernsehen und über Satzungen und deren Änderung bedürfen der Zustimmung der Mehrheit der Mitglieder.
+(9) Für Wahlen gelten die Absätze 6 und 7 entsprechend. Gewählt ist, wer die Mehrheit der Stimmen der Mitglieder der Medienkommission auf sich vereinigt. Kommt eine Wahl hiernach nicht zustande, so findet unverzüglich ein neuer Wahlgang statt, in dem gewählt ist, wer die meisten Stimmen erhält. Nimmt die gewählte Person die Wahl nicht an, so findet nach Maßgabe der Sätze 2 und 3 ein neuer Wahlgang statt. Nehmen an einer Sitzung nach Absatz 7 Satz 2 weniger als die Mehrheit der Mitglieder teil, so ist gewählt, wer mehr als die Hälfte der abgegebenen Stimmen erhält; Absatz 7 Satz 3 findet Anwendung.
+(10) Das Nähere regelt die LfM durch Satzung.
+§ 99  Aufwendungen
+(1) Die Mitglieder und stellvertretenden Mitglieder der Medienkommission haben Anspruch auf Ersatz von Reisekosten mit Ausnahme des Tagegeldes. Das Nähere regelt die LfM durch Satzung, die der Genehmigung der Rechtsaufsicht bedarf.
+(2) Neben den Reisekosten nach Absatz 1 erhalten die Mitglieder der Medienkommission für die jeweils erste monatliche Sitzung der Medienkommission und die jeweils erste monatliche Sitzung ihrer Ausschüsse bei Teilnahme ein Sitzungsgeld von jeweils 200 Euro. Für jede weitere monatliche Sitzung beträgt das Sitzungsgeld bei Teilnahme 30 Euro. Gleiches gilt für die stellvertretenden Mitglieder im Fall einer Vertretung. Zudem haben die Mitglieder Anspruch auf eine monatliche Aufwandsentschädigung in Höhe von 350 Euro. Die oder der Vorsitzende erhält die Aufwandsentschädigung in 2,8-facher, das Mitglied, das die Stellvertretung im Vorsitz wahrnimmt, und Vorsitzende von Ausschüssen in 1,9-facher Höhe; die stellvertretenden Mitglieder der Medienkommission erhalten die Aufwandsentschädigung in 0,75-facher Höhe.
+Unterabschnitt 3 Direktorin oder Direktor
+§ 100  Wahl
+(1) Die Direktorin oder der Direktor wird von der Medienkommission für sechs Jahre gewählt. Die Direktorin oder der Direktor muss die Befähigung zum Richteramt haben. Die Stelle ist öffentlich auszuschreiben. Die Wiederwahl ist zulässig. Eine Neuwahl darf frühestens neun Monate vor Ablauf der laufenden Amtsperiode erfolgen.
+(2) Eine Abwahl vor Ablauf der Amtszeit ist nur aus wichtigem Grund zulässig und bedarf mindestens zwei Drittel der Stimmen der Mitglieder der Medienkommission.
+(3) Die oder der Vorsitzende der Medienkommission schließt den Dienstvertrag mit der gewählten Person ab und vertritt die LfM gegenüber dieser gerichtlich und außergerichtlich. Der Dienstvertrag orientiert sich an den Grundsätzen, die für Beamte auf Zeit gelten. Die Bezüge und die Versorgungsleistungen dürfen höchstens einer Besoldung und Versorgung nach Besoldungsgruppe B 10 der Landesbesoldungsordnung B des Landesbesoldungsgesetzes vom 14. Juni 2016 (GV. NRW. S. 310, ber. S. 642) in der jeweils geltenden Fassung einschließlich Familienzuschlag entsprechen. Darüber hinausgehende Zusatzleistungen sind zulässig, wenn im Aufgabenbereich und Interesse der LfM Funktionen in europäischen Koordinationsgremien wahrgenommen werden, die über die bloße Vertretung der LfM nach § 102 hinausgehen. Der Dienstvertrag sowie Änderungen des Dienstvertrages bedürfen der Genehmigung der Rechtsaufsicht.
+(4) Die Direktorin oder der Direktor nimmt nach Ablauf der Amtszeit die Geschäfte wahr, bis eine Nachfolgerin oder ein Nachfolger das Amt angetreten hat.
+§ 101  Inkompatibilität
+Außer in den Fällen des § 91 ist vom Amt der Direktorin oder des Direktors ausgeschlossen, wer den Wohnsitz außerhalb von Nordrhein-Westfalen hat, nicht unbeschränkt strafrechtlich verfolgt werden kann oder Mitglied der Medienkommission ist.
+§ 102  Vertretung
+Die Direktorin oder der Direktor vertritt die LfM gerichtlich und außergerichtlich.
+§ 103  Aufgaben
+(1) Die Direktorin oder der Direktor führt die Geschäfte der laufenden Verwaltung, entscheidet über Einstellungen und Entlassungen und sonstige Angelegenheiten des Personals, bestellt die Gleichstellungsbeauftragte und ihre Stellvertreterin, erarbeitet Entwürfe für Satzungen und Beschlüsse der Medienkommission, vollzieht deren Beschlüsse und veröffentlicht die Satzungen im Gesetz- und Verordnungsblatt für das Land Nordrhein-Westfalen.
+(2) Darüber hinaus hat die Direktorin oder der Direktor
+1. die Maßnahmen zu treffen, die erforderlich sind, um die Einhaltung der Vorschriften dieses Gesetzes zu überwachen,
+2. die Maßnahmen nach Abschnitt 9 zu treffen,
+3. die Aufgaben der Beratung und Zusammenarbeit nach § 88 Absatz 3 wahrzunehmen,
+4. die Aufgabe nach § 61 Abs. 2 wahrzunehmen,
+5. die Aufgaben nach §§ 33c Abs. 1, 33d Abs. 7, 8 und 9 1. Alternative wahrzunehmen,
+6. den Entwurf des Haushaltsplans, den Jahresabschluss und den Geschäftsbericht aufzustellen.
+(3) Die Medienkommission kann der Direktorin oder dem Direktor durch Satzung weitere Aufgaben im Zusammenhang mit der Telemedienaufsicht nach allgemeinen Gesetzen und der Erteilung von Unbedenklichkeitsbestätigungen übertragen.
+§ 104  Stellvertretende Direktorin oder stellvertretender Direktor
+(1) Die Bestimmung zur stellvertretenden Direktorin oder zum stellvertretenden Direktor erfolgt höchstens für die Dauer der Amtsperiode der Direktorin oder des Direktors. Scheidet die Direktorin oder der Direktor vorzeitig aus dem Amt aus, nimmt die stellvertretende Direktorin oder der stellvertretende Direktor deren Aufgaben wahr, bis eine neue Direktorin oder ein neuer Direktor das Amt angetreten hat.
+(2) § 101 gilt entsprechend.
+(3) Die Wahrnehmung der Aufgaben und die Vertretung erfolgt im Fall der Verhinderung der Direktorin oder des Direktors durch die stellvertretende Direktorin oder den stellvertretenden Direktor.
+Unterabschnitt 4 (weggefallen)
+Unterabschnitt 5 Haushalts- und Wirtschaftsführung, Rechtsaufsicht
+§ 109  Haushaltsplan
+(1) Grundlage der Haushalts- und Wirtschaftsführung der LfM ist der Haushaltsplan. Die Direktorin oder der Direktor leitet der Medienkommission den Entwurf rechtzeitig vor Beginn des Haushaltsjahrs zu. Die Medienkommission stellt den Haushaltsplan fest.
+(2) Der Haushaltsplan enthält alle im Haushaltsjahr zu erwartenden Einnahmen, voraussichtlich zu leistenden Ausgaben und benötigten Ermächtigungen zum Eingehen von Verpflichtungen zur Leistung von Ausgaben in künftigen Jahren (Verpflichtungsermächtigungen). Er ist in Einnahmen und Ausgaben auszugleichen. Der Haushaltsplan hat ausreichende finanzielle und personelle Ressourcen für die Erfüllung der Aufgaben der Medienkommission auszuweisen.
+(3) Haushaltsjahr ist das Kalenderjahr.
+§ 110  Grundsatz der Sparsamkeit und Wirtschaftlichkeit
+(1) Bei der Aufstellung und Ausführung des Haushaltsplans sind unter Beachtung des Grundsatzes der Sparsamkeit und Wirtschaftlichkeit nur die Ausgaben und Verpflichtungsermächtigungen zu berücksichtigen, die zur Erfüllung der Aufgaben der LfM notwendig sind.
+(2) Rücklagen können zur Sicherstellung einer geordneten Haushalts- und Wirtschaftsführung gebildet werden, soweit sie zur Aufgabenerfüllung in künftigen Jahren notwendig sind und die Wirtschaftlichkeit der Maßnahme, für deren Durchführung die Rücklage gebildet wird, zum Zeitpunkt der Einstellung der Rücklage in den Haushaltsplan belegt ist. Die Wirtschaftlichkeit der Rücklagenbildung ist durch Wirtschaftlichkeitsberechnungen vorher festzustellen. Erträge aus der Anlage von Rücklagenmitteln fließen der Rücklage zu. Die Notwendigkeit der Rücklage ist in jedem Haushaltsjahr erneut festzustellen.
+(3) Die Bildung freier Rücklagen ist unzulässig.
+(4) Das Nähere zur Aufstellung und Ausführung des Haushaltsplans regelt die LfM durch Satzung.
+§ 111  Ermächtigung
+Ist bis zum Schluss des Haushaltsjahres der Haushaltsplan für das folgende Haushaltsjahr noch nicht festgestellt, ist die Direktorin oder der Direktor bis zur Feststellung ermächtigt, alle Ausgaben zu leisten, die notwendig sind, um
+1. den Betrieb der LfM in seinem bisherigen Umfang fortzusetzen,
+2. von der Medienkommission beschlossene Maßnahmen durchzuführen,
+3. Bauten, Beschaffungen und sonstige Leistungen fortzusetzen, soweit durch den Haushaltsplan des Vorjahres bereits Beträge bewilligt waren,
+4. die rechtlich begründeten Verpflichtungen der LfM zu erfüllen.
+§ 112  Jahresabschluss und Geschäftsbericht
+(1) Die LfM erstellt nach Ende des Haushaltsjahres eine Jahresrechnung (Jahresabschluss) und einen Geschäftsbericht.
+(2) Im Geschäftsbericht ist der Jahresabschluss zu erläutern und über die Vermögens- und Ertragsverhältnisse der LfM umfassend zu berichten. Der Geschäftsbericht berichtet auch über Vorgänge von besonderer Bedeutung, die nach Ablauf des Haushaltsjahres eingetreten sind.
+(3) Die LfM veröffentlicht die für die Tätigkeit im Geschäftsjahr gewährten Bezüge der Direktorin oder des Direktors und deren/dessen Vertreterin oder Vertreters unter Namensnennung, aufgeteilt nach erfolgsunabhängigen und erfolgsbezogenen Komponenten sowie Komponenten mit langfristiger Anreizwirkung, im Geschäftsbericht. Satz 1 gilt auch für:
+1. Leistungen, die den genannten Personen für den Fall einer vorzeitigen Beendigung ihrer Tätigkeit zugesagt worden sind,
+2. Leistungen, die den genannten Personen für den Fall der regulären Beendigung ihrer Tätigkeit zugesagt worden sind, mit ihrem Barwert sowie den von der LfM während des Geschäftsjahres hierfür aufgewandten oder zurückgestellten Betrag,
+3. während des Geschäftsjahres vereinbarte Änderungen dieser Zusagen und
+4. Leistungen, die einer der betroffenen Personen, die ihre Tätigkeit im Laufe des Geschäftsjahres beendet hat, in diesem Zusammenhang zugesagt und im Laufe des Geschäftsjahres gewährt worden sind.
+(4) Nach Vorlage eines Entwurfs durch die Direktorin oder den Direktor stellt die Medienkommission den Jahresabschluss vorläufig fest. Sie genehmigt den Geschäftsbericht. Beide werden der Landesregierung und dem Landesrechnungshof übermittelt.
+§ 113  Prüfung des Jahresabschlusses
+(1) Der Landesrechnungshof prüft den Jahresabschluss und die Ordnungsmäßigkeit und Wirtschaftlichkeit der Haushalts- und Wirtschaftsführung der LfM.
+(2) Er prüft insbesondere die Einnahmen, Ausgaben, Verpflichtungen zur Leistung von Ausgaben, das Vermögen und die Schulden, Maßnahmen, die sich finanziell auswirken können, Verwahrungen und Vorschüsse.
+(3) Die Prüfung erstreckt sich auf die Einhaltung der für die Haushalts- und Wirtschaftsführung der LfM geltenden Vorschriften und Grundsätze. Dazu gehört, ob der Haushaltsplan eingehalten worden ist, die Einnahmen und Ausgaben begründet und belegt sind und der Jahresabschluss ordnungsgemäß aufgestellt ist, wirtschaftlich und sparsam verfahren wird, die Aufgaben mit geringerem Personal- und Sachaufwand oder auf andere Weise wirksamer erfüllt werden können.
+§ 114  Prüfungsverfahren
+(1) Der Landesrechnungshof bestimmt Zeit und Art der Prüfung. Erhebungen bei der LfM kann er durch Beauftragte vornehmen lassen. Soweit erforderlich, kann er Sachverständige hinzuziehen.
+(2) Die LfM kann Teile des Jahresabschlusses mit Zustimmung des Landesrechnungshofs durch einen Abschlussprüfer im Sinne der §§ 318 und 319 Handelsgesetzbuch prüfen lassen. In diesem Fall sind die Prüfungen des Landesrechnungshofs und des Abschlussprüfers inhaltlich aufeinander abzustimmen.
+(3) Der Landesrechnungshof kann die Prüfung beschränken und Teile der Haushaltsrechnung und der Vermögensrechnung ungeprüft lassen.
+(4) Dem Landesrechnungshof, seinen Beauftragten und hinzugezogenen Sachverständigen sind die erbetenen Auskünfte zu erteilen. Sie haben das Recht auf Einsicht in die Unterlagen, deren Kenntnis sie zur Erfüllung ihrer Aufgaben für erforderlich halten.
+(5) Der Landesrechnungshof teilt das Ergebnis seiner Prüfung nur der LfM und der für die Rechtsaufsicht zuständigen Behörde mit. Die Medienkommission berät den Jahresabschluss aufgrund einer schriftlichen Stellungnahme der Direktorin oder des Direktors erneut und stellt ihn endgültig fest.
+§ 115  Veröffentlichung
+Nach der endgültigen Feststellung des Jahresabschlusses hat die Direktorin oder der Direktor den Jahresabschluss und die vom Landesrechnungshof für nicht erledigt erklärten Teile des Prüfungsberichts zu veröffentlichen. Die Veröffentlichung erfolgt im Online-Angebot der LfM, wobei auf diese Veröffentlichung jeweils im Ministerialblatt des Landes Nordrhein-Westfalen hinzuweisen ist.
+§ 116  Finanzierung
+(1) Die LfM erhält 60 Prozent von dem in § 10 Rundfunkfinanzierungsstaatsvertrag in Verbindung mit § 112 des Medienstaatsvertrages bestimmten Anteil am Rundfunkbeitrag. Soweit dieser Anteil nach dem endgültigen Jahresabschluss nicht zur Erfüllung der Aufgaben der LfM benötigt wird, steht er dem WDR zu. Nach der vorläufigen Feststellung des Jahresabschlusses kann der WDR eine angemessene Abschlagszahlung verlangen. Der Betrag wird mit der endgültigen Feststellung des Jahresabschlusses fällig.
+(2) Für Amtshandlungen nach diesem Gesetz, nach dem Medienstaatsvertrag und nach dem Jugendmedienschutz-Staatsvertrag erhebt die LfM Verwaltungsgebühren; außerdem lässt sie sich die Auslagen ersetzen. Die Gebührentatbestände und die Höhe der Gebühren und des Auslagenersatzes werden durch Satzung festgelegt. Die Höhe einer Gebühr beträgt mindestens 30 Euro, höchstens 100.000 Euro.
+§ 117  Rechtsaufsicht
+(1) Die Ministerpräsidentin oder der Ministerpräsident führt die Rechtsaufsicht über die LfM. Der Rechtsaufsicht sind die zur Wahrnehmung ihrer Aufgabe erforderlichen Auskünfte zu erteilen und Einsicht in die Unterlagen zu gewähren. Sie ist berechtigt, das zuständige Organ durch schriftliche Mitteilung auf Maßnahmen oder Unterlassungen der LfM hinzuweisen, die die Gesetze verletzen.
+(2) Wird die Gesetzwidrigkeit innerhalb einer von der Rechtsaufsicht zu setzenden angemessenen Frist nicht behoben, weist die Rechtsaufsicht die LfM an, auf deren Kosten diejenigen Maßnahmen durchzuführen, die die Rechtsaufsicht im Einzelnen festzulegen hat.
+(3) Beruht die Gesetzwidrigkeit auf einer Handlung oder Unterlassung der Direktorin oder des Direktors, sind Maßnahmen nach den Absätzen 1 und 2 erst zulässig, wenn die Medienkommission die ihr obliegende Aufsicht binnen angemessener Frist nicht wahrgenommen hat oder weitergehende Rechtsaufsichtsmaßnahmen erforderlich sind. Die Rechtsaufsicht ist berechtigt, der Medienkommission im Einzelfall eine angemessene Frist zur Wahrnehmung ihrer Aufsichtspflichten zu setzen.
+(4) Gegen Maßnahmen nach den Absätzen 1 bis 3 kann die LfM Klage vor dem Verwaltungsgericht erheben. Ein Vorverfahren findet nicht statt.
+Abschnitt 11 Verfahren bei Rechtsverstößen, Rücknahme und Widerruf
+§ 118  Rechtsverstoß
+(1) Stellt die LfM einen Rechtsverstoß fest, trifft sie nach Anhörung des Verpflichteten die erforderlichen Maßnahmen. Maßnahmen sind insbesondere Beanstandung und Untersagung.
+(2) Hat die LfM bereits einen Rechtsverstoß nach Absatz 1 beanstandet, kann sie bei Fortdauer des Rechtsverstoßes oder bei einem weiteren Rechtsverstoß nach dieser Beanstandung zusammen mit der Anweisung nach Absatz 1 anordnen, dass die Verbreitung oder Weiterverbreitung des Rundfunkprogramms für einen bestimmten Zeitraum, der einen Monat nicht überschreiten darf, ruht. Die Anordnung kann sich auch auf einzelne Teile des Rundfunkprogramms beziehen.
+(3) Die LfM kann bestimmen, dass Beanstandungen nach Absatz 1 sowie rechtskräftige Entscheidungen in einem Ordnungswidrigkeitsverfahren oder Strafverfahren nach Abschnitt 12 von dem betroffenen Veranstalter in seinem Rundfunkprogramm verbreitet werden. Inhalt und Zeitpunkt der Bekanntgabe der Beanstandung hat die LfM nach pflichtgemäßem Ermessen festzulegen.
+(4) Das Nähere regelt die LfM unter Berücksichtigung der Schwere und Häufigkeit des Rechtsverstoßes durch Satzung.
+§ 119  Rücknahme der Zulassung
+(1) Die Zulassung ist nach vorheriger Anhörung des Veranstalters zurückzunehmen, wenn
+1. der Veranstalter sie durch unrichtige oder unvollständige Angaben, durch Täuschung, Drohung oder sonstige rechtswidrige Mittel erlangt hat,
+2. eine Voraussetzung nach § 5 nicht gegeben oder ein Umstand nach § 6 gegeben war,
+3. bei lokalem Hörfunk eine Voraussetzung nach §§ 58, 58a oder § 59 nicht gegeben war.
+(2) § 48 Verwaltungsverfahrensgesetz für das Land Nordrhein-Westfalen findet keine Anwendung.
+§ 120  Widerruf der Zulassung
+(1) Die Zulassung ist nach vorheriger Anhörung des Veranstalters zu widerrufen, wenn
+1. in den Fällen des § 119 Absatz 1 Nummer 2 und 3 die Voraussetzung oder der Umstand nachträglich eingetreten oder weggefallen ist,
+2. wenn gegen Vorgaben des § 8 Abs. 1, 2 oder § 9 Abs. 1 verstoßen wird oder ein Fall des § 9 Abs. 3 vorliegt,
+3. bei lokalem Hörfunk trotz Versagung der Erlaubnis nach § 55 Absatz 2 oder 3 das festgelegte Programmschema oder die festgelegte Programmdauer nicht eingehalten werden, oder
+4. der Veranstalter gegen seine Verpflichtung nach diesem Gesetz schwerwiegend verstoßen hat, die LfM den Verstoß durch Beschluss als schwerwiegend festgestellt und diesen dem Veranstalter zugestellt hat.
+(2) Die Zulassung kann widerrufen werden, wenn der Veranstalter einer Anordnung der LfM nach § 118 innerhalb der von ihr bestimmten Frist nicht gefolgt ist.
+(3) § 49 Verwaltungsverfahrensgesetz für das Land Nordrhein-Westfalen findet keine Anwendung.
+§ 121  Vertreter
+Ergeben sich gegen einen gesetzlichen oder satzungsmäßigen Vertreter Bedenken nach § 5 Abs. 2 Nr. 4, kann die LfM an Stelle von Maßnahmen nach § 120 verlangen, dass der Vertreter vom Veranstalter abberufen wird.
+§ 122  Rücknahme der Zuweisung einer Übertragungskapazität
+(1) Die Zuweisung einer Übertragungskapazität ist nach vorheriger Anhörung des betroffenen Veranstalters oder Anbieters zurückzunehmen, wenn dieser sie durch unrichtige oder unvollständige Angaben, durch Täuschung, Drohung oder sonstige rechtswidrige Mittel erlangt hat.
+(2) § 48 Verwaltungsverfahrensgesetz für das Land Nordrhein-Westfalen findet keine Anwendung.
+§ 123  Widerruf der Zuweisung einer Übertragungskapazität
+(1) Die Zuweisung einer Übertragungskapazität ist nach vorheriger Anhörung des Veranstalters oder Anbieters zu widerrufen, wenn
+1. die Voraussetzungen der §§ 13, 14 nicht mehr erfüllt sind,
+2. die Bestimmungen der §§ 16 Absatz 3 oder 17 Absatz 3 nicht eingehalten werden oder
+3. die Verbreitung oder Weiterverbreitung aus Gründen, die vom Veranstalter, Anbieter rundfunkähnlicher Telemedien oder Anbieter einer Medienplattform zu verantworten sind, nicht zum vorgesehenen Zeitpunkt begonnen oder innerhalb einer von der LfM bestimmten Frist nicht aufgenommen oder nicht fortgesetzt wird.
+(2) § 49 Verwaltungsverfahrensgesetz für das Land Nordrhein-Westfalen findet keine Anwendung.
+§ 124  Vermögensnachteile
+Der Veranstalter oder Anbieter wird für einen Vermögensnachteil, den er infolge berechtigter Maßnahmen nach den vorstehenden Vorschriften erleidet, nicht entschädigt.
+Abschnitt 12 Ordnungswidrigkeiten
+§ 125  Ordnungswidrigkeiten
+(1) Ordnungswidrig handelt, wer als Veranstalter eines nicht bundesweiten Rundfunkprogramms vorsätzlich oder fahrlässig einen der in § 115 Absatz 1 Satz 1 des Medienstaatsvertrages in Verbindung mit § 35 Absatz 2 und § 38 Absatz 1 dieses Gesetzes bezeichneten Verstöße bezüglich Werbung und Gewinnspielen oder Bestellung eines Jugendschutzbeauftragten begeht.
+(2) Ferner handelt ordnungswidrig, wer vorsätzlich oder fahrlässig
+1. als Veranstalter entgegen §§ 4 Absatz 1, 52, 83 Absatz 1 ohne Zulassung durch die LfM Rundfunkprogramme veranstaltet,
+2. als Veranstalter entgegen § 4 Absatz 5 Satz 1 die Verbreitung eines nicht bundesweiten, ausschließlich im Internet verbreiteten Hörfunkprogramms nicht oder nicht vollständig der LfM anzeigt,
+3. als Veranstalter oder Anbieter entgegen § 12 ohne Zuweisung einer Übertragungskapazität durch die LfM Rundfunkprogramme oder vergleichbare Telemedien verbreitet oder weiterverbreitet,
+4. als Veranstalter oder Anbieter entgegen §§ 9, 17 Absatz 3 Satz 2 eine Änderung der maßgeblichen Umstände nach Antragstellung oder nach Erteilung der Zulassung bzw. Zuweisung nicht unverzüglich der LfM mitteilt,
+5. als Betreiber einer Kabelanlage entgegen § 24 Absatz 1 den Betrieb oder die Belegung einer Kabelanlage oder Änderungen des Betriebs oder der Belegung einer Kabelanlage nicht anzeigt,
+6. als Betreiber einer Kabelanlage Programme ohne Anzeige nach § 24 Absatz 2 einspeist, die Einspeisung von Programmen trotz Untersagung nach § 26 Absatz 1 fortführt oder die Feststellungen der LfM nach § 20 Absatz 2 nicht beachtet,
+7. als Veranstalter seiner Aufzeichnungs- oder Aufbewahrungspflicht nach § 43 Absatz 1 und 2 nicht, nicht richtig oder nicht vollständig nachkommt,
+oder
+8. als Veranstalter entgegen § 31 Absatz 6 keine für den Inhalt des Rundfunkprogramms verantwortliche Person benennt.
+(3) Die Ordnungswidrigkeit kann mit einer Geldbuße von bis zu 500.000 Euro geahndet werden.
+(4) Zuständige Verwaltungsbehörde im Sinne des § 36 Abs. 1 Nr. 1 des Gesetzes über Ordnungswidrigkeiten ist die LfM. Über die Einleitung eines Verfahrens hat die LfM die übrigen Landesmedienanstalten unverzüglich zu unterrichten. Soweit ein Verfahren nach dieser Vorschrift in mehreren Ländern eingeleitet wurde, stimmen sich die beteiligten Behörden über die Frage ab, welche Behörde das Verfahren fortführt.
+(5) Hat die LfM einem Veranstalter eines bundesweiten Rundfunkprogramms die Zulassung erteilt, kann sie bestimmen, dass Beanstandungen nach einem Rechtsverstoß gegen Regelungen dieses Gesetzes sowie rechtskräftige Entscheidungen in einem Ordnungswidrigkeitsverfahren nach Absatz 1 von dem betroffenen Veranstalter in seinem Rundfunkprogramm verbreitet werden. Inhalte und Zeitpunkte der Bekanntgabe sind durch die Medienanstalt nach pflichtgemäßem Ermessen festzulegen. Absatz 4 Satz 2 und 3 gilt entsprechend.
+(6) Die Verfolgung der in Absatz 2 genannten Ordnungswidrigkeiten verjährt in sechs Monaten. Der Lauf der Frist beginnt mit der Sendung. Mit der Wiederholung der Sendung beginnt die Frist von neuem.
+§ 126  Strafbestimmung
+§ 23 Jugendmedienschutz-Staatsvertrag findet Anwendung.
+Abschnitt 13 Übergangs- und Schlussvorschriften
+§ 127  Übergangsregelung zur Neukonstituierung der Medienkommission und zum Beschlussverfahren
+(1) Die bis zum 26. Februar 2021 laufende Amtszeit der Medienkommission gemäß § 96 wird bis zum 1. Dezember 2021 verlängert. Für die bis zum Zusammentritt der neuen Medienkommission nach Satz 1 amtierende Medienkommission, findet § 96 Absatz 1 in der Fassung des Gesetzes vom 2. Juli 2002 (GV. NRW. S. 334), das zuletzt durch Artikel 3 des Gesetzes vom 8. Mai 2018 (GV. NRW. S. 214) geändert worden ist, weiterhin Anwendung.
+(2) Alle Mitgliedschaften in der Medienkommission, die bis zu der ersten Neukonstituierung der Medienkommission, die auf die in Absatz 1 Satz 1 genannte Amtszeit folgt, bestanden, gelten bei der Berechnung der Zahl der Amtsperioden nach § 96 Absatz 1 als eine Amtsperiode.
+(3) Für die laufende Amtsperiode der Medienkommission gelten § 93 Abs. 3 und § 98 in der Fassung des Gesetzes vom 2. Juli 2002 (GV. NRW. S. 334), das zuletzt durch Artikel 1 des Gesetzes vom 3. April 2020 (GV. NRW. S. 284) geändert worden ist.
+§ 128  Übergangsregelung zu laufenden Zuweisungsverfahren und bestehenden Zulassungen
+(1) Für Verfahren zur Zuweisung von Übertragungskapazitäten, in denen die Ausschreibung vor dem 1. Juli 2014 endete, gelten die Vorgaben der Abschnitte 2 bis 4 dieses Gesetzes in der Fassung vom 2. Juli 2002 (GV. NRW. S. 334), das zuletzt durch Artikel 3 des Gesetzes vom 9. Dezember 2013 (GV. NRW. S. 875) geändert worden ist.
+(2) Zulassungen nach § 4 Absatz 1, die vor dem Inkrafttreten dieses Gesetzes nach § 8 Absatz 1 befristet erteilt oder verlängert wurden, gelten als unbefristet erteilt. Dies gilt nicht für nach § 31a Absatz 4, § 33b Absatz 4 in Verbindung mit § 65 Absatz 6 des Medienstaatsvertrages, § 40c Absatz 3, § 40d Absatz 3, § 70 in Verbindung mit § 8 Absatz 1, § 83 Absatz 1 in Verbindung mit § 84 Absatz 2 und § 83 Absatz 1 in Verbindung mit § 86 Absatz 2 dieses Gesetzes in der Fassung vom 2. Juli 2002 (GV. NRW. S. 334), das zuletzt durch Artikel 1 des Gesetzes vom 3. April 2020 (GV. NRW. S. 284) geändert worden ist, erteilte oder verlängerte Zulassungen.
+§ 129  Landesrundfunkgesetz
+(1) Das Rundfunkgesetz für das Land Nordrhein-Westfalen in der Fassung der Bekanntmachung vom 25. April 1998 (GV. NRW. S. 240), zuletzt geändert durch das Gesetz zur Anpassung des Landesrechts an den Euro in Nordrhein-Westfalen (EuroAnpG NRW) vom 25. September 2001 (GV. NRW. S. 708), wird aufgehoben.
+(2) Für zugelassene Veranstalter nach dem Satellitenfernseh-Staatsvertrag der Freien Hansestadt Bremen, der Länder Hessen und Nordrhein-Westfalen und des Saarlands und nach § 25 Abs. 3 und 4 Rundfunkstaatsvertrag gelten § 6 Abs. 1 Satz 3, Absätze 2 und 3 und § 8 Abs. 2 und 4 des Rundfunkgesetzes für das Land Nordrhein-Westfalen in der Fassung der Bekanntmachung vom 25. April 1998 (GV. NRW. S. 240) fort.
+§ 130  Inkrafttreten
+Dieses Gesetz tritt am Tag nach seiner Verkündung in Kraft.
+Die Landesregierung Nordrhein-Westfalen
+Der Ministerpräsident

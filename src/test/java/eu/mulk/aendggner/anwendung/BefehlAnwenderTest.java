@@ -1066,6 +1066,132 @@ class BefehlAnwenderTest {
     assertThat(ergebnis.neu().langue()).isEqualTo("Gesetz zur gründlichen Erprobung");
   }
 
+  /**
+   * Aufsteigende Umnummerierungs-Kaskade: Beide Befehle meinen die ursprüngliche Zählung. In
+   * Dokumentreihenfolge angewandt entstünde ein zweiter Absatz 2; der Anwender zieht deshalb den
+   * räumenden Befehl vor.
+   */
+  @Test
+  void loestAufsteigendeUmnummerierungsKaskadeAuf() {
+    var eins =
+        new Umnummerierung(
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("1")),
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2")),
+            PROV);
+    var zwei =
+        new Umnummerierung(
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2")),
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("3")),
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(eins, zwei));
+
+    assertThat(ergebnis.anzahlManuell()).isZero();
+    assertThat(ergebnis.neu().norm("§ 1").orElseThrow().absaetze().stream().map(Absatz::nummer))
+        .containsExactly("2", "3");
+    // Das Protokoll bleibt in Dokumentreihenfolge, unabhängig von der Anwendungsreihenfolge.
+    assertThat(ergebnis.protokoll().get(0).befehl()).isSameAs(eins);
+  }
+
+  /** Eine Umnummerierung läuft vor der Einfügung, die ihre bisherige Bezeichnung neu vergibt. */
+  @Test
+  void raeumtBezeichnungVorEinfuegung() {
+    var einfuegung =
+        new StrukturEinfuegung(
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("1")),
+            false,
+            Ebene.ABSATZ,
+            "2",
+            "(2) Neuer Absatz.",
+            PROV);
+    var umnummerierung =
+        new Umnummerierung(
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2")),
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("3")),
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(einfuegung, umnummerierung));
+
+    assertThat(ergebnis.anzahlManuell()).isZero();
+    assertThat(ergebnis.neu().norm("§ 1").orElseThrow().absaetze().stream().map(Absatz::nummer))
+        .containsExactly("1", "2", "3");
+    assertThat(absatzText(ergebnis.neu(), "§ 1", 1)).isEqualTo("Neuer Absatz.");
+  }
+
+  /**
+   * Anders als ein Absatz trägt eine Aufzählungsnummer ihre Bezeichnung als Marke im Text; die
+   * Umnummerierung muss sie dort austauschen.
+   */
+  @Test
+  void nummeriertAufzaehlungsNummerImTextUm() {
+    var befehl =
+        new Umnummerierung(
+            stelle(
+                new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("2")),
+            stelle(
+                new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("4")),
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "§ 1", 1))
+        .contains("  4. die Anwendung von Befehlen und")
+        .doesNotContain("  2. die Anwendung");
+  }
+
+  /** Der weggefallene Platzhalter mit der Zielbezeichnung weicht der Umnummerierung. */
+  @Test
+  void ueberschreibtWeggefalleneNummer() {
+    var mitLuecke =
+        new Gesetz(
+            "TestG",
+            "Gesetz zur Erprobung",
+            "Testgesetz",
+            List.of(
+                new Norm(
+                    "§ 1",
+                    "Zweck",
+                    null,
+                    List.of(
+                        new Absatz(
+                            "1",
+                            "Die Erprobung umfasst\n"
+                                + "  1. (weggefallen)\n"
+                                + "  2. die Anwendung von Befehlen.")),
+                    false)),
+            List.of());
+    var befehl =
+        new Umnummerierung(
+            stelle(
+                new Stelle.Paragraph("1"), new Stelle.AbsatzNr("1"), new Stelle.NummerNr("2")),
+            stelle(
+                new Stelle.Paragraph("1"), new Stelle.AbsatzNr("1"), new Stelle.NummerNr("1")),
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(mitLuecke, List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "§ 1", 0))
+        .isEqualTo("Die Erprobung umfasst\n  1. die Anwendung von Befehlen.");
+  }
+
+  /** Beginnt der Einschub mit einem Satzzeichen, entfällt das Leerzeichen hinter dem Anker. */
+  @Test
+  void fuegtSatzzeichenOhneVorangehendesLeerzeichenEin() {
+    var befehl =
+        new WoerterEinfuegung(
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("1")),
+            new WortAnker.NachWoertern("die Erprobung"),
+            ", auch in Teilen,",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+
+    assertThat(absatzText(ergebnis.neu(), "§ 1", 0))
+        .isEqualTo("Zweck dieses Gesetzes ist die Erprobung, auch in Teilen,.");
+  }
+
   private static String absatzText(Gesetz gesetz, String enbez, int index) {
     return gesetz.norm(enbez).orElseThrow().absaetze().get(index).text();
   }

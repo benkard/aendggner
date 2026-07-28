@@ -191,9 +191,28 @@ public final class AenderungsgesetzParser {
     var provenienz = new Provenienz(artikelLabel, eigenerPfad, zitate.stelleZitateWiederHer(text));
 
     if (!punkt.kinder().isEmpty()) {
-      // Ein Punkt mit Unterpunkten muss ein Kontextrahmen sein („§ X wird wie folgt geändert:“,
-      // auch als Verbund „§ 50 wird zu § 38 und wird wie folgt geändert:“).
+      // Verb-Rahmen („Es werden ersetzt:“): die Unterpunkte tragen die Fundstelle, der Rahmen nur
+      // das Verb; jeder Unterpunkt wird dafür zum vollständigen Befehlssatz ergänzt.
+      var verb = BefehlErkenner.verbRahmen(text);
+      if (verb.isPresent()) {
+        for (var kind : punkt.kinder()) {
+          verarbeiteVerbRahmenPunkt(
+              kind, kontext, artikelLabel, eigenerPfad, verb.get(), zitate, befehle);
+        }
+        return;
+      }
+      // Ein Punkt mit Unterpunkten muss sonst ein Kontextrahmen sein („§ X wird wie folgt
+      // geändert:“, auch als Verbund „§ 50 wird zu § 38 und wird wie folgt geändert:“). Steht dort
+      // „gefasst“ statt „geändert“, ist das ein amtlicher Schreibfehler: eine Neufassung trüge ihren
+      // Wortlaut als Zitat, keine Unterpunkte mit eigenen Änderungsbefehlen.
       var rahmen = BefehlErkenner.rahmenMitBefehl(text, kontext, provenienz);
+      if (rahmen.isEmpty() && text.endsWith("wie folgt gefasst:")) {
+        rahmen =
+            BefehlErkenner.rahmenMitBefehl(
+                text.substring(0, text.length() - "gefasst:".length()) + "geändert:",
+                kontext,
+                provenienz);
+      }
       var neuerKontext = kontext;
       if (rahmen.isPresent()) {
         if (rahmen.get().begleitbefehl() != null) {
@@ -211,6 +230,27 @@ public final class AenderungsgesetzParser {
 
     // Blattpunkt: einzelner Befehl.
     var befehl = BefehlErkenner.erkenne(text, kontext, zitate, provenienz);
+    befehle.add(
+        befehl.orElseGet(
+            () -> new UnbekannterBefehl(kontext, provenienz.originalText(), provenienz)));
+  }
+
+  /** Unterpunkt eines Verb-Rahmens: erst zum vollständigen Satz ergänzen, dann erkennen. */
+  private static void verarbeiteVerbRahmenPunkt(
+      GliederungsScanner.GliederungsPunkt punkt,
+      Stelle kontext,
+      String artikelLabel,
+      String pfad,
+      String verb,
+      ZitatExtraktor.Ergebnis zitate,
+      List<Aenderungsbefehl> befehle) {
+
+    var eigenerPfad = pfad + " " + markerText(punkt);
+    var text = punkt.text().replaceAll("\\s+", " ").strip();
+    var provenienz = new Provenienz(artikelLabel, eigenerPfad, zitate.stelleZitateWiederHer(text));
+    var befehl =
+        BefehlErkenner.vervollstaendigeVerbRahmenPunkt(text, verb)
+            .flatMap(satz -> BefehlErkenner.erkenne(satz, kontext, zitate, provenienz));
     befehle.add(
         befehl.orElseGet(
             () -> new UnbekannterBefehl(kontext, provenienz.originalText(), provenienz)));

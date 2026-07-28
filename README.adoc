@@ -63,7 +63,10 @@ Eingaben:
 * Stammgesetz (Bundesrecht): XML im gii-norm-Format von
   https://www.gesetze-im-internet.de/[gesetze-im-internet.de]
 * Stammgesetz (Landesrecht): konsolidierte Fassung als PDF oder als
-  kanonischer Klartext im Format der `--extract-only`-Ausgabe. Amtliche
+  kanonischer Klartext im Format der `--extract-only`-Ausgabe. Eine Zeile
+  „Inhaltsübersicht“ eröffnet darin die gleichnamige Norm, auf die die
+  Angabe-Befehle zielen; ihre Zeilen tragen das Übersichtsformat
+  „§ N | Titel“. Amtliche
   Satznummern und Fußnotenmarker stehen als Unicode-Superskripte im
   Text („¹Die freilebende Tierwelt …“, „Enteignung⁶)“); ob sie erhalten
   bleiben, ergibt sich aus der geladenen Stammfassung, nicht aus einer
@@ -110,8 +113,21 @@ zu Teil 3 … eingefügt“), Voranstellungen, Mehrfach-Ersetzungs- und
 -Einfügepaare, Einfügungen, deren Position ein Wortanker statt einer
 Stellenangabe bestimmt („Vor den Wörtern „Aus dem Bereich Verkehr:“ wird
 folgender Absatz 5 eingefügt“), Verbünde aus Umnummerierung und
-Folgeänderung („§ 50 wird zu § 38 und wird wie folgt geändert“) sowie die
-Neufassung der Gesetzesüberschrift. Die PDF-Aufbereitung toleriert dabei
+Folgeänderung („§ 50 wird zu § 38 und wird wie folgt geändert“),
+Verb-Rahmen, deren Unterpunkte allein die Fundstelle tragen („Es werden
+ersetzt: … in § 35 Absatz 3 die Angabe „X“ jeweils durch die Angabe
+„Y“,“) sowie die Neufassung der Gesetzesüberschrift.
+
+Angewandt wird nicht stur in Dokumentreihenfolge: Umnummerierungen
+beziehen sich stets auf die ursprüngliche Zählung, nicht auf den Stand
+nach den vorangegangenen Punkten. Wer eine Bezeichnung räumt, kommt
+deshalb vor den, der sie neu besetzt. Aus dieser einen Regel folgt die
+absteigende Abarbeitung einer aufsteigenden Kaskade („Der bisherige
+Absatz 3 wird Absatz 4“, „Der bisherige Absatz 4 wird Absatz 5“, …)
+ebenso wie der Vorrang einer Umnummerierung vor der Einfügung, die deren
+Bezeichnung neu vergibt. Verschoben wird dabei nur nach vorn, sodass
+jede Folgeänderung hinter der Umnummerierung bleibt, auf deren neue
+Bezeichnung sie zeigt. Die PDF-Aufbereitung toleriert dabei
 Drucksachen-Artefakte (Seitenköpfe und -füße, Vorabfassungs-Wasserzeichen,
 vertauschte oder gerade Anführungszeichen, verklebte Wortgrenzen, zerlegt
 kodierte Umlaute) und bestimmt die Brotschrift seitenweise, sodass auch
@@ -146,8 +162,10 @@ abgedeckt.
 Die übrigen Länder gliedern ihre Stammgesetze wie der Bund in
 Paragraphen; die Unterschiede liegen im Gesetzblatt-Satz und in
 Befehlsidiomen. Belegt sind Sachsen (SächsBeamtVG), Niedersachsen
-(NEFG) und Nordrhein-Westfalen (Telemedienzuständigkeitsgesetz) mit
-vollen Akzeptanztests ohne Rest; für Schleswig-Holstein und Berlin
+(NEFG) und Nordrhein-Westfalen (Telemedienzuständigkeitsgesetz,
+Landesmediengesetz und — mit 101 Befehlen an 31 Normen der größte
+Landesrechtsfall — das WDR-Gesetz) mit Akzeptanztests gegen die
+amtlichen Nachfassungen; für Schleswig-Holstein und Berlin
 reicht die Prüfung bis zur Befehlserkennung — dort vollständig, aber ohne
 Anwendung —, weil deren Landesportale ihre Stammfassungen nur über eine
 anmeldepflichtige Schnittstelle ausgeben. Welche Konvention welches Land beisteuert, welche

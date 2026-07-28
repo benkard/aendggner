@@ -257,15 +257,16 @@ class EndToEndTest {
     assertThat(parseErgebnis.befehle()).hasSize(154);
     assertThat(parseErgebnis.befehle()).noneMatch(b -> b instanceof UnbekannterBefehl);
 
-    // 4. Anwenden auf die alte Fassung. Von 154 Befehlen bleiben genau fünf als „manuell prüfen“
-    //    stehen — allesamt Folgeänderungen innerhalb zweier mehrschrittiger Umnummerierungs-
-    //    sequenzen, die ÄndGgner bewusst nicht automatisch auflöst (statt fehlerhaft zu raten):
-    //      * Art. 29a (§ 1 Nr. 23): ein vorangestellter Absatz und die Bereichs-Umnummerierung
-    //        „Die bisherigen Abs. 1 bis 3 werden die Abs. 2 bis 4“ verschieben die Absatzzählung;
-    //        die auf den neuen Abs. 5 zielenden Wort-/Satzbefehle finden ihren Alttext nicht mehr.
+    // 4. Anwenden auf die alte Fassung. Von 154 Befehlen bleiben genau drei als „manuell prüfen“
+    //    stehen — Folgeänderungen innerhalb einer mehrschrittigen Umnummerierungssequenz, die
+    //    ÄndGgner bewusst nicht automatisch auflöst (statt fehlerhaft zu raten):
     //      * Art. 56 (§ 1 Nr. 48): eine umfangreiche Neunummerierung des Bußgeldkatalogs
     //        (Einfügen der Nrn. 5–7 und 13, Verschieben von Nr. 6→9, 11→12 …) verschiebt die
     //        Zielnummern der begleitenden Buchstaben-/Wortänderungen.
+    //    Die Sequenz in Art. 29a (§ 1 Nr. 23) löst sich dagegen seit der Kaskaden-Ordnung des
+    //    BefehlAnwenders auf: „Der bisherige Abs. 4 wird Abs. 5“ läuft vor der Bereichs-
+    //    Umnummerierung „Die bisherigen Abs. 1 bis 3 werden die Abs. 2 bis 4“, sodass die auf den
+    //    neuen Abs. 5 zielenden Wort- und Satzbefehle ihren Alttext finden.
     //    Diese Residuen sind exakt gepinnt; sie landen mit Begründung im Abschnitt „Manuell prüfen“
     //    der Synopse und werden nie stillschweigend verworfen.
     var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
@@ -275,9 +276,14 @@ class EndToEndTest {
             .filter(a -> a.status() == BefehlAnwender.Status.MANUELL_PRUEFEN)
             .map(a -> a.befehl().provenienz().gliederungsPfad())
             .toList();
-    assertThat(manuellPfade)
-        .containsExactlyInAnyOrder(
-            "23. c) aa)", "23. c) cc)", "48. a) ee)", "48. a) gg)", "48. b) cc)");
+    assertThat(manuellPfade).containsExactlyInAnyOrder("48. a) ee)", "48. a) gg)", "48. b) cc)");
+
+    // Art. 29a Abs. 5 trägt nach der Kaskade die neue Behördenbezeichnung und den eingefügten Satz.
+    var art29a = anwendung.neu().norm("Art. 29a").orElseThrow();
+    assertThat(art29a.absaetze()).hasSize(5);
+    assertThat(art29a.absaetze().get(4).text())
+        .startsWith("¹Die oberste Jagdbehörde wird ermächtigt")
+        .contains("²Die oberste Jagdbehörde kann zudem durch Rechtsverordnung");
 
     // 5. Stichproben: § 2 (in Kraft 1.1.2027) hebt Art. 28 Abs. 1 Satz 4 auf und nummeriert
     //    Satz 5 um; § 1 Nr. 16 stellt Art. 22a die Abs. 1 bis 4 voran.
@@ -558,6 +564,128 @@ class EndToEndTest {
 
     var synopse = SynopseBuilder.baue(gesetz, anwendung, parseErgebnis.warnungen(), false);
     assertThat(HtmlRenderer.rendere(synopse, "E2E-Test TMZ-Gesetz")).contains("§ 2");
+  }
+
+  /**
+   * Nordrhein-Westfalen, Massentest: Artikel 1 desselben Heftes ändert das WDR-Gesetz — 101 Befehle
+   * an 31 Normen, darunter die Inhaltsübersicht, mehrere Umnummerierungs-Kaskaden über ganze
+   * Absatz- und Nummernfolgen und ein Sammelrahmen („Es werden ersetzt:“). Genau ein Befehl bleibt
+   * manuell; das Ergebnis wurde gegen die amtliche Fassung vom 1. April 2026 (recht.nrw.de)
+   * abgeglichen.
+   */
+  @Test
+  void wdrGesetzAcceptance() throws Exception {
+    var alt = SAMPLEDATA.resolve("NRW/WDR-Gesetz-alt.txt");
+    var pdf = SAMPLEDATA.resolve("NRW/GV-NRW-2026-S202_22-Rundfunkaenderungsgesetz.pdf");
+    assumeTrue(Files.exists(alt) && Files.exists(pdf), "WDR-Gesetz-Beispieldaten fehlen");
+
+    var gesetz = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(alt);
+    assertThat(gesetz.jurabk()).isEqualTo("WDR-Gesetz");
+    // Die Inhaltsübersicht ist eine eigene Norm — nur so greifen die Angabe-Befehle des Artikels 1.
+    assertThat(gesetz.norm("Inhaltsübersicht")).isPresent();
+
+    var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(pdf));
+    var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, null);
+    assertThat(parseErgebnis.artikel()).containsExactly("1");
+    assertThat(parseErgebnis.befehle()).noneMatch(b -> b instanceof UnbekannterBefehl);
+
+    var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
+    var manuellPfade =
+        anwendung.protokoll().stream()
+            .filter(a -> a.status() == BefehlAnwender.Status.MANUELL_PRUEFEN)
+            .map(a -> a.befehl().provenienz().gliederungsPfad())
+            .toList();
+    // Einziges Residuum: „In Satz 2 Nummer 1 wird … der Punkt am Ende des Satzes durch ein
+    // Semikolon ersetzt …“ — die adressierte Nummer 1 trägt zwei Sätze und endet selbst auf ein
+    // Komma; welchen Punkt der Befehl meint, ist dem Wortlaut nicht sicher zu entnehmen.
+    assertThat(manuellPfade).containsExactly("13. e) aa)");
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(parseErgebnis.befehle().size() - 1);
+
+    var neu = anwendung.neu();
+    // 1. Umnummerierungs-Kaskade in § 3: Absatz 2 wird durch zwei Absätze ersetzt, die bisherigen
+    //    Absätze 3 bis 11 rücken auf, ein neuer Absatz 13 kommt hinzu — 15 Absätze in der Reihe der
+    //    amtlichen Nachfassung.
+    var paragraph3 = neu.norm("§ 3").orElseThrow();
+    assertThat(paragraph3.absaetze().stream().map(a -> a.nummer()).toList())
+        .containsExactly(
+            "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15");
+    assertThat(paragraph3.absaetze().get(2).text())
+        .startsWith("Der WDR veranstaltet ein landesweites Fernsehprogramm");
+    assertThat(paragraph3.absaetze().get(12).text())
+        .startsWith("Der WDR strebt Partnerschaften");
+
+    // 2. Nummern-Kaskade in § 15 Absatz 3: Nummer 22 entfällt, die folgenden rücken auf — die
+    //    Aufzählungsmarken im Text sind mitgezogen.
+    var absatz3 = neu.norm("§ 15").orElseThrow().absaetze().get(2).text();
+    assertThat(absatz3)
+        .contains("22. den Landesbehindertenrat NRW e.V.")
+        .contains("25. die Allianz Deutscher Produzentinnen und Produzenten")
+        .doesNotContain("22. den Sozialverband VdK");
+
+    // 3. Sammelrahmen „Es werden ersetzt:“ — die Unterpunkte tragen die Fundstelle, nicht das Verb.
+    assertThat(neu.norm("§ 17").orElseThrow().gesamtText())
+        .contains("schriftlich oder elektronisch");
+    assertThat(neu.norm("§ 40").orElseThrow().gesamtText())
+        .contains("schriftliche oder elektronische");
+
+    // 4. Die Angabe-Befehle auf die Inhaltsübersicht sind angewandt.
+    assertThat(neu.norm("Inhaltsübersicht").orElseThrow().gesamtText())
+        .contains("§ 11 | (weggefallen)")
+        .contains("§ 57a | Übergangsregelung zu Amtszeiten, Entsendung und Hörfunkprogrammen");
+
+    // 5. „Dem Wortlaut des Absatzes 3 werden die folgenden Sätze vorangestellt“ trifft den Absatz,
+    //    nicht die Norm.
+    assertThat(neu.norm("§ 24").orElseThrow().absaetze().get(0).text())
+        .startsWith("Die Intendantin oder der Intendant wird auf sechs Jahre gewählt");
+    assertThat(neu.norm("§ 24").orElseThrow().absaetze().get(2).text())
+        .startsWith("Die inhaltlichen Anforderungen an das Amt");
+  }
+
+  /**
+   * Nordrhein-Westfalen: Artikel 2 desselben Heftes ändert das Landesmediengesetz — 18 Befehle,
+   * *alle* angewandt. Das Ergebnis stimmt mit der amtlichen Fassung vom 1. April 2026 überein; nur
+   * § 93 Absatz 3 Nummer 11 weicht ab, weil die amtliche Nachfassung dort über den Befehlswortlaut
+   * hinaus auch die Wörter „Film (“ gestrichen hat.
+   */
+  @Test
+  void lmgNrwAcceptance() throws Exception {
+    var alt = SAMPLEDATA.resolve("NRW/LMG-NRW-alt.txt");
+    var pdf = SAMPLEDATA.resolve("NRW/GV-NRW-2026-S202_22-Rundfunkaenderungsgesetz.pdf");
+    assumeTrue(Files.exists(alt) && Files.exists(pdf), "LMG-NRW-Beispieldaten fehlen");
+
+    var gesetz = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(alt);
+    assertThat(gesetz.jurabk()).isEqualTo("LMG NRW");
+    // Die Inhaltsübersicht führt auch die Gliederungs-Überschriften („Abschnitt 1 …“); sie zerfällt
+    // daran nicht, sondern bleibt eine Norm bis zum ersten Normkopf.
+    var uebersicht = gesetz.norm("Inhaltsübersicht").orElseThrow();
+    assertThat(uebersicht.gesamtText())
+        .contains("Abschnitt 1 Allgemeine Vorschriften")
+        .contains("§ 127 | Übergangsregelung zur Neukonstituierung der Medienkommission");
+
+    var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(pdf));
+    var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, null);
+    assertThat(parseErgebnis.artikel()).containsExactly("2");
+    assertThat(parseErgebnis.befehle()).hasSize(18);
+    assertThat(parseErgebnis.befehle()).noneMatch(b -> b instanceof UnbekannterBefehl);
+
+    var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
+    assertThat(anwendung.anzahlManuell()).isZero();
+
+    var neu = anwendung.neu();
+    // § 49 Absatz 2 Satz 1: Die Fundstellen-Abkürzung „BGBl.“ darf den Satz nicht teilen, sonst
+    // fände der zweite Teil des Befehls seinen Alttext nicht.
+    assertThat(neu.norm("§ 49").orElseThrow().absaetze().get(1).text())
+        .contains("der der Verordnung (EU) 2016/679")
+        .contains("Telekommunikation-Digitale-Dienste-Datenschutz-Gesetzes vom 23. Juni 2021")
+        .doesNotContain("Telekommunikation-Telemedien-Datenschutz-Gesetzes");
+    // § 127 ist neu gefasst — samt Überschrift in der Inhaltsübersicht.
+    assertThat(neu.norm("§ 127").orElseThrow().titel())
+        .isEqualTo("Übergangsregelung zu Amtszeiten und Entsendung");
+    assertThat(neu.norm("Inhaltsübersicht").orElseThrow().gesamtText())
+        .contains("§ 127 | Übergangsregelung zu Amtszeiten und Entsendung");
+    // § 88 Absatz 6 Satz 4 ist aufgehoben.
+    assertThat(neu.norm("§ 88").orElseThrow().absaetze().get(5).text())
+        .doesNotContain("Absatz 5 Satz 2 gilt entsprechend");
   }
 
   /**

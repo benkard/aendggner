@@ -42,7 +42,24 @@ public final class SatzTeiler {
           "Halbs",
           "Doppelbuchst",
           "usw",
-          "etc");
+          "etc",
+          // Fundstellen-Abkürzungen. Sie stehen mitten im Satz vor einem Großbuchstaben („… vom
+          // 23. Juni 2021 (BGBl. I S. 1982) in der jeweils geltenden Fassung …“) und rissen den
+          // Satz sonst genau dort auseinander.
+          "BGBl",
+          "RGBl",
+          "GBl",
+          "GVBl",
+          "GVOBl",
+          "GV",
+          "ABl",
+          "AmtsBl",
+          "BAnz",
+          "BayRS",
+          "NRW",
+          "NW",
+          "Nds",
+          "Bek");
 
   private static final Set<String> MONATE =
       Set.of(
@@ -61,9 +78,10 @@ public final class SatzTeiler {
 
   /**
    * Kandidat für ein Satzende: Punkt (ggf. gefolgt von schließendem Zitat oder Klammer), dann
-   * Leerraum, dann Großbuchstabe, Zitat oder Klammer.
+   * Leerraum, dann Großbuchstabe, Zitat, Klammer oder Paragraphenzeichen — Rechtssätze beginnen
+   * häufig mit einem Verweis („… zusammengefasst werden. § 27 Absatz 2 … bleibt unberührt.“).
    */
-  private static final Pattern SATZENDE = Pattern.compile("(\\.[“)]*)\\s+(?=[A-ZÄÖÜ„(])");
+  private static final Pattern SATZENDE = Pattern.compile("(\\.[“)]*)\\s+(?=[A-ZÄÖÜ„(§])");
 
   private SatzTeiler() {}
 
@@ -77,7 +95,9 @@ public final class SatzTeiler {
     int start = 0;
     while (matcher.find()) {
       int punkt = matcher.start();
-      if (istAbkuerzung(text, punkt) || istDatum(text, punkt, matcher.end())) {
+      if (istAbkuerzung(text, punkt)
+          || istDatum(text, punkt, matcher.end())
+          || istAufzaehlungsMarke(text, punkt)) {
         continue;
       }
       bereiche.add(new SatzBereich(start, matcher.end(1)));
@@ -157,6 +177,21 @@ public final class SatzTeiler {
     var rest = text.substring(naechstesWortPosition);
     var naechstesWort = rest.split("[\\s,.;]", 2)[0];
     return MONATE.contains(naechstesWort);
+  }
+
+  /**
+   * Punkt einer Aufzählungsmarke am Zeilenanfang („… folgende Aufgaben ⏎ 1. Erlaß von Satzungen
+   * …“). Er beendet keinen Satz: die Glieder einer Aufzählung gehören zum tragenden Satz. Die
+   * Beschränkung auf den Zeilenanfang unterscheidet die Marke von einer Zahl am Satzende („… beträgt
+   * 30. Die Frist …“).
+   */
+  private static boolean istAufzaehlungsMarke(String text, int punktPosition) {
+    var wort = wortVor(text, punktPosition);
+    if (!wort.matches("\\d{1,2}[a-z]?")) {
+      return false;
+    }
+    int anfang = punktPosition - wort.length();
+    return anfang == 0 || text.charAt(anfang - 1) == '\n';
   }
 
   private static String wortVor(String text, int position) {

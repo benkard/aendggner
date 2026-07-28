@@ -92,7 +92,7 @@ public final class StellenParser {
           komponenten.add(new Stelle.Paragraph(wert, "Art."));
           i++;
         }
-        case "Absatz", "Abs.", "Absätze", "Absätzen" -> {
+        case "Absatz", "Absatzes", "Abs.", "Absätze", "Absätzen" -> {
           var wert = naechstesWort(woerter, i);
           if (wert == null || !NUMMER_WERT.matcher(wert).matches()) {
             return Optional.empty();
@@ -100,7 +100,7 @@ public final class StellenParser {
           komponenten.add(new Stelle.AbsatzNr(wert));
           i++;
         }
-        case "Satz", "Sätze", "Sätzen" -> {
+        case "Satz", "Satzes", "Sätze", "Sätzen" -> {
           var wert = naechstesWort(woerter, i);
           if (wert == null || !NUMMER_WERT.matcher(wert).matches()) {
             return Optional.empty();
@@ -108,7 +108,7 @@ public final class StellenParser {
           komponenten.add(new Stelle.SatzNr(wert));
           i++;
         }
-        case "Halbsatz", "Halbsätze", "Halbs." -> {
+        case "Halbsatz", "Halbsatzes", "Halbsätze", "Halbs." -> {
           var wert = naechstesWort(woerter, i);
           if (wert == null || !NUMMER_WERT.matcher(wert).matches()) {
             return Optional.empty();
@@ -124,7 +124,7 @@ public final class StellenParser {
           komponenten.add(new Stelle.NummerNr(wert));
           i++;
         }
-        case "Buchstabe", "Buchst.", "Doppelbuchstabe", "Buchstaben" -> {
+        case "Buchstabe", "Buchstabens", "Buchst.", "Doppelbuchstabe", "Buchstaben" -> {
           var wert = naechstesWort(woerter, i);
           if (wert == null || !BUCHSTABE_WERT.matcher(wert).matches()) {
             return Optional.empty();

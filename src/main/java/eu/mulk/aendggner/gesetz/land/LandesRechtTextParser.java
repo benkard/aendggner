@@ -59,7 +59,20 @@ final class LandesRechtTextParser {
   private static final Pattern GLIEDERUNG_ARABISCH =
       Pattern.compile("^(Buch|Teil|Kapitel|Abschnitt|Unterabschnitt|Titel) (\\d+[a-z]?)\\s+(\\S.*)$");
 
+  // Römische Gliederung ohne Schlüsselwort („I. Rechtsform und Aufgaben“, NRW). Sie ist nur an der
+  // Stellung erkennbar, deshalb gilt dieselbe Absicherung wie für UNTER_GLIEDERUNG: kurzer,
+  // großgeschriebener, satzzeichenfreier Titel und ein Normkopf oder eine weitere Überschrift als
+  // nächste nicht-leere Zeile.
+  private static final Pattern GLIEDERUNG_ROEMISCH = Pattern.compile("^([IVXLCDM]+)\\.\\s+(\\S.*)$");
+
   private static final Pattern UNTER_GLIEDERUNG = Pattern.compile("^(\\d+[a-z]?)\\.\\s+(\\S.*)$");
+
+  /**
+   * Die Inhaltsübersicht ist eine Norm ohne Sigel; Angabe-Befehle adressieren sie unter genau
+   * diesem Namen (siehe {@code InhaltsuebersichtAnwender}). Ihre Zeilen tragen das
+   * Übersichtsformat „§ N | Titel“.
+   */
+  private static final String INHALTSUEBERSICHT = "Inhaltsübersicht";
 
   // Normkopf: „§ N“ bzw. „Art. N“ plus Titel auf derselben Zeile. Das Sigel steht in Gruppe 1, die
   // Nummer in Gruppe 2, der Titel in Gruppe 3. Die Negativliste schließt Querverweise am
@@ -116,10 +129,7 @@ final class LandesRechtTextParser {
       }
     }
     // Rest des Titelblocks (Datum, Fundstellen, Vollzitat) bis zur ersten Struktur überspringen.
-    while (i < zeilen.size()
-        && !GLIEDERUNG.matcher(zeilen.get(i).strip()).matches()
-        && !GLIEDERUNG_ARABISCH.matcher(zeilen.get(i).strip()).matches()
-        && !NORM_KOPF.matcher(zeilen.get(i).strip()).matches()) {
+    while (i < zeilen.size() && !istStrukturZeile(zeilen, i)) {
       i++;
     }
 
@@ -129,8 +139,7 @@ final class LandesRechtTextParser {
     String elternKennzahl = null;
     int gliederungsZaehler = 0;
 
-    String normSigel = null;
-    String normNummer = null;
+    String normEnbez = null;
     String normTitel = null;
     var normZeilen = new ArrayList<String>();
     int letzteNormNummer = 0;
@@ -140,25 +149,40 @@ final class LandesRechtTextParser {
 
       var gliederung = zeile != null ? GLIEDERUNG.matcher(zeile) : null;
       var arabisch = zeile != null ? GLIEDERUNG_ARABISCH.matcher(zeile) : null;
+      var roemisch = zeile != null ? GLIEDERUNG_ROEMISCH.matcher(zeile) : null;
       var unterGliederung = zeile != null ? UNTER_GLIEDERUNG.matcher(zeile) : null;
       var normKopf = zeile != null ? NORM_KOPF.matcher(zeile) : null;
+      var uebersicht = INHALTSUEBERSICHT.equals(zeile);
+      // Die Inhaltsübersicht führt die Gliederungs-Überschriften des Gesetzes als eigene Zeilen mit
+      // („Abschnitt 1 Allgemeine Vorschriften“). Innerhalb ihrer beendet eine solche Zeile die Norm
+      // nur, wenn ihr ein Normkopf folgt — sonst zerfiele die Übersicht und die Angaben gingen
+      // verloren.
+      var gliederungsZeile =
+          zeile != null
+              && (gliederung.matches()
+                  || arabisch.matches()
+                  || (roemisch.matches() && istUnterGliederung(roemisch, zeilen, i))
+                  || (unterGliederung.matches() && istUnterGliederung(unterGliederung, zeilen, i)))
+              && (!INHALTSUEBERSICHT.equals(normEnbez) || folgtNormkopf(zeilen, i));
 
       if (zeile == null
-          || gliederung.matches()
-          || arabisch.matches()
-          || (normKopf.matches() && istNeuerNormKopf(normKopf.group(2), letzteNormNummer))
-          || (unterGliederung.matches() && istUnterGliederung(unterGliederung, zeilen, i))) {
+          || uebersicht
+          || gliederungsZeile
+          || (normKopf.matches() && istNeuerNormKopf(normKopf.group(2), letzteNormNummer))) {
         // Laufende Norm abschließen.
-        if (normNummer != null) {
-          normen.add(baueNorm(normSigel, normNummer, normTitel, aktuelleGliederung, normZeilen));
+        if (normEnbez != null) {
+          normen.add(baueNorm(normEnbez, normTitel, aktuelleGliederung, normZeilen));
         }
-        normNummer = null;
+        normEnbez = null;
         normZeilen.clear();
 
         if (zeile == null) {
           break;
         }
-        if (gliederung.matches()) {
+        if (uebersicht) {
+          normEnbez = INHALTSUEBERSICHT;
+          normTitel = null;
+        } else if (gliederung.matches()) {
           gliederungsZaehler++;
           elternKennzahl = String.format("%03d", gliederungsZaehler);
           var titel = gliederung.group(3).strip();
@@ -179,10 +203,16 @@ final class LandesRechtTextParser {
                   titel.isEmpty() ? null : titel);
           gliederungen.add(aktuelleGliederung);
         } else if (normKopf.matches() && istNeuerNormKopf(normKopf.group(2), letzteNormNummer)) {
-          normSigel = normKopf.group(1);
-          normNummer = normKopf.group(2);
+          normEnbez = normKopf.group(1) + " " + normKopf.group(2);
           normTitel = normKopf.group(3).strip();
-          letzteNormNummer = numerisch(normNummer);
+          letzteNormNummer = numerisch(normKopf.group(2));
+        } else if (roemisch.matches()) {
+          gliederungsZaehler++;
+          elternKennzahl = String.format("%03d", gliederungsZaehler);
+          aktuelleGliederung =
+              new Gliederung(
+                  elternKennzahl, roemisch.group(1) + ".", roemisch.group(2).strip());
+          gliederungen.add(aktuelleGliederung);
         } else {
           var kennzahl =
               (elternKennzahl != null ? elternKennzahl : "000") + "." + unterGliederung.group(1);
@@ -193,7 +223,7 @@ final class LandesRechtTextParser {
         continue;
       }
 
-      if (normNummer != null) {
+      if (normEnbez != null) {
         normZeilen.add(zeilen.get(i));
       }
     }
@@ -204,6 +234,32 @@ final class LandesRechtTextParser {
               + " kanonischen Klartextformat?");
     }
     return new Gesetz(jurabk != null ? jurabk : langue, langue, kurzue, normen, gliederungen);
+  }
+
+  /** Eröffnet die Zeile eine Struktureinheit (Gliederung, Inhaltsübersicht oder Normkopf)? */
+  private static boolean istStrukturZeile(List<String> zeilen, int i) {
+    var zeile = zeilen.get(i).strip();
+    var roemisch = GLIEDERUNG_ROEMISCH.matcher(zeile);
+    return INHALTSUEBERSICHT.equals(zeile)
+        || GLIEDERUNG.matcher(zeile).matches()
+        || GLIEDERUNG_ARABISCH.matcher(zeile).matches()
+        || NORM_KOPF.matcher(zeile).matches()
+        || (roemisch.matches() && istUnterGliederung(roemisch, zeilen, i));
+  }
+
+  /**
+   * Die nächste nicht-leere Zeile ist ein Normkopf. Innerhalb der Inhaltsübersicht unterscheidet
+   * das die zitierte Gliederungs-Überschrift („Abschnitt 1 …“, gefolgt von Angabezeilen) von der
+   * gleichlautenden Überschrift des Textteils, die die Übersicht beendet.
+   */
+  private static boolean folgtNormkopf(List<String> zeilen, int index) {
+    for (int j = index + 1; j < zeilen.size(); j++) {
+      var naechste = zeilen.get(j).strip();
+      if (!naechste.isEmpty()) {
+        return NORM_KOPF.matcher(naechste).matches();
+      }
+    }
+    return false;
   }
 
   /** Überspringt die Kopfzeile der Druckfassung samt umbrochenem Rest. */
@@ -259,12 +315,10 @@ final class LandesRechtTextParser {
   }
 
   private static Norm baueNorm(
-      String sigel,
-      String nummer,
+      String enbez,
       @Nullable String titel,
       @Nullable Gliederung gliederung,
       List<String> zeilen) {
-    var enbez = sigel + " " + nummer;
     boolean weggefallen = titel != null && WEGGEFALLEN_TITEL.matcher(titel).matches();
 
     var absaetze = new ArrayList<Absatz>();
