@@ -772,4 +772,76 @@ class EndToEndTest {
     assertThat(ZitatExtraktor.extrahiere(text).warnungen())
         .anyMatch(w -> w.startsWith("Zitat vor dem Aufzählungspunkt „cc)“ nicht geschlossen"));
   }
+
+  /**
+   * Nordrhein-Westfalen: Artikel 4 desselben Heftes fasst § 1 des Ausführungsgesetzes zum
+   * Siebzehnten Rundfunkänderungsstaatsvertrag neu. Damit sind alle vier ändernden Artikel des
+   * Heftes GV. NRW. 7/2026 belegt.
+   *
+   * <p>Zwei Eigenheiten: Der Artikel führt seinen einzigen Befehl <em>ohne</em> Gliederungspunkt,
+   * und das Zitat der neuen Fassung trägt verschachtelte Anführungszeichen (ein vollständiges
+   * „durch Artikel 3 …“ innerhalb einer eckigen Klammer). Das Ergebnis stimmt zeichengenau mit der
+   * amtlichen Fassung vom 1. April 2026 (recht.nrw.de) überein — einschließlich der amtlichen
+   * Platzhalter „[einsetzen: …]“.
+   */
+  @Test
+  void rundfunkAusfuehrungsgesetzAcceptance() throws Exception {
+    var alt = SAMPLEDATA.resolve("NRW/17-RAEStV-AusfG-alt.txt");
+    var pdf = SAMPLEDATA.resolve("NRW/GV-NRW-2026-S202_22-Rundfunkaenderungsgesetz.pdf");
+    assumeTrue(Files.exists(alt) && Files.exists(pdf), "17.-RÄStV-AusfG-Beispieldaten fehlen");
+
+    var gesetz = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(alt);
+    // Der Klammerzusatz führt hier nur eine (mehrteilige) Bezeichnung, keinen Kurztitel am
+    // Gedankenstrich; genau sie nennt der Einleitungssatz des Artikels 4.
+    assertThat(gesetz.jurabk()).isEqualTo("Siebzehnter Rundfunkänderungsstaatsvertrag"
+        + " Ausführungsgesetz");
+    assertThat(gesetz.kurzue()).isNull();
+    assertThat(gesetz.normen()).hasSize(3);
+    // Der alte § 1 besteht aus einem einzigen, unbezeichneten Absatz.
+    assertThat(gesetz.norm("§ 1").orElseThrow().absaetze()).hasSize(1);
+    assertThat(gesetz.norm("§ 1").orElseThrow().absaetze().get(0).nummer()).isNull();
+
+    var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(pdf));
+    var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, null);
+    // Nur Artikel 4 trifft dieses Gesetz — die Auswahl gelingt über die Bezeichnung allein.
+    assertThat(parseErgebnis.artikel()).containsExactly("4");
+    // Der Artikel trägt keine nummerierten Punkte: Der Text nach der Änderungsformel ist der Befehl.
+    assertThat(parseErgebnis.befehle()).hasSize(1);
+    assertThat(parseErgebnis.befehle().get(0)).isInstanceOf(Aenderungsbefehl.Neufassung.class);
+    assertThat(parseErgebnis.befehle().get(0).stelle().anzeigeText()).isEqualTo("§ 1");
+
+    var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(1);
+    assertThat(anwendung.protokoll())
+        .noneMatch(a -> a.status() == BefehlAnwender.Status.MANUELL_PRUEFEN);
+
+    // Abgleich mit der amtlichen Fassung vom 01.04.2026: aus dem einen unbezeichneten Absatz sind
+    // zwei nummerierte geworden, Überschrift und Wortlaut stimmen zeichengenau.
+    var neu = anwendung.neu();
+    var paragraph1 = neu.norm("§ 1").orElseThrow();
+    assertThat(paragraph1.titel()).isEqualTo("Entsendungsbefugnis");
+    assertThat(paragraph1.absaetze()).hasSize(2);
+    assertThat(paragraph1.absaetze().get(0).text())
+        .isEqualTo(
+            "Die Vertreterin oder der Vertreter aus dem Bereich „Medienwirtschaft und Film“ nach"
+                + " § 21 Absatz 1 Satz 1 Buchstabe q Doppelbuchstabe jj des ZDF-Staatsvertrags vom"
+                + " 31. August 1991 (GV. NRW. S. 408), der zuletzt durch Artikel 2 des Vierten"
+                + " Medienänderungsstaatsvertrages vom 9. bis 16. Mai 2023 geändert worden ist"
+                + " (GV. NRW. S. 1252) [noch erforderliche Anpassung: „durch Artikel 3 des Siebten"
+                + " Medienänderungsstaatsvertrages vom 14. bis 26. März 2025 geändert worden ist"
+                + " (GV. NRW. [einsetzen: Datum der Bekanntmachung])“], wird gemeinsam durch die"
+                + " Allianz Deutscher Produzentinnen und Produzenten – Film, Fernsehen und"
+                + " Audiovisuelle Medien e.V., Produktionsallianz NRW, das Filmbüro NW e.V. und den"
+                + " Kulturrat NRW e.V., Sektion Medien, in den Fernsehrat des ZDF entsandt.");
+    assertThat(paragraph1.absaetze().get(1).text())
+        .isEqualTo(
+            "Bis zum Ende der zum Stichtag 31. Dezember 2025 laufenden Amtsperiode des Fernsehrates"
+                + " des ZDF ist § 1 in der am [einsetzen: Datum der Verkündung dieses Gesetzes]"
+                + " geltenden Fassung weiter anzuwenden.");
+    // §§ 2 und 3 bleiben unberührt.
+    assertThat(neu.norm("§ 2").orElseThrow().gesamtText())
+        .isEqualTo(gesetz.norm("§ 2").orElseThrow().gesamtText());
+    assertThat(neu.norm("§ 3").orElseThrow().gesamtText())
+        .isEqualTo(gesetz.norm("§ 3").orElseThrow().gesamtText());
+  }
 }

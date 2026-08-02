@@ -6,10 +6,10 @@
   01.04.2026
 - https://recht.nrw.de/gvnrw/2026-7
   (GV-NRW-2026-S202_22-Rundfunkaenderungsgesetz.pdf)
-- Das Heft ändert fünf Gesetze; Artikel 1 (WDR-Gesetz), Artikel 2
-  (Landesmediengesetz) und Artikel 3 (Telemedienzuständigkeitsgesetz)
-  sind als Akzeptanzfälle hinterlegt, Artikel 4 (17. RÄStV-AusfG) und
-  Artikel 5 (Inkrafttreten) nicht.
+- Das Heft ändert vier Gesetze; alle vier sind als Akzeptanzfälle
+  hinterlegt: Artikel 1 (WDR-Gesetz), Artikel 2 (Landesmediengesetz),
+  Artikel 3 (Telemedienzuständigkeitsgesetz) und Artikel 4
+  (17. RÄStV-AusfG). Artikel 5 regelt nur das Inkrafttreten.
 
 Stammfassungen (jeweils die vor dem Änderungsgesetz geltende Fassung):
 - recht.nrw.de gibt jede Fassung unter
@@ -28,6 +28,12 @@ Stammfassungen (jeweils die vor dem Änderungsgesetz geltende Fassung):
 - TMZ-Gesetz-alt.txt: Telemedienzuständigkeitsgesetz vom 29.03.2007
   (GV. NRW. S. 137), Stand 27.04.2022, aus
   .../27042022-gesetz-zur-regelung-der-zustaendigkeit-fuer-die-ueberwachung-von-telemedien
+- 17-RAEStV-AusfG-alt.txt: Gesetz zur Ausführung des Siebzehnten
+  Rundfunkänderungsstaatsvertrags (Siebzehnter
+  Rundfunkänderungsstaatsvertrag Ausführungsgesetz) vom 17.12.2015
+  (GV. NRW. S. 872), Stand 01.01.2016 — das Gesetz war bis 2026
+  unverändert, die Erstfassung ist also zugleich die Stammfassung; aus
+  .../01012016-gesetz-zur-ausfuehrung-des-siebzehnten-rundfunkaenderungsstaatsvertrags
 - Aufbereitung ins kanonische Klartextformat des LandesRechtLoaders:
   je <section class="legaldoc-article"> ein Normkopf aus
   field_num + field_headline, darunter die <p>-Absätze; die
@@ -44,3 +50,6 @@ Abgleich:
   „Bundesreisekostengesetzes“ entfallen; §§ 7 und 21: ein überzähliges
   Anführungszeichen aus dem Änderungsgesetz übernommen; LMG NRW § 93
   Absatz 3 Nummer 11: zusätzlich die Wörter „Film (“ gestrichen).
+- Beim 17. RÄStV-AusfG stimmt das Ergebnis zeichengenau mit der
+  amtlichen Nachfassung überein, einschließlich der dort stehenden
+  amtlichen Platzhalter („[einsetzen: Datum der Bekanntmachung]“).

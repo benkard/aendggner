@@ -99,8 +99,8 @@ folgt geändert").
   (`EndToEndTest.kommunalrechtAendGSchleswigHolstein`): Artikel 1 trifft die Gemeindeordnung,
   Artikel 2 die Kreisordnung, je ein Neufassungsbefehl, kein unbekannter Befehl. Ein voller
   Akzeptanztest ist *nicht* möglich — siehe „Noch offen“.
-* *Nordrhein-Westfalen* ist der Massentest-Fall: aus demselben Heft sind drei Artikel als
-  Akzeptanzfälle hinterlegt.
+* *Nordrhein-Westfalen* ist der Massentest-Fall: aus demselben Heft sind alle vier ändernden
+  Artikel als Akzeptanzfälle hinterlegt.
 +
 --
 `EndToEndTest.tmzGesetzAcceptance`:: Artikel 3 (Telemedienzuständigkeitsgesetz), vier Befehle,
@@ -113,14 +113,20 @@ Absatz 13 kommt hinzu; § 15 Absatz 3: Nummer 22 entfällt, 23 bis 37 rücken au
 Nr. 13 e) aa): „der Punkt am Ende des Satzes“ ist in einer zweisätzigen Nummer nicht eindeutig.
 `EndToEndTest.lmgNrwAcceptance`:: Artikel 2 (Landesmediengesetz), 18 Befehle, kein Rest. Stamm
 `NRW/LMG-NRW-alt.txt` (Fassung vom 01.01.2025).
+`EndToEndTest.rundfunkAusfuehrungsgesetzAcceptance`:: Artikel 4 (17. RÄStV-AusfG), ein Befehl,
+kein Rest. Stamm `NRW/17-RAEStV-AusfG-alt.txt` (Erstfassung vom 17.12.2015, bis 2026 unverändert).
+Der Artikel führt seinen Befehl *ohne* Gliederungspunkt — der Text nach der Änderungsformel ist
+der Befehl —, und das Zitat der neuen Fassung trägt verschachtelte Anführungszeichen (ein
+vollständiges „durch Artikel 3 …“ innerhalb einer eckigen Klammer). Beides trägt die vorhandene
+Maschinerie.
 --
 +
-Alle drei Ergebnisse sind normweise gegen die amtliche Fassung vom 01.04.2026 abgeglichen. Es
+Alle vier Ergebnisse sind normweise gegen die amtliche Fassung vom 01.04.2026 abgeglichen. Es
 bleiben nur Abweichungen, in denen die amtliche Nachfassung selbst vom Befehlswortlaut abweicht
 (§ 15 WDR-Gesetz: „des“ vor „Bundesreisekostengesetzes“ entfallen; § 7 und § 21 WDR-Gesetz: ein
 überzähliges Anführungszeichen aus dem Änderungsgesetz; § 93 LMG NRW: zusätzlich die Wörter
-„Film (“ gestrichen) — ÄndGgner wendet dort den Wortlaut an. Offen bleibt Artikel 4
-(17. RÄStV-AusfG).
+„Film (“ gestrichen) — ÄndGgner wendet dort den Wortlaut an. Damit ist das Heft GV. NRW. 7/2026
+vollständig belegt.
 * *Berlin* ist bis zur Befehlserkennung umgesetzt (`EndToEndTest.asogLafAendGBerlin`): Artikel 2
   (LAF-Errichtungsgesetz) wird vollständig erkannt, beide Punkte erben ihr Ziel aus der
   Änderungsformel. Artikel 1 wird seit der Wortanker-Einfügung und der Zitatgrenze am
