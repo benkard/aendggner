@@ -123,13 +123,15 @@ final class BefehlErkenner {
               + Z
               + " ersetzt\\.$");
 
+  // Wie ERSETZUNG, nur ohne Fundstelle — die liefert der Kontextrahmen. Das Objekt nach „durch“
+  // darf auch hier verkürzt sein („Die Angabe „X“ wird durch „Y“ ersetzt“, hessisches GVBl).
   private static final Pattern ERSETZUNG_OHNE_STELLE =
       Pattern.compile(
           "^(?:Die Wörter|Das Wort|Die Angabe|Die Zahl) "
               + Z
-              + " (?:wird|werden) (jeweils )?durch "
+              + " (?:wird|werden) (jeweils )?durch (?:"
               + WOERTER
-              + " "
+              + " )?"
               + Z
               + " ersetzt\\.$");
 
@@ -174,10 +176,13 @@ final class BefehlErkenner {
               + "\\.?$");
 
   // Ohne Stellenangabe: „Der Punkt am Ende wird durch die Angabe „…“ ersetzt.“ — das Satzzeichen ist
-  // hier selbst das Subjekt, die Fundstelle liefert der Kontextrahmen.
+  // hier selbst das Subjekt, die Fundstelle liefert der Kontextrahmen. Der Zusatz „am Ende“ darf
+  // fehlen („Das Komma wird durch das Wort „und“ ersetzt.“, hessisches GVBl): der bestimmte Artikel
+  // setzt dann voraus, dass die Einheit genau ein solches Satzzeichen trägt — was der Anwender
+  // prüft, statt es an das Einheitsende zu heften.
   private static final Pattern SATZZEICHEN_ERSETZUNG_OHNE_STELLE =
       Pattern.compile(
-          "^(Der Punkt|Das Komma|Das Semikolon) am Ende(?: des Satzes)? wird durch "
+          "^(Der Punkt|Das Komma|Das Semikolon)(?: am Ende(?: des Satzes)?)? wird durch "
               + "(ein Komma und "
               + WOERTER
               + " "
@@ -188,11 +193,12 @@ final class BefehlErkenner {
               + Z
               + ") ersetzt\\.$");
 
-  // Auch die Verbundform „wird der Punkt am Ende durch ein Komma und die Wörter „…“ ersetzt“.
+  // Auch die Verbundform „wird der Punkt am Ende durch ein Komma und die Wörter „…“ ersetzt“;
+  // „am Ende“ ist wie oben entbehrlich.
   private static final Pattern SATZZEICHEN_ERSETZUNG =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (der Punkt|das Komma|das Semikolon)"
-              + " am Ende(?: des Satzes)? durch "
+              + "(?: am Ende(?: des Satzes)?)? durch "
               + "(ein Komma und "
               + WOERTER
               + " "
@@ -1014,7 +1020,7 @@ final class BefehlErkenner {
       } else {
         neu = satzzeichen(m.group(2));
       }
-      return Optional.of(new Ersetzung(kontext, alt, neu, false, true, provenienz));
+      return Optional.of(new Ersetzung(kontext, alt, neu, false, amEnde(text), provenienz));
     }
 
     if ((m = SATZZEICHEN_ERSETZUNG.matcher(text)).matches()) {
@@ -1029,8 +1035,9 @@ final class BefehlErkenner {
         neu = satzzeichen(m.group(3));
       }
       var neuText = neu;
+      var amEnde = amEnde(text);
       return StellenParser.parse(m.group(1))
-          .map(s -> new Ersetzung(kontext.plus(s), alt, neuText, false, true, provenienz));
+          .map(s -> new Ersetzung(kontext.plus(s), alt, neuText, false, amEnde, provenienz));
     }
 
     if ((m = WOERTER_EINFUEGUNG.matcher(text)).matches()) {
@@ -1519,6 +1526,10 @@ final class BefehlErkenner {
           "(?i)(?:die Angabe|nach der Angabe|vor der Angabe|die Wörter|die Worte|"
               + "nach den Wörtern|vor den Wörtern|das Wort)\\b");
 
+  // Klausel, deren Subjekt ein Satzzeichen ist („das Komma wird durch … ersetzt“).
+  private static final Pattern SATZZEICHEN_SUBJEKT =
+      Pattern.compile("(?i)(?:der Punkt|das Komma|das Semikolon)\\b");
+
   private static Optional<Aenderungsbefehl> erkenneVerbund(
       String text, Stelle kontext, ZitatExtraktor.Ergebnis zitate, Provenienz provenienz) {
     var sep = VERBUND_SEP.matcher(text);
@@ -1583,6 +1594,31 @@ final class BefehlErkenner {
       var imNeuen = erkenneAlsSatz(gross, neuerKontext, zitate, provenienz);
       if (imNeuen.isPresent()) {
         return imNeuen;
+      }
+    }
+    // „Die bisherige Nr. 7 wird Nr. 5 und das Komma wird durch das Wort „und“ ersetzt.“ — anders
+    // als eine Wortoperation trägt eine Satzzeichen-Operation keinen unterscheidenden Zieltext:
+    // norm-weit aufgelöst träfe „das Komma“ auf beliebig viele Vorkommen. Sie meint deshalb stets
+    // die soeben umnummerierte Einheit und wird auf diese festgelegt.
+    if (linksBefehl instanceof Umnummerierung umnummerierung
+        && SATZZEICHEN_SUBJEKT.matcher(rechts).lookingAt()) {
+      var relativ = relativeStelle(umnummerierung.neu(), kontext);
+      var vm = WIRD_WERDEN.matcher(rechts);
+      if (!relativ.istLeer() && vm.find()) {
+        // Grammatische Normalform wie beim Gapping: Lokativ voran, Verb vor das Subjekt.
+        var umgestellt =
+            "In "
+                + relativ.anzeigeText()
+                + " "
+                + vm.group().strip()
+                + " "
+                + rechts.substring(0, vm.start()).strip()
+                + " "
+                + rechts.substring(vm.end()).strip();
+        var imNeuen = erkenneAlsSatz(umgestellt, kontext, zitate, provenienz);
+        if (imNeuen.isPresent()) {
+          return imNeuen;
+        }
       }
     }
     // „Der bisherige Wortlaut wird Abs. 5 und in Halbsatz 1 wird … ersetzt“ (bayerisch): die
@@ -2073,6 +2109,17 @@ final class BefehlErkenner {
   private static String wortZitat(ZitatExtraktor.Ergebnis zitate, String index) {
     return zitat(zitate, index).replaceAll("\\s+", " ").strip();
   }
+
+  /**
+   * Nennt der Befehl das Satzzeichen ausdrücklich „am Ende“, so ist es dort zu ersetzen; sonst
+   * verlangt der bestimmte Artikel, dass die Einheit genau eines trägt — das prüft der Anwender.
+   * Zitate sind hier bereits maskiert, die Wendung kann also nicht aus dem Ersatztext stammen.
+   */
+  private static boolean amEnde(String text) {
+    return AM_ENDE.matcher(text).find();
+  }
+
+  private static final Pattern AM_ENDE = Pattern.compile("\\bam Ende\\b");
 
   private static String satzzeichen(String phrase) {
     // Am Satzanfang steht dieselbe Phrase großgeschrieben („Der Punkt am Ende wird …“).

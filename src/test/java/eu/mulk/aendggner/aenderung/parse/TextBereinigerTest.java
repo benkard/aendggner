@@ -289,6 +289,22 @@ class TextBereinigerTest {
   }
 
   @Test
+  void entferntSeitenmoebelDesGvblHessen() {
+    // Der Trenner der Fußzeile ist ein weiches Trennzeichen (U+00AD), kein Gedankenstrich; die
+    // Sternchen-Fußnote der Überschrift steht am Seitenfuß mitten zwischen zwei Punkten.
+    var roh =
+        """
+        für das Land Hessen
+        2026 Wiesbaden,  den 3. Februar 2026 Nr. 5
+        Erster Satz.
+        * Ändert FFN 61-60
+        Gesetz- und Verordnungsblatt für das Land Hessen ­ Nr. 5 vom 3. Februar 2026 2
+        Zweiter Satz.""";
+
+    assertThat(TextBereiniger.bereinige(roh)).isEqualTo("Erster Satz.\nZweiter Satz.");
+  }
+
+  @Test
   void repariertInvertierteZitatzeichenAnAbsatzmarkern() {
     // BMJV-Vorlagen zeichnen das hängende „ nach dem Absatzmarker bzw. der Paragraphenangabe.
     assertThat(TextBereiniger.bereinige("(1) „ Ungeachtet des § 8 gilt.“"))

@@ -844,4 +844,87 @@ class EndToEndTest {
     assertThat(neu.norm("§ 3").orElseThrow().gesamtText())
         .isEqualTo(gesetz.norm("§ 3").orElseThrow().gesamtText());
   }
+
+  /**
+   * Hessen: Die Elfte Verordnung zur Änderung der Verordnung zur Bestimmung verkehrsrechtlicher
+   * Zuständigkeiten (GVBl. 2026 Nr. 5). Der Test hält Extraktion und Befehlserkennung fest — alle
+   * 21 Befehle des Artikels 1 werden erkannt.
+   *
+   * <p>Kein voller Akzeptanztest: {@code hessenrecht.hessen.de} ist dieselbe anmeldepflichtige
+   * juris-Anwendung wie die Portale Schleswig-Holsteins und Berlins, die Stammfassung ist daraus
+   * nicht zu beschaffen.
+   *
+   * <p>Der hessische Sperrsatz („Der Mi n is t er“) bleibt bewusst unbehandelt: Er trifft nur den
+   * Unterschriftenblock am Dokumentende, keinen einzigen Befehl.
+   */
+  @Test
+  void verkehrsZustVAendVOHessen() throws Exception {
+    var pdf =
+        SAMPLEDATA.resolve("Hessen/GVBl-2026-05_11-AendVO-verkehrsrechtl-Zustaendigkeiten.pdf");
+    assumeTrue(Files.exists(pdf), "GVBl-Hessen-Beispiel-PDF fehlt");
+
+    var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(pdf));
+
+    // Die laufende Fußzeile stand zwischen den Punkten 11. und 12. und hing sonst an Punkt 12.
+    assertThat(text).doesNotContain("Gesetz- und Verordnungsblatt für das Land Hessen");
+    // Die amtliche Sternchen-Fußnote der Überschrift steht am Seitenfuß zwischen 4. b) und 5. und
+    // hing sonst an Punkt 4. b).
+    assertThat(text).doesNotContain("Ändert FFN");
+    // Der Sperrsatz beschränkt sich auf den Unterschriftenblock — hier bewusst nicht geheilt.
+    assertThat(text).contains("Min isterpräsident");
+
+    var verordnung =
+        new Gesetz(
+            "VerkZustV",
+            "Verordnung zur Bestimmung verkehrsrechtlicher Zuständigkeiten",
+            null,
+            List.of());
+    var ergebnis = new AenderungsgesetzParser().parse(text, verordnung, null);
+    // Artikel 2 regelt nur das Inkrafttreten.
+    assertThat(ergebnis.artikel()).containsExactly("1");
+    assertThat(ergebnis.befehle()).hasSize(21);
+    assertThat(ergebnis.befehle()).noneMatch(b -> b instanceof UnbekannterBefehl);
+
+    // Hessen kürzt im §-Kontext durchweg ab („In Abs. 1 …“, „Nr. 1 wird aufgehoben“); der Rahmen
+    // liefert den Paragraphen.
+    assertThat(befehlZu(ergebnis, "1. a)").stelle().anzeigeText()).isEqualTo("§ 6 Absatz 1");
+    assertThat(befehlZu(ergebnis, "5. a)").stelle().anzeigeText()).isEqualTo("§ 14 Nummer 1");
+    // „Die Absatzbezeichnung „(1)“ wird gestrichen.“ — die Bezeichnung selbst ist das Ziel.
+    assertThat(befehlZu(ergebnis, "4. a)").stelle().anzeigeText())
+        .isEqualTo("§ 13 Absatzbezeichnung (1)");
+
+    // 5. b) und 5. f) sind Verbünde aus Umnummerierung und einer Folgeoperation ohne eigenen
+    // Lokativ. Die Wortoperation löst norm-weit auf (ihr Zieltext ist unterscheidend), die
+    // Satzzeichen-Operation dagegen wird auf die umnummerierte Nummer festgelegt — „das Komma“
+    // träfe sonst beliebig viele Vorkommen.
+    var umnummerierungUndErsetzung = (Aenderungsbefehl.Sammelbefehl) befehlZu(ergebnis, "5. b)");
+    assertThat(umnummerierungUndErsetzung.teilbefehle())
+        .extracting(b -> b.stelle().anzeigeText())
+        .containsExactly("§ 14 Nummer 2", "§ 14");
+    var umnummerierungUndKomma = (Aenderungsbefehl.Sammelbefehl) befehlZu(ergebnis, "5. f)");
+    assertThat(umnummerierungUndKomma.teilbefehle())
+        .extracting(b -> b.stelle().anzeigeText())
+        .containsExactly("§ 14 Nummer 7", "§ 14 Nummer 5");
+    var komma = (Aenderungsbefehl.Ersetzung) umnummerierungUndKomma.teilbefehle().get(1);
+    assertThat(komma.alt()).isEqualTo(",");
+    assertThat(komma.neu()).isEqualTo("und");
+    // Ohne den Zusatz „am Ende“ ist das Satzzeichen nicht ans Einheitsende geheftet; der Anwender
+    // verlangt dann, dass die Einheit genau eines trägt.
+    assertThat(komma.amEnde()).isFalse();
+
+    // Bereichs-Umnummerierung, absteigend angewandt: „Die bisherigen Nr. 3 und 4 werden die
+    // Nr. 2 und 3.“
+    var bereich = (Aenderungsbefehl.Sammelbefehl) befehlZu(ergebnis, "5. c)");
+    assertThat(bereich.teilbefehle())
+        .extracting(b -> b.stelle().anzeigeText())
+        .containsExactly("§ 14 Nummer 4", "§ 14 Nummer 3");
+  }
+
+  private static Aenderungsbefehl befehlZu(
+      AenderungsgesetzParser.ParseErgebnis ergebnis, String gliederungsPfad) {
+    return ergebnis.befehle().stream()
+        .filter(b -> b.provenienz().gliederungsPfad().equals(gliederungsPfad))
+        .findFirst()
+        .orElseThrow();
+  }
 }

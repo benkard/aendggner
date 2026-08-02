@@ -78,6 +78,62 @@ class BefehlErkennerTest {
     assertThat(ersetzung.amEnde()).isTrue();
   }
 
+  /**
+   * Hessisches GVBl: Der Zusatz „am Ende“ darf fehlen. Der bestimmte Artikel setzt dann voraus,
+   * dass die Einheit genau ein solches Satzzeichen trägt — das prüft der Anwender, statt dass die
+   * Erkennung es ans Einheitsende heftet.
+   */
+  @Test
+  void erkenntSatzzeichenErsetzungOhneEndeAngabe() {
+    var befehl =
+        erkenne(
+            "In Nummer 5 wird das Komma durch das Wort „und“ ersetzt.",
+            new Stelle(List.of(new Stelle.Paragraph("14"))));
+
+    assertThat(befehl).containsInstanceOf(Ersetzung.class);
+    var ersetzung = (Ersetzung) befehl.orElseThrow();
+    assertThat(ersetzung.stelle().anzeigeText()).isEqualTo("§ 14 Nummer 5");
+    assertThat(ersetzung.alt()).isEqualTo(",");
+    assertThat(ersetzung.neu()).isEqualTo("und");
+    assertThat(ersetzung.amEnde()).isFalse();
+  }
+
+  /** Ohne Fundstelle und mit verkürztem Objekt hinter „durch“ (hessisches GVBl). */
+  @Test
+  void erkenntErsetzungOhneStelleMitVerkuerztemObjekt() {
+    var befehl =
+        erkenne(
+            "Die Angabe „(§ 19 Abs. 3 Satz 1 Nr. 3 oder 4)“ wird durch „(§ 19 Abs. 3 Satz 1"
+                + " Nr. 3)“ ersetzt.",
+            new Stelle(List.of(new Stelle.Paragraph("14"))));
+
+    assertThat(befehl).containsInstanceOf(Ersetzung.class);
+    var ersetzung = (Ersetzung) befehl.orElseThrow();
+    assertThat(ersetzung.stelle().anzeigeText()).isEqualTo("§ 14");
+    assertThat(ersetzung.alt()).isEqualTo("(§ 19 Abs. 3 Satz 1 Nr. 3 oder 4)");
+    assertThat(ersetzung.neu()).isEqualTo("(§ 19 Abs. 3 Satz 1 Nr. 3)");
+  }
+
+  /**
+   * Verbund aus Umnummerierung und Satzzeichen-Operation: Anders als eine Wortoperation trägt sie
+   * keinen unterscheidenden Zieltext und meint deshalb die soeben umnummerierte Einheit.
+   */
+  @Test
+  void bindetSatzzeichenKlauselAnDieUmnummerierteEinheit() {
+    var befehl =
+        erkenne(
+            "Die bisherige Nr. 7 wird Nr. 5 und das Komma wird durch das Wort „und“ ersetzt.",
+            new Stelle(List.of(new Stelle.Paragraph("14"))));
+
+    assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile).hasSize(2);
+    assertThat(teile.get(0)).isInstanceOf(Umnummerierung.class);
+    assertThat(teile.get(0).stelle().anzeigeText()).isEqualTo("§ 14 Nummer 7");
+    assertThat(teile.get(1).stelle().anzeigeText()).isEqualTo("§ 14 Nummer 5");
+    assertThat(((Ersetzung) teile.get(1)).neu()).isEqualTo("und");
+  }
+
   @Test
   void erkenntNeufassung() {
     var befehl =

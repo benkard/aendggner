@@ -146,6 +146,26 @@ public final class TextBereiniger {
       Pattern.compile(
           "^\\s*(?:Nummer \\d{4}/\\d{1,3}|\\d{4}/\\d{1,3} vom \\d{1,2}\\. \\p{L}+)\\s*$");
 
+  // GVBl. für das Land Hessen: laufende Fußzeile („Gesetz- und Verordnungsblatt für das Land
+  // Hessen ­ Nr. 5 vom 3. Februar 2026 2“) und der Rest des Titelkopfs („für das Land Hessen“,
+  // „2026 Wiesbaden, den 3. Februar 2026 Nr. 5“). Die Fußzeile steht zwischen zwei
+  // Gliederungspunkten und hängte sich sonst an den vorangehenden Befehl. Der Trenner ist ein
+  // weiches Trennzeichen (U+00AD), kein Gedankenstrich.
+  private static final Pattern GVBL_HESSEN_FUSS =
+      Pattern.compile(
+          "^\\s*Gesetz- und Verordnungsblatt für das Land Hessen\\s*[\\u00ad–-]\\s*Nr\\. \\d+"
+              + " vom .+? \\d{4}\\s+\\d{1,4}\\s*$");
+  private static final Pattern GVBL_HESSEN_KOPF =
+      Pattern.compile(
+          "^\\s*(?:für das Land Hessen|\\d{4}\\s+\\p{Lu}\\p{L}+,\\s+den .+? \\d{4}\\s+Nr\\. \\d+)"
+              + "\\s*$");
+
+  // Amtliche Sternchen-Fußnote der Verordnungs-/Gesetzesüberschrift, die auf die Fundstellennummer
+  // des geänderten Rechts verweist („* Ändert FFN 61-60“, Hessen; „* Ändert Gl.Nr. …“). Sie steht
+  // am Seitenfuß mitten zwischen zwei Gliederungspunkten und ist damit funktional Seitenmöbel.
+  private static final Pattern FUNDSTELLEN_FUSSNOTE =
+      Pattern.compile("^\\s*\\*\\s*Ändert (?:FFN|Gl\\.\\s?Nr\\.|GVBl\\.).*$");
+
   /** Konjunktionen, die typischerweise auf einen Suspensivstrich folgen („Wirk- und …“). */
   private static final Pattern KONJUNKTION =
       Pattern.compile("^(und|oder|sowie|bzw\\.|beziehungsweise)\\b.*");
@@ -372,7 +392,10 @@ public final class TextBereiniger {
         || NDS_HERAUSGEBER.matcher(zeile).matches()
         || GVOBL_SH_KOPF.matcher(zeile).matches()
         || GVOBL_SH_LAND.matcher(zeile).matches()
-        || GVOBL_SH_HEFT.matcher(zeile).matches();
+        || GVOBL_SH_HEFT.matcher(zeile).matches()
+        || GVBL_HESSEN_FUSS.matcher(zeile).matches()
+        || GVBL_HESSEN_KOPF.matcher(zeile).matches()
+        || FUNDSTELLEN_FUSSNOTE.matcher(zeile).matches();
   }
 
   /**

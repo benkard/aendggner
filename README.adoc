@@ -113,7 +113,10 @@ zu Teil 3 … eingefügt“), Voranstellungen, Mehrfach-Ersetzungs- und
 -Einfügepaare, Einfügungen, deren Position ein Wortanker statt einer
 Stellenangabe bestimmt („Vor den Wörtern „Aus dem Bereich Verkehr:“ wird
 folgender Absatz 5 eingefügt“), Verbünde aus Umnummerierung und
-Folgeänderung („§ 50 wird zu § 38 und wird wie folgt geändert“),
+Folgeänderung („§ 50 wird zu § 38 und wird wie folgt geändert“, „Die
+bisherige Nr. 7 wird Nr. 5 und das Komma wird durch das Wort „und“
+ersetzt“ — eine Satzzeichen-Operation meint dabei stets die soeben
+umnummerierte Einheit, weil ihr Zieltext nichts unterscheidet),
 Verb-Rahmen, deren Unterpunkte allein die Fundstelle tragen („Es werden
 ersetzt: … in § 35 Absatz 3 die Angabe „X“ jeweils durch die Angabe
 „Y“,“) sowie die Neufassung der Gesetzesüberschrift.
@@ -167,7 +170,7 @@ Heftes: Telemedienzuständigkeitsgesetz, Landesmediengesetz,
 Ausführungsgesetz zum 17. Rundfunkänderungsstaatsvertrag und, mit 101
 Befehlen an 31 Normen der größte Landesrechtsfall, das WDR-Gesetz —
 mit Akzeptanztests gegen die
-amtlichen Nachfassungen; für Schleswig-Holstein und Berlin
+amtlichen Nachfassungen; für Schleswig-Holstein, Berlin und Hessen
 reicht die Prüfung bis zur Befehlserkennung — dort vollständig, aber ohne
 Anwendung —, weil deren Landesportale ihre Stammfassungen nur über eine
 anmeldepflichtige Schnittstelle ausgeben. Welche Konvention welches Land beisteuert, welche

@@ -44,7 +44,9 @@ gefasst"); *hochgestellte Fußnotenmarker an Artikel-Überschriften* („Artikel
 03.02.2026 (Elfte Verordnung zur Änderung der Verordnung zur Bestimmung verkehrsrechtlicher
 Zuständigkeiten)
 |*Sperrsatz* in Datums- und Signaturzeilen („3 . F e bru a r 2 02 6", „Der Mi n is t er pr
-äs i d e nt") als Extraktions-Härtetest; *abgekürztes „Abs."/„Nr." im §-Kontext*; FFN-Fußnote.
+äs i d e nt") — er trifft, anders als erwartet, nur den Unterschriftenblock und keinen Befehl;
+*abgekürztes „Abs."/„Nr." im §-Kontext*; die *FFN-Fußnote der Überschrift* („* Ändert FFN 61-60")
+steht am Seitenfuß mitten zwischen zwei Gliederungspunkten.
 
 |Niedersachsen
 |`Niedersachsen/Nds-GVBl-2026-10_ELER-Foerdergesetz-AendG.pdf` — Nds. GVBl. 2026 Nr. 10 vom
@@ -133,6 +135,13 @@ vollständig belegt.
   Aufzählungspunkt *vollständig* erkannt — alle sechs Befehle, einschließlich der Änderungen an der
   unnummerierten Anlage. Ein voller Akzeptanztest bleibt an der Stammfassung hängen (siehe „Noch
   offen“).
+* *Hessen* ist bis zur Befehlserkennung umgesetzt (`EndToEndTest.verkehrsZustVAendVOHessen`): alle
+  21 Befehle des Artikels 1 werden erkannt. Der als Härtetest erwartete Sperrsatz erwies sich als
+  harmlos — er trifft nur den Unterschriftenblock. Zu tun war dreierlei: die laufende GVBl-Fußzeile
+  und der Masthead als Kolumnentitel, die Sternchen-Fußnote der Überschrift („* Ändert FFN 61-60“,
+  am Seitenfuß zwischen zwei Gliederungspunkten) ebenso, und zwei Befehlsformen — der Zusatz
+  „am Ende“ darf beim Satzzeichen fehlen, und das Objekt hinter „durch“ darf auch ohne Fundstelle
+  verkürzt sein. Ein voller Akzeptanztest ist *nicht* möglich — siehe „Noch offen“.
 * Baden-Württemberg (GBl 2026 Nr. 26): großes Anlage-lastiges Änderungsgesetz (§§ 4–57a + Anlagen
   1/3b/4b); Stammfassung/Akzeptanztest noch offen.
 
@@ -154,12 +163,14 @@ Vorfassung kommt über die Wayback-CDX-API: Fassungs-IDs abfragen, die zum Zeitr
 per `…id_/…`-Rohform laden. Achtung, `WebFetch` erreicht `web.archive.org` nicht — nur `curl`.
 
 juris-Landesportale:: Sackgasse — *geprüft* für `gesetze-rechtsprechung.sh.juris.de`
-(Schleswig-Holstein) und `gesetze.berlin.de` (Berlin, trotz Eigennamen dieselbe Anwendung). Beide
-sind seit etwa Ende 2022 reine Single-Page-Anwendungen; sämtliche Dokument-URLs liefern nur die
-leere Anwendungshülle, die Inhalte hängen an einer tokenpflichtigen Schnittstelle. Auch archivierte
+(Schleswig-Holstein), `gesetze.berlin.de` (Berlin, trotz Eigennamen dieselbe Anwendung),
+`landesrecht-bw.de` (Baden-Württemberg) und `rv.hessenrecht.hessen.de` (Hessen, Kennung `bshe`).
+Alle vier sind seit etwa Ende 2022 reine Single-Page-Anwendungen; sämtliche Dokument-URLs liefern
+nur die leere Anwendungshülle (rund 5,4 kB), die Inhalte hängen an einer tokenpflichtigen
+Schnittstelle. Auch archivierte
 Einzelnorm-Seiten sind bereits Hüllen. Brauchbar sind allenfalls Wayback-Snapshots aus der Zeit
 *vor* der Umstellung — die sind aber meist zu alt für die gesuchte Fassung. Für
-`landesrecht-bw.de`, `hessenrecht.hessen.de`, `landesrecht.thueringen.de` und `voris.niedersachsen.de`
+`landesrecht.thueringen.de` und `voris.niedersachsen.de`
 ist dasselbe zu erwarten, aber *nicht* nachgeprüft: Ein Versuch lohnt, bevor man aufgibt.
 
 Fällt das Portal aus, bleibt der Weg über das Gesetzblatt selbst: Trägt der Einleitungssatz des
@@ -189,12 +200,16 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
   juris-Anwendung wie das schleswig-holsteinische Portal (Kennung `bsbe`) und ebenso
   anmeldepflichtig. In der Wayback Machine gibt es keine serverseitig gerenderten Volltexte des
   ASOG oder des LAF-Errichtungsgesetzes.
+* *Hessen — Stammfassung nicht beschaffbar*: `rv.hessenrecht.hessen.de` ist dieselbe juris-Anwendung
+  (Kennung `bshe`) wie die Portale Schleswig-Holsteins und Berlins; Dokument-URLs liefern nur die
+  Anwendungshülle. Die Befehlserkennung ist vollständig belegt, die Anwendung bleibt offen.
 * *Anlagen im kanonischen Klartext*: Anlagen sind als Änderungsziel unterstützt — im gii-XML sind
   sie eigene Normen („Anlage 8“, „Anhang“), und `Stelle.anlagenEnbez()` löst sie auf; im GEG werden
   anlagenbezogene Befehle angewandt. Der `LandesRechtTextParser` kennt jedoch nur „§“- und
   „Art.“-Normköpfe: Eine handgepflegte Stammfassung kann *keine* Anlage tragen. Das ist die
-  konkrete Lücke für Berlin (Artikel 1) und Baden-Württemberg (Anlagen 1/3b/4b) — sie wird erst
-  behebbar, wenn für eines der beiden eine Stammfassung vorliegt.
+  konkrete Lücke für Berlin (Artikel 1) und Baden-Württemberg (Anlagen 1/3b/4b). Beide Portale sind
+  inzwischen als juris-Anwendung *nachgeprüft* — die Lücke geht deshalb erst mit einem
+  Anlage-tragenden Stammgesetz aus einem anderen Portal auf, praktisch `recht.nrw.de`.
 * *Berlin, ganzseitenbreite Rahmen*: Titelblock und Impressum stehen im Inhaltsstrom an anderer
   Stelle als im Satzbild (der Titelblock mitten im Fließtext der ersten Seite). Das zu beheben
   verlangt eine geometrische Lesereihenfolge (XY-Cut), nicht bloß eine Spaltenerkennung.
@@ -208,15 +223,20 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
 Kein Land scheitert noch an reiner Extraktionsschwäche; offen sind Modell- und Beschaffungsfragen.
 Nach absteigendem Nutzen:
 
-. *Anlagen-Normköpfe im `LandesRechtTextParser`* — der Parser kennt jetzt neben „§“/„Art.“ auch
-  die Inhaltsübersicht als Norm; die Anlage fehlt noch. Lohnt, sobald für Berlin bzw.
-  Baden-Württemberg eine Stammfassung vorliegt, sonst nicht end-to-end prüfbar.
-. *Hessen* als Sperrsatz-Härtetest („3 . F e bru a r 2 02 6“). Betrifft nur Datums- und
-  Signaturzeilen, nicht die Befehle — kosmetisch, aber ein eigener Extraktionsfall.
+. *Ein Anlage-tragendes Stammgesetz über `recht.nrw.de` beschaffen* — und dann die
+  *Anlagen-Normköpfe im `LandesRechtTextParser`* ergänzen (er kennt neben „§“/„Art.“ inzwischen
+  auch die Inhaltsübersicht als Norm). Über Berlin oder Baden-Württemberg geht das nicht mehr:
+  deren Portale sind als juris-Anwendung nachgeprüft. Ohne eine solche Stammfassung bleibt die
+  Ergänzung nicht end-to-end prüfbar.
+. *Thüringen* (`Thueringen/GVBl-TH-2026-02_…`) ist als einziges beschafftes Heft noch gar nicht
+  angefasst — ein Sammelheft mit mehreren Verkündungen, also zugleich ein Test der Artikel-/
+  Verkündungsauswahl.
+. *Berlin, ganzseitenbreite Rahmen* (XY-Cut) — die letzte offene Layout-Frage, siehe „Noch offen“.
 
 Regressionsschutz: `./mvnw verify` prüft die bestehenden Belegfälle mit. Gepinnt ist dabei nicht
 überall dieselbe Art von Zahl — für UWG, AGG und ProdHaftG, dass *kein* Befehl manuell bleibt; für
 das BayJG die 154 erkannten Befehle und namentlich die drei Umnummerierungs-Residuen; für Sachsen,
-Niedersachsen und die drei NRW-Artikel die vollständige Anwendung bis auf das eine benannte
-Residuum im WDR-Gesetz. Wer eine dieser Zahlen
+Niedersachsen und die vier NRW-Artikel die vollständige Anwendung bis auf das eine benannte
+Residuum im WDR-Gesetz; für Schleswig-Holstein, Berlin und Hessen die vollständige *Erkennung*
+(dort 21 Befehle). Wer eine dieser Zahlen
 ändern muss, sollte den Grund im Test vermerken.
