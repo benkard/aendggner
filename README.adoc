@@ -178,6 +178,46 @@ Stammfassungen woher stammen und was noch offen ist, verzeichnet
 `src/main/resources/sampledata/Landesrecht-Beispiele.adoc`.
 
 
+[[web]]
+== Web-App
+
+Neben der CLI gibt es einen eigenständigen Webserver
+(`eu.mulk.aendggner.web.WebMain`), der dieselbe Pipeline
+(`eu.mulk.aendggner.Pipeline`) über ein einfaches Upload-Formular
+zugänglich macht: Stammgesetz- und Änderungsgesetz-Datei(en) hochladen,
+Synopse erhalten. Er nutzt ausschließlich JDK-Bordmittel
+(`com.sun.net.httpserver.HttpServer`) — keine zusätzliche
+Web-Framework-Abhängigkeit — und hält keine Rechtsdaten Dritter
+serverseitig vor; hochgeladene Dateien werden nur für die Dauer der
+Anfrage als temporäre Dateien gehalten und danach sofort gelöscht.
+
+Lokal starten nach <<building,dem Bauen>> der JAR:
+
+[source,shell script]
+----
+java -cp "target/aendggner-0.1.0-SNAPSHOT.jar:target/libs/*" \
+  eu.mulk.aendggner.web.WebMain
+----
+
+Der Server bindet standardmäßig nur an `127.0.0.1:8080`; Adresse und
+Port lassen sich über die Umgebungsvariablen `AENDGGNER_WEB_BIND` und
+`AENDGGNER_WEB_PORT` ändern. Für den öffentlichen Betrieb gehört davor
+ein TLS-terminierender Reverse Proxy mit Rate-Limiting — eine
+`nginx`-Vorlage sowie eine `systemd`-Unit liegen unter `deploy/`
+(`deploy/nginx-aendggner.conf`, `deploy/aendggner-web.service`).
+
+Vor dem produktiven, öffentlichen Betrieb sind zwingend zu erledigen:
+
+* `impressum.html` und `datenschutz.html`
+  (`src/main/resources/eu/mulk/aendggner/web/`) mit den tatsächlich
+  zutreffenden Angaben statt der `TODO`-Platzhalter füllen (Pflicht
+  nach § 5 DDG bzw. DSGVO für öffentlich erreichbare Dienste).
+* Den Quellcode-Link im Footer von `index.html` auf das tatsächlich
+  öffentlich erreichbare Repository setzen — das Projekt steht unter
+  AGPLv3 (`COPYING`), dessen §13 bei Netzwerkbetrieb einen
+  Quellcode-Zugriff für Nutzer:innen verlangt.
+
+
 == Running the Tests
 
 To build and run the tests:

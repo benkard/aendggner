@@ -1,0 +1,114 @@
+:root {
+  color-scheme: light dark;
+  --fg: #1b1b1b;
+  --bg: #fdfdfb;
+  --muted: #5a5a54;
+  --accent: #6b4423;
+  --border: #d8d3c4;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fg: #e8e6df;
+    --bg: #1c1b18;
+    --muted: #a6a296;
+    --accent: #c99a6c;
+    --border: #3a382f;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+  max-width: 40rem;
+  font-family: "Georgia", "Times New Roman", serif;
+  color: var(--fg);
+  background: var(--bg);
+  line-height: 1.5;
+}
+
+header {
+  margin-bottom: 2rem;
+}
+
+h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.75rem;
+}
+
+.tagline {
+  color: var(--muted);
+  margin: 0;
+}
+
+.field {
+  margin-bottom: 1.25rem;
+}
+
+label {
+  display: block;
+  font-weight: bold;
+  margin-bottom: 0.35rem;
+}
+
+.field.checkbox label {
+  font-weight: normal;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+input[type="file"] {
+  width: 100%;
+  padding: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+}
+
+button {
+  font: inherit;
+  font-weight: bold;
+  padding: 0.6rem 1.5rem;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  background: var(--accent);
+  color: var(--bg);
+  cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(1.1);
+}
+
+.disclaimer {
+  margin-top: 2rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+footer {
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+footer a {
+  color: var(--accent);
+}

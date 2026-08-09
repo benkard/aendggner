@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ÄndGgner — Änderungsgesetze konsolidieren</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <h1>ÄndGgner</h1>
+    <p class="tagline">
+      Änderungsgesetze automatisch auf ein Stammgesetz anwenden und als Synopse darstellen.
+    </p>
+  </header>
+
+  <main>
+    <form method="post" action="/synopse" enctype="multipart/form-data">
+      <div class="field">
+        <label for="stamm">Stammgesetz</label>
+        <input type="file" id="stamm" name="stamm" required>
+        <p class="hint">
+          gii-Norm-XML von gesetze-im-internet.de, oder — für bayerisches Landesrecht — die
+          konsolidierte Fassung von gesetze-bayern.de (PDF oder Klartext).
+        </p>
+      </div>
+
+      <div class="field">
+        <label for="aenderung">Änderungsgesetz(e)</label>
+        <input type="file" id="aenderung" name="aenderung" multiple required>
+        <p class="hint">
+          Ein oder mehrere BGBl-PDFs oder Klartextdateien. Werden bei Mehrfachauswahl in der
+          gewählten Reihenfolge nacheinander angewendet.
+        </p>
+      </div>
+
+      <div class="field checkbox">
+        <label>
+          <input type="checkbox" name="vollstaendig">
+          Unveränderte Vorschriften mit in die Synopse aufnehmen
+        </label>
+      </div>
+
+      <button type="submit">Synopse erzeugen</button>
+    </form>
+
+    <p class="disclaimer">
+      Die Synopse wird automatisch erstellt und ist <strong>ohne Gewähr</strong> für Vollständigkeit
+      und Richtigkeit; sie ersetzt keine Rechtsberatung. Uneindeutige Änderungsbefehle werden zur
+      manuellen Prüfung markiert statt stillschweigend verworfen. Hochgeladene Dateien werden
+      ausschließlich zur Erzeugung der Synopse verarbeitet und danach sofort wieder gelöscht — es
+      findet keine dauerhafte Speicherung statt. Bitte nur Rechtstexte hochladen.
+    </p>
+  </main>
+
+  <footer>
+    <a href="/impressum">Impressum</a> ·
+    <a href="/datenschutz">Datenschutz</a> ·
+    <a href="https://TODO-QUELLCODE-URL-EINTRAGEN">Quellcode (AGPLv3)</a>
+  </footer>
+</body>
+</html>

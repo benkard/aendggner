@@ -2,20 +2,12 @@ package eu.mulk.aendggner;
 
 import eu.mulk.aendggner.aenderung.parse.AenderungsgesetzParser;
 import eu.mulk.aendggner.aenderung.parse.PatchTextExtraktor;
-import eu.mulk.aendggner.aenderung.parse.SuperskriptModus;
 import eu.mulk.aendggner.aenderung.parse.TextBereiniger;
 import eu.mulk.aendggner.anwendung.BefehlAnwender;
-import eu.mulk.aendggner.gesetz.Gesetz;
-import eu.mulk.aendggner.gesetz.Superskript;
-import eu.mulk.aendggner.gesetz.gii.GiiXmlLoader;
-import eu.mulk.aendggner.gesetz.land.LandesRechtLoader;
-import eu.mulk.aendggner.synopse.HtmlRenderer;
-import eu.mulk.aendggner.synopse.SynopseBuilder;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.LogManager;
@@ -111,7 +103,7 @@ public class AendGgner implements Callable<Integer> {
     log.debugf("Logging configured.");
 
     if (dumpGesetz) {
-      var gesetz = ladeStammgesetz();
+      var gesetz = Pipeline.ladeStammgesetz(baseFile);
       System.out.printf(
           "%s — %s (%d Normen)%n", gesetz.jurabk(), gesetz.langue(), gesetz.normen().size());
       for (var norm : gesetz.normen()) {
@@ -126,8 +118,8 @@ public class AendGgner implements Callable<Integer> {
     }
 
     if (extractOnly) {
-      var gesetz = ladeStammgesetz();
-      var extraktor = new PatchTextExtraktor(superskriptModus(gesetz));
+      var gesetz = Pipeline.ladeStammgesetz(baseFile);
+      var extraktor = new PatchTextExtraktor(Pipeline.superskriptModus(gesetz));
       for (var file : patches) {
         var text = extraktor.extrahiere(file);
         System.out.println(raw ? text : TextBereiniger.bereinige(text));
@@ -136,8 +128,8 @@ public class AendGgner implements Callable<Integer> {
     }
 
     if (dumpBefehle) {
-      var gesetz = ladeStammgesetz();
-      var extraktor = new PatchTextExtraktor(superskriptModus(gesetz));
+      var gesetz = Pipeline.ladeStammgesetz(baseFile);
+      var extraktor = new PatchTextExtraktor(Pipeline.superskriptModus(gesetz));
       var parser = new AenderungsgesetzParser();
       for (var file : patches) {
         var text = TextBereiniger.bereinige(extraktor.extrahiere(file));
@@ -177,79 +169,20 @@ public class AendGgner implements Callable<Integer> {
       return 1;
     }
 
-    // Pipeline: Stammgesetz laden → Befehle parsen → anwenden → Synopse rendern.
-    var altesGesetz = ladeStammgesetz();
-    var extraktor = new PatchTextExtraktor(superskriptModus(altesGesetz));
-    var parser = new AenderungsgesetzParser();
-
-    var gesetz = altesGesetz;
-    var protokoll = new ArrayList<BefehlAnwender.AngewandteAenderung>();
-    var warnungen = new ArrayList<String>();
-    var quellen = new ArrayList<String>();
-
-    for (var file : patches) {
-      var text = TextBereiniger.bereinige(extraktor.extrahiere(file));
-      var parseErgebnis = parser.parse(text, gesetz, artikel);
-      if (parseErgebnis.befehle().isEmpty()) {
-        System.err.printf(
-            "Warnung: in %s wurde kein auf %s anwendbarer Artikel gefunden.%n",
-            file, gesetz.jurabk());
-      }
-      var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
-      gesetz = anwendung.neu();
-      protokoll.addAll(anwendung.protokoll());
-      warnungen.addAll(parseErgebnis.warnungen());
-      quellen.add(
-          file.getFileName() + " (Artikel " + String.join(", ", parseErgebnis.artikel()) + ")");
-    }
-
-    var gesamtErgebnis = new BefehlAnwender.AnwendungsErgebnis(gesetz, protokoll);
-    var synopse = SynopseBuilder.baue(altesGesetz, gesamtErgebnis, warnungen, vollstaendig);
-    var quelle = baseFile.getFileName() + " + " + String.join(" + ", quellen);
-    var html = HtmlRenderer.rendere(synopse, quelle);
+    var ergebnis = Pipeline.erzeugeSynopse(baseFile, patches, artikel, vollstaendig);
 
     if (output.equals("-")) {
-      System.out.println(html);
+      System.out.println(ergebnis.html());
     } else {
-      Files.writeString(Path.of(output), html, StandardCharsets.UTF_8);
+      Files.writeString(Path.of(output), ergebnis.html(), StandardCharsets.UTF_8);
       log.infof("Synopse nach %s geschrieben.", output);
     }
 
     System.err.printf(
         "%d Befehle angewandt, %d manuell zu prüfen, %d geänderte Normen.%n",
-        gesamtErgebnis.anzahlAngewandt(),
-        gesamtErgebnis.anzahlManuell(),
-        synopse.eintraege().size());
+        ergebnis.anzahlAngewandt(), ergebnis.anzahlManuell(), ergebnis.anzahlGeaenderteNormen());
 
-    return gesamtErgebnis.anzahlAngewandt() == 0 && !protokoll.isEmpty() ? 2 : 0;
-  }
-
-  /** Gii-XML → {@link GiiXmlLoader}; PDF/Klartext (Landesrecht) → {@link LandesRechtLoader}. */
-  private Gesetz ladeStammgesetz() throws Exception {
-    return istGiiXml() ? new GiiXmlLoader().load(baseFile) : new LandesRechtLoader().load(baseFile);
-  }
-
-  /**
-   * Der Superskriptmodus folgt der Schreibweise des Stammgesetzes: Trägt es amtliche Satznummern
-   * (bayerisches Landesrecht, Niedersachsen u.a.), werden auch die Änderungsgesetze mit
-   * Superskript-Erhalt extrahiert, damit Zitate und Stammtext dieselbe Schreibweise tragen; sonst
-   * (Bundesrecht, Länder ohne amtliche Satzzählung) sind hochgestellte Ziffern bloße
-   * Fußnotenmarker und werden verworfen.
-   */
-  private SuperskriptModus superskriptModus(Gesetz gesetz) {
-    for (var norm : gesetz.normen()) {
-      for (var absatz : norm.absaetze()) {
-        if (Superskript.traegtSatznummern(absatz.text())) {
-          return SuperskriptModus.BEHALTEN;
-        }
-      }
-    }
-    return SuperskriptModus.ENTFERNEN;
-  }
-
-  private boolean istGiiXml() throws IOException {
-    var mimeType = new org.apache.tika.Tika().detect(baseFile);
-    return mimeType.equals("application/xml") || mimeType.equals("text/xml");
+    return ergebnis.anzahlAngewandt() == 0 && ergebnis.anzahlProtokollEintraege() > 0 ? 2 : 0;
   }
 
   private static String kuerze(String text) {
