@@ -14,6 +14,16 @@ public final class HtmlRenderer {
   private HtmlRenderer() {}
 
   public static String rendere(Synopse synopse, String quelleBeschreibung) {
+    return rendere(synopse, quelleBeschreibung, false);
+  }
+
+  /**
+   * @param entwurfsfassung mindestens eines der angewandten Dokumente war ein Entwurf, ein
+   *     Änderungsantrag oder eine Beschlussempfehlung; die rechte Spalte zeigt dann keinen
+   *     geltenden Rechtsstand, sondern einen Verfahrensstand.
+   */
+  public static String rendere(
+      Synopse synopse, String quelleBeschreibung, boolean entwurfsfassung) {
     var sb = new StringBuilder();
     sb.append("<!DOCTYPE html>\n<html lang=\"de\">\n<head>\n<meta charset=\"utf-8\">\n");
     sb.append("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n");
@@ -23,7 +33,7 @@ public final class HtmlRenderer {
         .append(CSS)
         .append("</style>\n</head>\n<body>\n");
 
-    rendereKopf(sb, synopse, quelleBeschreibung);
+    rendereKopf(sb, synopse, quelleBeschreibung, entwurfsfassung);
 
     rendereGliederungsAenderungen(sb, synopse);
 
@@ -37,8 +47,14 @@ public final class HtmlRenderer {
     return sb.toString();
   }
 
-  private static void rendereKopf(StringBuilder sb, Synopse synopse, String quelle) {
+  private static void rendereKopf(
+      StringBuilder sb, Synopse synopse, String quelle, boolean entwurfsfassung) {
     sb.append("<header>\n<h1>Synopse: ").append(esc(synopse.alt().jurabk())).append("</h1>\n");
+    if (entwurfsfassung) {
+      sb.append(
+          "<p class=\"entwurfshinweis\">Entwurfsfassung — nicht geltendes Recht. Die neue Fassung"
+              + " gibt den Stand des Gesetzgebungsverfahrens wieder.</p>\n");
+    }
     if (synopse.alt().langue() != null) {
       sb.append("<p class=\"langue\">").append(esc(synopse.alt().langue())).append("</p>\n");
     }
@@ -64,7 +80,8 @@ public final class HtmlRenderer {
     if (synopse.gliederungsAenderungen().isEmpty()) {
       return;
     }
-    sb.append("<section class=\"gliederung-aenderungen\">\n<h2>Geänderte Gliederungs-Überschriften</h2>\n");
+    sb.append(
+        "<section class=\"gliederung-aenderungen\">\n<h2>Geänderte Gliederungs-Überschriften</h2>\n");
     for (var aenderung : synopse.gliederungsAenderungen()) {
       var altText = aenderung.alt() != null ? aenderung.alt().anzeigeText() : "";
       var spalten = WortDiff.vergleiche(altText, aenderung.neu().anzeigeText());
@@ -218,6 +235,13 @@ public final class HtmlRenderer {
       header h1 { margin-bottom: 0.2rem; }
       .langue { font-style: italic; margin-top: 0; }
       .quelle, .statistik, .gliederung, .ursachen { color: var(--dezent); font-size: 0.9rem; }
+      .entwurfshinweis {
+        border: 1px solid var(--rand);
+        border-left: 4px solid var(--del-fg);
+        padding: 0.5rem 0.75rem;
+        margin: 0.6rem 0;
+        font-size: 0.95rem;
+      }
       .spaltenkopf {
         display: grid;
         grid-template-columns: 1fr 1fr;

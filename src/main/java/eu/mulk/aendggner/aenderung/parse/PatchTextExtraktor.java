@@ -50,4 +50,25 @@ public final class PatchTextExtraktor {
       return FontgroessenFilter.extrahiere(dokument, superskriptModus);
     }
   }
+
+  /**
+   * Extrahiert die beiden Spalten einer zweispaltigen Seite getrennt und in Lesereihenfolge.
+   *
+   * <p>Nur für Layouts nötig, deren Spalten im Inhaltsstrom verschränkt stehen — die
+   * Zusammenstellung einer Beschlussempfehlung. BGBl- und GVBl-Spalten kommen bereits nacheinander
+   * und brauchen das nicht.
+   *
+   * @return links = Entwurfsspalte, rechts = Ausschussspalte.
+   */
+  public Spalten extrahiereSpalten(Path datei) throws IOException {
+    try (var dokument = Loader.loadPDF(datei.toFile())) {
+      return new Spalten(
+          FontgroessenFilter.extrahiere(
+              dokument, superskriptModus, FontgroessenFilter.Spalte.LINKS),
+          FontgroessenFilter.extrahiere(
+              dokument, superskriptModus, FontgroessenFilter.Spalte.RECHTS));
+    }
+  }
+
+  public record Spalten(String links, String rechts) {}
 }

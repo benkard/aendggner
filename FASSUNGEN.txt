@@ -21,6 +21,150 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 14. August 2026,
+ zuletzt geändert durch die am 14. August 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Das Erzeugnis nimmt bislang zwei Sorten von Änderungsdokumenten entgegen und
+behandelt sie gleich: verkündete Artikelgesetze und Gesetzentwürfe. Damit fehlt
+ihm die zweite Hälfte des Gesetzgebungsverfahrens — die Dokumente, die einen
+Entwurf ändern statt ein Gesetz. Diese Fassung führt den Begriff der Dokumentart
+ein, wendet Änderungsanträge auf den Entwurf an, auf den sie zielen, und trennt
+die Spalten einer Zusammenstellung.
+
+
+Artikel 1
+Erkennung der Dokumentart
+
+(1) Die Art eines Änderungsdokuments wird nunmehr aus seinem Kopf erschlossen
+(DokumentErkenner, DokumentArt, DokumentKopf). Unterschieden werden das
+verkündete Artikelgesetz, der Gesetzentwurf, der Änderungsantrag, die
+Beschlussempfehlung sowie das Dokument ohne Änderungsbefehle
+(Entschließungsantrag, schlichter Antrag, Plenarprotokoll, Bericht).
+
+(2) Maßgeblich ist allein der Text; der Dateiname bleibt außer Betracht. Die
+Beispieldaten belegen die Notwendigkeit: Die Datei mit dem Namen
+„BT-Drs-21-7071_Beschlussempfehlung.pdf“ enthält einen Entschließungsantrag.
+
+(3) Die Erkennung arbeitet auf dem unbereinigten Extraktionstext, da der
+Textbereiniger gerade diejenigen Drucksachenköpfe entfernt, aus denen Art und
+Nummer hervorgehen. Erfasst werden dabei auch die eigene Drucksachennummer und
+die Nummern der in Bezug genommenen Drucksachen.
+
+(4) Ein Dokument ohne Änderungsbefehle wird übergangen und in der Synopse
+gemeldet; bisher führte es stillschweigend zu keinem Befehl.
+
+(5) Ist an einer Synopse ein Entwurf, ein Antrag oder eine Beschlussempfehlung
+beteiligt, so trägt sie den Hinweis, dass sie eine Entwurfsfassung und nicht
+geltendes Recht zeigt (HtmlRenderer). Die Quellenzeile nennt je Datei die
+erkannte Art.
+
+(6) Die Grenze des Begründungsteils wird für Entwürfe und Anträge um die dort
+üblichen Überschriften erweitert („A. Allgemeiner Teil“, „Zu Artikel 1“); für
+verkündete Gesetze bleibt es bei der schlichten Marke, damit ein Gesetzblatt
+nicht an einem gleichlautenden Wort abbricht (AenderungsgesetzParser).
+
+
+Artikel 2
+Änderungsanträge
+
+(1) Ein Änderungsantrag ändert nicht das Stammgesetz, sondern eine Drucksache.
+Sein Rahmensatz benennt daher zwei Ebenen zugleich: die Stelle in der Drucksache
+und die Stelle in dem Text, den der dort stehende Befehl zitiert. Beide werden
+gesondert geführt (AenderungsantragParser mit den Sätzen DrucksachenStelle und
+MetaBefehl); die Drucksachenstelle wird bewusst nicht als Stelle modelliert, da
+diese eine Fundstelle im Gesetz bezeichnet und ein anderes Bezugssystem meint.
+
+(2) Die Befehle werden auf den Lineartext des Entwurfs angewandt
+(EntwurfsPatcher). Der Gesetzesanwender bleibt unberührt: Ein Entwurf ist kein
+Gesetz, sondern eine Folge von Befehlen, deren Zitate erst künftig Gesetz werden
+sollen; der Antrag greift in eben diese Zitate ein.
+
+(3) Bei der Suche nach der Drucksachenstelle werden die Zitate zeichengleich
+ausgeblendet. Andernfalls gälten die Aufzählungen des zitierten Gesetzestextes
+(„1. Haarwild:“) als Gliederungspunkte der Drucksache und ließen den gesuchten
+Punkt vorzeitig enden.
+
+(4) Welcher Entwurf gemeint ist, entscheidet die vom Antrag genannte
+Drucksachennummer, nicht die Reihenfolge der Argumente (Pipeline). Fehlt der
+Entwurf, bleibt der Antrag unangewandt und wird gemeldet; eine ersatzweise
+Anwendung auf das Stammgesetz unterbleibt, da die Stellenangaben auf die
+Drucksache zielen.
+
+(5) Erkannt wird die elliptische Antragsform, die das Hilfsverb nur einmal in
+der Beschlussformel führt („In Nr. 1.29 die Angabe „,“ am Ende durch die Angabe
+„;“ ersetzt.“). Das fehlende Hilfsverb wird an der Stelle ergänzt, an der es im
+vollständigen Satz stünde (BefehlErkenner).
+
+(6) Das allgemeine Ersetzungsmuster lässt nunmehr den Zusatz „am Ende“ zwischen
+Ziel und „durch“ zu und führt ihn als solchen. Bisher kannte diesen Zusatz nur
+das Muster für Satzzeichen.
+
+(7) Der Stellenparser nimmt gestufte Nummern an („Nr. 1.29“), wie sie in
+dezimal durchgezählten Listen vorkommen.
+
+
+Artikel 3
+Zusammenstellung einer Beschlussempfehlung
+
+(1) Die Zusammenstellung stellt links den Entwurf und rechts die Beschlüsse des
+Ausschusses gegenüber. Anders als beim alten Bundesgesetzblatt und beim Gesetz-
+und Verordnungsblatt für Berlin stehen die Spalten nicht nacheinander im
+Inhaltsstrom, sondern zeilenweise verschränkt; sie werden daher erstmals anhand
+der Koordinaten getrennt (FontgroessenFilter, PatchTextExtraktor).
+
+(2) Geschnitten wird an der Blattmitte, jedoch nur dort, wo ein tatsächlicher
+Spaltensteg vorliegt. Eine über die Blattmitte durchlaufende Zeile ist
+ganzseitenbreit (Vorblatt, Bericht, Seitenkopf); sie bleibt ungeschnitten und
+wird der linken Spalte zugeschlagen, damit sie genau einmal erscheint.
+
+(3) Der gesperrt gesetzte Vermerk der Ausschussspalte wird auf seine Normalform
+gebracht, der laufende Spaltenkopf als Kolumnentitel entfernt (TextBereiniger).
+
+(4) Die Auflösung der rechten Spalte unterbleibt einstweilen. Sie druckt
+Unverändertes nicht ab, sondern vermerkt es — und zwar nicht nur je
+Gliederungspunkt, sondern auch zeilenweise innerhalb zitierter Blöcke. Die
+rechte Spalte ist damit für sich genommen kein vollständiges Dokument; ihre
+Anführungszeichen gehen nicht auf. Eine Auflösung über die Gliederungspfade
+allein wurde erprobt und ist daran gescheitert; erforderlich ist die zeilenweise
+Zuordnung beider Spalten über ihre gemeinsame Grundlinie im Satzspiegel. Bis
+dahin wird eine Beschlussempfehlung erkannt und unter Angabe des Grundes
+übergangen, verbunden mit dem Hinweis auf die Drucksachennummer des Entwurfs,
+der sich stattdessen eignet.
+
+
+Artikel 4
+Prüffälle
+
+(1) Es treten hinzu: die Einordnung von zwölf Beispieldokumenten nach ihrer Art
+(DokumentErkennerTest), das Lesen und Anwenden eines Änderungsantrags
+(AenderungsantragParserTest, EntwurfsPatcherTest) sowie vier Fälle in
+EndToEndTest — der Antrag der Fraktion BÜNDNIS 90/DIE GRÜNEN zum bayerischen
+Jagdgesetz (Ltg.-Drs. 19/10365), die Unberührtheit des Stammgesetzes durch
+ebendiesen Antrag, die Spaltentrennung der Zusammenstellung zur Drucksache
+20/7619 und die Behandlung eines Entschließungsantrags.
+
+(2) Der Antragsfall belegt beides: Der Antrag streicht den Goldschakal aus der
+Artenliste des neuen § 18 der Ausführungsverordnung und schließt die Aufzählung
+mit einem Semikolon ab; die Synopse des Bayerischen Jagdgesetzes bleibt dabei
+zu Recht unverändert, weil der Antrag auf einen Paragraphen des Entwurfs zielt,
+der die Verordnung und nicht das Gesetz ändert.
+
+(3) Die Spaltentrennung wird daran gemessen, dass die linke Spalte der
+Zusammenstellung Befehl für Befehl den Regierungsentwurf ergibt, aus dem sie
+gebaut ist (117 Befehle, wie aus Drucksache 20/6875).
+
+
+Artikel 5
+Handbuch
+
+Das Handbuch (README.adoc) erhält den Abschnitt „Quellformate: Gesetz, Entwurf,
+Antrag“. Die bisherige Angabe, Meta-Änderungen an Drucksachen seien bewusst
+nicht abgedeckt, entfällt. Das Hinweisfeld der Web-Anwendung nennt die nunmehr
+zulässigen Dokumentarten.
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 26. Juli 2026,
  zuletzt geändert durch die am 26. Juli 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

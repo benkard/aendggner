@@ -7,8 +7,11 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.UnbekannterBefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortAnker;
+import eu.mulk.aendggner.aenderung.parse.AenderungsantragParser;
 import eu.mulk.aendggner.aenderung.parse.AenderungsgesetzParser;
+import eu.mulk.aendggner.aenderung.parse.EntwurfsPatcher;
 import eu.mulk.aendggner.aenderung.parse.PatchTextExtraktor;
+import eu.mulk.aendggner.aenderung.parse.SuperskriptModus;
 import eu.mulk.aendggner.aenderung.parse.TextBereiniger;
 import eu.mulk.aendggner.aenderung.parse.ZitatExtraktor;
 import eu.mulk.aendggner.anwendung.BefehlAnwender;
@@ -549,8 +552,9 @@ class EndToEndTest {
     var absatz2 = neu.norm("§ 1").orElseThrow().absaetze().get(1).text();
     assertThat(absatz2)
         .contains("Verordnung (EU) 2016/679")
-        .contains("Telekommunikation-Digitale-Dienste-Datenschutz-Gesetzes vom 23. Juni 2021 (BGBl."
-            + " I S. 1982; 2022 I S. 1045)")
+        .contains(
+            "Telekommunikation-Digitale-Dienste-Datenschutz-Gesetzes vom 23. Juni 2021 (BGBl."
+                + " I S. 1982; 2022 I S. 1045)")
         .doesNotContain("WDR-Rundfunkdatenschutzbeauftragte");
     // 3./4. § 2: Fundstellen-Ersetzung im Satzteil vor Nummer 1 und Neufassung der Nummern 1 und 2.
     var paragraph2 = neu.norm("§ 2").orElseThrow().gesamtText();
@@ -611,8 +615,7 @@ class EndToEndTest {
             "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15");
     assertThat(paragraph3.absaetze().get(2).text())
         .startsWith("Der WDR veranstaltet ein landesweites Fernsehprogramm");
-    assertThat(paragraph3.absaetze().get(12).text())
-        .startsWith("Der WDR strebt Partnerschaften");
+    assertThat(paragraph3.absaetze().get(12).text()).startsWith("Der WDR strebt Partnerschaften");
 
     // 2. Nummern-Kaskade in § 15 Absatz 3: Nummer 22 entfällt, die folgenden rücken auf — die
     //    Aufzählungsmarken im Text sind mitgezogen.
@@ -694,11 +697,11 @@ class EndToEndTest {
    * eine koordinatenbasierte Spaltenerkennung ist dafür nicht nötig.
    *
    * <p>Kein voller Akzeptanztest: gesetze.berlin.de ist wie das schleswig-holsteinische Portal eine
-   * anmeldepflichtige juris-Anwendung, die Stammfassungen sind daraus nicht zu beschaffen. Artikel 1
-   * ändert zudem eine *Anlage*; anlagenbezogene Befehle wendet ÄndGgner an (siehe GEG), doch der
-   * {@link eu.mulk.aendggner.gesetz.land.LandesRechtTextParser} kennt nur „§“- und
-   * „Art.“-Normköpfe — eine handgepflegte Stammfassung könnte diese Anlage nicht tragen (dieselbe
-   * Grenze, an der Baden-Württemberg zurückgestellt wurde).
+   * anmeldepflichtige juris-Anwendung, die Stammfassungen sind daraus nicht zu beschaffen. Artikel
+   * 1 ändert zudem eine *Anlage*; anlagenbezogene Befehle wendet ÄndGgner an (siehe GEG), doch der
+   * {@link eu.mulk.aendggner.gesetz.land.LandesRechtTextParser} kennt nur „§“- und „Art.“-Normköpfe
+   * — eine handgepflegte Stammfassung könnte diese Anlage nicht tragen (dieselbe Grenze, an der
+   * Baden-Württemberg zurückgestellt wurde).
    */
   @Test
   void asogLafAendGBerlin() throws Exception {
@@ -737,8 +740,7 @@ class EndToEndTest {
     // § 2 Absatz 4 Satz 1 wird wie folgt geändert“). Der Zusatz benennt die Anlage nur — er darf
     // nicht als Ziel „§ 2“ gelesen werden; die Punkte erben „Anlage“ als Kontext.
     var asog =
-        new Gesetz(
-            "ASOG Bln", "Allgemeines Sicherheits- und Ordnungsgesetz", null, List.of());
+        new Gesetz("ASOG Bln", "Allgemeines Sicherheits- und Ordnungsgesetz", null, List.of());
     var artikel1 = new AenderungsgesetzParser().parse(text, asog, null);
     assertThat(artikel1.artikel()).containsExactly("1");
     assertThat(artikel1.befehle())
@@ -764,8 +766,7 @@ class EndToEndTest {
     var einfuegung = (StrukturEinfuegung) bb;
     assertThat(einfuegung.vorher()).isTrue();
     assertThat(einfuegung.bezeichnung()).isEqualTo("5");
-    assertThat(einfuegung.anker())
-        .isEqualTo(new WortAnker.VorWoertern("Aus dem Bereich Verkehr:"));
+    assertThat(einfuegung.anker()).isEqualTo(new WortAnker.VorWoertern("Aus dem Bereich Verkehr:"));
 
     // Bei diesem Punkt fehlt im amtlichen Satz das schließende Anführungszeichen. Ohne die Grenze
     // am nächsten Aufzählungspunkt verschlänge das offene Zitat die Punkte cc) und c).
@@ -793,8 +794,8 @@ class EndToEndTest {
     var gesetz = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(alt);
     // Der Klammerzusatz führt hier nur eine (mehrteilige) Bezeichnung, keinen Kurztitel am
     // Gedankenstrich; genau sie nennt der Einleitungssatz des Artikels 4.
-    assertThat(gesetz.jurabk()).isEqualTo("Siebzehnter Rundfunkänderungsstaatsvertrag"
-        + " Ausführungsgesetz");
+    assertThat(gesetz.jurabk())
+        .isEqualTo("Siebzehnter Rundfunkänderungsstaatsvertrag" + " Ausführungsgesetz");
     assertThat(gesetz.kurzue()).isNull();
     assertThat(gesetz.normen()).hasSize(3);
     // Der alte § 1 besteht aus einem einzigen, unbezeichneten Absatz.
@@ -805,7 +806,8 @@ class EndToEndTest {
     var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, null);
     // Nur Artikel 4 trifft dieses Gesetz — die Auswahl gelingt über die Bezeichnung allein.
     assertThat(parseErgebnis.artikel()).containsExactly("4");
-    // Der Artikel trägt keine nummerierten Punkte: Der Text nach der Änderungsformel ist der Befehl.
+    // Der Artikel trägt keine nummerierten Punkte: Der Text nach der Änderungsformel ist der
+    // Befehl.
     assertThat(parseErgebnis.befehle()).hasSize(1);
     assertThat(parseErgebnis.befehle().get(0)).isInstanceOf(Aenderungsbefehl.Neufassung.class);
     assertThat(parseErgebnis.befehle().get(0).stelle().anzeigeText()).isEqualTo("§ 1");
@@ -918,6 +920,140 @@ class EndToEndTest {
     assertThat(bereich.teilbefehle())
         .extracting(b -> b.stelle().anzeigeText())
         .containsExactly("§ 14 Nummer 4", "§ 14 Nummer 3");
+  }
+
+  /**
+   * Änderungsantrag der GRÜNEN (Ltg-Drs. 19/10365) zum Landtags-Gesetzentwurf 19/9707: Er ändert
+   * nicht das Stammgesetz, sondern die Drucksache — genau den Befehl § 3 Nr. 22, der die Artenliste
+   * des neuen § 18 AVBayJG zitiert.
+   */
+  @Test
+  void bayJgAenderungsantragAendertDenEntwurf() throws Exception {
+    var entwurfPdf = SAMPLEDATA.resolve("BayJG/Ltg-Drs-19-9707_Gesetzentwurf.pdf");
+    var antragPdf = SAMPLEDATA.resolve("BayJG/Ltg-Drs-19-10365_Aenderungsantrag-Gruene.pdf");
+    assumeTrue(Files.exists(entwurfPdf) && Files.exists(antragPdf), "BayJG-Beispieldaten fehlen");
+
+    var extraktor = new PatchTextExtraktor(SuperskriptModus.BEHALTEN);
+    var entwurf = TextBereiniger.bereinige(extraktor.extrahiere(entwurfPdf));
+    var antrag = TextBereiniger.bereinige(extraktor.extrahiere(antragPdf));
+
+    // Der Entwurf stellt Wolf und Goldschakal nebeneinander unter Jagdrecht.
+    assertThat(entwurf).contains("1.29. Wolf (Canis lupus),");
+    assertThat(entwurf).contains("1.30. Goldschakal (Canis aureus);");
+
+    var parseErgebnis = AenderungsantragParser.parse(antrag);
+    assertThat(parseErgebnis.warnungen()).isEmpty();
+    assertThat(parseErgebnis.befehle()).hasSize(2);
+
+    var patch = EntwurfsPatcher.wendeAn(entwurf, parseErgebnis.befehle());
+    assertThat(patch.warnungen()).isEmpty();
+    assertThat(patch.angewandt()).isEqualTo(2);
+
+    // Der Goldschakal ist gestrichen, der Wolf schließt die Liste nun mit Semikolon ab.
+    assertThat(patch.text()).contains("1.29. Wolf (Canis lupus);");
+    assertThat(patch.text()).doesNotContain("Goldschakal (Canis aureus)");
+    // Die übrigen 154 Befehle des Entwurfs bleiben unangetastet.
+    assertThat(patch.text()).contains("1.28. Mink (Neovison vison),");
+    assertThat(patch.text()).contains("2. Federwild:");
+  }
+
+  /**
+   * Derselbe Antrag durch die volle Pipeline. Er zielt auf § 3 des Entwurfs, und der ändert die
+   * AVBayJG, nicht das BayJG — die Synopse des Stammgesetzes bleibt deshalb zu Recht dieselbe. Das
+   * ist die eigentliche Probe: Ein Antrag darf nicht auf das Stammgesetz durchschlagen, nur weil
+   * seine Stellenangaben zufällig auch dort passen könnten.
+   */
+  @Test
+  void bayJgAenderungsantragLaesstDasStammgesetzUnberuehrt() throws Exception {
+    var alt = SAMPLEDATA.resolve("BayJG/BayJG-alt.txt");
+    var entwurfPdf = SAMPLEDATA.resolve("BayJG/Ltg-Drs-19-9707_Gesetzentwurf.pdf");
+    var antragPdf = SAMPLEDATA.resolve("BayJG/Ltg-Drs-19-10365_Aenderungsantrag-Gruene.pdf");
+    assumeTrue(
+        Files.exists(alt) && Files.exists(entwurfPdf) && Files.exists(antragPdf),
+        "BayJG-Beispieldaten fehlen");
+
+    var ohne = Pipeline.erzeugeSynopse(alt, List.of(entwurfPdf), null, false);
+    var mit = Pipeline.erzeugeSynopse(alt, List.of(entwurfPdf, antragPdf), null, false);
+
+    assertThat(mit.anzahlAngewandt()).isEqualTo(ohne.anzahlAngewandt()).isEqualTo(151);
+    assertThat(mit.anzahlManuell()).isEqualTo(ohne.anzahlManuell()).isEqualTo(3);
+    // Beide Läufe zeigen eine Entwurfsfassung, nicht geltendes Recht.
+    assertThat(mit.html()).contains("Entwurfsfassung");
+    assertThat(mit.html()).contains("[Änderungsantrag Drs. 19/10365]");
+  }
+
+  /**
+   * Die Zusammenstellung einer Beschlussempfehlung (BT-Drs. 20/7619) steht zweispaltig: links der
+   * Entwurf, rechts die Ausschussfassung. Anders als beim alten BGBl und beim Berliner GVBl folgen
+   * die Spalten <em>nicht</em> nacheinander im Inhaltsstrom, sondern zeilenweise verschränkt; nur
+   * die Koordinaten trennen sie.
+   *
+   * <p>Die Probe aufs Exempel für die Spaltentrennung: Die linke Spalte muss Wort für Wort den
+   * Regierungsentwurf ergeben, aus dem die Zusammenstellung gebaut ist — dieselbe Befehlszahl wie
+   * aus BT-Drs. 20/6875, das als eigener Testfall danebensteht.
+   */
+  @Test
+  void zusammenstellungTrenntDieSpaltenSauber() throws Exception {
+    var xml = SAMPLEDATA.resolve("GEG/BJNR172810020.xml");
+    var empfehlung = SAMPLEDATA.resolve("GEG/BT-Drs-20-7619_Beschlussempfehlung.pdf");
+    var entwurf = SAMPLEDATA.resolve("GEG/BT-Drs-20-6875_Regierungsentwurf.pdf");
+    assumeTrue(
+        Files.exists(xml) && Files.exists(empfehlung) && Files.exists(entwurf),
+        "GEG-Beispieldaten fehlen");
+
+    var gesetz = new GiiXmlLoader().load(xml);
+    var extraktor = new PatchTextExtraktor();
+    var spalten = extraktor.extrahiereSpalten(empfehlung);
+
+    var ausEntwurfsspalte =
+        new AenderungsgesetzParser()
+            .parse(TextBereiniger.bereinige(spalten.links()), gesetz, null, true);
+    var ausDrucksache =
+        new AenderungsgesetzParser()
+            .parse(TextBereiniger.bereinige(extraktor.extrahiere(entwurf)), gesetz, null, true);
+
+    assertThat(ausEntwurfsspalte.artikel()).isEqualTo(ausDrucksache.artikel());
+    assertThat(ausEntwurfsspalte.befehle())
+        .as("die linke Spalte ist der Regierungsentwurf")
+        .hasSameSizeAs(ausDrucksache.befehle());
+    assertThat(ausDrucksache.befehle()).hasSize(117);
+
+    // Die rechte Spalte trägt überwiegend den Vermerk „unverändert“ — gesperrt gesetzt im PDF,
+    // vom TextBereiniger auf die Normalform gebracht.
+    assertThat(TextBereiniger.bereinige(spalten.rechts())).contains("unverändert");
+  }
+
+  /**
+   * Eine Beschlussempfehlung wird als solche erkannt und mit Begründung übergangen, statt eine halb
+   * aufgelöste Fassung auszugeben. Die Meldung nennt den Entwurf, der stattdessen taugt.
+   */
+  @Test
+  void beschlussempfehlungWirdMitBegruendungUebergangen() throws Exception {
+    var xml = SAMPLEDATA.resolve("GEG/BJNR172810020.xml");
+    var pdf = SAMPLEDATA.resolve("GEG/BT-Drs-20-7619_Beschlussempfehlung.pdf");
+    assumeTrue(Files.exists(xml) && Files.exists(pdf), "GEG-Beispieldaten fehlen");
+
+    var ergebnis = Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false);
+
+    assertThat(ergebnis.anzahlAngewandt()).isZero();
+    assertThat(ergebnis.html()).contains("Beschlussempfehlung");
+    assertThat(ergebnis.html()).contains("Drs. 20/6875");
+  }
+
+  /**
+   * Ein Entschließungsantrag trägt keine Rechtsetzungsbefehle. Er wird als solcher erkannt,
+   * übergangen und gemeldet — nicht stillschweigend zu null Befehlen verarbeitet.
+   */
+  @Test
+  void entschliessungsantragWirdGemeldetStattStillUebergangen() throws Exception {
+    var xml = SAMPLEDATA.resolve("GEG/BJNR172810020.xml");
+    var pdf = SAMPLEDATA.resolve("GEG/BT-Drs-21-7071_Beschlussempfehlung.pdf");
+    assumeTrue(Files.exists(xml) && Files.exists(pdf), "GEG-Beispieldaten fehlen");
+
+    var ergebnis = Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false);
+
+    assertThat(ergebnis.anzahlAngewandt()).isZero();
+    assertThat(ergebnis.html()).contains("keine Änderungsbefehle");
   }
 
   private static Aenderungsbefehl befehlZu(

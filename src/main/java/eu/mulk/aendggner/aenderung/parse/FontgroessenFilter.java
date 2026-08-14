@@ -29,9 +29,9 @@ import org.jboss.logging.Logger;
  * (automatischer Blocksatz-Umbruch: die Zeile endet am lokalen rechten Satzspiegelrand) oder
  * <b>hart</b> (bewusstes Zeilenende: deutlich davor) und markiert es mit {@link
  * TextBereiniger#WEICHES_ZEILENENDE} bzw. {@link TextBereiniger#HARTES_ZEILENENDE}. Der
- * TextBereiniger nutzt das, um weiche Umbrüche zu Fließtext zusammenzuziehen und bewusste
- * Umbrüche (etwa die Kurzüberschrift einer hängend eingerückten Definition im UWG-Anhang) zu
- * erhalten — eine Unterscheidung, die aus dem reinen Text nicht zuverlässig möglich ist.
+ * TextBereiniger nutzt das, um weiche Umbrüche zu Fließtext zusammenzuziehen und bewusste Umbrüche
+ * (etwa die Kurzüberschrift einer hängend eingerückten Definition im UWG-Anhang) zu erhalten — eine
+ * Unterscheidung, die aus dem reinen Text nicht zuverlässig möglich ist.
  */
 final class FontgroessenFilter {
 
@@ -40,46 +40,64 @@ final class FontgroessenFilter {
   /** Läufe, die um mehr als diese Punktzahl unter der Brotschrift liegen, sind Kleingedrucktes. */
   private static final float TOLERANZ_PT = 1.4f;
 
-  /** Anteil an den Zeichen einer Seite, ab dem eine Fontgröße unstrittig die Brotschrift ist.
+  /**
+   * Anteil an den Zeichen einer Seite, ab dem eine Fontgröße unstrittig die Brotschrift ist.
    * Bewusst über 50 %: Auf halb/halb geteilten Seiten (Befehle oben, langer Fußnotenblock unten)
-   * darf nicht das Kleingedruckte durch eine hauchdünne Mehrheit gewinnen. */
+   * darf nicht das Kleingedruckte durch eine hauchdünne Mehrheit gewinnen.
+   */
   private static final double DOMINANZ_SCHWELLE = 0.6;
 
   /**
-   * Erreicht keine Größe die absolute Mehrheit (fußnotenlastige Seiten), gewinnt die <em>größte</em>
-   * Größe mit diesem Mindestanteil: Kleingedrucktes kann die Zeichenmehrheit stellen, ist aber nie
-   * größer gesetzt als die Brotschrift.
+   * Erreicht keine Größe die absolute Mehrheit (fußnotenlastige Seiten), gewinnt die
+   * <em>größte</em> Größe mit diesem Mindestanteil: Kleingedrucktes kann die Zeichenmehrheit
+   * stellen, ist aber nie größer gesetzt als die Brotschrift.
    */
   private static final double KANDIDATEN_SCHWELLE = 0.25;
 
-  /** Interne End-X-Metadaten am Zeilenende („␂527␂“), von {@link #klassifiziereZeilenenden}
-   * konsumiert; verlässt diese Klasse nie. */
+  /**
+   * Interne End-X-Metadaten am Zeilenende („␂527␂“), von {@link #klassifiziereZeilenenden}
+   * konsumiert; verlässt diese Klasse nie.
+   */
   private static final char ENDX_MARKE = '\uE002';
 
   /** Verirrte End-X-Metadaten mitten in einer Zeile (siehe {@link #klassifiziereZeilenenden}). */
   private static final java.util.regex.Pattern ENDX_REST =
       java.util.regex.Pattern.compile("\uE002\\d*\uE002?");
 
-  /** Fensterhälfte (Zeilen davor/danach) für die lokale Suche nach Ausrichtungs-Clustern. Lokal
-   * statt dokumentweit, weil ein Dokument Blöcke unterschiedlicher Spaltenbreite mischt
-   * (schmalerer Regelungstext vs. breitere Begründung; zweispaltiges altes BGBl, dessen Spalten
-   * in Content-Stream-Reihenfolge nacheinander kommen). */
+  /**
+   * Fensterhälfte (Zeilen davor/danach) für die lokale Suche nach Ausrichtungs-Clustern. Lokal
+   * statt dokumentweit, weil ein Dokument Blöcke unterschiedlicher Spaltenbreite mischt (schmalerer
+   * Regelungstext vs. breitere Begründung; zweispaltiges altes BGBl, dessen Spalten in
+   * Content-Stream-Reihenfolge nacheinander kommen).
+   */
   private static final int RAND_FENSTER = 20;
 
-  /** Streuung (pt), innerhalb derer Zeilenenden als „gleich ausgerichtet“ gelten. Blocksatz-Zeilen
+  /**
+   * Streuung (pt), innerhalb derer Zeilenenden als „gleich ausgerichtet“ gelten. Blocksatz-Zeilen
    * enden auf wenige pt genau am Rand; ein evtl. mitgemessenes Trailing-Space verschiebt das Ende
-   * um eine Leerzeichenbreite (~2–3 pt). */
+   * um eine Leerzeichenbreite (~2–3 pt).
+   */
   private static final float CLUSTER_TOLERANZ_PT = 4f;
 
-  /** Ab diesem Abstand (pt) unter einem Ausrichtungs-Cluster ist ein Zeilenende bewusst gesetzt →
+  /**
+   * Ab diesem Abstand (pt) unter einem Ausrichtungs-Cluster ist ein Zeilenende bewusst gesetzt →
    * harter Umbruch. Der Bereich dazwischen bleibt unklassifiziert (z.B. Zeilen, deren gefilterte
-   * Fußnotenziffer das gemessene Ende leicht verkürzt). */
+   * Fußnotenziffer das gemessene Ende leicht verkürzt).
+   */
   private static final float HART_ABSTAND_PT = 10f;
 
-  /** Mindestzahl gleich ausgerichteter Fensterzeilen, damit ein Zeilenende als Satzspiegelrand
-   * (Ausrichtungs-Cluster) gilt — Titelseiten, Unterschriftenblöcke u.ä. bilden keine Cluster
-   * und bleiben unklassifiziert. */
+  /**
+   * Mindestzahl gleich ausgerichteter Fensterzeilen, damit ein Zeilenende als Satzspiegelrand
+   * (Ausrichtungs-Cluster) gilt — Titelseiten, Unterschriftenblöcke u.ä. bilden keine Cluster und
+   * bleiben unklassifiziert.
+   */
   private static final int MIN_RANDZEILEN = 5;
+
+  /**
+   * Mindestbreite (pt) des Stegs zwischen zwei Spalten. Ein Wortzwischenraum misst 2–4 pt, der Steg
+   * einer Zusammenstellung ein Vielfaches davon; dazwischen liegt viel Luft.
+   */
+  private static final float RINNE_MIN_PT = 12f;
 
   private FontgroessenFilter() {}
 
@@ -88,6 +106,23 @@ final class FontgroessenFilter {
   }
 
   static String extrahiere(PDDocument dokument, SuperskriptModus superskriptModus)
+      throws IOException {
+    return extrahiere(dokument, superskriptModus, Spalte.GANZ);
+  }
+
+  /**
+   * Welcher Teil der Seitenbreite extrahiert wird. Nötig für die Zusammenstellung einer
+   * Beschlussempfehlung, deren zwei Spalten — anders als beim alten BGBl und beim Berliner GVBl —
+   * <em>nicht</em> nacheinander im Inhaltsstrom stehen, sondern zeilenweise verschränkt; nur die
+   * Koordinaten trennen sie.
+   */
+  enum Spalte {
+    GANZ,
+    LINKS,
+    RECHTS
+  }
+
+  static String extrahiere(PDDocument dokument, SuperskriptModus superskriptModus, Spalte spalte)
       throws IOException {
     var zaehler = new GroessenZaehler();
     zaehler.setLineSeparator("\n");
@@ -103,7 +138,7 @@ final class FontgroessenFilter {
 
     var filter =
         new GroessenFilterStripper(
-            schwellen, zaehler.brotschriftUntergrenzen(schwellen), superskriptModus);
+            schwellen, zaehler.brotschriftUntergrenzen(schwellen), superskriptModus, spalte);
     filter.setLineSeparator("\n");
     var ausgabe = new StringWriter();
     filter.writeText(dokument, ausgabe);
@@ -113,9 +148,9 @@ final class FontgroessenFilter {
   /**
    * Ersetzt die End-X-Metadaten der Zeilen durch die Umbruch-Klassifikation: Zeilen, die an einem
    * lokalen Satzspiegelrand enden (Ausrichtungs-Cluster aus mindestens {@link #MIN_RANDZEILEN}
-   * gleich endenden Fensterzeilen), erhalten {@link TextBereiniger#WEICHES_ZEILENENDE}; Zeilen,
-   * die deutlich vor einem solchen Rand enden, {@link TextBereiniger#HARTES_ZEILENENDE}; alles
-   * andere bleibt unmarkiert. Cluster statt Perzentil, weil ein Fenster am Spaltenwechsel des
+   * gleich endenden Fensterzeilen), erhalten {@link TextBereiniger#WEICHES_ZEILENENDE}; Zeilen, die
+   * deutlich vor einem solchen Rand enden, {@link TextBereiniger#HARTES_ZEILENENDE}; alles andere
+   * bleibt unmarkiert. Cluster statt Perzentil, weil ein Fenster am Spaltenwechsel des
    * zweispaltigen alten BGBl beide Spaltenränder enthält — maßgeblich ist der Rand, an dem die
    * Zeile selbst ausgerichtet ist bzw. der nächste oberhalb ihres Endes.
    */
@@ -177,7 +212,9 @@ final class FontgroessenFilter {
     return String.join("\n", zeilen);
   }
 
-  /** Enden mindestens {@link #MIN_RANDZEILEN} der Fensterzeilen gleich ausgerichtet bei {@code x}? */
+  /**
+   * Enden mindestens {@link #MIN_RANDZEILEN} der Fensterzeilen gleich ausgerichtet bei {@code x}?
+   */
   private static boolean istCluster(List<Float> fenster, float x) {
     int anzahl = 0;
     for (float v : fenster) {
@@ -188,8 +225,10 @@ final class FontgroessenFilter {
     return anzahl >= MIN_RANDZEILEN;
   }
 
-  /** Anteil der Seitenhöhe, unterhalb dessen Brotschrift-Text als Seitenfuß (Kolumnentitel)
-   * gilt und die Fußnotengrenze nicht nach unten ziehen darf. */
+  /**
+   * Anteil der Seitenhöhe, unterhalb dessen Brotschrift-Text als Seitenfuß (Kolumnentitel) gilt und
+   * die Fußnotengrenze nicht nach unten ziehen darf.
+   */
   private static final float SEITENFUSS_BEREICH = 0.92f;
 
   /** Pass 1: zeichengewichtete Häufigkeit der Fontgrößen (auf halbe Punkte gerundet) je Seite. */
@@ -229,7 +268,8 @@ final class FontgroessenFilter {
           continue;
         }
         for (var groessenEintrag : eintrag.getValue().entrySet()) {
-          dokumentweit.merge(groessenEintrag.getKey(), (long) groessenEintrag.getValue(), Long::sum);
+          dokumentweit.merge(
+              groessenEintrag.getKey(), (long) groessenEintrag.getValue(), Long::sum);
         }
         dokumentGesamt += gesamt;
         var brotschrift = groessterKandidat(eintrag.getValue(), gesamt);
@@ -240,7 +280,8 @@ final class FontgroessenFilter {
       if (dokumentGesamt > 0) {
         var zaehlungen = new HashMap<Float, Integer>();
         for (var eintrag : dokumentweit.entrySet()) {
-          zaehlungen.put(eintrag.getKey(), Math.toIntExact(Math.min(Integer.MAX_VALUE, eintrag.getValue())));
+          zaehlungen.put(
+              eintrag.getKey(), Math.toIntExact(Math.min(Integer.MAX_VALUE, eintrag.getValue())));
         }
         var global = groessterKandidat(zaehlungen, dokumentGesamt);
         if (global != null) {
@@ -302,8 +343,8 @@ final class FontgroessenFilter {
    * Pass 2: Kleingedrucktes verwerfen — aber nur, wenn es unterhalb der letzten Brotschrift-Zeile
    * der Seite steht (Fußnotenblock) oder sehr deutlich unter der Brotschriftgröße liegt
    * (hochgestellte Fußnotenziffern). Bundesrats-Drucksachen setzen zitierten Gesetzestext
-   * absichtlich etwas kleiner als die Brotschrift; solcher Text steht im Satzspiegel (oberhalb
-   * der Grenze) und muss erhalten bleiben.
+   * absichtlich etwas kleiner als die Brotschrift; solcher Text steht im Satzspiegel (oberhalb der
+   * Grenze) und muss erhalten bleiben.
    */
   private static final class GroessenFilterStripper extends PDFTextStripper {
 
@@ -319,6 +360,7 @@ final class FontgroessenFilter {
     private final Map<Integer, Float> schwellen;
     private final Map<Integer, Float> untergrenzen;
     private final SuperskriptModus superskriptModus;
+    private final Spalte spalte;
 
     /** End-X (pt) des breitesten behaltenen Laufs der laufenden Zeile; NaN vor dem ersten. */
     private float zeilenEndX = Float.NaN;
@@ -326,18 +368,88 @@ final class FontgroessenFilter {
     GroessenFilterStripper(
         Map<Integer, Float> schwellen,
         Map<Integer, Float> untergrenzen,
-        SuperskriptModus superskriptModus) {
+        SuperskriptModus superskriptModus,
+        Spalte spalte) {
       this.schwellen = schwellen;
       this.untergrenzen = untergrenzen;
       this.superskriptModus = superskriptModus;
+      this.spalte = spalte;
+    }
+
+    /**
+     * Beschränkt einen Lauf auf die gewünschte Spalte, Zeichen für Zeichen.
+     *
+     * <p>Nicht lauf-, sondern zeichenweise, weil PDFBox alles auf einer Grundlinie zu einem Lauf
+     * zusammenfasst: Die einander gegenüberstehenden Überschriften beider Spalten („Artikel 1“ und
+     * „Artikel 1“) kämen sonst gemeinsam in einer Spalte an.
+     *
+     * @return die Zeichen der Spalte, oder {@code null}, wenn der Lauf ganz außerhalb liegt.
+     */
+    private List<TextPosition> aufSpalte(List<TextPosition> positionen) {
+      if (spalte == Spalte.GANZ || positionen.isEmpty()) {
+        return positionen;
+      }
+      var seite = getCurrentPage();
+      if (seite == null) {
+        return positionen;
+      }
+      float mitte = seite.getMediaBox().getWidth() / 2;
+
+      // Wo überschreitet der Lauf die Blattmitte?
+      int uebergang = -1;
+      for (int i = 0; i < positionen.size() - 1; i++) {
+        if (zeichenMitte(positionen.get(i)) < mitte
+            && zeichenMitte(positionen.get(i + 1)) >= mitte) {
+          uebergang = i;
+          break;
+        }
+      }
+
+      if (uebergang < 0) {
+        // Der Lauf liegt ganz auf einer Seite der Mitte.
+        boolean links = zeichenMitte(positionen.get(0)) < mitte;
+        return links == (spalte == Spalte.LINKS) ? positionen : null;
+      }
+
+      var davor = positionen.get(uebergang);
+      float luecke =
+          positionen.get(uebergang + 1).getXDirAdj()
+              - (davor.getXDirAdj() + davor.getWidthDirAdj());
+      if (luecke < RINNE_MIN_PT) {
+        // Kein Spaltensteg, sondern durchlaufender Text über die Blattmitte hinweg: eine
+        // ganzseitenbreite Zeile (Vorblatt, Bericht, Seitenkopf). Sie gehört keiner Spalte an und
+        // wird der linken zugeschlagen, damit sie genau einmal erscheint statt zerschnitten
+        // zweimal.
+        return spalte == Spalte.LINKS ? positionen : null;
+      }
+      return spalte == Spalte.LINKS
+          ? positionen.subList(0, uebergang + 1)
+          : positionen.subList(uebergang + 1, positionen.size());
+    }
+
+    private static float zeichenMitte(TextPosition position) {
+      return position.getXDirAdj() + position.getWidthDirAdj() / 2;
     }
 
     @Override
     protected void writeString(String text, List<TextPosition> positionen) throws IOException {
+      var inSpalte = aufSpalte(positionen);
+      if (inSpalte == null) {
+        return;
+      }
+      if (inSpalte.size() != positionen.size()) {
+        positionen = inSpalte;
+        var sb = new StringBuilder();
+        for (var position : positionen) {
+          sb.append(position.getUnicode());
+        }
+        text = sb.toString();
+      }
       if (!behalte(positionen)) {
         // Fußnotenblock bzw. hochgestellte Ziffer. In BEHALTEN-Modus werden reine Ziffernläufe
         // im Satzspiegel (oberhalb des Fußnotenblocks) als Superskripte übernommen.
-        var hochgestellt = superskriptModus == SuperskriptModus.BEHALTEN ? nurZiffern(positionen) : null;
+        var hochgestellt =
+            superskriptModus == SuperskriptModus.BEHALTEN ? nurZiffern(positionen) : null;
         if (hochgestellt == null) {
           return;
         }
@@ -424,16 +536,20 @@ final class FontgroessenFilter {
       return true;
     }
 
-    /** Schreibt vor jedem Zeilentrenner das End-X der Zeile als Metadaten für
-     * {@link #klassifiziereZeilenenden}. */
+    /**
+     * Schreibt vor jedem Zeilentrenner das End-X der Zeile als Metadaten für {@link
+     * #klassifiziereZeilenenden}.
+     */
     @Override
     protected void writeLineSeparator() throws IOException {
       schreibeEndXMarke();
       super.writeLineSeparator();
     }
 
-    /** Die letzte Zeile einer Seite endet ohne Zeilentrenner — ohne Flush würde ihr End-X erst
-     * an der ersten Zeile der Folgeseite landen und diese falsch klassifizieren. */
+    /**
+     * Die letzte Zeile einer Seite endet ohne Zeilentrenner — ohne Flush würde ihr End-X erst an
+     * der ersten Zeile der Folgeseite landen und diese falsch klassifizieren.
+     */
     @Override
     protected void writePageEnd() throws IOException {
       schreibeEndXMarke();

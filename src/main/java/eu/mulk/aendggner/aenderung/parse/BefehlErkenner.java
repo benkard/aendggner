@@ -7,9 +7,9 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ebene;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.FussnotenAufhebung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.GliederungsUeberschriften;
-import eu.mulk.aendggner.aenderung.Aenderungsbefehl.SatznummerierungStreichung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Neufassung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Sammelbefehl;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.SatznummerierungStreichung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Streichung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturErsetzung;
@@ -117,6 +117,10 @@ final class BefehlErkenner {
               + WOERTER
               + " "
               + Z
+              // Steht die zu ersetzende Angabe ausdrücklich „am Ende“, so ist genau das letzte
+              // Vorkommen gemeint — bei Satzzeichen der Regelfall („die Angabe „,“ am Ende durch
+              // die Angabe „;“ ersetzt“).
+              + "(?:( am Ende)(?: des Satzes)?)?"
               + " (?:jeweils )?durch (?:"
               + WOERTER
               + " )?"
@@ -175,7 +179,8 @@ final class BefehlErkenner {
               + Z
               + "\\.?$");
 
-  // Ohne Stellenangabe: „Der Punkt am Ende wird durch die Angabe „…“ ersetzt.“ — das Satzzeichen ist
+  // Ohne Stellenangabe: „Der Punkt am Ende wird durch die Angabe „…“ ersetzt.“ — das Satzzeichen
+  // ist
   // hier selbst das Subjekt, die Fundstelle liefert der Kontextrahmen. Der Zusatz „am Ende“ darf
   // fehlen („Das Komma wird durch das Wort „und“ ersetzt.“, hessisches GVBl): der bestimmte Artikel
   // setzt dann voraus, dass die Einheit genau ein solches Satzzeichen trägt — was der Anwender
@@ -307,8 +312,7 @@ final class BefehlErkenner {
 
   // Ziel einer Wortlaut-Voranstellung: „Wortlaut“ allein (Stelle aus dem Rahmen) oder mit
   // Genitiv-Attribut („Wortlaut des Absatzes 3“).
-  private static final Pattern WORTLAUT_ZIEL =
-      Pattern.compile("^Wortlaut(?: (?:des|der) (.+))?$");
+  private static final Pattern WORTLAUT_ZIEL = Pattern.compile("^Wortlaut(?: (?:des|der) (.+))?$");
 
   private static final Pattern VORANSTELLUNG =
       Pattern.compile(
@@ -386,7 +390,9 @@ final class BefehlErkenner {
   // allem als rechte Klausel eines Verbunds auf („… ersetzt und die Angabe „X“ wird gestrichen“).
   private static final Pattern STREICHUNG_OHNE_STELLE =
       Pattern.compile(
-          "^(?:Die Wörter|Das Wort|Die Angabe|Die Zahl) " + Z + " (?:wird|werden) "
+          "^(?:Die Wörter|Das Wort|Die Angabe|Die Zahl) "
+              + Z
+              + " (?:wird|werden) "
               + "(?:jeweils )?gestrichen\\.$");
 
   // „In Nr. 2 werden die Angabe „X“ und die Angabe „Y“ gestrichen.“ — mehrere Streichobjekte
@@ -428,11 +434,16 @@ final class BefehlErkenner {
   private static final Pattern UMNUMMERIERUNG_PARAGRAPHEN =
       Pattern.compile("^Die (§§|Artt?\\.) (.+?) werden (?:zu den \\1 |zu \\1 |die \\1 )(.+?)\\.$");
 
-  // „Die §§ 52 bis 56 werden wie folgt gefasst: „§ 52 (weggefallen) …““ — Neufassung eines §-Bereichs;
+  // „Die §§ 52 bis 56 werden wie folgt gefasst: „§ 52 (weggefallen) …““ — Neufassung eines
+  // §-Bereichs;
   // der Zitatblock wird an „§ N“-Grenzen in Einzel-Neufassungen zerlegt.
   private static final Pattern PARAGRAPH_BEREICH_NEUFASSUNG =
       Pattern.compile(
-          "^Die (?:§§|Artt?\\.) (\\d+[a-z]?) bis (\\d+[a-z]?) " + NEUFASSUNG_VERB + ": " + Z + "\\.?$");
+          "^Die (?:§§|Artt?\\.) (\\d+[a-z]?) bis (\\d+[a-z]?) "
+              + NEUFASSUNG_VERB
+              + ": "
+              + Z
+              + "\\.?$");
 
   // „Der Wortlaut wird Absatz 1.“, bayerisch auch „Der bisherige Wortlaut wird Abs. 5.“ und
   // „Der Wortlaut wird Satz 1.“
@@ -558,7 +569,8 @@ final class BefehlErkenner {
               + "|(ein Komma|ein Semikolon))$");
 
   // „… ein Komma eingefügt und werden …“: Trennstellen eines Verbundbefehls sind „ und “ (ggf. mit
-  // Komma) bzw. „, “ direkt vor „wird/werden“. Innerhalb von Zitaten steht „ und “ als «n» maskiert.
+  // Komma) bzw. „, “ direkt vor „wird/werden“. Innerhalb von Zitaten steht „ und “ als «n»
+  // maskiert.
   private static final Pattern VERBUND_SEP =
       Pattern.compile(
           ",? und |,? sowie |, (?=wird\\b|werden\\b)"
@@ -581,7 +593,8 @@ final class BefehlErkenner {
               + "(?:Satzteil|Satz|Sätze[n]?|Absatz|Abs\\.|Absätze[n]?|Nummer[n]?|Nrn?\\."
               + "|Buchstabe[n]?|Buchst\\.|Halbsatz)\\b");
 
-  // „In <Stelle> wird nach den Wörtern «1» ein Komma eingefügt.“ (Satzzeichen statt Wörter einfügen)
+  // „In <Stelle> wird nach den Wörtern «1» ein Komma eingefügt.“ (Satzzeichen statt Wörter
+  // einfügen)
   private static final Pattern KOMMA_EINFUEGUNG =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?(nach|vor) "
@@ -645,8 +658,8 @@ final class BefehlErkenner {
   /**
    * Ergänzt das Fragment eines Verb-Rahmen-Punkts zum vollständigen Befehlssatz: „in § 35 Absatz 3
    * die Angabe «1» jeweils durch die Angabe «2»,“ wird mit dem Verb des Rahmens zu „In § 35 Absatz
-   * 3 werden die Angabe «1» jeweils durch die Angabe «2» ersetzt.“ — der Form, die die
-   * gewöhnlichen Muster erkennen.
+   * 3 werden die Angabe «1» jeweils durch die Angabe «2» ersetzt.“ — der Form, die die gewöhnlichen
+   * Muster erkennen.
    */
   static Optional<String> vervollstaendigeVerbRahmenPunkt(String text, String verb) {
     var m = VERB_RAHMEN_PUNKT.matcher(text.strip());
@@ -654,6 +667,67 @@ final class BefehlErkenner {
       return Optional.empty();
     }
     return Optional.of("In " + m.group(1) + " werden " + m.group(2).strip() + " " + verb + ".");
+  }
+
+  // Änderungsanträge setzen ihre Punkte als Glieder eines einzigen Beschlusssatzes („Der Landtag
+  // wolle beschließen: … 1. In Nr. 1.29 die Angabe «0» am Ende durch die Angabe «1» ersetzt.“).
+  // Das Hilfsverb steht deshalb nur einmal, in der Beschlussformel; die Punkte selbst tragen bloß
+  // das Partizip. Ergänzt wird es an der Stelle, an der es im vollständigen Satz stünde: hinter
+  // dem vorangestellten Lokator, sonst vor dem Partizip.
+  private static final Pattern ANTRAGS_ELLIPSE =
+      Pattern.compile(
+          "^(.*?)\\s+(ersetzt|eingefügt|angefügt|gestrichen|aufgehoben|gefasst|vorangestellt)"
+              + "([.;,:]?)$");
+  private static final Pattern HILFSVERB = Pattern.compile("\\b(?:wird|werden|ist|sind)\\b");
+  private static final Pattern ANTRAGS_LOKATOR =
+      Pattern.compile("^(In\\s+.+?)\\s+(d(?:ie|er|as)\\s+(\\p{L}+).*)$");
+  private static final java.util.Set<String> PLURALKOEPFE =
+      java.util.Set.of(
+          "Wörter", "Worte", "Angaben", "Sätze", "Nummern", "Buchstaben", "Absätze", "Nrn.");
+
+  /**
+   * Ergänzt das fehlende Hilfsverb eines Antragspunkts: „In Nr. 1.29 die Angabe «0» am Ende durch
+   * die Angabe «1» ersetzt.“ wird zu „In Nr. 1.29 wird die Angabe «0» am Ende durch die Angabe «1»
+   * ersetzt.“ — der Form, die die gewöhnlichen Muster erkennen.
+   *
+   * @return leer, wenn der Satz bereits ein Hilfsverb trägt oder nicht auf ein Partizip endet; dann
+   *     ist nichts zu ergänzen.
+   */
+  static Optional<String> vervollstaendigeAntragsPunkt(String text) {
+    var satz = text.strip();
+    if (HILFSVERB.matcher(satz).find()) {
+      return Optional.empty();
+    }
+    var ellipse = ANTRAGS_ELLIPSE.matcher(satz);
+    if (!ellipse.matches()) {
+      return Optional.empty();
+    }
+    var lokator = ANTRAGS_LOKATOR.matcher(satz);
+    if (lokator.matches()) {
+      return Optional.of(
+          lokator.group(1) + " " + hilfsverb(lokator.group(3)) + " " + lokator.group(2));
+    }
+    // Ohne vorangestellten Lokator ist das Subjekt der Satzanfang: „Nr. 1.30 aufgehoben.“
+    return Optional.of(
+        ellipse.group(1)
+            + " "
+            + hilfsverbFuerPhrase(ellipse.group(1))
+            + " "
+            + ellipse.group(2)
+            + ellipse.group(3));
+  }
+
+  private static String hilfsverb(String kopf) {
+    return PLURALKOEPFE.contains(kopf) ? "werden" : "wird";
+  }
+
+  private static String hilfsverbFuerPhrase(String phrase) {
+    for (var wort : phrase.split("\\s+")) {
+      if (PLURALKOEPFE.contains(wort)) {
+        return "werden";
+      }
+    }
+    return "wird";
   }
 
   /**
@@ -671,8 +745,7 @@ final class BefehlErkenner {
       var alt = StellenParser.parse(m.group(1));
       if (alt.isPresent()) {
         var neu = new Stelle(List.of(komponenteFuer(m.group(2), m.group(3))));
-        var befehl =
-            new Umnummerierung(kontext.plus(alt.get()), kontext.plus(neu), provenienz);
+        var befehl = new Umnummerierung(kontext.plus(alt.get()), kontext.plus(neu), provenienz);
         return Optional.of(new Rahmen(neu, befehl));
       }
     }
@@ -832,8 +905,7 @@ final class BefehlErkenner {
       if (stelle.isEmpty()) {
         return Optional.empty();
       }
-      var neuerText =
-          mitEnumerator(m.group(3), List.of(stelle.get()), zitat(zitate, m.group(4)));
+      var neuerText = mitEnumerator(m.group(3), List.of(stelle.get()), zitat(zitate, m.group(4)));
       return Optional.of(new Neufassung(kontext.plus(stelle.get()), neuerText, provenienz));
     }
 
@@ -972,9 +1044,10 @@ final class BefehlErkenner {
     if ((m = ERSETZUNG.matcher(text)).matches()) {
       var jeweils = m.group(2) != null || text.contains(" jeweils durch ");
       var alt = wortZitat(zitate, m.group(3));
-      var neu = wortZitat(zitate, m.group(4));
+      var amEnde = m.group(4) != null;
+      var neu = wortZitat(zitate, m.group(5));
       return ausStellen(
-          m.group(1), s -> new Ersetzung(kontext.plus(s), alt, neu, jeweils, false, provenienz));
+          m.group(1), s -> new Ersetzung(kontext.plus(s), alt, neu, jeweils, amEnde, provenienz));
     }
 
     if ((m = ERSETZUNG_MIT_ANKER.matcher(text)).matches()) {
@@ -1332,8 +1405,7 @@ final class BefehlErkenner {
     }
 
     if ((m = UEBERSCHRIFT_STREICHUNG.matcher(text)).matches()) {
-      return StellenParser.parse(m.group(1))
-          .map(s -> new Aufhebung(kontext.plus(s), provenienz));
+      return StellenParser.parse(m.group(1)).map(s -> new Aufhebung(kontext.plus(s), provenienz));
     }
 
     if ((m = ABSATZBEZEICHNUNG_STREICHUNG.matcher(text)).matches()) {
@@ -1459,8 +1531,8 @@ final class BefehlErkenner {
   }
 
   /**
-   * „In <Stelle> werden nach X die Wörter «1» und nach Y ein Komma und die Angabe «2» eingefügt.“
-   * — mehrere Einfügepaare unter einem gemeinsamen „eingefügt“, aufgelöst in einen {@link
+   * „In <Stelle> werden nach X die Wörter «1» und nach Y ein Komma und die Angabe «2» eingefügt.“ —
+   * mehrere Einfügepaare unter einem gemeinsamen „eingefügt“, aufgelöst in einen {@link
    * Sammelbefehl} von {@link WoerterEinfuegung}en (Kreuzprodukt mit koordinierter Stelle).
    */
   private static Optional<Aenderungsbefehl> erkenneEinfuegungsPaare(
@@ -1569,8 +1641,8 @@ final class BefehlErkenner {
    * Versucht die rechte Klausel eines Verbunds zu erkennen: (1) unverändert, (2) mit großem
    * Anfangsbuchstaben (eigenständiger Befehl wie „nach …“ → „Nach …“), (3) nach einer
    * Umnummerierung mit aufgelöstem Rückbezug („… wird Nummer 2 und in ihr werden …“ / „… und wie
-   * folgt gefasst: …“), (4) mit vorangestelltem lokativem Präfix der linken Klausel („In
-   * <Stelle> “).
+   * folgt gefasst: …“), (4) mit vorangestelltem lokativem Präfix der linken Klausel („In <Stelle>
+   * “).
    */
   private static Optional<Aenderungsbefehl> erkenneRechteKlausel(
       String links,
@@ -1589,8 +1661,7 @@ final class BefehlErkenner {
       // Nummeriert die linke Klausel einen ganzen Paragraphen um, so ist dessen neue Bezeichnung
       // schon die vollständige Stelle; bei feineren Einheiten (Absatz, Nummer) tritt sie zum
       // Kontext hinzu („Der bisherige Absatz 7 wird Absatz 8 und nach Satz 2 …“ → Absatz 8 Satz 2).
-      var neuerKontext =
-          um.neu().paragraph().isPresent() ? um.neu() : kontext.plus(um.neu());
+      var neuerKontext = um.neu().paragraph().isPresent() ? um.neu() : kontext.plus(um.neu());
       var imNeuen = erkenneAlsSatz(gross, neuerKontext, zitate, provenienz);
       if (imNeuen.isPresent()) {
         return imNeuen;
@@ -1626,8 +1697,7 @@ final class BefehlErkenner {
     if (linksBefehl instanceof WortlautZuAbsatz wz
         && rechts.startsWith("in ")
         && !rechts.matches(".*(?:§|Art\\.)\\s*\\d.*")) {
-      var neuKontext =
-          wz.stelle().plus(new Stelle(List.of(new Stelle.AbsatzNr(wz.nummer()))));
+      var neuKontext = wz.stelle().plus(new Stelle(List.of(new Stelle.AbsatzNr(wz.nummer()))));
       var imNeuen = erkenneAlsSatz(gross, neuKontext, zitate, provenienz);
       if (imNeuen.isPresent()) {
         return imNeuen;
@@ -1688,8 +1758,7 @@ final class BefehlErkenner {
               relativ.anzeigeText() + " wird " + rechts, kontext, zitate, provenienz);
         }
         if (rechts.startsWith("wird wie folgt ") || rechts.startsWith("werden wie folgt ")) {
-          return erkenneAlsSatz(
-              relativ.anzeigeText() + " " + rechts, kontext, zitate, provenienz);
+          return erkenneAlsSatz(relativ.anzeigeText() + " " + rechts, kontext, zitate, provenienz);
         }
       }
     }
@@ -1713,7 +1782,9 @@ final class BefehlErkenner {
     return Optional.empty();
   }
 
-  /** Die Komponenten von {@code voll} hinter dem Kontext-Präfix (leer, wenn nichts übrig bleibt). */
+  /**
+   * Die Komponenten von {@code voll} hinter dem Kontext-Präfix (leer, wenn nichts übrig bleibt).
+   */
   private static Stelle relativeStelle(Stelle voll, Stelle kontext) {
     int praefix = kontext.komponenten().size();
     if (voll.komponenten().size() <= praefix) {
@@ -1753,7 +1824,8 @@ final class BefehlErkenner {
 
   /**
    * Löst „Die §§ 46 und 47 werden zu den §§ 34 und 35.“ (auch Bereiche) in paarweise
-   * §-Umnummerierungen auf. Beide Seiten werden zu Paragraphenlisten expandiert und zusammengeführt.
+   * §-Umnummerierungen auf. Beide Seiten werden zu Paragraphenlisten expandiert und
+   * zusammengeführt.
    */
   private static Optional<Aenderungsbefehl> paragraphenUmnummerierung(
       String sigel, String altPhrase, String neuPhrase, Stelle kontext, Provenienz provenienz) {
@@ -1838,9 +1910,9 @@ final class BefehlErkenner {
 
   /**
    * Baut aus einem zusammenhängenden, koordinierten Ziel-Bereich („Die Absätze 8 und 9 …“, „Die
-   * bisherigen Sätze 4 und 5 …“) eine bereichsbezogene {@link StrukturErsetzung}: erstes und letztes
-   * Ziel spannen den zu ersetzenden Bereich auf; der zitierte Block ersetzt ihn (Absatz-, Satz-,
-   * Nummer- und Buchstaben-Bereiche; §-Bereiche laufen über den PARAGRAPH-Zweig).
+   * bisherigen Sätze 4 und 5 …“) eine bereichsbezogene {@link StrukturErsetzung}: erstes und
+   * letztes Ziel spannen den zu ersetzenden Bereich auf; der zitierte Block ersetzt ihn (Absatz-,
+   * Satz-, Nummer- und Buchstaben-Bereiche; §-Bereiche laufen über den PARAGRAPH-Zweig).
    */
   private static Optional<Aenderungsbefehl> koordinierteErsetzung(
       List<Stelle> stellen,
@@ -1855,8 +1927,7 @@ final class BefehlErkenner {
       return Optional.empty();
     }
     return Optional.of(
-        new StrukturErsetzung(
-            kontext.plus(first), kontext.plus(last), ebene, block, provenienz));
+        new StrukturErsetzung(kontext.plus(first), kontext.plus(last), ebene, block, provenienz));
   }
 
   /** Die Ebene der feinsten Komponente einer Stelle (Buchstabe < Nummer < Satz < Absatz < §). */

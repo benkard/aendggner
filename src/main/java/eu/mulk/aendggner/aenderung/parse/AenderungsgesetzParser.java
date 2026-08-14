@@ -41,11 +41,23 @@ public final class AenderungsgesetzParser {
    *     Artikel, deren Einleitung das Zielgesetz nennt.
    */
   public ParseErgebnis parse(String text, Gesetz ziel, @Nullable String artikelFilter) {
+    return parse(text, ziel, artikelFilter, false);
+  }
+
+  /**
+   * @param entwurfsGrenzen für Entwürfe und Anträge zusätzlich an den dort üblichen
+   *     Begründungsmarken abbrechen (Referentenentwürfe überschreiben „Begründung“ gern mit „A.
+   *     Allgemeiner Teil“). Für verkündete Gesetze bleibt es bei der schlichten Marke, damit ein
+   *     Gesetzblatt nicht an einem gleichlautenden Wort abbricht.
+   */
+  public ParseErgebnis parse(
+      String text, Gesetz ziel, @Nullable String artikelFilter, boolean entwurfsGrenzen) {
     var zitate = ZitatExtraktor.extrahiere(text);
-    var artikelBloecke = teileInArtikel(zitate.text(), ARTIKEL_UEBERSCHRIFT);
+    var artikelBloecke = teileInArtikel(zitate.text(), ARTIKEL_UEBERSCHRIFT, entwurfsGrenzen);
     boolean paragraphenModus = false;
     if (artikelBloecke.isEmpty()) {
-      artikelBloecke = teileInArtikel(zitate.text(), PARAGRAPH_UEBERSCHRIFT_AUSSEN);
+      artikelBloecke =
+          teileInArtikel(zitate.text(), PARAGRAPH_UEBERSCHRIFT_AUSSEN, entwurfsGrenzen);
       paragraphenModus = !artikelBloecke.isEmpty();
     }
 
@@ -203,7 +215,8 @@ public final class AenderungsgesetzParser {
       }
       // Ein Punkt mit Unterpunkten muss sonst ein Kontextrahmen sein („§ X wird wie folgt
       // geändert:“, auch als Verbund „§ 50 wird zu § 38 und wird wie folgt geändert:“). Steht dort
-      // „gefasst“ statt „geändert“, ist das ein amtlicher Schreibfehler: eine Neufassung trüge ihren
+      // „gefasst“ statt „geändert“, ist das ein amtlicher Schreibfehler: eine Neufassung trüge
+      // ihren
       // Wortlaut als Zitat, keine Unterpunkte mit eigenen Änderungsbefehlen.
       var rahmen = BefehlErkenner.rahmenMitBefehl(text, kontext, provenienz);
       if (rahmen.isEmpty() && text.endsWith("wie folgt gefasst:")) {
@@ -262,15 +275,24 @@ public final class AenderungsgesetzParser {
 
   private record ArtikelBlock(String label, List<String> zeilen) {}
 
-  private static List<ArtikelBlock> teileInArtikel(String platzhalterText, Pattern ueberschrift) {
+  // Gesetzentwürfe (RefE/RegE/Drucksachen): Nach dem Gesetzestext folgt der Begründungsteil —
+  // Freitext, der keine Befehle enthält und den letzten Artikel nicht verunreinigen darf.
+  private static final Pattern BEGRUENDUNG = Pattern.compile("Begründung:?");
+  // Weitere Überschriften, mit denen Entwürfe und Anträge ihren Begründungsteil eröffnen.
+  private static final Pattern BEGRUENDUNG_ENTWURF =
+      Pattern.compile(
+          "Begründung:?|Begründung\\s*:?\\s*[–-]?\\s*Allgemeiner Teil|[AB]\\.\\s*(?:Allgemeiner|Besonderer) Teil"
+              + "|Zu Artikel \\d+[a-z]?\\b.*");
+
+  private static List<ArtikelBlock> teileInArtikel(
+      String platzhalterText, Pattern ueberschrift, boolean entwurfsGrenzen) {
     var bloecke = new ArrayList<ArtikelBlock>();
+    var begruendung = entwurfsGrenzen ? BEGRUENDUNG_ENTWURF : BEGRUENDUNG;
     String aktuellesLabel = null;
     var aktuelleZeilen = new ArrayList<String>();
 
     for (var zeile : platzhalterText.split("\n", -1)) {
-      // Gesetzentwürfe (RefE/RegE/Drucksachen): Nach dem Gesetzestext folgt der Begründungsteil
-      // — Freitext, der keine Befehle enthält und den letzten Artikel nicht verunreinigen darf.
-      if (aktuellesLabel != null && zeile.strip().matches("Begründung:?")) {
+      if (aktuellesLabel != null && begruendung.matcher(zeile.strip()).matches()) {
         break;
       }
       var matcher = ueberschrift.matcher(zeile.strip());

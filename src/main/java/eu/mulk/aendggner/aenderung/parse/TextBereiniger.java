@@ -17,19 +17,23 @@ import java.util.regex.Pattern;
  *
  * <p>PDF-extrahierter Text trägt außerdem die geometrische Umbruch-Klassifikation des {@link
  * FontgroessenFilter}s ({@link #HARTES_ZEILENENDE}/{@link #WEICHES_ZEILENENDE} am Zeilenende):
- * Weiche Umbrüche (Zeile endet am rechten Blocksatzrand) werden zu Fließtext zusammengezogen,
- * harte (deutlich davor) bleiben als Zeilenumbruch erhalten. Nach {@link #bereinige} ist damit
- * jeder verbleibende Zeilenumbruch nach bester Einschätzung beabsichtigt; die Marker selbst
- * verlassen diese Klasse nie.
+ * Weiche Umbrüche (Zeile endet am rechten Blocksatzrand) werden zu Fließtext zusammengezogen, harte
+ * (deutlich davor) bleiben als Zeilenumbruch erhalten. Nach {@link #bereinige} ist damit jeder
+ * verbleibende Zeilenumbruch nach bester Einschätzung beabsichtigt; die Marker selbst verlassen
+ * diese Klasse nie.
  */
 public final class TextBereiniger {
 
-  /** Vom {@link FontgroessenFilter} an eine Zeile angehängt, deren Ende deutlich vor dem lokalen
-   * rechten Satzspiegelrand liegt: ein bewusstes Zeilenende. */
+  /**
+   * Vom {@link FontgroessenFilter} an eine Zeile angehängt, deren Ende deutlich vor dem lokalen
+   * rechten Satzspiegelrand liegt: ein bewusstes Zeilenende.
+   */
   static final char HARTES_ZEILENENDE = '\uE000';
 
-  /** Vom {@link FontgroessenFilter} an eine Zeile angehängt, die am lokalen rechten
-   * Satzspiegelrand endet: ein automatischer (weicher) Blocksatz-Umbruch. */
+  /**
+   * Vom {@link FontgroessenFilter} an eine Zeile angehängt, die am lokalen rechten Satzspiegelrand
+   * endet: ein automatischer (weicher) Blocksatz-Umbruch.
+   */
   static final char WEICHES_ZEILENENDE = '\uE001';
 
   /** Geometrische Einordnung eines Zeilenendes (siehe {@link FontgroessenFilter}). */
@@ -71,8 +75,28 @@ public final class TextBereiniger {
               + ")"
               + gesperrt(" ersetzt."));
 
-  /** Whitespace einschließlich der Umbruch-Marker des FontgroessenFilters — die kurzen Zeilen
-   * des senkrechten Wasserzeichens tragen sie an jedem Zeilenende. */
+  /**
+   * In der Zusammenstellung einer Beschlussempfehlung steht der Vermerk der Ausschussspalte
+   * gesperrt: „u n v e r ä n d e r t“. Er ist kein Fließtext, sondern eine Marke, und wird auf ihre
+   * Normalform gebracht, bevor irgendetwas anderes ihn zu lesen versucht.
+   */
+  /**
+   * Der laufende Spaltenkopf der Zusammenstellung („Entwurf“ links, „Beschlüsse des 25.
+   * Ausschusses“ rechts) wiederholt sich auf jeder Seite und steht damit mitten in den Befehlen.
+   * Erfasst wird auch die ungetrennte Form, die entsteht, solange die Spalten noch nicht getrennt
+   * sind.
+   */
+  private static final Pattern ZUSAMMENSTELLUNG_SPALTENKOPF =
+      Pattern.compile(
+          "\\s*(?:Entwurf\\s*)?(?:Beschlüsse\\s+des\\s+\\d+\\.\\s+Ausschusses)\\s*|\\s*Entwurf\\s*");
+
+  private static final Pattern UNVERAENDERT_GESPERRT =
+      Pattern.compile("u\\s+n\\s+v\\s+e\\s+r\\s+ä\\s+n\\s+d\\s+e\\s+r\\s+t");
+
+  /**
+   * Whitespace einschließlich der Umbruch-Marker des FontgroessenFilters — die kurzen Zeilen des
+   * senkrechten Wasserzeichens tragen sie an jedem Zeilenende.
+   */
   private static final String FUELLER = "[\\s\\uE000\\uE001]*";
 
   /** Regex für eine Phrase, deren Zeichen durch beliebigen Whitespace getrennt sein dürfen. */
@@ -125,9 +149,12 @@ public final class TextBereiniger {
       Pattern.compile(
           "^\\s*https?://\\S+\\s+Fassung vom \\d{1,2}\\.\\d{1,2}\\.\\d{4}\\s+Seite \\d+ von \\d+\\s*$");
 
-  // Niedersächsisches GVBl: laufende Fußzeile („Nds. GVBl. 2026 Nr. 10 vom 4. Februar 2026  Seite 2“)
-  // und Herausgeberzeile. Die Fußzeile steht zwischen zwei Aufzählungsgliedern und hängte sich sonst
-  // an den vorangehenden Befehl (Neufassungs-Zitat), sodass dessen Satzende-Anker nicht mehr greift.
+  // Niedersächsisches GVBl: laufende Fußzeile („Nds. GVBl. 2026 Nr. 10 vom 4. Februar 2026  Seite
+  // 2“)
+  // und Herausgeberzeile. Die Fußzeile steht zwischen zwei Aufzählungsgliedern und hängte sich
+  // sonst
+  // an den vorangehenden Befehl (Neufassungs-Zitat), sodass dessen Satzende-Anker nicht mehr
+  // greift.
   private static final Pattern NDS_GVBL_FUSS =
       Pattern.compile("^\\s*Nds\\. GVBl\\. \\d{4} Nr\\. \\d+ vom .+? Seite \\d+\\s*$");
   private static final Pattern NDS_HERAUSGEBER =
@@ -140,8 +167,7 @@ public final class TextBereiniger {
   // Artikel-Überschrift.
   private static final Pattern GVOBL_SH_KOPF =
       Pattern.compile("^\\s*Gesetz- und Verordnungsblatt(?: für Schleswig-Holstein)?\\s*$");
-  private static final Pattern GVOBL_SH_LAND =
-      Pattern.compile("^\\s*für Schleswig-Holstein\\s*$");
+  private static final Pattern GVOBL_SH_LAND = Pattern.compile("^\\s*für Schleswig-Holstein\\s*$");
   private static final Pattern GVOBL_SH_HEFT =
       Pattern.compile(
           "^\\s*(?:Nummer \\d{4}/\\d{1,3}|\\d{4}/\\d{1,3} vom \\d{1,2}\\. \\p{L}+)\\s*$");
@@ -170,16 +196,20 @@ public final class TextBereiniger {
   private static final Pattern KONJUNKTION =
       Pattern.compile("^(und|oder|sowie|bzw\\.|beziehungsweise)\\b.*");
 
-  /** Aufzählungsmarker am Zeilenanfang („3. “, „d) “, „aa) “) — eröffnet eine bewusste
-   * Strukturzeile, in die nie hineingejoint werden darf. */
+  /**
+   * Aufzählungsmarker am Zeilenanfang („3. “, „d) “, „aa) “) — eröffnet eine bewusste
+   * Strukturzeile, in die nie hineingejoint werden darf.
+   */
   private static final Pattern AUFZAEHLUNGSMARKER =
       Pattern.compile("(\\d+[a-z]?\\.|[a-z]{1,3}\\))\\s");
 
-  /** Zeilen, die eigenständige Struktur-Anker des Parsers sind („Artikel 2“, „§ 19“, allein
-   * stehende Gliederungs-Bezeichnungen) und nie mit Nachbarzeilen zusammengezogen werden dürfen —
-   * auch dann nicht, wenn die Geometrie sie für einen Blocksatz-Umbruch hält: gleich breite,
-   * zentrierte Überschriften in Serie (etwa die Artikel-Überschriften der Folgeänderungen eines
-   * Entwurfs) bilden ein Schein-Ausrichtungs-Cluster. */
+  /**
+   * Zeilen, die eigenständige Struktur-Anker des Parsers sind („Artikel 2“, „§ 19“, allein stehende
+   * Gliederungs-Bezeichnungen) und nie mit Nachbarzeilen zusammengezogen werden dürfen — auch dann
+   * nicht, wenn die Geometrie sie für einen Blocksatz-Umbruch hält: gleich breite, zentrierte
+   * Überschriften in Serie (etwa die Artikel-Überschriften der Folgeänderungen eines Entwurfs)
+   * bilden ein Schein-Ausrichtungs-Cluster.
+   */
   private static final Pattern STRUKTURZEILE =
       Pattern.compile(
           "^(?:(?:Artikel|Teil|Abschnitt|Unterabschnitt|Kapitel|Titel|Buch)\\s+\\d+[a-z]?"
@@ -187,15 +217,22 @@ public final class TextBereiniger {
               + "|Art\\.\\s*\\d+[a-z]?"
               + "|(?:Anlage|Anhang)(?:\\s+\\d+[a-z]?)?)$");
 
-  /** Perzentil der Zeilenlängen, das als „volle Spaltenbreite“ gilt (siehe {@link #verbindeUmbrueche}). */
+  /**
+   * Perzentil der Zeilenlängen, das als „volle Spaltenbreite“ gilt (siehe {@link
+   * #verbindeUmbrueche}).
+   */
   private static final double VOLLZEILE_PERZENTIL = 0.9;
 
-  /** Mindestanteil der vollen Spaltenbreite, ab dem ein markerloser Umbruch als Silbentrennung
-   * statt als bewusster Wortgrenzen-Umbruch gilt. */
+  /**
+   * Mindestanteil der vollen Spaltenbreite, ab dem ein markerloser Umbruch als Silbentrennung statt
+   * als bewusster Wortgrenzen-Umbruch gilt.
+   */
   private static final double VOLLZEILE_MINDESTANTEIL = 0.7;
 
-  /** Anzahl Zeilen vor/nach einer Kandidatenzeile, die für die lokale Spaltenbreiten-Schätzung
-   * herangezogen werden (siehe {@link #typischeZeilenlaenge}). */
+  /**
+   * Anzahl Zeilen vor/nach einer Kandidatenzeile, die für die lokale Spaltenbreiten-Schätzung
+   * herangezogen werden (siehe {@link #typischeZeilenlaenge}).
+   */
   private static final int VOLLZEILE_FENSTER = 20;
 
   // BMJV-Entwurfsvorlagen zeichnen das hängende öffnende Anführungszeichen im Content-Stream
@@ -228,7 +265,8 @@ public final class TextBereiniger {
       Pattern.compile("(§|Art\\.) (\\d+) ([a-z])(?![a-zäöüß).])");
 
   /** C0-Steuerzeichen außer Tabulator und Zeilenumbruch; im Fließtext stets Extraktionsmüll. */
-  private static final Pattern STEUERZEICHEN = Pattern.compile("[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]");
+  private static final Pattern STEUERZEICHEN =
+      Pattern.compile("[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]");
 
   private TextBereiniger() {}
 
@@ -253,6 +291,7 @@ public final class TextBereiniger {
     text = INVERTIERTES_LISTEN_ZITAT.matcher(text).replaceAll("$1„$2 ");
     text = trenneVerklebteZitatgrenzen(text);
     text = VORABFASSUNG.matcher(text).replaceAll("\n");
+    text = UNVERAENDERT_GESPERRT.matcher(text).replaceAll("unverändert");
     text = GVBL_BERLIN_KOPF.matcher(text).replaceAll("\n");
     var zeilen = entferneKolumnentitel(zerlegeInZeilen(text));
     var verbunden = verbindeUmbrueche(zeilen);
@@ -263,9 +302,9 @@ public final class TextBereiniger {
   }
 
   /**
-   * Zerlegt den Text in Zeilen und streift dabei die Umbruch-Marker des {@link
-   * FontgroessenFilter}s in die Klassifikation ab. Verirrte Marker mitten in der Zeile (z.B.
-   * Reste der Wasserzeichen-Entfernung) sind bedeutungslos und werden entfernt.
+   * Zerlegt den Text in Zeilen und streift dabei die Umbruch-Marker des {@link FontgroessenFilter}s
+   * in die Klassifikation ab. Verirrte Marker mitten in der Zeile (z.B. Reste der
+   * Wasserzeichen-Entfernung) sind bedeutungslos und werden entfernt.
    */
   private static ArrayList<Zeile> zerlegeInZeilen(String text) {
     var roh = text.split("\n", -1);
@@ -313,11 +352,12 @@ public final class TextBereiniger {
         .replace("\"", "“");
   }
 
-  /** Verklebte Zitatgrenzen wieder trennen („§ 9“ersetzt → „§ 9“ ersetzt) — erst nach den
-   * Invertiertes-Zitat-Fixes, die auf die verklebte Form angewiesen sind. */
+  /**
+   * Verklebte Zitatgrenzen wieder trennen („§ 9“ersetzt → „§ 9“ ersetzt) — erst nach den
+   * Invertiertes-Zitat-Fixes, die auf die verklebte Form angewiesen sind.
+   */
   private static String trenneVerklebteZitatgrenzen(String text) {
-    return text
-        .replaceAll("“(\\p{L})", "“ $1")
+    return text.replaceAll("“(\\p{L})", "“ $1")
         .replaceAll("(\\p{L})„", "$1 „")
         // Verklebte Befehlsvokabeln (Zusammenzug über Zeilengrenzen ohne Leerzeichen).
         .replace("durchdie ", "durch die ")
@@ -395,6 +435,7 @@ public final class TextBereiniger {
         || GVOBL_SH_HEFT.matcher(zeile).matches()
         || GVBL_HESSEN_FUSS.matcher(zeile).matches()
         || GVBL_HESSEN_KOPF.matcher(zeile).matches()
+        || ZUSAMMENSTELLUNG_SPALTENKOPF.matcher(zeile).matches()
         || FUNDSTELLEN_FUSSNOTE.matcher(zeile).matches();
   }
 
@@ -410,17 +451,17 @@ public final class TextBereiniger {
    *       enden dort mit Leerzeichen vor dem Zeilenumbruch; endet eine Zeile direkt mit einem
    *       Buchstaben und beginnt die Folgezeile klein, ist es eine Trennung → ohne Leerzeichen
    *       zusammenziehen. Das trifft aber nur zu, wenn die Zeile den rechten Rand tatsächlich
-   *       erreicht — sonst wäre der Umbruch dort nicht nötig gewesen. Bewusst abgebrochene
-   *       Zeilen (z.B. ein Stichwort vor einer hängend eingerückten Definition:
-   *       „…Nachhaltigkeitssiegels“ + „das Anbringen …“) werden deshalb ausgenommen — sie sind
-   *       ein Wortgrenzen-Umbruch, keine Silbentrennung, auch wenn das Trailing-Space-Signal
-   *       fehlt. Maßgeblich ist die geometrische Klassifikation des FontgroessenFilters; nur wo
-   *       sie fehlt, springt die Zeichenzahl-Näherung ({@link #typischeZeilenlaenge}) ein.
+   *       erreicht — sonst wäre der Umbruch dort nicht nötig gewesen. Bewusst abgebrochene Zeilen
+   *       (z.B. ein Stichwort vor einer hängend eingerückten Definition: „…Nachhaltigkeitssiegels“
+   *       + „das Anbringen …“) werden deshalb ausgenommen — sie sind ein Wortgrenzen-Umbruch, keine
+   *       Silbentrennung, auch wenn das Trailing-Space-Signal fehlt. Maßgeblich ist die
+   *       geometrische Klassifikation des FontgroessenFilters; nur wo sie fehlt, springt die
+   *       Zeichenzahl-Näherung ({@link #typischeZeilenlaenge}) ein.
    * </ul>
    *
    * <p>Beginnt die Folgezeile mit einem Aufzählungsmarker („d)“, „3.“), unterbleibt jeder
-   * Zusammenzug — ein Marker eröffnet eine bewusste Strukturzeile, auch wenn er klein
-   * geschrieben ist („…vorgesehen und“ + „d) die Überwachung …“).
+   * Zusammenzug — ein Marker eröffnet eine bewusste Strukturzeile, auch wenn er klein geschrieben
+   * ist („…vorgesehen und“ + „d) die Überwachung …“).
    */
   private static ArrayList<Zeile> verbindeUmbrueche(List<Zeile> zeilen) {
     // Markerlose Trennungen sind nur erkennbar, wenn die Quelle die Trailing-Space-Konvention
@@ -558,9 +599,9 @@ public final class TextBereiniger {
   /**
    * Zieht geometrisch weiche Umbrüche (Blocksatz-Zeilenfall) mit einem Leerzeichen zu Fließtext
    * zusammen und stutzt die Zeilenenden. Harte und unklassifizierte Umbrüche bleiben erhalten —
-   * nach diesem Schritt ist jeder verbleibende Zeilenumbruch nach bester Einschätzung
-   * beabsichtigt. Leerzeilen unmittelbar nach einem weichen Umbruch sind Spalten-/Seitenwechsel
-   * mitten im Absatz und entfallen.
+   * nach diesem Schritt ist jeder verbleibende Zeilenumbruch nach bester Einschätzung beabsichtigt.
+   * Leerzeilen unmittelbar nach einem weichen Umbruch sind Spalten-/Seitenwechsel mitten im Absatz
+   * und entfallen.
    *
    * <p>Beginnt die Folgezeile mit einem Aufzählungsmarker, bleibt der Umbruch auch nach einer
    * weichen Zeile stehen: Der Zeilenfall kann zufällig genau vor einem Aufzählungspunkt am Rand

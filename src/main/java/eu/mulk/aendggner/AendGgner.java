@@ -1,6 +1,7 @@
 package eu.mulk.aendggner;
 
 import eu.mulk.aendggner.aenderung.parse.AenderungsgesetzParser;
+import eu.mulk.aendggner.aenderung.parse.DokumentErkenner;
 import eu.mulk.aendggner.aenderung.parse.PatchTextExtraktor;
 import eu.mulk.aendggner.aenderung.parse.TextBereiniger;
 import eu.mulk.aendggner.anwendung.BefehlAnwender;
@@ -78,6 +79,12 @@ public class AendGgner implements Callable<Integer> {
   private boolean raw;
 
   @Option(
+      names = "--dump-dokumentart",
+      hidden = true,
+      description = "Debug: print the recognised document kind of each amendment file and exit.")
+  private boolean dumpDokumentart;
+
+  @Option(
       names = "--dump-befehle",
       hidden = true,
       description = "Debug: dump the parsed amendment commands and exit.")
@@ -123,6 +130,24 @@ public class AendGgner implements Callable<Integer> {
       for (var file : patches) {
         var text = extraktor.extrahiere(file);
         System.out.println(raw ? text : TextBereiniger.bereinige(text));
+      }
+      return 0;
+    }
+
+    if (dumpDokumentart) {
+      var extraktor = new PatchTextExtraktor();
+      // Ohne weitere Argumente wird die erste Datei selbst eingeordnet — zum Nachsehen, was
+      // ÄndGgner in einem einzelnen Dokument erkennt, braucht es dann kein Stammgesetz.
+      var zuPruefen = patches == null || patches.isEmpty() ? List.of(baseFile) : patches;
+      for (var file : zuPruefen) {
+        var kopf = DokumentErkenner.erkenne(extraktor.extrahiere(file));
+        System.out.printf(
+            "%s: %s [eigene Drs. %s, Bezug %s] %s%n",
+            file.getFileName(),
+            kopf.art(),
+            kopf.eigeneDrucksache() == null ? "—" : kopf.eigeneDrucksache(),
+            kopf.bezugsDrucksachen().isEmpty() ? "—" : String.join(", ", kopf.bezugsDrucksachen()),
+            kopf.titel());
       }
       return 0;
     }

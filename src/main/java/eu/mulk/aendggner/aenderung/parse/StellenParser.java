@@ -41,7 +41,10 @@ public final class StellenParser {
           "bisherigen");
 
   private static final Pattern PARAGRAPH = Pattern.compile("§");
-  private static final Pattern NUMMER_WERT = Pattern.compile("\\d+[a-z]?");
+  // Gestufte Nummern („Nr. 1.29“) kommen in Listen vor, die ihre Glieder dezimal durchzählen —
+  // etwa der Artenkatalog des BayJG. Der Punkt muss von einer Ziffer gefolgt sein, damit „Nummer
+  // 1.“ mit bloßem Aufzählungspunkt weiterhin nicht als Wert durchgeht.
+  private static final Pattern NUMMER_WERT = Pattern.compile("\\d+(?:\\.\\d+)*[a-z]?");
   private static final Pattern BUCHSTABE_WERT = Pattern.compile("[a-z]{1,3}");
 
   private StellenParser() {}
@@ -55,9 +58,9 @@ public final class StellenParser {
               + "(?:Nummer|Nr\\.|Buchstabe|Buchst\\.|Satz|Absatz|Abs\\.) \\S+");
 
   /**
-   * Wahr, wenn die Phrase ausschließlich aus einem Chapeau-Qualifier besteht (z.B. „im Satzteil
-   * vor Nummer 1“, „in der Angabe vor Nummer 1“) und daher keine eigene Stelle-Komponente trägt.
-   * Die Operation bezieht sich dann auf die Kontextstelle (den umgebenden Änderungsrahmen).
+   * Wahr, wenn die Phrase ausschließlich aus einem Chapeau-Qualifier besteht (z.B. „im Satzteil vor
+   * Nummer 1“, „in der Angabe vor Nummer 1“) und daher keine eigene Stelle-Komponente trägt. Die
+   * Operation bezieht sich dann auf die Kontextstelle (den umgebenden Änderungsrahmen).
    */
   public static boolean istNurChapeau(String phrase) {
     var rest = CHAPEAU_QUALIFIER.matcher(phrase.strip()).replaceAll(" ").strip();
@@ -132,8 +135,16 @@ public final class StellenParser {
           komponenten.add(new Stelle.BuchstabeNr(wert));
           i++;
         }
-        case "Teil", "Teils", "Buch", "Buches", "Kapitel", "Kapitels", "Abschnitt", "Abschnitts",
-            "Unterabschnitt", "Unterabschnitts" -> {
+        case "Teil",
+            "Teils",
+            "Buch",
+            "Buches",
+            "Kapitel",
+            "Kapitels",
+            "Abschnitt",
+            "Abschnitts",
+            "Unterabschnitt",
+            "Unterabschnitts" -> {
           var wert = naechstesWort(woerter, i);
           if (wert == null || !NUMMER_WERT.matcher(wert).matches()) {
             return Optional.empty();
@@ -249,7 +260,9 @@ public final class StellenParser {
 
   private static final Pattern BLOSSES_LABEL = Pattern.compile("\\d+[a-z]?|[a-z]{1,3}");
 
-  /** Ersetzt die letzte Komponente von {@code vorige} durch dieselbe Komponentenart mit neuem Label. */
+  /**
+   * Ersetzt die letzte Komponente von {@code vorige} durch dieselbe Komponentenart mit neuem Label.
+   */
   private static Optional<Stelle> mitGeerbtemLabel(Stelle vorige, String label) {
     var komponenten = new ArrayList<>(vorige.komponenten());
     var neu = mitLabel(komponenten.get(komponenten.size() - 1), label);
@@ -486,8 +499,19 @@ public final class StellenParser {
 
   private static boolean istGliederungsArt(String wort) {
     return switch (wort) {
-      case "Teil", "Teils", "Buch", "Buches", "Kapitel", "Kapitels", "Abschnitt", "Abschnitts",
-          "Unterabschnitt", "Unterabschnitts", "Anlage", "Anlagen" -> true;
+      case "Teil",
+          "Teils",
+          "Buch",
+          "Buches",
+          "Kapitel",
+          "Kapitels",
+          "Abschnitt",
+          "Abschnitts",
+          "Unterabschnitt",
+          "Unterabschnitts",
+          "Anlage",
+          "Anlagen" ->
+          true;
       default -> false;
     };
   }
