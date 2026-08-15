@@ -164,7 +164,9 @@ final class StellenAufloeser {
       }
       bereich =
           zeilenBlock(
-              text, labelRegex, bereich != null ? bereich : new SatzTeiler.SatzBereich(0, text.length()));
+              text,
+              labelRegex,
+              bereich != null ? bereich : new SatzTeiler.SatzBereich(0, text.length()));
       if (bereich == null) {
         return null;
       }

@@ -21,7 +21,8 @@ class TextBereinigerTest {
 
   @Test
   void setztZerlegteUmlauteKanonischZusammen() {
-    // Das GV.-NRW.-Heft 7/2026 kodiert einen Teil seiner Umlaute zerlegt; für die Befehlsmuster wäre
+    // Das GV.-NRW.-Heft 7/2026 kodiert einen Teil seiner Umlaute zerlegt; für die Befehlsmuster
+    // wäre
     // „angefügt“ dann ein anderes Wort und dutzende Befehle könnten nie matchen.
     // Der Umlaut steht hier bewusst zerlegt (u + U+0308), wie im Heft.
     var roh = "Dem § 128 wird folgender Absatz 3 angefu\u0308gt:";
@@ -203,7 +204,8 @@ class TextBereinigerTest {
             + "Nächste eigene Zeile. \uE000";
 
     assertThat(TextBereiniger.bereinige(roh))
-        .isEqualTo("Erste Zeile des Absatzes wird fortgesetzt und endet hier.\nNächste eigene Zeile.");
+        .isEqualTo(
+            "Erste Zeile des Absatzes wird fortgesetzt und endet hier.\nNächste eigene Zeile.");
   }
 
   @Test
@@ -217,7 +219,8 @@ class TextBereinigerTest {
             + "Dieses Gesetz tritt am Tag nach der Verkündung in Kraft. \uE000";
 
     assertThat(TextBereiniger.bereinige(roh))
-        .isEqualTo("Artikel 2\nInkrafttreten\nDieses Gesetz tritt am Tag nach der Verkündung in Kraft.");
+        .isEqualTo(
+            "Artikel 2\nInkrafttreten\nDieses Gesetz tritt am Tag nach der Verkündung in Kraft.");
   }
 
   @Test

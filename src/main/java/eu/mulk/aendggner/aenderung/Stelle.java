@@ -29,8 +29,8 @@ public record Stelle(List<Komponente> komponenten) {
           Absatzbezeichnung {}
 
   /**
-   * „§ 5“, „§ 28a“, im bayerischen Landesrecht „Art. 5“ — die Normnummer ohne Sigel, dazu das
-   * Sigel selbst („§“ oder „Art.“).
+   * „§ 5“, „§ 28a“, im bayerischen Landesrecht „Art. 5“ — die Normnummer ohne Sigel, dazu das Sigel
+   * selbst („§“ oder „Art.“).
    */
   public record Paragraph(String nummer, String sigel) implements Komponente {
     public Paragraph(String nummer) {

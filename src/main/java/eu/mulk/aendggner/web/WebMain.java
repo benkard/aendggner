@@ -34,7 +34,8 @@ public final class WebMain {
         "/datenschutz",
         new StaticHandler("/eu/mulk/aendggner/web/datenschutz.html", "text/html; charset=utf-8"));
     server.createContext(
-        "/style.css", new StaticHandler("/eu/mulk/aendggner/web/style.css", "text/css; charset=utf-8"));
+        "/style.css",
+        new StaticHandler("/eu/mulk/aendggner/web/style.css", "text/css; charset=utf-8"));
     server.createContext("/synopse", new UploadHandler());
 
     server.start();

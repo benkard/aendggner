@@ -11,8 +11,8 @@ import org.jspecify.annotations.Nullable;
  * Zerlegt einen Absatztext in Sätze im Rechtssinne, mit einer Stoppliste für juristische
  * Abkürzungen und Datumsangaben („Abs.“, „31. März 2021“).
  *
- * <p>Trägt der Text amtliche Satznummern als Unicode-Superskripte (bayerisches Landesrecht,
- * „¹Die freilebende Tierwelt …“), wird exakt an diesen geteilt statt heuristisch.
+ * <p>Trägt der Text amtliche Satznummern als Unicode-Superskripte (bayerisches Landesrecht, „¹Die
+ * freilebende Tierwelt …“), wird exakt an diesen geteilt statt heuristisch.
  */
 public final class SatzTeiler {
 
@@ -182,8 +182,8 @@ public final class SatzTeiler {
   /**
    * Punkt einer Aufzählungsmarke am Zeilenanfang („… folgende Aufgaben ⏎ 1. Erlaß von Satzungen
    * …“). Er beendet keinen Satz: die Glieder einer Aufzählung gehören zum tragenden Satz. Die
-   * Beschränkung auf den Zeilenanfang unterscheidet die Marke von einer Zahl am Satzende („… beträgt
-   * 30. Die Frist …“).
+   * Beschränkung auf den Zeilenanfang unterscheidet die Marke von einer Zahl am Satzende („…
+   * beträgt 30. Die Frist …“).
    */
   private static boolean istAufzaehlungsMarke(String text, int punktPosition) {
     var wort = wortVor(text, punktPosition);

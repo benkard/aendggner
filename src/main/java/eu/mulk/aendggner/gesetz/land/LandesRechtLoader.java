@@ -6,17 +6,17 @@ import eu.mulk.aendggner.aenderung.parse.TextBereiniger;
 import eu.mulk.aendggner.gesetz.Gesetz;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.text.Normalizer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.Normalizer;
 import org.apache.tika.Tika;
 import org.jboss.logging.Logger;
 
 /**
  * Liest ein Stammgesetz des Landesrechts aus der konsolidierten Fassung — als PDF oder als
  * kanonischer Klartext. Deckt bayerisches Landesrecht (Gliederung in {@code Art.}, amtliche
- * Satznummern) ebenso ab wie die {@code §}-gegliederten Gesetze der übrigen Länder; das Sigel
- * folgt je Norm aus dem Text (siehe {@link LandesRechtTextParser}).
+ * Satznummern) ebenso ab wie die {@code §}-gegliederten Gesetze der übrigen Länder; das Sigel folgt
+ * je Norm aus dem Text (siehe {@link LandesRechtTextParser}).
  *
  * <p>PDFs durchlaufen dieselbe Aufbereitung wie Änderungsgesetze (Fontgrößen-Filter mit
  * Superskript-Erhalt, Textbereinigung); der bereinigte Lineartext ist zugleich das dokumentierte
@@ -56,7 +56,7 @@ public final class LandesRechtLoader {
 
   /**
    * Stellt einen vom Zeilen-Reflow an das Satzende der Vornorm geklebten Normkopf („… verlangen.
-   * Art. 17  Jagderlaubnis“) wieder auf eine eigene Zeile. Das doppelte Leerzeichen zwischen
+   * Art. 17 Jagderlaubnis“) wieder auf eine eigene Zeile. Das doppelte Leerzeichen zwischen
    * Norm-Nummer und Titel unterscheidet den Normkopf von gewöhnlichen Querverweisen.
    */
   private static String nachSatzendeGetrennteNormkoepfe(String text) {

@@ -23,22 +23,23 @@ class StellenParserTest {
   void parstMehrfachMitGemeinsamemPraefix() {
     // Zweites Segment erbt „§ 3“, ersetzt aber ab „Absatz“.
     var stellen = StellenParser.parseMehrfach("§ 3 Absatz 1 Satz 2 und Absatz 4");
-    assertThat(stellen).extracting(Stelle::anzeigeText)
+    assertThat(stellen)
+        .extracting(Stelle::anzeigeText)
         .containsExactly("§ 3 Absatz 1 Satz 2", "§ 3 Absatz 4");
   }
 
   @Test
   void parstMehrfachMitSatzTiefe() {
     var stellen = StellenParser.parseMehrfach("§ 20 Absatz 1 Satz 1 und Absatz 2 Satz 2");
-    assertThat(stellen).extracting(Stelle::anzeigeText)
+    assertThat(stellen)
+        .extracting(Stelle::anzeigeText)
         .containsExactly("§ 20 Absatz 1 Satz 1", "§ 20 Absatz 2 Satz 2");
   }
 
   @Test
   void parstMehrfachMitKomma() {
     var stellen = StellenParser.parseMehrfach("§ 1, § 2 und § 3");
-    assertThat(stellen).extracting(Stelle::anzeigeText)
-        .containsExactly("§ 1", "§ 2", "§ 3");
+    assertThat(stellen).extracting(Stelle::anzeigeText).containsExactly("§ 1", "§ 2", "§ 3");
   }
 
   @Test
@@ -57,14 +58,16 @@ class StellenParserTest {
   void bloßeNummerErbtKomponentenart() {
     // „Absatz 1 und 5“: das „5“ erbt die Komponentenart „Absatz“ der letzten Komponente.
     var stellen = StellenParser.parseMehrfach("§ 7 Absatz 1 und 5");
-    assertThat(stellen).extracting(Stelle::anzeigeText)
+    assertThat(stellen)
+        .extracting(Stelle::anzeigeText)
         .containsExactly("§ 7 Absatz 1", "§ 7 Absatz 5");
   }
 
   @Test
   void bloßeNummerNachSatz() {
     var stellen = StellenParser.parseMehrfach("Absatz 1 Satz 1 und 2");
-    assertThat(stellen).extracting(Stelle::anzeigeText)
+    assertThat(stellen)
+        .extracting(Stelle::anzeigeText)
         .containsExactly("Absatz 1 Satz 1", "Absatz 1 Satz 2");
   }
 
@@ -94,10 +97,12 @@ class StellenParserTest {
   void parstBayerischenBereichMitAbkuerzung() {
     // „In den Abs. 4 und 5“ und Bereiche wie „Art. 4 bis 6“ mit erhaltenem Sigel.
     var stellen = StellenParser.parseMehrfach("Art. 4 Abs. 3, Art. 5 Abs. 2 und Art. 11 Abs. 6");
-    assertThat(stellen).extracting(Stelle::anzeigeText)
+    assertThat(stellen)
+        .extracting(Stelle::anzeigeText)
         .containsExactly("Art. 4 Absatz 3", "Art. 5 Absatz 2", "Art. 11 Absatz 6");
     var bereich = StellenParser.parseMehrfach("Abs. 1 bis 3");
-    assertThat(bereich).extracting(Stelle::anzeigeText)
+    assertThat(bereich)
+        .extracting(Stelle::anzeigeText)
         .containsExactly("Absatz 1", "Absatz 2", "Absatz 3");
   }
 
@@ -127,7 +132,8 @@ class StellenParserTest {
   @Test
   void ignoriertChapeauZusatz() {
     // „in der Angabe vor Nummer 1“ ist ein verfeinernder Zusatz ohne eigene Komponente.
-    assertThat(StellenParser.parse("Absatz 1 in der Angabe vor Nummer 1").orElseThrow().anzeigeText())
+    assertThat(
+            StellenParser.parse("Absatz 1 in der Angabe vor Nummer 1").orElseThrow().anzeigeText())
         .isEqualTo("Absatz 1");
   }
 }

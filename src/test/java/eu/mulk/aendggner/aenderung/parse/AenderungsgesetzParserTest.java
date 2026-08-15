@@ -93,8 +93,7 @@ class AenderungsgesetzParserTest {
   @Test
   void eingebettetesRahmenzielSetztKontext() {
     var bayUig =
-        new Gesetz(
-            "BayUIG", "Bayerisches Umweltinformationsgesetz", null, List.of(), List.of());
+        new Gesetz("BayUIG", "Bayerisches Umweltinformationsgesetz", null, List.of(), List.of());
     var text =
         """
         § 3
@@ -113,8 +112,7 @@ class AenderungsgesetzParserTest {
     // aus der Zitierkette der Änderungshistorie.
     assertThat(ergebnis.befehle())
         .allSatisfy(
-            befehl ->
-                assertThat(befehl.stelle().anzeigeText()).startsWith("Art. 7 Absatz 2"));
+            befehl -> assertThat(befehl.stelle().anzeigeText()).startsWith("Art. 7 Absatz 2"));
   }
 
   @Test

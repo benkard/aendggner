@@ -57,20 +57,22 @@ final class LandesRechtTextParser {
   // nachgestelltem Schlüsselwort („I. Abschnitt“, Muster GLIEDERUNG). Der Titel steht — nach der
   // kanonischen Aufbereitung — mit doppeltem Leerzeichen auf derselben Zeile.
   private static final Pattern GLIEDERUNG_ARABISCH =
-      Pattern.compile("^(Buch|Teil|Kapitel|Abschnitt|Unterabschnitt|Titel) (\\d+[a-z]?)\\s+(\\S.*)$");
+      Pattern.compile(
+          "^(Buch|Teil|Kapitel|Abschnitt|Unterabschnitt|Titel) (\\d+[a-z]?)\\s+(\\S.*)$");
 
   // Römische Gliederung ohne Schlüsselwort („I. Rechtsform und Aufgaben“, NRW). Sie ist nur an der
   // Stellung erkennbar, deshalb gilt dieselbe Absicherung wie für UNTER_GLIEDERUNG: kurzer,
   // großgeschriebener, satzzeichenfreier Titel und ein Normkopf oder eine weitere Überschrift als
   // nächste nicht-leere Zeile.
-  private static final Pattern GLIEDERUNG_ROEMISCH = Pattern.compile("^([IVXLCDM]+)\\.\\s+(\\S.*)$");
+  private static final Pattern GLIEDERUNG_ROEMISCH =
+      Pattern.compile("^([IVXLCDM]+)\\.\\s+(\\S.*)$");
 
   private static final Pattern UNTER_GLIEDERUNG = Pattern.compile("^(\\d+[a-z]?)\\.\\s+(\\S.*)$");
 
   /**
    * Die Inhaltsübersicht ist eine Norm ohne Sigel; Angabe-Befehle adressieren sie unter genau
-   * diesem Namen (siehe {@code InhaltsuebersichtAnwender}). Ihre Zeilen tragen das
-   * Übersichtsformat „§ N | Titel“.
+   * diesem Namen (siehe {@code InhaltsuebersichtAnwender}). Ihre Zeilen tragen das Übersichtsformat
+   * „§ N | Titel“.
    */
   private static final String INHALTSUEBERSICHT = "Inhaltsübersicht";
 
@@ -81,12 +83,14 @@ final class LandesRechtTextParser {
       Pattern.compile(
           "^(§|Art\\.)\\s+(\\d+[a-z]?)\\s+"
               // Querverweis-Schlüsselwörter nur als ganzes Wort ausschließen: „§ 4 Satz 2“ ist ein
-              // Verweis, „§ 4 Satzungen“ dagegen ein Normtitel. Der Schutz „(?![a-zäöüß])“ verhindert,
+              // Verweis, „§ 4 Satzungen“ dagegen ein Normtitel. Der Schutz „(?![a-zäöüß])“
+              // verhindert,
               // dass „Satz“ auch „Satzungen“, „Nummer“ auch „Nummerierung“ trifft.
               + "(?!(?:Absatz|Abs\\.|Satz|Sätze|Nummer|Nr\\.|Buchstabe|Buchst\\."
               + "|und|bis|oder|sowie|des|der|dieses)(?![a-zäöüß]))"
               // Der Titel endet nicht auf einen Punkt: ein Normkopf trägt eine Überschrift, keinen
-              // ganzen Satz. So wird ein am Zeilenanfang stehender Querverweis-Satz („§ 7 GAPInVeKoSG
+              // ganzen Satz. So wird ein am Zeilenanfang stehender Querverweis-Satz („§ 7
+              // GAPInVeKoSG
               // findet entsprechend Anwendung.“) nicht fälschlich als Normkopf „§ 7“ gelesen.
               + "((?:\\p{Lu}|\\().*[^.])\\s*$");
 
@@ -210,8 +214,7 @@ final class LandesRechtTextParser {
           gliederungsZaehler++;
           elternKennzahl = String.format("%03d", gliederungsZaehler);
           aktuelleGliederung =
-              new Gliederung(
-                  elternKennzahl, roemisch.group(1) + ".", roemisch.group(2).strip());
+              new Gliederung(elternKennzahl, roemisch.group(1) + ".", roemisch.group(2).strip());
           gliederungen.add(aktuelleGliederung);
         } else {
           var kennzahl =
@@ -278,8 +281,8 @@ final class LandesRechtTextParser {
   }
 
   /**
-   * Ein Normkopf eröffnet nur dann eine neue Norm, wenn seine Nummer hinter der letzten liegt —
-   * das fängt Querverweise ab, die die Negativliste nicht ausschließt.
+   * Ein Normkopf eröffnet nur dann eine neue Norm, wenn seine Nummer hinter der letzten liegt — das
+   * fängt Querverweise ab, die die Negativliste nicht ausschließt.
    */
   private static boolean istNeuerNormKopf(String nummer, int letzteNormNummer) {
     return numerisch(nummer) >= letzteNormNummer;
@@ -315,10 +318,7 @@ final class LandesRechtTextParser {
   }
 
   private static Norm baueNorm(
-      String enbez,
-      @Nullable String titel,
-      @Nullable Gliederung gliederung,
-      List<String> zeilen) {
+      String enbez, @Nullable String titel, @Nullable Gliederung gliederung, List<String> zeilen) {
     boolean weggefallen = titel != null && WEGGEFALLEN_TITEL.matcher(titel).matches();
 
     var absaetze = new ArrayList<Absatz>();

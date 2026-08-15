@@ -170,8 +170,8 @@ public final class ZitatExtraktor {
       Pattern.compile("^(?:\\d+[a-z]?\\.|[a-z]{1,3}\\))[ \\t]");
 
   /**
-   * Wahr, wenn das öffnende Anführungszeichen an Position {@code i} ein Fortführungszeichen ist:
-   * Es steht am Zeilenanfang innerhalb eines offenen Zitats und ihm folgt unmittelbar ein
+   * Wahr, wenn das öffnende Anführungszeichen an Position {@code i} ein Fortführungszeichen ist: Es
+   * steht am Zeilenanfang innerhalb eines offenen Zitats und ihm folgt unmittelbar ein
    * Aufzählungsmarker.
    */
   private static boolean istFortfuehrungszeichen(String text, int i) {
@@ -191,7 +191,8 @@ public final class ZitatExtraktor {
    * Stammgesetze zitieren ihre Normköpfe als „Art. N“, nicht als „Artikel N“ — zitierter Inhalt
    * läuft hier also nicht versehentlich auf.
    */
-  private static final Pattern ARTIKEL_GRENZE = Pattern.compile("^Artikel[ \\t]+\\d+[a-z]?[ \\t]*$");
+  private static final Pattern ARTIKEL_GRENZE =
+      Pattern.compile("^Artikel[ \\t]+\\d+[a-z]?[ \\t]*$");
 
   /** Wahr, wenn die bei {@code von} beginnende Zeile eine Artikel-Überschrift ist. */
   private static boolean beginntArtikelUeberschrift(String text, int von) {

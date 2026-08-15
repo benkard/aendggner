@@ -21,19 +21,20 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * {@code POST /synopse} — nimmt Stammgesetz- und Änderungsgesetz-Datei(en) per
- * {@code multipart/form-data} entgegen, ruft {@link Pipeline#erzeugeSynopse} auf und liefert das
- * erzeugte HTML zurück.
+ * {@code POST /synopse} — nimmt Stammgesetz- und Änderungsgesetz-Datei(en) per {@code
+ * multipart/form-data} entgegen, ruft {@link Pipeline#erzeugeSynopse} auf und liefert das erzeugte
+ * HTML zurück.
  *
- * <p>Hochgeladene Dateien landen ausschließlich als temporäre Dateien für die Dauer der Anfrage
- * und werden danach in jedem Fall gelöscht — es wird nichts dauerhaft gespeichert. Die eigentliche
+ * <p>Hochgeladene Dateien landen ausschließlich als temporäre Dateien für die Dauer der Anfrage und
+ * werden danach in jedem Fall gelöscht — es wird nichts dauerhaft gespeichert. Die eigentliche
  * Verarbeitung läuft auf einem auf die Kernzahl begrenzten Thread-Pool mit fester Warteschlange;
  * bei Überlast wird sofort mit {@code 503} abgelehnt, statt unbegrenzt Arbeit anzunehmen.
  */
 final class UploadHandler implements HttpHandler {
 
   private static final long MAX_PART_BYTES = 15L * 1024 * 1024; // 15 MB je Datei
-  private static final long MAX_BODY_BYTES = 40L * 1024 * 1024; // Sicherheitsnetz für die gesamte Anfrage
+  private static final long MAX_BODY_BYTES =
+      40L * 1024 * 1024; // Sicherheitsnetz für die gesamte Anfrage
   private static final long TIMEOUT_SECONDS = 30;
 
   private final ExecutorService pipelinePool;
@@ -77,7 +78,8 @@ final class UploadHandler implements HttpHandler {
                 try {
                   Files.deleteIfExists(path);
                 } catch (IOException ignored) {
-                  // Aufräumen ist best effort; ein verwaistes Temp-File blockiert die Antwort nicht.
+                  // Aufräumen ist best effort; ein verwaistes Temp-File blockiert die Antwort
+                  // nicht.
                 }
               });
     } catch (IOException ignored) {
@@ -169,7 +171,8 @@ final class UploadHandler implements HttpHandler {
       var future = pipelinePool.submit(job);
       ergebnis = future.get(TIMEOUT_SECONDS, TimeUnit.SECONDS);
     } catch (RejectedExecutionException e) {
-      sendText(exchange, 503, "Der Dienst ist gerade ausgelastet. Bitte in Kürze erneut versuchen.");
+      sendText(
+          exchange, 503, "Der Dienst ist gerade ausgelastet. Bitte in Kürze erneut versuchen.");
       return;
     } catch (TimeoutException e) {
       sendText(exchange, 504, "Die Verarbeitung hat zu lange gedauert und wurde abgebrochen.");
@@ -215,7 +218,8 @@ final class UploadHandler implements HttpHandler {
     return filename.replaceAll("[^A-Za-z0-9._-]", "_");
   }
 
-  private static void sendText(HttpExchange exchange, int status, String message) throws IOException {
+  private static void sendText(HttpExchange exchange, int status, String message)
+      throws IOException {
     var body = message.getBytes(StandardCharsets.UTF_8);
     exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
     exchange.sendResponseHeaders(status, body.length);

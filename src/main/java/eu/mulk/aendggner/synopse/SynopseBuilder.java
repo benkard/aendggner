@@ -50,13 +50,13 @@ public final class SynopseBuilder {
     var manuell =
         anwendung.protokoll().stream().filter(a -> a.status() == Status.MANUELL_PRUEFEN).toList();
 
-    return new Synopse(alt, neu, eintraege, gliederungsAenderungen(alt, neu), manuell, parseWarnungen);
+    return new Synopse(
+        alt, neu, eintraege, gliederungsAenderungen(alt, neu), manuell, parseWarnungen);
   }
 
   /**
-   * Paart die Gliederungseinheiten nach Kennzahl und sammelt die mit geänderter Überschrift.
-   * Neu eingefügte Einheiten (ohne Kennzahl und ohne Alt-Pendant) erscheinen mit {@code alt ==
-   * null}.
+   * Paart die Gliederungseinheiten nach Kennzahl und sammelt die mit geänderter Überschrift. Neu
+   * eingefügte Einheiten (ohne Kennzahl und ohne Alt-Pendant) erscheinen mit {@code alt == null}.
    */
   private static List<Synopse.GliederungsAenderung> gliederungsAenderungen(Gesetz alt, Gesetz neu) {
     var aenderungen = new ArrayList<Synopse.GliederungsAenderung>();

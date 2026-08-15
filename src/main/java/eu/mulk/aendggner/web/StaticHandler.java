@@ -7,7 +7,10 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 
-/** Liefert eine einzelne, beim Start einmal geladene statische Ressource aus (Formular, Impressum, CSS, …). */
+/**
+ * Liefert eine einzelne, beim Start einmal geladene statische Ressource aus (Formular, Impressum,
+ * CSS, …).
+ */
 final class StaticHandler implements HttpHandler {
 
   private final byte[] content;
@@ -48,7 +51,8 @@ final class StaticHandler implements HttpHandler {
     }
   }
 
-  private static void sendText(HttpExchange exchange, int status, String message) throws IOException {
+  private static void sendText(HttpExchange exchange, int status, String message)
+      throws IOException {
     var body = message.getBytes(StandardCharsets.UTF_8);
     exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=utf-8");
     exchange.sendResponseHeaders(status, body.length);

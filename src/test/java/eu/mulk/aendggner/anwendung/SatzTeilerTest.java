@@ -115,7 +115,8 @@ class SatzTeilerTest {
         SatzTeiler.teileTexte(
             "Die Angebote können zusammengefasst werden. § 27 Absatz 2 bleibt unberührt.");
 
-    assertThat(saetze).containsExactly(
-        "Die Angebote können zusammengefasst werden.", "§ 27 Absatz 2 bleibt unberührt.");
+    assertThat(saetze)
+        .containsExactly(
+            "Die Angebote können zusammengefasst werden.", "§ 27 Absatz 2 bleibt unberührt.");
   }
 }

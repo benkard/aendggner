@@ -225,8 +225,7 @@ class BefehlErkennerTest {
     // 17/2026): Die Position der neuen Einheit bestimmt ein Wortanker, das Ziel erbt der Befehl aus
     // dem Rahmen („Nummer 23“ der Anlage).
     var kontext =
-        new Stelle(
-            List.of(new Stelle.Gliederungseinheit("Anlage", ""), new Stelle.NummerNr("23")));
+        new Stelle(List.of(new Stelle.Gliederungseinheit("Anlage", ""), new Stelle.NummerNr("23")));
     var befehl =
         erkenne(
             "Vor den Wörtern „Aus dem Bereich Verkehr:“ wird folgender Absatz 5 eingefügt:"
@@ -239,8 +238,7 @@ class BefehlErkennerTest {
     assertThat(einfuegung.vorher()).isTrue();
     assertThat(einfuegung.ebene()).isEqualTo(Ebene.ABSATZ);
     assertThat(einfuegung.bezeichnung()).isEqualTo("5");
-    assertThat(einfuegung.anker())
-        .isEqualTo(new WortAnker.VorWoertern("Aus dem Bereich Verkehr:"));
+    assertThat(einfuegung.anker()).isEqualTo(new WortAnker.VorWoertern("Aus dem Bereich Verkehr:"));
     assertThat(einfuegung.text()).startsWith("(5) die Identifizierung");
   }
 
@@ -486,9 +484,11 @@ class BefehlErkennerTest {
     assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
     var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
     assertThat(teile).hasSize(2).allMatch(t -> t instanceof Streichung);
-    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+    assertThat(teile)
+        .extracting(t -> t.stelle().anzeigeText())
         .containsExactly("§ 3 Absatz 1 Satz 2", "§ 3 Absatz 4");
-    assertThat(((Streichung) teile.get(0)).woerter()).isEqualTo("in Bezug auf § 2 Abs. 1 Nr. 1 bis 4");
+    assertThat(((Streichung) teile.get(0)).woerter())
+        .isEqualTo("in Bezug auf § 2 Abs. 1 Nr. 1 bis 4");
   }
 
   @Test
@@ -502,7 +502,8 @@ class BefehlErkennerTest {
     assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
     var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
     assertThat(teile).hasSize(2).allMatch(t -> t instanceof Ersetzung);
-    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+    assertThat(teile)
+        .extracting(t -> t.stelle().anzeigeText())
         .containsExactly("§ 20 Absatz 1 Satz 1", "§ 20 Absatz 2 Satz 2");
     assertThat(((Ersetzung) teile.get(0)).neu()).isEqualTo("Lebensalters");
   }
@@ -518,7 +519,8 @@ class BefehlErkennerTest {
     assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
     var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
     assertThat(teile).hasSize(2).allMatch(t -> t instanceof WoerterEinfuegung);
-    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+    assertThat(teile)
+        .extracting(t -> t.stelle().anzeigeText())
         .containsExactly("§ 30 Absatz 2 Satz 1", "§ 30 Absatz 3");
   }
 
@@ -533,9 +535,11 @@ class BefehlErkennerTest {
     var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
     assertThat(teile).hasSize(3).allMatch(t -> t instanceof Umnummerierung);
     // Absteigend, damit die Anwendung keine Labels kollidieren lässt: 4→5, 3→4, 2→3.
-    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+    assertThat(teile)
+        .extracting(t -> t.stelle().anzeigeText())
         .containsExactly("§ 5 Absatz 4", "§ 5 Absatz 3", "§ 5 Absatz 2");
-    assertThat(teile).extracting(t -> ((Umnummerierung) t).neu().anzeigeText())
+    assertThat(teile)
+        .extracting(t -> ((Umnummerierung) t).neu().anzeigeText())
         .containsExactly("§ 5 Absatz 5", "§ 5 Absatz 4", "§ 5 Absatz 3");
   }
 
@@ -563,7 +567,8 @@ class BefehlErkennerTest {
             Stelle.LEER);
     var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
     assertThat(teile).hasSize(2).allMatch(t -> t instanceof Ersetzung);
-    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+    assertThat(teile)
+        .extracting(t -> t.stelle().anzeigeText())
         .containsExactly("Absatz 1 Satz 1", "Absatz 1 Satz 2");
   }
 
@@ -614,19 +619,23 @@ class BefehlErkennerTest {
   @Test
   void bereichsAufhebungWirdSammelbefehl() {
     var teile =
-        ((Sammelbefehl) erkenne("Die Nummern 1 bis 3 werden aufgehoben.", Stelle.LEER).orElseThrow())
+        ((Sammelbefehl)
+                erkenne("Die Nummern 1 bis 3 werden aufgehoben.", Stelle.LEER).orElseThrow())
             .teilbefehle();
     assertThat(teile).hasSize(3).allMatch(t -> t instanceof Aufhebung);
-    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+    assertThat(teile)
+        .extracting(t -> t.stelle().anzeigeText())
         .containsExactly("Nummer 1", "Nummer 2", "Nummer 3");
   }
 
   @Test
   void koordinierteAufhebungWirdSammelbefehl() {
     var teile =
-        ((Sammelbefehl) erkenne("Die Absätze 4 und 5 werden aufgehoben.", Stelle.LEER).orElseThrow())
+        ((Sammelbefehl)
+                erkenne("Die Absätze 4 und 5 werden aufgehoben.", Stelle.LEER).orElseThrow())
             .teilbefehle();
-    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+    assertThat(teile)
+        .extracting(t -> t.stelle().anzeigeText())
         .containsExactly("Absatz 4", "Absatz 5");
   }
 
@@ -639,9 +648,11 @@ class BefehlErkennerTest {
             .teilbefehle();
     assertThat(teile).hasSize(3).allMatch(t -> t instanceof Umnummerierung);
     // Absteigend: 6→10, 5→9, 4→8.
-    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+    assertThat(teile)
+        .extracting(t -> t.stelle().anzeigeText())
         .containsExactly("Nummer 6", "Nummer 5", "Nummer 4");
-    assertThat(teile).extracting(t -> ((Umnummerierung) t).neu().anzeigeText())
+    assertThat(teile)
+        .extracting(t -> ((Umnummerierung) t).neu().anzeigeText())
         .containsExactly("Nummer 10", "Nummer 9", "Nummer 8");
   }
 
@@ -656,7 +667,8 @@ class BefehlErkennerTest {
                     .orElseThrow())
             .teilbefehle();
     assertThat(teile).hasSize(3).allMatch(t -> t instanceof Neufassung);
-    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+    assertThat(teile)
+        .extracting(t -> t.stelle().anzeigeText())
         .containsExactly("§ 52", "§ 53", "§ 54");
   }
 
@@ -704,7 +716,9 @@ class BefehlErkennerTest {
             new Stelle(List.of(new Stelle.Paragraph("64"))));
     var b = befehl.orElseThrow();
     assertThat(b).isInstanceOf(Aufhebung.class);
-    assertThat(b.stelle().absatzbezeichnung()).get().extracting(Stelle.Absatzbezeichnung::nummer)
+    assertThat(b.stelle().absatzbezeichnung())
+        .get()
+        .extracting(Stelle.Absatzbezeichnung::nummer)
         .isEqualTo("2");
   }
 
@@ -737,7 +751,8 @@ class BefehlErkennerTest {
         ((Sammelbefehl) erkenne("Die §§ 34 bis 39 werden gestrichen.", Stelle.LEER).orElseThrow())
             .teilbefehle();
     assertThat(teile).hasSize(6).allMatch(t -> t instanceof Aufhebung);
-    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+    assertThat(teile)
+        .extracting(t -> t.stelle().anzeigeText())
         .containsExactly("§ 34", "§ 35", "§ 36", "§ 37", "§ 38", "§ 39");
   }
 
@@ -774,7 +789,8 @@ class BefehlErkennerTest {
                     .orElseThrow())
             .teilbefehle();
     assertThat(teile).hasSize(4).allMatch(t -> t instanceof Umnummerierung);
-    assertThat(teile).extracting(t -> t.stelle().anzeigeText())
+    assertThat(teile)
+        .extracting(t -> t.stelle().anzeigeText())
         .containsExactly("§ 108 Absatz 7", "§ 108 Absatz 6", "§ 108 Absatz 5", "§ 108 Absatz 4");
   }
 
@@ -806,11 +822,13 @@ class BefehlErkennerTest {
   @Test
   void koordinierteParagraphUmnummerierung() {
     var teile =
-        ((Sammelbefehl) erkenne("Die §§ 46 und 47 werden zu den §§ 34 und 35.", Stelle.LEER).orElseThrow())
+        ((Sammelbefehl)
+                erkenne("Die §§ 46 und 47 werden zu den §§ 34 und 35.", Stelle.LEER).orElseThrow())
             .teilbefehle();
     assertThat(teile).hasSize(2).allMatch(t -> t instanceof Umnummerierung);
     assertThat(teile).extracting(t -> t.stelle().anzeigeText()).containsExactly("§ 46", "§ 47");
-    assertThat(teile).extracting(t -> ((Umnummerierung) t).neu().anzeigeText())
+    assertThat(teile)
+        .extracting(t -> ((Umnummerierung) t).neu().anzeigeText())
         .containsExactly("§ 34", "§ 35");
   }
 
@@ -884,6 +902,7 @@ class BefehlErkennerTest {
     assertThat(teile).extracting(t -> ((Ersetzung) t).alt()).containsExactly("a", "c");
     assertThat(teile).extracting(t -> ((Ersetzung) t).neu()).containsExactly("b", "d");
   }
+
   // --- Welle-4-Formen --------------------------------------------------------------------------
 
   @Test
@@ -920,7 +939,8 @@ class BefehlErkennerTest {
             kontext);
 
     assertThat(befehl).containsInstanceOf(Neufassung.class);
-    assertThat(befehl.orElseThrow().stelle().anzeigeText()).isEqualTo("Inhaltsübersicht Abschnitt 2");
+    assertThat(befehl.orElseThrow().stelle().anzeigeText())
+        .isEqualTo("Inhaltsübersicht Abschnitt 2");
   }
 
   @Test
@@ -1300,7 +1320,8 @@ class BefehlErkennerTest {
   @Test
   void erkenntSatzzeichenErsetzungOhneStelle() {
     var befehl =
-        erkenne("Der Punkt am Ende wird durch die Angabe „(Gesellschaftsdialog).“ ersetzt.",
+        erkenne(
+            "Der Punkt am Ende wird durch die Angabe „(Gesellschaftsdialog).“ ersetzt.",
             PARAGRAPH_5);
 
     assertThat(befehl).containsInstanceOf(Ersetzung.class);

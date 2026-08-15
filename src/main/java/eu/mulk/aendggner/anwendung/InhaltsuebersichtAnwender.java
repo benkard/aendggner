@@ -74,12 +74,13 @@ final class InhaltsuebersichtAnwender {
   /** Die adressierte Angabe: die §-/Gliederungs-Komponenten hinter der Inhaltsübersichts-Marke. */
   private static List<Stelle.Komponente> zielKette(Stelle stelle) {
     return stelle.komponenten().stream()
-        .filter(
-            k -> k instanceof Stelle.Paragraph || k instanceof Stelle.Gliederungseinheit)
+        .filter(k -> k instanceof Stelle.Paragraph || k instanceof Stelle.Gliederungseinheit)
         .toList();
   }
 
-  /** Ersetzt die Zeilen von {@code von} bis {@code bis} durch die Angaben des Zitats (oder nichts). */
+  /**
+   * Ersetzt die Zeilen von {@code von} bis {@code bis} durch die Angaben des Zitats (oder nichts).
+   */
   private static AngewandteAenderung ersetzeZeilen(
       List<Norm> normen,
       Aenderungsbefehl befehl,
@@ -139,8 +140,7 @@ final class InhaltsuebersichtAnwender {
 
   // --- Zeilenmodell ----------------------------------------------------------------------------
 
-  private record Zeilenfund(
-      int absatzIndex, int vonZeile, int bisZeile, @Nullable String fehler) {
+  private record Zeilenfund(int absatzIndex, int vonZeile, int bisZeile, @Nullable String fehler) {
     static Zeilenfund fehlgeschlagen(String begruendung) {
       return new Zeilenfund(-1, -1, -1, begruendung);
     }
@@ -148,8 +148,8 @@ final class InhaltsuebersichtAnwender {
 
   /**
    * Findet die (norm-weit eindeutige) Zeile der adressierten Angabe. Die Kette wird verschachtelt
-   * aufgelöst: „Teil 2 Abschnitt 4“ sucht die Abschnitt-Zeile erst hinter der Teil-2-Zeile (und
-   * vor dem nächsten Teil), sodass gleichnamige Abschnitte anderer Teile nicht stören.
+   * aufgelöst: „Teil 2 Abschnitt 4“ sucht die Abschnitt-Zeile erst hinter der Teil-2-Zeile (und vor
+   * dem nächsten Teil), sodass gleichnamige Abschnitte anderer Teile nicht stören.
    */
   private static Zeilenfund findeZeile(Norm norm, List<Stelle.Komponente> kette) {
     var ziel = kette.get(kette.size() - 1);

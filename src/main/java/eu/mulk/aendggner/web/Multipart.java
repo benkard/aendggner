@@ -17,7 +17,8 @@ final class Multipart {
   private static final Pattern BOUNDARY_PATTERN = Pattern.compile("boundary=\"?([^\";]+)\"?");
   private static final Pattern NAME_PATTERN = Pattern.compile("name=\"([^\"]*)\"");
   private static final Pattern FILENAME_PATTERN = Pattern.compile("filename=\"([^\"]*)\"");
-  private static final byte[] HEADER_BODY_SEPARATOR = "\r\n\r\n".getBytes(StandardCharsets.ISO_8859_1);
+  private static final byte[] HEADER_BODY_SEPARATOR =
+      "\r\n\r\n".getBytes(StandardCharsets.ISO_8859_1);
 
   private Multipart() {}
 
@@ -33,7 +34,9 @@ final class Multipart {
     var delimiter = ("--" + boundary).getBytes(StandardCharsets.ISO_8859_1);
 
     var positions = new ArrayList<Integer>();
-    for (int i = indexOf(body, delimiter, 0); i >= 0; i = indexOf(body, delimiter, i + delimiter.length)) {
+    for (int i = indexOf(body, delimiter, 0);
+        i >= 0;
+        i = indexOf(body, delimiter, i + delimiter.length)) {
       positions.add(i);
     }
 

@@ -260,8 +260,9 @@ class BefehlAnwenderTest {
 
     assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
     assertThat(absatzText(ergebnis.neu(), "§ 1", 1))
-        .contains("  1. das Einlesen von Gesetzen,\n  1a. die Prüfung von Zitaten,\n  2. die"
-            + " Anwendung von Befehlen und");
+        .contains(
+            "  1. das Einlesen von Gesetzen,\n  1a. die Prüfung von Zitaten,\n  2. die"
+                + " Anwendung von Befehlen und");
   }
 
   @Test
@@ -515,7 +516,8 @@ class BefehlAnwenderTest {
     // Ein Befehl → genau ein Protokolleintrag, aber beide Teiledits wirken.
     assertThat(ergebnis.protokoll()).hasSize(1);
     assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
-    assertThat(ergebnis.protokoll().get(0).betroffeneEnbez()).containsExactlyInAnyOrder("§ 1", "§ 2");
+    assertThat(ergebnis.protokoll().get(0).betroffeneEnbez())
+        .containsExactlyInAnyOrder("§ 1", "§ 2");
     assertThat(absatzText(ergebnis.neu(), "§ 1", 0))
         .isEqualTo("Zweck dieses Gesetzes ist die Prüfung.");
     assertThat(absatzText(ergebnis.neu(), "§ 2", 0)).startsWith("Prüfung ist die Prüfung");
@@ -550,7 +552,8 @@ class BefehlAnwenderTest {
   @Test
   void nummeriertParagraphUm() {
     var befehl =
-        new Umnummerierung(stelle(new Stelle.Paragraph("3")), stelle(new Stelle.Paragraph("4")), PROV);
+        new Umnummerierung(
+            stelle(new Stelle.Paragraph("3")), stelle(new Stelle.Paragraph("4")), PROV);
 
     var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
 
@@ -580,7 +583,8 @@ class BefehlAnwenderTest {
   @Test
   void meldetKonfliktBeiParagraphUmnummerierung() {
     var befehl =
-        new Umnummerierung(stelle(new Stelle.Paragraph("3")), stelle(new Stelle.Paragraph("1")), PROV);
+        new Umnummerierung(
+            stelle(new Stelle.Paragraph("3")), stelle(new Stelle.Paragraph("1")), PROV);
 
     var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
 
@@ -712,20 +716,26 @@ class BefehlAnwenderTest {
     var teile =
         List.<eu.mulk.aendggner.aenderung.Aenderungsbefehl>of(
             new Aufhebung(
-                stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("1")),
+                stelle(
+                    new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("1")),
                 PROV),
             new Aufhebung(
-                stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("2")),
+                stelle(
+                    new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("2")),
                 PROV),
             new Aufhebung(
-                stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("3")),
+                stelle(
+                    new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("3")),
                 PROV));
 
     var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(new Sammelbefehl(teile)));
 
     assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
     var text = absatzText(ergebnis.neu(), "§ 1", 1);
-    assertThat(text).contains("1. (weggefallen)").contains("2. (weggefallen)").contains("3. (weggefallen)");
+    assertThat(text)
+        .contains("1. (weggefallen)")
+        .contains("2. (weggefallen)")
+        .contains("3. (weggefallen)");
   }
 
   // --- Anhang/Anlage als Norm-Ziel -----------------------------------------------------------
@@ -737,12 +747,7 @@ class BefehlAnwenderTest {
         null,
         null,
         List.of(
-            new Norm(
-                "§ 1",
-                "Zweck",
-                null,
-                List.of(new Absatz("1", "Es gilt der Anhang.")),
-                false),
+            new Norm("§ 1", "Zweck", null, List.of(new Absatz("1", "Es gilt der Anhang.")), false),
             new Norm(
                 "Anhang",
                 "(zu § 1)",
@@ -1057,8 +1062,7 @@ class BefehlAnwenderTest {
   @Test
   void ersetztGesetzesUeberschrift() {
     var befehl =
-        new Neufassung(
-            stelle(new Stelle.Ueberschrift()), "Gesetz zur gründlichen Erprobung", PROV);
+        new Neufassung(stelle(new Stelle.Ueberschrift()), "Gesetz zur gründlichen Erprobung", PROV);
 
     var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
 
@@ -1126,10 +1130,8 @@ class BefehlAnwenderTest {
   void nummeriertAufzaehlungsNummerImTextUm() {
     var befehl =
         new Umnummerierung(
-            stelle(
-                new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("2")),
-            stelle(
-                new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("4")),
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("2")),
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("4")),
             PROV);
 
     var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
@@ -1163,10 +1165,8 @@ class BefehlAnwenderTest {
             List.of());
     var befehl =
         new Umnummerierung(
-            stelle(
-                new Stelle.Paragraph("1"), new Stelle.AbsatzNr("1"), new Stelle.NummerNr("2")),
-            stelle(
-                new Stelle.Paragraph("1"), new Stelle.AbsatzNr("1"), new Stelle.NummerNr("1")),
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("1"), new Stelle.NummerNr("2")),
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("1"), new Stelle.NummerNr("1")),
             PROV);
 
     var ergebnis = BefehlAnwender.anwenden(mitLuecke, List.of(befehl));

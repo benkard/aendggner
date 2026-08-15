@@ -6,8 +6,8 @@ import org.jspecify.annotations.Nullable;
  * Eine Gliederungseinheit (z.B. „Teil 2 — Anforderungen an zu errichtende Gebäude“ oder „2.
  * Abschnitt — Koordinierung und Früherkennung“).
  *
- * @param kennzahl die hierarchie-kodierende Gliederungskennzahl aus dem gii-XML (z.B. {@code 020020}
- *     für Abschnitt 2 in Teil 2); {@code null} bei anderweitig konstruierten Einheiten.
+ * @param kennzahl die hierarchie-kodierende Gliederungskennzahl aus dem gii-XML (z.B. {@code
+ *     020020} für Abschnitt 2 in Teil 2); {@code null} bei anderweitig konstruierten Einheiten.
  * @param bezeichnung die relative Bezeichnung („Teil 2“, „Abschnitt 2“).
  * @param titel die Überschrift der Einheit ({@code null} bei titellosen Einheiten).
  */

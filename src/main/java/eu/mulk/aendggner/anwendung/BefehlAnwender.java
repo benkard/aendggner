@@ -2,14 +2,14 @@ package eu.mulk.aendggner.anwendung;
 
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Anfuegung;
-import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ebene;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Aufhebung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ebene;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.FussnotenAufhebung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.GliederungsUeberschriften;
-import eu.mulk.aendggner.aenderung.Aenderungsbefehl.SatznummerierungStreichung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Neufassung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Sammelbefehl;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.SatznummerierungStreichung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Streichung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturErsetzung;
@@ -298,7 +298,8 @@ public final class BefehlAnwender {
   private static List<StrukturErsetzung> ersetzungen(Aenderungsbefehl befehl) {
     return switch (befehl) {
       case StrukturErsetzung e -> List.of(e);
-      case Sammelbefehl s -> s.teilbefehle().stream().flatMap(t -> ersetzungen(t).stream()).toList();
+      case Sammelbefehl s ->
+          s.teilbefehle().stream().flatMap(t -> ersetzungen(t).stream()).toList();
       default -> List.of();
     };
   }
@@ -374,8 +375,7 @@ public final class BefehlAnwender {
     // Führende Eigenbezeichnung („Abschnitt 2 …“ oder „2. Abschnitt …“) aus dem Zitat entfernen.
     var label = Pattern.compile("^(\\d+[a-z]?\\.\\s+\\S+|\\S+\\s+\\d+[a-z]?)\\s+").matcher(titel);
     if (label.find()
-        && kanonischeBezeichnung(label.group(1))
-            .equals(kanonischeBezeichnung(alt.bezeichnung()))) {
+        && kanonischeBezeichnung(label.group(1)).equals(kanonischeBezeichnung(alt.bezeichnung()))) {
       titel = titel.substring(label.end()).strip();
     } else if (titel.startsWith(alt.bezeichnung())) {
       titel = titel.substring(alt.bezeichnung().length()).strip();
@@ -395,7 +395,9 @@ public final class BefehlAnwender {
     return angewandt(befehl, alt.bezeichnung());
   }
 
-  /** „Der bisherige Abschnitt 2 wird zu Abschnitt 3.“ — Bezeichnung der Gliederungseinheit umsetzen. */
+  /**
+   * „Der bisherige Abschnitt 2 wird zu Abschnitt 3.“ — Bezeichnung der Gliederungseinheit umsetzen.
+   */
   private static AngewandteAenderung wendeGliederungUmnummerierungAn(
       List<Gliederung> gliederungen, Umnummerierung befehl) {
     int idx = findeGliederung(gliederungen, befehl.stelle().gliederungsPfad());
@@ -451,12 +453,12 @@ public final class BefehlAnwender {
         if (idx < 0) {
           return manuell(
               befehl,
-              "Gliederungseinheit nicht gefunden: "
-                  + pfad.get(pfad.size() - 1).bezeichnung());
+              "Gliederungseinheit nicht gefunden: " + pfad.get(pfad.size() - 1).bezeichnung());
         }
         indizes.add(idx);
       }
-      var alte = indizes.stream().map(gliederungen::get).collect(java.util.stream.Collectors.toSet());
+      var alte =
+          indizes.stream().map(gliederungen::get).collect(java.util.stream.Collectors.toSet());
       int einfuegePos = java.util.Collections.min(indizes);
       indizes.sort(java.util.Comparator.reverseOrder());
       for (int idx : indizes) {
@@ -479,7 +481,9 @@ public final class BefehlAnwender {
     }
     var anker = normen.get(aufloesung.normIndex());
     int gliederungsPos =
-        anker.gliederung() != null ? gliederungen.indexOf(anker.gliederung()) + 1 : gliederungen.size();
+        anker.gliederung() != null
+            ? gliederungen.indexOf(anker.gliederung()) + 1
+            : gliederungen.size();
     if (gliederungsPos == 0) {
       gliederungsPos = gliederungen.size();
     }
@@ -513,7 +517,8 @@ public final class BefehlAnwender {
       gefunden = -1;
       for (int i = 0; i < gliederungen.size(); i++) {
         var g = gliederungen.get(i);
-        if (kanonischeBezeichnung(g.bezeichnung()).equals(kanonischeBezeichnung(einheit.bezeichnung()))
+        if (kanonischeBezeichnung(g.bezeichnung())
+                .equals(kanonischeBezeichnung(einheit.bezeichnung()))
             && (g.kennzahl() == null || g.kennzahl().startsWith(praefix))) {
           gefunden = i;
           break;
@@ -542,34 +547,39 @@ public final class BefehlAnwender {
         normen,
         befehl,
         ohneFussnoten(
-        text -> {
-          if (befehl.amEnde()) {
-            var gestutzt = text.stripTrailing();
-            if (!gestutzt.endsWith(befehl.alt())) {
-              return TextErgebnis.fehler("Der Text endet nicht mit „" + befehl.alt() + "“.");
-            }
-            var rumpf = gestutzt.substring(0, gestutzt.length() - befehl.alt().length());
-            // Tritt an die Stelle des Satzzeichens ein Klammerzusatz („Der Punkt am Ende wird
-            // durch die Angabe „(Gesellschaftsdialog).“ ersetzt“), gehört davor ein Leerzeichen —
-            // so setzt es auch die amtliche Nachfassung.
-            var fuge =
-                befehl.neu().startsWith("(")
-                        && !rumpf.isEmpty()
-                        && Character.isLetterOrDigit(rumpf.charAt(rumpf.length() - 1))
-                    ? " "
-                    : "";
-            return TextErgebnis.ok(rumpf + fuge + befehl.neu());
-          }
-          int anzahl = zaehleVorkommen(text, befehl.alt());
-          if (anzahl == 0) {
-            return TextErgebnis.fehler("„" + befehl.alt() + "“ kommt im Zieltext nicht vor.");
-          }
-          if (anzahl > 1 && !befehl.jeweils()) {
-            return TextErgebnis.fehler(
-                "„" + befehl.alt() + "“ kommt " + anzahl + "-mal vor (ohne „jeweils“ mehrdeutig).");
-          }
-          return TextErgebnis.ok(text.replace(befehl.alt(), befehl.neu()));
-        }));
+            text -> {
+              if (befehl.amEnde()) {
+                var gestutzt = text.stripTrailing();
+                if (!gestutzt.endsWith(befehl.alt())) {
+                  return TextErgebnis.fehler("Der Text endet nicht mit „" + befehl.alt() + "“.");
+                }
+                var rumpf = gestutzt.substring(0, gestutzt.length() - befehl.alt().length());
+                // Tritt an die Stelle des Satzzeichens ein Klammerzusatz („Der Punkt am Ende wird
+                // durch die Angabe „(Gesellschaftsdialog).“ ersetzt“), gehört davor ein Leerzeichen
+                // —
+                // so setzt es auch die amtliche Nachfassung.
+                var fuge =
+                    befehl.neu().startsWith("(")
+                            && !rumpf.isEmpty()
+                            && Character.isLetterOrDigit(rumpf.charAt(rumpf.length() - 1))
+                        ? " "
+                        : "";
+                return TextErgebnis.ok(rumpf + fuge + befehl.neu());
+              }
+              int anzahl = zaehleVorkommen(text, befehl.alt());
+              if (anzahl == 0) {
+                return TextErgebnis.fehler("„" + befehl.alt() + "“ kommt im Zieltext nicht vor.");
+              }
+              if (anzahl > 1 && !befehl.jeweils()) {
+                return TextErgebnis.fehler(
+                    "„"
+                        + befehl.alt()
+                        + "“ kommt "
+                        + anzahl
+                        + "-mal vor (ohne „jeweils“ mehrdeutig).");
+              }
+              return TextErgebnis.ok(text.replace(befehl.alt(), befehl.neu()));
+            }));
   }
 
   private static AngewandteAenderung wendeStreichungAn(List<Norm> normen, Streichung befehl) {
@@ -577,19 +587,21 @@ public final class BefehlAnwender {
         normen,
         befehl,
         ohneFussnoten(
-        text -> {
-          int anzahl = zaehleVorkommen(text, befehl.woerter());
-          if (anzahl == 0) {
-            return TextErgebnis.fehler("„" + befehl.woerter() + "“ kommt im Zieltext nicht vor.");
-          }
-          if (anzahl > 1) {
-            return TextErgebnis.fehler("„" + befehl.woerter() + "“ kommt " + anzahl + "-mal vor.");
-          }
-          return TextErgebnis.ok(
-              text.replace(befehl.woerter(), "")
-                  .replaceAll("  +", " ")
-                  .replaceAll(" ([,;.])", "$1"));
-        }));
+            text -> {
+              int anzahl = zaehleVorkommen(text, befehl.woerter());
+              if (anzahl == 0) {
+                return TextErgebnis.fehler(
+                    "„" + befehl.woerter() + "“ kommt im Zieltext nicht vor.");
+              }
+              if (anzahl > 1) {
+                return TextErgebnis.fehler(
+                    "„" + befehl.woerter() + "“ kommt " + anzahl + "-mal vor.");
+              }
+              return TextErgebnis.ok(
+                  text.replace(befehl.woerter(), "")
+                      .replaceAll("  +", " ")
+                      .replaceAll(" ([,;.])", "$1"));
+            }));
   }
 
   private static AngewandteAenderung wendeWoerterEinfuegungAn(
@@ -598,50 +610,57 @@ public final class BefehlAnwender {
         normen,
         befehl,
         ohneFussnoten(
-        text ->
-            switch (befehl.anker()) {
-              case WortAnker.NachWoertern nach -> {
-                var pruefung = eindeutigeFundstelle(text, nach.woerter());
-                if (pruefung.fehler() != null) {
-                  yield TextErgebnis.fehler(pruefung.fehler());
-                }
-                int ende = pruefung.index() + nach.woerter().length();
-                yield TextErgebnis.ok(
-                    text.substring(0, ende) + fuge(befehl.woerter()) + befehl.woerter()
-                        + text.substring(ende));
-              }
-              case WortAnker.VorWoertern vor -> {
-                var pruefung = eindeutigeFundstelle(text, vor.woerter());
-                if (pruefung.fehler() != null) {
-                  yield TextErgebnis.fehler(pruefung.fehler());
-                }
-                yield TextErgebnis.ok(
-                    text.substring(0, pruefung.index())
-                        + befehl.woerter()
-                        + " "
-                        + text.substring(pruefung.index()));
-              }
-              case WortAnker.VorKommaAmEnde ignoriert -> {
-                var gestutzt = text.stripTrailing();
-                if (!gestutzt.endsWith(",")) {
-                  yield TextErgebnis.fehler("Der Zieltext endet nicht mit einem Komma.");
-                }
-                yield TextErgebnis.ok(
-                    gestutzt.substring(0, gestutzt.length() - 1) + " " + befehl.woerter() + ",");
-              }
-              case WortAnker.AmEnde ignoriert -> {
-                var gestutzt = text.stripTrailing();
-                if (gestutzt.endsWith(".") || gestutzt.endsWith(",") || gestutzt.endsWith(";")) {
-                  var satzzeichen = gestutzt.charAt(gestutzt.length() - 1);
-                  yield TextErgebnis.ok(
-                      gestutzt.substring(0, gestutzt.length() - 1)
-                          + " "
-                          + befehl.woerter()
-                          + satzzeichen);
-                }
-                yield TextErgebnis.ok(gestutzt + " " + befehl.woerter());
-              }
-            }));
+            text ->
+                switch (befehl.anker()) {
+                  case WortAnker.NachWoertern nach -> {
+                    var pruefung = eindeutigeFundstelle(text, nach.woerter());
+                    if (pruefung.fehler() != null) {
+                      yield TextErgebnis.fehler(pruefung.fehler());
+                    }
+                    int ende = pruefung.index() + nach.woerter().length();
+                    yield TextErgebnis.ok(
+                        text.substring(0, ende)
+                            + fuge(befehl.woerter())
+                            + befehl.woerter()
+                            + text.substring(ende));
+                  }
+                  case WortAnker.VorWoertern vor -> {
+                    var pruefung = eindeutigeFundstelle(text, vor.woerter());
+                    if (pruefung.fehler() != null) {
+                      yield TextErgebnis.fehler(pruefung.fehler());
+                    }
+                    yield TextErgebnis.ok(
+                        text.substring(0, pruefung.index())
+                            + befehl.woerter()
+                            + " "
+                            + text.substring(pruefung.index()));
+                  }
+                  case WortAnker.VorKommaAmEnde ignoriert -> {
+                    var gestutzt = text.stripTrailing();
+                    if (!gestutzt.endsWith(",")) {
+                      yield TextErgebnis.fehler("Der Zieltext endet nicht mit einem Komma.");
+                    }
+                    yield TextErgebnis.ok(
+                        gestutzt.substring(0, gestutzt.length() - 1)
+                            + " "
+                            + befehl.woerter()
+                            + ",");
+                  }
+                  case WortAnker.AmEnde ignoriert -> {
+                    var gestutzt = text.stripTrailing();
+                    if (gestutzt.endsWith(".")
+                        || gestutzt.endsWith(",")
+                        || gestutzt.endsWith(";")) {
+                      var satzzeichen = gestutzt.charAt(gestutzt.length() - 1);
+                      yield TextErgebnis.ok(
+                          gestutzt.substring(0, gestutzt.length() - 1)
+                              + " "
+                              + befehl.woerter()
+                              + satzzeichen);
+                    }
+                    yield TextErgebnis.ok(gestutzt + " " + befehl.woerter());
+                  }
+                }));
   }
 
   // --- Strukturoperationen -------------------------------------------------------------------
@@ -876,7 +895,8 @@ public final class BefehlAnwender {
     var text = absatz.text();
     var einrueckung = einrueckungVon(text, von);
     var ersatz = rueckeZitatEin(normalisiereZitatText(befehl.text()), einrueckung);
-    absaetze.set(f1.absatzIndex(), absatz.mitText(text.substring(0, von) + ersatz + text.substring(bis)));
+    absaetze.set(
+        f1.absatzIndex(), absatz.mitText(text.substring(0, von) + ersatz + text.substring(bis)));
     normen.set(f1.normIndex(), norm.mitAbsaetzen(absaetze));
     return angewandt(befehl, norm.enbez());
   }
@@ -911,8 +931,7 @@ public final class BefehlAnwender {
           yield angewandt(befehl, neue.stream().map(Norm::enbez).toList());
         }
 
-        var sigelNeu =
-            befehl.stelle().paragraph().map(Stelle.Paragraph::sigel).orElse("§");
+        var sigelNeu = befehl.stelle().paragraph().map(Stelle.Paragraph::sigel).orElse("§");
         var enbezNeu = sigelNeu + " " + befehl.bezeichnung();
         if (StellenAufloeser.normIndex(gesetzAus(normen), enbezNeu) >= 0) {
           yield manuell(befehl, enbezNeu + " existiert bereits im Stammgesetz.");
@@ -1016,7 +1035,10 @@ public final class BefehlAnwender {
                       normalisiereZitatText(befehl.text()), einrueckungVon(text, zeilenAnfang));
               return TextErgebnis.ok(
                   befehl.vorher()
-                      ? text.substring(0, zeilenAnfang) + block + "\n" + text.substring(zeilenAnfang)
+                      ? text.substring(0, zeilenAnfang)
+                          + block
+                          + "\n"
+                          + text.substring(zeilenAnfang)
                       : text.substring(0, zeilenEnde) + "\n" + block + text.substring(zeilenEnde));
             }));
   }
@@ -1176,8 +1198,10 @@ public final class BefehlAnwender {
       var absaetze = new ArrayList<>(norm.absaetze());
       int quelleIdx = fundstelle.absatzIndex();
       var neueNummer = neuAbsatz.get().nummer();
-      // Ein leerer Platzhalter-Absatz mit der Zielnummer (weggefallen/gegenstandslos) wird durch die
-      // Umnummerierung überschrieben (analog zur Norm-Umnummerierung auf eine weggefallene Zielnorm).
+      // Ein leerer Platzhalter-Absatz mit der Zielnummer (weggefallen/gegenstandslos) wird durch
+      // die
+      // Umnummerierung überschrieben (analog zur Norm-Umnummerierung auf eine weggefallene
+      // Zielnorm).
       for (int i = absaetze.size() - 1; i >= 0; i--) {
         if (i != quelleIdx
             && neueNummer.equals(absaetze.get(i).nummer())
@@ -1208,8 +1232,11 @@ public final class BefehlAnwender {
                     .matcher(text.substring(bereich.von(), bereich.bis()));
             if (!marke.find()) {
               return TextErgebnis.fehler(
-                  "„" + alteMarke + "“ steht nicht am Anfang von "
-                      + befehl.stelle().anzeigeText() + ".");
+                  "„"
+                      + alteMarke
+                      + "“ steht nicht am Anfang von "
+                      + befehl.stelle().anzeigeText()
+                      + ".");
             }
             var umbenannt =
                 text.substring(0, bereich.von())
@@ -1235,9 +1262,11 @@ public final class BefehlAnwender {
         var absaetze = new ArrayList<>(norm.absaetze());
         var absatz = absaetze.get(fundstelle.absatzIndex());
         var text = absatz.text();
-        var marker = Superskript.LAUF.matcher(text).region(fundstelle.bereich().von(), fundstelle.bereich().bis());
-        if (marker.lookingAt()
-            && Superskript.istSatzanfang(text, marker.start(), marker.end())) {
+        var marker =
+            Superskript.LAUF
+                .matcher(text)
+                .region(fundstelle.bereich().von(), fundstelle.bereich().bis());
+        if (marker.lookingAt() && Superskript.istSatzanfang(text, marker.start(), marker.end())) {
           var neuerText =
               text.substring(0, marker.start())
                   + Superskript.zuSuperskript(neuSatz.nummer())
@@ -1279,7 +1308,9 @@ public final class BefehlAnwender {
    */
   private static String entferneWeggefallenenPlatzhalter(String text, String marke) {
     return text.replaceFirst(
-        "(?m)^[ \\t]*" + Pattern.quote(marke) + "[ \\t]+\\((?:weggefallen|gegenstandslos|aufgehoben)\\)\\n?",
+        "(?m)^[ \\t]*"
+            + Pattern.quote(marke)
+            + "[ \\t]+\\((?:weggefallen|gegenstandslos|aufgehoben)\\)\\n?",
         "");
   }
 
@@ -1310,8 +1341,7 @@ public final class BefehlAnwender {
     // Steht genau ein unnummerierter Absatz zwischen nummerierten (bayerische Folge „Dem Wortlaut
     // werden … Abs. 1 bis 4 vorangestellt“ → „Der bisherige Wortlaut wird Abs. 5“), erhält nur
     // dieser die Nummer. Sind alle Absätze unnummeriert, wird der Gesamtwortlaut zu einem Absatz.
-    var unnummerierte =
-        norm.absaetze().stream().filter(a -> a.nummer() == null).toList();
+    var unnummerierte = norm.absaetze().stream().filter(a -> a.nummer() == null).toList();
     if (unnummerierte.size() == 1 && norm.absaetze().size() > 1) {
       var absaetze = new ArrayList<>(norm.absaetze());
       int idx = absaetze.indexOf(unnummerierte.get(0));
@@ -1427,11 +1457,7 @@ public final class BefehlAnwender {
     if (!fehlend.isEmpty()) {
       return manuell(
           befehl,
-          "Fußnote "
-              + String.join(", ", fehlend)
-              + " kommt in "
-              + norm.enbez()
-              + " nicht vor.");
+          "Fußnote " + String.join(", ", fehlend) + " kommt in " + norm.enbez() + " nicht vor.");
     }
     normen.set(aufloesung.normIndex(), norm.mitAbsaetzen(absaetze));
     return angewandt(befehl, norm.enbez());
@@ -1475,7 +1501,11 @@ public final class BefehlAnwender {
       betroffene.addAll(ergebnis.betroffeneEnbez());
       if (ergebnis.status() != Status.ANGEWANDT) {
         meldungen[index] =
-            "Teil " + (index + 1) + " (" + teil.stelle().anzeigeText() + "): "
+            "Teil "
+                + (index + 1)
+                + " ("
+                + teil.stelle().anzeigeText()
+                + "): "
                 + ergebnis.begruendung();
       }
     }
@@ -1742,7 +1772,8 @@ public final class BefehlAnwender {
 
   /**
    * Zerlegt einen Zitatblock mehrerer Paragraphen an den §-Überschriften (nicht an Querverweisen)
-   * und parst jeden Abschnitt zu einer {@link Norm}. Die Gliederung wird von der Vorlage übernommen.
+   * und parst jeden Abschnitt zu einer {@link Norm}. Die Gliederung wird von der Vorlage
+   * übernommen.
    */
   private static List<Norm> parseNormenBlock(String block, @Nullable Gliederung gliederung) {
     var normen = new ArrayList<Norm>();
@@ -1868,10 +1899,10 @@ public final class BefehlAnwender {
   }
 
   /**
-   * Rückt die kanonischen Zitatzeilen auf die Ziel-Einrückung um: Aufzählungszeilen (und die
-   * erste Zeile) auf {@code einrueckung}, Fortsetzungszeilen — etwa der Definitionstext unter
-   * einer Kurzüberschrift — zwei Zeichen tiefer, damit sie Kindzeilen der Einheit bleiben
-   * (dieselbe Form, die der ContentFlattener aus dem Stammgesetz-XML erzeugt).
+   * Rückt die kanonischen Zitatzeilen auf die Ziel-Einrückung um: Aufzählungszeilen (und die erste
+   * Zeile) auf {@code einrueckung}, Fortsetzungszeilen — etwa der Definitionstext unter einer
+   * Kurzüberschrift — zwei Zeichen tiefer, damit sie Kindzeilen der Einheit bleiben (dieselbe Form,
+   * die der ContentFlattener aus dem Stammgesetz-XML erzeugt).
    */
   private static String rueckeZitatEin(String zitat, String einrueckung) {
     var sb = new StringBuilder();

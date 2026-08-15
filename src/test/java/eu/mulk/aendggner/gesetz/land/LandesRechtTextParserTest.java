@@ -159,7 +159,9 @@ class LandesRechtTextParserTest {
     // Unnummerierter Einzelabsatz und weggefallene Norm wie im bayerischen Fall.
     assertThat(gesetz.norm("§ 2").orElseThrow().absaetze().get(0).nummer()).isNull();
     assertThat(gesetz.norm("§ 3").orElseThrow().weggefallen()).isTrue();
-    assertThat(gesetz.gliederungen()).extracting(Gliederung::anzeigeText).containsExactly("I. Teil — Grundlagen der Gemeindeverfassung");
+    assertThat(gesetz.gliederungen())
+        .extracting(Gliederung::anzeigeText)
+        .containsExactly("I. Teil — Grundlagen der Gemeindeverfassung");
   }
 
   @Test
