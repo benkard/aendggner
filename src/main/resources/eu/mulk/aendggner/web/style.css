@@ -112,3 +112,29 @@ footer {
 footer a {
   color: var(--accent);
 }
+
+.meldung {
+  margin-top: 1.25rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9375rem;
+}
+
+.meldung.arbeit {
+  color: var(--muted);
+}
+
+.meldung.fertig {
+  border-color: var(--accent);
+}
+
+.meldung.fehler {
+  border-color: #a33;
+  color: #a33;
+}
+
+button[disabled] {
+  filter: grayscale(0.6);
+  cursor: progress;
+}

@@ -16,7 +16,6 @@ import eu.mulk.aendggner.gesetz.gii.GiiXmlLoader;
 import eu.mulk.aendggner.gesetz.land.LandesRechtLoader;
 import eu.mulk.aendggner.synopse.HtmlRenderer;
 import eu.mulk.aendggner.synopse.SynopseBuilder;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +23,9 @@ import java.util.List;
 /**
  * Kernpipeline: Stammgesetz laden → Änderungsgesetze parsen und anwenden → Synopse rendern.
  *
- * <p>Wird sowohl von der CLI ({@link AendGgner}) als auch vom Webserver ( {@code
- * eu.mulk.aendggner.web.UploadHandler}) verwendet, damit die Anwendungslogik nur an einer Stelle
- * existiert.
+ * <p>Wird sowohl von der Befehlszeile ({@link AendGgner}) als auch von der Browserfassung ({@code
+ * eu.mulk.aendggner.wasm.BrowserMain}) verwendet, damit die Anwendungslogik nur an einer Stelle
+ * existiert. Sie kennt kein Dateisystem: Eingaben kommen als {@link Quelle} (Name und Bytes).
  */
 public final class Pipeline {
 
@@ -49,14 +48,14 @@ public final class Pipeline {
    *     — bei einem Entwurf die Änderungsanträge, die ihn geändert haben. Sie gehen in die
    *     Quellenzeile ein, denn die gezeigte Fassung ist ohne sie nicht nachvollziehbar.
    */
-  record Quelldokument(Path datei, DokumentKopf kopf, String text, List<String> eingearbeitet) {
+  record Quelldokument(Quelle quelle, DokumentKopf kopf, String text, List<String> eingearbeitet) {
 
-    Quelldokument(Path datei, DokumentKopf kopf, String text) {
-      this(datei, kopf, text, List.of());
+    Quelldokument(Quelle quelle, DokumentKopf kopf, String text) {
+      this(quelle, kopf, text, List.of());
     }
 
     String quellenAngabe(List<String> artikel) {
-      var sb = new StringBuilder(datei.getFileName().toString());
+      var sb = new StringBuilder(quelle.name());
       sb.append(" [").append(kopf.anzeigeName()).append("]");
       for (var zusatz : eingearbeitet) {
         sb.append(" + ").append(zusatz);
@@ -65,8 +64,19 @@ public final class Pipeline {
     }
   }
 
+  /** Bequemlichkeit für Befehlszeile und Tests; im Browser gibt es keine {@link Path}e. */
   public static Ergebnis erzeugeSynopse(
       Path baseFile, List<Path> patches, String artikel, boolean vollstaendig) throws Exception {
+    var patchQuellen = new ArrayList<Quelle>();
+    for (var patch : patches) {
+      patchQuellen.add(Quelle.lies(patch));
+    }
+    return erzeugeSynopse(Quelle.lies(baseFile), patchQuellen, artikel, vollstaendig);
+  }
+
+  public static Ergebnis erzeugeSynopse(
+      Quelle baseFile, List<Quelle> patches, String artikel, boolean vollstaendig)
+      throws Exception {
     var altesGesetz = ladeStammgesetz(baseFile);
     var extraktor = new PatchTextExtraktor(superskriptModus(altesGesetz));
     var parser = new AenderungsgesetzParser();
@@ -85,9 +95,7 @@ public final class Pipeline {
         warnungen.add(
             "In %s (%s) wurde kein auf %s anwendbarer Artikel gefunden."
                 .formatted(
-                    dokument.datei().getFileName(),
-                    dokument.kopf().anzeigeName(),
-                    gesetz.jurabk()));
+                    dokument.quelle().name(), dokument.kopf().anzeigeName(), gesetz.jurabk()));
       }
       var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
       gesetz = anwendung.neu();
@@ -99,8 +107,8 @@ public final class Pipeline {
 
     var gesamtErgebnis = new BefehlAnwender.AnwendungsErgebnis(gesetz, protokoll);
     var synopse = SynopseBuilder.baue(altesGesetz, gesamtErgebnis, warnungen, vollstaendig);
-    var quelle = baseFile.getFileName() + " + " + String.join(" + ", quellen);
-    var html = HtmlRenderer.rendere(synopse, quelle, entwurfsfassung);
+    var quellenZeile = baseFile.name() + " + " + String.join(" + ", quellen);
+    var html = HtmlRenderer.rendere(synopse, quellenZeile, entwurfsfassung);
 
     return new Ergebnis(
         html,
@@ -116,18 +124,18 @@ public final class Pipeline {
    * hinterlässt eine Warnung, die in der Synopse erscheint.
    */
   private static List<Quelldokument> leseDokumente(
-      List<Path> patches, PatchTextExtraktor extraktor, List<String> warnungen) throws Exception {
+      List<Quelle> patches, PatchTextExtraktor extraktor, List<String> warnungen) throws Exception {
     var dokumente = new ArrayList<Quelldokument>();
     for (var datei : patches) {
       var rohText = extraktor.extrahiere(datei);
       // Die Erkennung arbeitet auf dem Rohtext: Der Bereiniger entfernt genau die
       // Drucksachenköpfe, aus denen Art und Nummer hervorgehen.
       var kopf = DokumentErkenner.erkenne(rohText);
-      log.infof("Datei %s erkannt als %s.", datei, kopf.anzeigeName());
+      log.infof("Datei %s erkannt als %s.", datei.name(), kopf.anzeigeName());
       if (kopf.art() == DokumentArt.OHNE_BEFEHLE) {
         warnungen.add(
             "%s ist ein %s und enthält keine Änderungsbefehle; die Datei wurde übergangen."
-                .formatted(datei.getFileName(), kopf.art().anzeigeName()));
+                .formatted(datei.name(), kopf.art().anzeigeName()));
         continue;
       }
       if (kopf.art() == DokumentArt.BESCHLUSSEMPFEHLUNG) {
@@ -141,7 +149,7 @@ public final class Pipeline {
                     + " übergangen. Für eine Synopse eignet sich der zugrunde liegende"
                     + " Gesetzentwurf%s.")
                 .formatted(
-                    datei.getFileName(),
+                    datei.name(),
                     kopf.bezugsDrucksachen().isEmpty()
                         ? ""
                         : " (Drs. " + kopf.bezugsDrucksachen().get(0) + ")"));
@@ -179,7 +187,7 @@ public final class Pipeline {
             ("%s ist ein Änderungsantrag zu %s; der zugehörige Gesetzentwurf wurde nicht"
                     + " mitgegeben, der Antrag blieb daher unberücksichtigt.")
                 .formatted(
-                    antrag.datei().getFileName(),
+                    antrag.quelle().name(),
                     antrag.kopf().bezugsDrucksachen().isEmpty()
                         ? "einer Drucksache"
                         : "Drs. " + String.join(", ", antrag.kopf().bezugsDrucksachen())));
@@ -192,15 +200,15 @@ public final class Pipeline {
       warnungen.addAll(patch.warnungen());
       log.infof(
           "%s: %d von %d Antragsbefehlen auf %s angewandt.",
-          antrag.datei().getFileName(),
+          antrag.quelle().name(),
           patch.angewandt(),
           parseErgebnis.befehle().size(),
-          ziel.datei().getFileName());
+          ziel.quelle().name());
       var eingearbeitet = new ArrayList<>(ziel.eingearbeitet());
-      eingearbeitet.add(antrag.datei().getFileName() + " [" + antrag.kopf().anzeigeName() + "]");
+      eingearbeitet.add(antrag.quelle().name() + " [" + antrag.kopf().anzeigeName() + "]");
       ergebnis.set(
           zielIndex,
-          new Quelldokument(ziel.datei(), ziel.kopf(), patch.text(), List.copyOf(eingearbeitet)));
+          new Quelldokument(ziel.quelle(), ziel.kopf(), patch.text(), List.copyOf(eingearbeitet)));
     }
     return ergebnis;
   }
@@ -234,9 +242,14 @@ public final class Pipeline {
     return dokument.kopf().art().istEntwurfsfassung();
   }
 
-  /** Gii-XML → {@link GiiXmlLoader}; PDF/Klartext (Landesrecht) → {@link LandesRechtLoader}. */
+  /** Bequemlichkeit für Befehlszeile und Tests; im Browser gibt es keine {@link Path}e. */
   static Gesetz ladeStammgesetz(Path baseFile) throws Exception {
-    return istGiiXml(baseFile)
+    return ladeStammgesetz(Quelle.lies(baseFile));
+  }
+
+  /** Gii-XML → {@link GiiXmlLoader}; PDF/Klartext (Landesrecht) → {@link LandesRechtLoader}. */
+  static Gesetz ladeStammgesetz(Quelle baseFile) throws Exception {
+    return DateiTyp.erkenne(baseFile.inhalt()) == DateiTyp.XML
         ? new GiiXmlLoader().load(baseFile)
         : new LandesRechtLoader().load(baseFile);
   }
@@ -257,10 +270,5 @@ public final class Pipeline {
       }
     }
     return SuperskriptModus.ENTFERNEN;
-  }
-
-  static boolean istGiiXml(Path baseFile) throws IOException {
-    var mimeType = new org.apache.tika.Tika().detect(baseFile);
-    return mimeType.equals("application/xml") || mimeType.equals("text/xml");
   }
 }

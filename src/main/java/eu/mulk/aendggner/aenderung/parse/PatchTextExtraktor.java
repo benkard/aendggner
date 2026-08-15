@@ -1,11 +1,11 @@
 package eu.mulk.aendggner.aenderung.parse;
 
+import eu.mulk.aendggner.DateiTyp;
+import eu.mulk.aendggner.Quelle;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import org.apache.pdfbox.Loader;
-import org.apache.tika.Tika;
 import org.jboss.logging.Logger;
 
 /**
@@ -20,7 +20,6 @@ public final class PatchTextExtraktor {
 
   private static final Logger log = Logger.getLogger(PatchTextExtraktor.class);
 
-  private final Tika tika = new Tika();
   private final SuperskriptModus superskriptModus;
 
   public PatchTextExtraktor() {
@@ -31,22 +30,27 @@ public final class PatchTextExtraktor {
     this.superskriptModus = superskriptModus;
   }
 
+  /** Bequemlichkeit für Befehlszeile und Tests; im Browser gibt es keine {@link Path}e. */
   public String extrahiere(Path datei) throws IOException {
-    var mimeType = tika.detect(datei);
-    log.infof("Datei %s hat Typ %s.", datei, mimeType);
+    return extrahiere(Quelle.lies(datei));
+  }
 
-    return switch (mimeType) {
-      case "application/pdf" -> extrahierePdf(datei);
-      case "text/plain" -> Files.readString(datei, StandardCharsets.UTF_8);
-      default ->
+  public String extrahiere(Quelle quelle) throws IOException {
+    var typ = DateiTyp.erkenne(quelle.inhalt());
+    log.infof("Datei %s hat Typ %s.", quelle.name(), typ.anzeigeName());
+
+    return switch (typ) {
+      case PDF -> extrahierePdf(quelle.inhalt());
+      case KLARTEXT -> new String(quelle.inhalt(), StandardCharsets.UTF_8);
+      case XML ->
           throw new IOException(
               "Nicht unterstützter Dateityp %s für %s (unterstützt: PDF, Klartext)"
-                  .formatted(mimeType, datei));
+                  .formatted(typ.anzeigeName(), quelle.name()));
     };
   }
 
-  private String extrahierePdf(Path datei) throws IOException {
-    try (var dokument = Loader.loadPDF(datei.toFile())) {
+  private String extrahierePdf(byte[] inhalt) throws IOException {
+    try (var dokument = Loader.loadPDF(inhalt)) {
       return FontgroessenFilter.extrahiere(dokument, superskriptModus);
     }
   }
@@ -61,7 +65,11 @@ public final class PatchTextExtraktor {
    * @return links = Entwurfsspalte, rechts = Ausschussspalte.
    */
   public Spalten extrahiereSpalten(Path datei) throws IOException {
-    try (var dokument = Loader.loadPDF(datei.toFile())) {
+    return extrahiereSpalten(Quelle.lies(datei));
+  }
+
+  public Spalten extrahiereSpalten(Quelle quelle) throws IOException {
+    try (var dokument = Loader.loadPDF(quelle.inhalt())) {
       return new Spalten(
           FontgroessenFilter.extrahiere(
               dokument, superskriptModus, FontgroessenFilter.Spalte.LINKS),

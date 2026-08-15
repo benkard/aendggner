@@ -19,6 +19,7 @@
 
     <enforced.maven-version>3.9.0</enforced.maven-version>
 
+    <build-helper-plugin.version>3.6.0</build-helper-plugin.version>
     <compiler-plugin.version>3.15.0</compiler-plugin.version>
     <dependency-plugin.version>3.11.0</dependency-plugin.version>
     <enforcer-plugin.version>3.6.3</enforcer-plugin.version>
@@ -33,12 +34,12 @@
     <assertj.version>3.27.7</assertj.version>
     <java-diff-utils.version>4.17</java-diff-utils.version>
     <jboss-logging.version>3.6.3.Final</jboss-logging.version>
+    <jzlib.version>1.1.5</jzlib.version>
     <jspecify.version>1.0.0</jspecify.version>
     <junit.version>5.13.4</junit.version>
     <pdfbox.version>3.0.8</pdfbox.version>
     <picocli.version>4.7.7</picocli.version>
     <slf4j.version>2.0.18</slf4j.version>
-    <tika.version>3.3.1</tika.version>
   </properties>
 
   <dependencyManagement>
@@ -84,13 +85,6 @@
       <groupId>org.slf4j</groupId>
       <artifactId>jcl-over-slf4j</artifactId>
       <version>${slf4j.version}</version>
-    </dependency>
-
-    <!-- Document type detection -->
-    <dependency>
-      <groupId>org.apache.tika</groupId>
-      <artifactId>tika-core</artifactId>
-      <version>${tika.version}</version>
     </dependency>
 
     <!-- PDF text extraction -->
@@ -266,5 +260,145 @@
     </plugins>
 
   </build>
+
+  <profiles>
+
+    <!--
+      Browserfassung: übersetzt dieselbe Pipeline mit GraalVM Web Image nach WebAssembly.
+      Ausdrücklich anzufordern (`-Pwasm`); der Standard-Build bleibt unberührt und braucht
+      kein GraalVM.
+
+      Voraussetzung: Oracle GraalVM 25.1+ (Web Image ist dort enthalten, in der CE nicht):
+
+        JAVA_HOME=/pfad/zu/oracle-graalvm ./mvnw -Pwasm package
+
+      Ergebnis: target/web/ — aendggner.js, aendggner.js.wasm und die statischen Seiten.
+    -->
+    <profile>
+      <id>wasm</id>
+
+      <properties>
+        <native-image.executable>${java.home}/bin/native-image</native-image.executable>
+        <wasm.output.directory>${project.build.directory}/web</wasm.output.directory>
+        <!--
+          Die Option „release 21“ beschränkte den Modulpfad auf die dokumentierte JDK-API; die
+          Web-Image-API des GraalVM wäre damit unsichtbar. Deshalb hier source/target statt
+          release — übersetzt wird ohnehin nur mit dem GraalVM, gegen dessen eigene Klassen.
+        -->
+        <maven.compiler.release/>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+      </properties>
+
+      <dependencies>
+        <!--
+          Reines Java-zlib. Web Image bindet die nativen zlib-Funktionen des JDK nicht an
+          (GR-65205); ohne Inflate ist kein PDF lesbar. Siehe
+          src/wasm/java/.../InflaterErsatz.java.
+        -->
+        <dependency>
+          <groupId>org.jruby</groupId>
+          <artifactId>jzlib</artifactId>
+          <version>${jzlib.version}</version>
+        </dependency>
+      </dependencies>
+
+      <build>
+        <plugins>
+
+          <!-- Der Wasm-Quellbaum kommt nur in diesem Profil hinzu: Er braucht die
+               Web-Image-API und svm.jar, die es nur im GraalVM gibt. -->
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>build-helper-maven-plugin</artifactId>
+            <version>${build-helper-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>wasm-quellen</id>
+                <phase>generate-sources</phase>
+                <goals>
+                  <goal>add-source</goal>
+                </goals>
+                <configuration>
+                  <sources>
+                    <source>src/wasm/java</source>
+                  </sources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <configuration>
+              <compilerArgs>
+                <arg>-Aproject=${project.groupId}/${project.artifactId}</arg>
+                <arg>--add-modules</arg>
+                <arg>org.graalvm.webimage.api</arg>
+              </compilerArgs>
+              <annotationProcessorPaths>
+                <path>
+                  <groupId>info.picocli</groupId>
+                  <artifactId>picocli-codegen</artifactId>
+                  <version>${picocli.version}</version>
+                </path>
+              </annotationProcessorPaths>
+            </configuration>
+          </plugin>
+
+          <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>statische-seiten</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <outputDirectory>${wasm.output.directory}</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>src/main/resources/eu/mulk/aendggner/web</directory>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>web-image</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>${native-image.executable}</executable>
+                  <arguments>
+                    <argument>--tool:svm-wasm</argument>
+                    <!-- Der Textzwischenschritt (aendggner.js.wat) wird sonst mehrere hundert
+                         Megabyte groß; auf die Größe des .wasm hat das keinen Einfluss. -->
+                    <argument>-H:WasmComments=NONE</argument>
+                    <argument>-classpath</argument>
+                    <classpath/>
+                    <argument>-o</argument>
+                    <argument>${wasm.output.directory}/aendggner</argument>
+                    <argument>eu.mulk.aendggner.wasm.BrowserMain</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+        </plugins>
+      </build>
+    </profile>
+
+  </profiles>
 
 </project>

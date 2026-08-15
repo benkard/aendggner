@@ -1,9 +1,11 @@
 package eu.mulk.aendggner.gesetz.gii;
 
+import eu.mulk.aendggner.Quelle;
 import eu.mulk.aendggner.gesetz.Absatz;
 import eu.mulk.aendggner.gesetz.Gesetz;
 import eu.mulk.aendggner.gesetz.Gliederung;
 import eu.mulk.aendggner.gesetz.Norm;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Path;
@@ -30,9 +32,14 @@ public final class GiiXmlLoader {
   private static final Pattern ABSATZ_MARKER =
       Pattern.compile("^\\((\\d+[a-z]?)\\)\\s+", Pattern.UNICODE_CASE);
 
+  /** Bequemlichkeit für Befehlszeile und Tests; im Browser gibt es keine {@link Path}e. */
   public Gesetz load(Path datei) throws IOException, SAXException {
+    return load(Quelle.lies(datei));
+  }
+
+  public Gesetz load(Quelle quelle) throws IOException, SAXException {
     var builder = neuerDocumentBuilder();
-    var dokument = builder.parse(datei.toFile());
+    var dokument = builder.parse(new ByteArrayInputStream(quelle.inhalt()));
     var wurzel = dokument.getDocumentElement();
 
     String jurabk = null;
@@ -80,7 +87,7 @@ public final class GiiXmlLoader {
     }
 
     if (jurabk == null) {
-      throw new SAXException("Keine <norm>-Elemente mit Metadaten gefunden: " + datei);
+      throw new SAXException("Keine <norm>-Elemente mit Metadaten gefunden: " + quelle.name());
     }
     return new Gesetz(jurabk, langue, kurzue, normen, gliederungen);
   }

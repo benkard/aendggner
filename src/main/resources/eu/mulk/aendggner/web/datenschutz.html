@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Datenschutz — ÄndGgner</title>
-  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main>
@@ -15,19 +15,22 @@
       Zugriffslogs, Hosting-Anbieter).
     </p>
 
-    <h2>Hochgeladene Dateien</h2>
+    <h2>Ihre Dateien</h2>
     <p>
-      Stammgesetz und Änderungsgesetz(e) werden ausschließlich im Arbeitsspeicher bzw. in
-      temporären Dateien verarbeitet, um die Synopse zu erzeugen. Nach Auslieferung der Antwort
-      werden diese temporären Dateien sofort gelöscht. Es findet keine dauerhafte Speicherung des
-      Inhalts statt.
+      Die gewählten Dateien werden <strong>nicht übertragen</strong>. Die gesamte Auswertung —
+      PDF-Textgewinnung, Anwendung der Änderungsbefehle, Erzeugung der Synopse — läuft als
+      WebAssembly-Programm in Ihrem Browser. Der Server sieht die Dateien nicht, kann sie nicht
+      sehen und speichert folglich auch nichts davon. Wer das prüfen möchte, öffne die
+      Netzwerkanzeige der Entwicklerwerkzeuge: Nach dem Laden der Seite und des Rechenwerks
+      entsteht kein weiterer Netzverkehr.
     </p>
 
     <h2>Zugriffsprotokolle</h2>
     <p>
-      Wie bei jedem Webserver werden beim Aufruf technische Zugriffsdaten (u. a. IP-Adresse,
-      Zeitpunkt, aufgerufene Adresse) für einen begrenzten Zeitraum zur Absicherung des Betriebs
-      protokolliert.
+      Beim Abruf der Seite selbst und der zugehörigen Dateien werden wie bei jedem Webserver
+      technische Zugriffsdaten (u. a. IP-Adresse, Zeitpunkt, aufgerufene Adresse) für einen
+      begrenzten Zeitraum zur Absicherung des Betriebs protokolliert. Diese Protokolle enthalten
+      keine Angaben über die von Ihnen ausgewerteten Dokumente.
     </p>
 
     <h2>Keine Cookies, keine Konten, kein Tracking</h2>
@@ -36,6 +39,6 @@
       Analyse- oder Tracking-Dienste Dritter ein.
     </p>
   </main>
-  <footer><a href="/">Zurück zum Formular</a></footer>
+  <footer><a href="index.html">Zurück zum Formular</a></footer>
 </body>
 </html>

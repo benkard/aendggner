@@ -1,15 +1,15 @@
 package eu.mulk.aendggner.gesetz.land;
 
+import eu.mulk.aendggner.DateiTyp;
+import eu.mulk.aendggner.Quelle;
 import eu.mulk.aendggner.aenderung.parse.PatchTextExtraktor;
 import eu.mulk.aendggner.aenderung.parse.SuperskriptModus;
 import eu.mulk.aendggner.aenderung.parse.TextBereiniger;
 import eu.mulk.aendggner.gesetz.Gesetz;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.Normalizer;
-import org.apache.tika.Tika;
 import org.jboss.logging.Logger;
 
 /**
@@ -29,27 +29,30 @@ public final class LandesRechtLoader {
 
   private static final Logger log = Logger.getLogger(LandesRechtLoader.class);
 
-  private final Tika tika = new Tika();
-
+  /** Bequemlichkeit für Befehlszeile und Tests; im Browser gibt es keine {@link Path}e. */
   public Gesetz load(Path datei) throws IOException {
-    var mimeType = tika.detect(datei);
-    log.infof("Stammgesetz %s hat Typ %s.", datei, mimeType);
+    return load(Quelle.lies(datei));
+  }
+
+  public Gesetz load(Quelle quelle) throws IOException {
+    var typ = DateiTyp.erkenne(quelle.inhalt());
+    log.infof("Stammgesetz %s hat Typ %s.", quelle.name(), typ.anzeigeName());
 
     var text =
-        switch (mimeType) {
-          case "application/pdf" ->
+        switch (typ) {
+          case PDF ->
               nachSatzendeGetrennteNormkoepfe(
                   TextBereiniger.bereinige(
-                      new PatchTextExtraktor(SuperskriptModus.BEHALTEN).extrahiere(datei)));
+                      new PatchTextExtraktor(SuperskriptModus.BEHALTEN).extrahiere(quelle)));
           // Auch der handgepflegte Klartext wird kanonisch zusammengesetzt (NFC), damit Stammtext
           // und Befehlstext gleich kodiert sind — der PDF-Zweig erledigt das über bereinige().
-          case "text/plain" ->
+          case KLARTEXT ->
               Normalizer.normalize(
-                  Files.readString(datei, StandardCharsets.UTF_8), Normalizer.Form.NFC);
-          default ->
+                  new String(quelle.inhalt(), StandardCharsets.UTF_8), Normalizer.Form.NFC);
+          case XML ->
               throw new IOException(
                   "Nicht unterstützter Dateityp %s für Stammgesetz %s (unterstützt: PDF, Klartext)"
-                      .formatted(mimeType, datei));
+                      .formatted(typ.anzeigeName(), quelle.name()));
         };
     return LandesRechtTextParser.parse(text);
   }

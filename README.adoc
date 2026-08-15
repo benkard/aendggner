@@ -272,30 +272,59 @@ schlimmer als keine.
 [[web]]
 == Web-App
 
-Neben der CLI gibt es einen eigenständigen Webserver
-(`eu.mulk.aendggner.web.WebMain`), der dieselbe Pipeline
-(`eu.mulk.aendggner.Pipeline`) über ein einfaches Upload-Formular
-zugänglich macht: Stammgesetz- und Änderungsgesetz-Datei(en) hochladen,
-Synopse erhalten. Er nutzt ausschließlich JDK-Bordmittel
-(`com.sun.net.httpserver.HttpServer`) — keine zusätzliche
-Web-Framework-Abhängigkeit — und hält keine Rechtsdaten Dritter
-serverseitig vor; hochgeladene Dateien werden nur für die Dauer der
-Anfrage als temporäre Dateien gehalten und danach sofort gelöscht.
+Neben der CLI gibt es eine Browserfassung, die dieselbe Pipeline
+(`eu.mulk.aendggner.Pipeline`) über ein Upload-Formular zugänglich macht:
+Stammgesetz- und Änderungsgesetz-Datei(en) wählen, Synopse erhalten.
 
-Lokal starten nach <<building,dem Bauen>> der JAR:
+Sie braucht keinen Server: Die vollständige Verarbeitung — PDF-Textgewinnung
+mit PDFBox eingeschlossen — läuft als WebAssembly-Modul im Browser, übersetzt
+mit GraalVM Web Image aus demselben Java-Quelltext. Ausgeliefert werden nur
+statische Dateien; die gewählten Dokumente verlassen den Rechner der
+Nutzer:innen nicht.
+
+Bauen (verlangt Oracle GraalVM 25.1 oder neuer — Web Image ist dort enthalten,
+in der Community Edition nicht):
 
 [source,shell script]
 ----
-java -cp "target/aendggner-0.1.0-SNAPSHOT.jar:target/libs/*" \
-  eu.mulk.aendggner.web.WebMain
+JAVA_HOME=/pfad/zu/oracle-graalvm ./mvnw -Pwasm package
 ----
 
-Der Server bindet standardmäßig nur an `127.0.0.1:8080`; Adresse und
-Port lassen sich über die Umgebungsvariablen `AENDGGNER_WEB_BIND` und
-`AENDGGNER_WEB_PORT` ändern. Für den öffentlichen Betrieb gehört davor
-ein TLS-terminierender Reverse Proxy mit Rate-Limiting — eine
-`nginx`-Vorlage sowie eine `systemd`-Unit liegen unter `deploy/`
-(`deploy/nginx-aendggner.conf`, `deploy/aendggner-web.service`).
+Ergebnis ist `target/web/` mit `index.html`, `app.js`, `worker.js`,
+`style.css`, `aendggner.js` und `aendggner.js.wasm` (rund 20 MB, komprimiert
+etwa 6 MB). Die daneben liegende `aendggner.js.wat` ist ein Zwischenschritt des
+Übersetzers und gehört nicht auf den Server.
+
+Lokal ansehen — `file://` genügt nicht, Browser laden Wasm-Module und Worker
+nur über HTTP:
+
+[source,shell script]
+----
+python3 -m http.server --directory target/web 8000
+----
+
+Der öffentliche Betrieb braucht nur einen Webserver für statische Dateien;
+eine `nginx`-Vorlage liegt unter `deploy/nginx-aendggner.conf`. Die
+Befehlszeilenfassung bleibt davon unberührt und ist weiterhin der Weg für
+Massenläufe.
+
+=== Warum WebAssembly und nicht ein Java-Server
+
+Der Kern ist reines Java ohne Dateisystem- oder Netzzugriff; nur vier Stellen
+berührten die Plattform (PDFBox, MIME-Erkennung, XML-Parser, Dateizugriff).
+Sie sind hinter `eu.mulk.aendggner.Quelle` (Name + Bytes) und
+`eu.mulk.aendggner.DateiTyp` (Signaturbytes statt Tika) gebündelt, sodass
+Befehlszeile und Browser dieselbe Pipeline speisen.
+
+Zwei Eigenheiten von Web Image sind dabei zu beachten und im Quelltext
+vermerkt:
+
+* Die nativen zlib-Bindungen des JDK fehlen (`java.util.zip.Inflater`), ohne
+  die kein PDF lesbar ist. `src/wasm/java/.../InflaterErsatz.java` ersetzt sie
+  durch die reine Java-Umsetzung von jzlib.
+* Typisierte Felder lassen sich derzeit nicht nach `byte[]` umsetzen; der
+  Dateiinhalt wandert deshalb als Base64-Text über die JS-Grenze.
+
 
 Vor dem produktiven, öffentlichen Betrieb sind zwingend zu erledigen:
 
