@@ -19,6 +19,7 @@ import eu.mulk.aendggner.synopse.SynopseBuilder;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Kernpipeline: Stammgesetz laden → Änderungsgesetze parsen und anwenden → Synopse rendern.
@@ -47,16 +48,31 @@ public final class Pipeline {
    * @param eingearbeitet die Dokumente, die vor der Anwendung in {@code text} eingearbeitet wurden
    *     — bei einem Entwurf die Änderungsanträge, die ihn geändert haben. Sie gehen in die
    *     Quellenzeile ein, denn die gezeigte Fassung ist ohne sie nicht nachvollziehbar.
+   * @param fassung welche von mehreren Fassungen des Dokuments gilt, sofern es mehrere trägt — die
+   *     Beschlussempfehlung stellt Entwurf und Ausschussfassung nebeneinander. Sonst {@code null}.
    */
-  record Quelldokument(Quelle quelle, DokumentKopf kopf, String text, List<String> eingearbeitet) {
+  record Quelldokument(
+      Quelle quelle,
+      DokumentKopf kopf,
+      String text,
+      List<String> eingearbeitet,
+      @Nullable String fassung) {
 
     Quelldokument(Quelle quelle, DokumentKopf kopf, String text) {
-      this(quelle, kopf, text, List.of());
+      this(quelle, kopf, text, List.of(), null);
+    }
+
+    Quelldokument(Quelle quelle, DokumentKopf kopf, String text, List<String> eingearbeitet) {
+      this(quelle, kopf, text, eingearbeitet, null);
     }
 
     String quellenAngabe(List<String> artikel) {
       var sb = new StringBuilder(quelle.name());
-      sb.append(" [").append(kopf.anzeigeName()).append("]");
+      sb.append(" [").append(kopf.anzeigeName());
+      if (fassung != null) {
+        sb.append(", ").append(fassung);
+      }
+      sb.append("]");
       for (var zusatz : eingearbeitet) {
         sb.append(" + ").append(zusatz);
       }
@@ -139,20 +155,30 @@ public final class Pipeline {
         continue;
       }
       if (kopf.art() == DokumentArt.BESCHLUSSEMPFEHLUNG) {
-        // Die beschlossene Fassung steht in der zweispaltigen Zusammenstellung, deren rechte
-        // Spalte für sich unvollständig ist („unverändert“ statt des Wortlauts, Zitate, die nicht
-        // aufgehen). Sie aufzulösen verlangt die zeilenweise Zuordnung beider Spalten und ist noch
-        // nicht umgesetzt; eine halb aufgelöste Fassung auszugeben wäre schlimmer als keine.
-        warnungen.add(
-            ("%s ist eine Beschlussempfehlung. Ihre maßgebliche Fassung steht in der zweispaltigen"
-                    + " Zusammenstellung, deren Auflösung noch nicht umgesetzt ist; die Datei wurde"
-                    + " übergangen. Für eine Synopse eignet sich der zugrunde liegende"
-                    + " Gesetzentwurf%s.")
-                .formatted(
-                    datei.name(),
-                    kopf.bezugsDrucksachen().isEmpty()
-                        ? ""
-                        : " (Drs. " + kopf.bezugsDrucksachen().get(0) + ")"));
+        // Die maßgebliche Fassung steht nicht im Fließtext, sondern in der zweispaltigen
+        // Zusammenstellung: links der Entwurf, rechts die Beschlüsse des Ausschusses.
+        var fassung = extraktor.leseZusammenstellung(datei);
+        warnungen.addAll(fassung.warnungen());
+        if (fassung.text() == null) {
+          // Eine halb aufgelöste Fassung auszugeben wäre schlimmer als keine.
+          warnungen.add(
+              ("%s ist eine Beschlussempfehlung, deren Zusammenstellung sich nicht auflösen ließ;"
+                      + " die Datei wurde übergangen. Für eine Synopse eignet sich der zugrunde"
+                      + " liegende Gesetzentwurf%s.")
+                  .formatted(
+                      datei.name(),
+                      kopf.bezugsDrucksachen().isEmpty()
+                          ? ""
+                          : " (Drs. " + kopf.bezugsDrucksachen().get(0) + ")"));
+          continue;
+        }
+        dokumente.add(
+            new Quelldokument(
+                datei,
+                kopf,
+                TextBereiniger.bereinige(fassung.text()),
+                List.of(),
+                "Ausschussfassung"));
         continue;
       }
       dokumente.add(new Quelldokument(datei, kopf, TextBereiniger.bereinige(rohText)));
@@ -208,7 +234,12 @@ public final class Pipeline {
       eingearbeitet.add(antrag.quelle().name() + " [" + antrag.kopf().anzeigeName() + "]");
       ergebnis.set(
           zielIndex,
-          new Quelldokument(ziel.quelle(), ziel.kopf(), patch.text(), List.copyOf(eingearbeitet)));
+          new Quelldokument(
+              ziel.quelle(),
+              ziel.kopf(),
+              patch.text(),
+              List.copyOf(eingearbeitet),
+              ziel.fassung()));
     }
     return ergebnis;
   }

@@ -76,11 +76,6 @@ public final class TextBereiniger {
               + gesperrt(" ersetzt."));
 
   /**
-   * In der Zusammenstellung einer Beschlussempfehlung steht der Vermerk der Ausschussspalte
-   * gesperrt: „u n v e r ä n d e r t“. Er ist kein Fließtext, sondern eine Marke, und wird auf ihre
-   * Normalform gebracht, bevor irgendetwas anderes ihn zu lesen versucht.
-   */
-  /**
    * Der laufende Spaltenkopf der Zusammenstellung („Entwurf“ links, „Beschlüsse des 25.
    * Ausschusses“ rechts) wiederholt sich auf jeder Seite und steht damit mitten in den Befehlen.
    * Erfasst wird auch die ungetrennte Form, die entsteht, solange die Spalten noch nicht getrennt
@@ -90,8 +85,21 @@ public final class TextBereiniger {
       Pattern.compile(
           "\\s*(?:Entwurf\\s*)?(?:Beschlüsse\\s+des\\s+\\d+\\.\\s+Ausschusses)\\s*|\\s*Entwurf\\s*");
 
+  /**
+   * In der Zusammenstellung einer Beschlussempfehlung steht der Vermerk der Ausschussspalte
+   * gesperrt: „u n v e r ä n d e r t“. Er ist kein Fließtext, sondern eine Marke, und wird auf ihre
+   * Normalform gebracht, bevor irgendetwas anderes ihn zu lesen versucht.
+   */
   private static final Pattern UNVERAENDERT_GESPERRT =
       Pattern.compile("u\\s+n\\s+v\\s+e\\s+r\\s+ä\\s+n\\s+d\\s+e\\s+r\\s+t");
+
+  /**
+   * Bringt den gesperrten Vermerk auf seine Normalform. Der {@link ZusammenstellungsLeser} braucht
+   * ihn früher als der übrige Bereiniger: Er entscheidet zeilenweise über die maßgebliche Spalte.
+   */
+  static String entsperreUnveraendert(String zeile) {
+    return UNVERAENDERT_GESPERRT.matcher(zeile).replaceAll("unverändert");
+  }
 
   /**
    * Whitespace einschließlich der Umbruch-Marker des FontgroessenFilters — die kurzen Zeilen des
@@ -415,7 +423,13 @@ public final class TextBereiniger {
     return ergebnis;
   }
 
-  private static boolean istKolumnentitel(String zeile) {
+  /**
+   * Ist die Zeile Seitenmöbel (Kopf-/Fußzeile, Spaltenkopf)? Auch der {@link
+   * ZusammenstellungsLeser} fragt danach: Er muss das Möbel loswerden, <em>bevor</em> er die
+   * Spalten zusammenführt — ein Spaltenkopf mitten in einem unveränderten Block würde ihm sonst
+   * einen Wechsel der maßgeblichen Spalte vortäuschen.
+   */
+  static boolean istKolumnentitel(String zeile) {
     return KOPFZEILE.matcher(zeile).matches()
         || SEITENZAHL.matcher(zeile).matches()
         || BUNDESANZEIGER.matcher(zeile).matches()

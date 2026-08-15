@@ -1024,20 +1024,54 @@ class EndToEndTest {
   }
 
   /**
-   * Eine Beschlussempfehlung wird als solche erkannt und mit Begründung übergangen, statt eine halb
-   * aufgelöste Fassung auszugeben. Die Meldung nennt den Entwurf, der stattdessen taugt.
+   * Aus einer Beschlussempfehlung entsteht die Synopse der <em>beschlossenen</em> Fassung: Die
+   * Pipeline löst die zweispaltige Zusammenstellung auf, statt die Datei zu übergehen.
+   *
+   * <p>Gepinnt ist die Zahl der angewandten Befehle. Der große Rest bleibt aus demselben Grund
+   * manuell wie beim Regierungsentwurf daneben (BT-Drs. 20/6875, {@link
+   * #gegGrossesAenderungsgesetz}): Das Beispiel-XML ist die Urfassung des GEG von 2020, geändert
+   * wird eine Fassung von 2023. Maßgeblich ist deshalb der Vergleich mit dem Entwurf — die
+   * Ausschussfassung muss <em>mehr</em> Befehle tragen, denn der Ausschuss hat zwei Artikel
+   * hinzugefügt (BGB und Betriebskostenverordnung).
    */
   @Test
-  void beschlussempfehlungWirdMitBegruendungUebergangen() throws Exception {
+  void beschlussempfehlungLiefertDieAusschussfassung() throws Exception {
     var xml = SAMPLEDATA.resolve("GEG/BJNR172810020.xml");
-    var pdf = SAMPLEDATA.resolve("GEG/BT-Drs-20-7619_Beschlussempfehlung.pdf");
-    assumeTrue(Files.exists(xml) && Files.exists(pdf), "GEG-Beispieldaten fehlen");
+    var empfehlung = SAMPLEDATA.resolve("GEG/BT-Drs-20-7619_Beschlussempfehlung.pdf");
+    var entwurf = SAMPLEDATA.resolve("GEG/BT-Drs-20-6875_Regierungsentwurf.pdf");
+    assumeTrue(
+        Files.exists(xml) && Files.exists(empfehlung) && Files.exists(entwurf),
+        "GEG-Beispieldaten fehlen");
+
+    var ausEmpfehlung = Pipeline.erzeugeSynopse(xml, List.of(empfehlung), null, false);
+    var ausEntwurf = Pipeline.erzeugeSynopse(xml, List.of(entwurf), null, false);
+
+    assertThat(ausEmpfehlung.anzahlAngewandt()).isEqualTo(67);
+    assertThat(ausEmpfehlung.anzahlAngewandt() + ausEmpfehlung.anzahlManuell())
+        .as("die Ausschussfassung trägt mehr Befehle als der Entwurf")
+        .isGreaterThan(ausEntwurf.anzahlAngewandt() + ausEntwurf.anzahlManuell());
+    // Die Quellenzeile muss sagen, welche der beiden Spalten gilt.
+    assertThat(ausEmpfehlung.html()).contains(", Ausschussfassung]");
+  }
+
+  /**
+   * Derselbe Weg auf einer zweiten Beschlussempfehlung — dem Dritten Bevölkerungsschutzgesetz
+   * (BT-Drs. 19/24334) —, damit der Leser nicht am GEG-Heft hängt.
+   *
+   * <p>Zwei Befehle bleiben hier unerkannt, beide wegen Setzfehlern der amtlichen Drucksache: In
+   * Nummer 16 b) fehlt der Schlusspunkt („… eingefügt“), und Artikel 3 Nummer 1 b) trägt ein
+   * überzähliges schließendes Anführungszeichen. Beides ist zeichengenau so übernommen.
+   */
+  @Test
+  void beschlussempfehlungBevoelkerungsschutzgesetz() throws Exception {
+    var xml = SAMPLEDATA.resolve("IfSG/BJNR104510000.xml");
+    var pdf = SAMPLEDATA.resolve("IfSG/1924334.pdf");
+    assumeTrue(Files.exists(xml) && Files.exists(pdf), "IfSG-Beispieldaten fehlen");
 
     var ergebnis = Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false);
 
-    assertThat(ergebnis.anzahlAngewandt()).isZero();
-    assertThat(ergebnis.html()).contains("Beschlussempfehlung");
-    assertThat(ergebnis.html()).contains("Drs. 20/6875");
+    assertThat(ergebnis.anzahlAngewandt()).isEqualTo(47);
+    assertThat(ergebnis.html()).contains(", Ausschussfassung]");
   }
 
   /**

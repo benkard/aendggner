@@ -204,8 +204,9 @@ Gesetzentwurf::
 Änderungsantrag::
   Ändert nicht das Stammgesetz, sondern eine *Drucksache* — siehe unten.
 Beschlussempfehlung::
-  Trägt ihre Fassung in einer zweispaltigen Zusammenstellung. Erkannt,
-  aber noch nicht angewandt (siehe unten).
+  Trägt ihre Fassung in einer zweispaltigen Zusammenstellung, die
+  aufgelöst wird — die Synopse zeigt dann die vom Ausschuss beschlossene
+  Fassung (siehe unten).
 Dokument ohne Änderungsbefehle::
   Entschließungs- und schlichter Antrag, Plenarprotokoll, Bericht. Sie
   werden übergangen und gemeldet — nicht stillschweigend zu null
@@ -243,31 +244,45 @@ elliptische Antragsform, die das Hilfsverb nur einmal in der
 Beschlussformel führt („1. In Nr. 1.29 die Angabe „,“ am Ende durch die
 Angabe „;“ ersetzt.“).
 
-=== Beschlussempfehlungen: erkannt, noch nicht angewandt
+=== Beschlussempfehlungen: die beschlossene Fassung
 
 Die maßgebliche Fassung einer Beschlussempfehlung steht in einer
 zweispaltigen Zusammenstellung: links der Entwurf, rechts die Beschlüsse
-des Ausschusses. Die Spaltentrennung ist erledigt und belegt — anders
-als beim alten BGBl und beim Berliner GVBl stehen die Spalten *nicht*
-nacheinander im Inhaltsstrom, sondern zeilenweise verschränkt, weshalb
-sie erstmals koordinatenbasiert getrennt werden (`PatchTextExtraktor.
-extrahiereSpalten`, Schnitt an der Blattmitte, aber nur an einem
-tatsächlichen Spaltensteg, damit ganzseitenbreite Zeilen ungeschnitten
-bleiben). Der Akzeptanztest hält fest, dass die linke Spalte Befehl für
-Befehl den Regierungsentwurf ergibt, aus dem die Zusammenstellung gebaut
-ist.
+des Ausschusses. Anders als beim alten BGBl und beim Berliner GVBl
+stehen die Spalten *nicht* nacheinander im Inhaltsstrom, sondern
+zeilenweise verschränkt; getrennt werden sie deshalb über die
+Koordinaten (`PatchTextExtraktor.extrahiereSpalten`, Schnitt an der
+Blattmitte, aber nur an einem tatsächlichen Spaltensteg, damit
+ganzseitenbreite Zeilen ungeschnitten bleiben).
 
-Was fehlt, ist die Auflösung der rechten Spalte. Sie druckt Unverändertes
-nicht ab, sondern vermerkt bloß „unverändert“ — und zwar nicht nur je
-Gliederungspunkt, sondern auch zeilenweise innerhalb zitierter Blöcke.
-Dadurch ist die rechte Spalte für sich genommen kein vollständiges
-Dokument: Ihre Anführungszeichen gehen nicht auf. Eine Auflösung über
-Gliederungspfade allein scheitert daran nachweislich; nötig ist die
-zeilenweise Zuordnung beider Spalten über ihre gemeinsame Grundlinie im
-PDF. Bis dahin wird eine Beschlussempfehlung erkannt und mit Begründung
-übergangen — samt Hinweis auf die Drucksachennummer des Entwurfs, der
-sich stattdessen eignet. Eine halb aufgelöste Fassung auszugeben wäre
-schlimmer als keine.
+Die rechte Spalte für sich gelesen ist allerdings kein vollständiges
+Dokument: Sie druckt Unverändertes nicht ab, sondern vermerkt bloß
+„unverändert“ — und zwar nicht nur je Gliederungspunkt, sondern auch
+zeilenweise innerhalb zitierter Blöcke, weshalb ihre Anführungszeichen
+nicht aufgehen. Eine Auflösung über die Gliederungspfade scheitert daran
+nachweislich. Maßgeblich ist stattdessen die *Grundlinie*: Beide Spalten
+sind zeilensynchron gesetzt, jeder Vermerk steht auf der Höhe der
+Entwurfszeile, die er meint. Der `ZusammenstellungsLeser` führt beide
+Spalten über Seite und Grundlinie in eine gemeinsame Lesereihenfolge
+zusammen und entscheidet dann Zeile für Zeile: „unverändert“ holt den
+Wortlaut aus der Entwurfsspalte, „entfällt“ streicht ihn, sonst gilt die
+Ausschussspalte. Dabei meint „unverändert“ den Wortlaut, nicht die
+Zählung — streicht der Ausschuss einen Punkt, rücken die folgenden auf,
+und seine Marke tritt an die Stelle der des Entwurfs.
+
+Die Quellenzeile der Synopse weist die verwendete Spalte als
+`[Beschlussempfehlung …, Ausschussfassung]` aus. Lässt sich die
+Zusammenstellung nicht auflösen, wird die Datei nach wie vor mit
+Begründung übergangen — samt Hinweis auf die Drucksachennummer des
+Entwurfs, der sich stattdessen eignet. Eine halb aufgelöste Fassung
+auszugeben wäre schlimmer als keine.
+
+Belegt ist beides: dass die *linke* Spalte Befehl für Befehl den
+Regierungsentwurf ergibt, aus dem die Zusammenstellung gebaut ist, und
+dass die aufgelöste Fassung mehr Befehle trägt als er — der Ausschuss
+hat der GEG-Novelle zwei Artikel hinzugefügt. Zwei Beispiele stehen im
+Test: BT-Drs. 20/7619 (GEG) und BT-Drs. 19/24334 (Drittes
+Bevölkerungsschutzgesetz).
 
 [[web]]
 == Web-App

@@ -5,8 +5,10 @@ import eu.mulk.aendggner.Quelle;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.List;
 import org.apache.pdfbox.Loader;
 import org.jboss.logging.Logger;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Extrahiert den linearen Text eines Änderungsgesetzes aus einer Eingabedatei.
@@ -79,4 +81,28 @@ public final class PatchTextExtraktor {
   }
 
   public record Spalten(String links, String rechts) {}
+
+  /**
+   * Gewinnt aus der Zusammenstellung einer Beschlussempfehlung die vom Ausschuss beschlossene
+   * Fassung; siehe {@link ZusammenstellungsLeser}.
+   *
+   * @param text die beschlossene Fassung, oder {@code null}, wenn sie sich nicht gewinnen ließ —
+   *     dann nennt {@code warnungen} den Grund.
+   */
+  public record Ausschussfassung(@Nullable String text, List<String> warnungen) {}
+
+  public Ausschussfassung leseZusammenstellung(Quelle quelle) throws IOException {
+    if (DateiTyp.erkenne(quelle.inhalt()) != DateiTyp.PDF) {
+      return new Ausschussfassung(
+          null,
+          List.of(
+              "%s ist keine PDF-Datei; die Spalten einer Zusammenstellung lassen sich nur über die"
+                      .formatted(quelle.name())
+                  + " Koordinaten des Satzbildes trennen."));
+    }
+    try (var dokument = Loader.loadPDF(quelle.inhalt())) {
+      var ergebnis = ZusammenstellungsLeser.lies(dokument, superskriptModus);
+      return new Ausschussfassung(ergebnis.text(), ergebnis.warnungen());
+    }
+  }
 }

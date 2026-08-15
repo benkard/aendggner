@@ -3,7 +3,6 @@ package eu.mulk.aendggner.aenderung.parse;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,14 +54,18 @@ final class FontgroessenFilter {
   private static final double KANDIDATEN_SCHWELLE = 0.25;
 
   /**
-   * Interne End-X-Metadaten am Zeilenende („␂527␂“), von {@link #klassifiziereZeilenenden}
-   * konsumiert; verlässt diese Klasse nie.
+   * Interne Zeilenmetadaten am Zeilenende („␂22,7315,527“ = Seite, Grundlinie ×10, End-X), von
+   * {@link #zerlege} eingelesen; als Text verlassen sie diese Klasse nie.
+   *
+   * <p>Die Metadaten reisen im Textstrom mit, statt nebenher gesammelt zu werden: Nur so ist ihre
+   * Zuordnung zu den Zeilen gesichert. PDFBox schreibt Zeilentrenner an mehreren Stellen
+   * (Zeilenende, Seitenende), und eine parallel geführte Liste geriete dort aus dem Tritt.
    */
-  private static final char ENDX_MARKE = '\uE002';
+  private static final char ZEILEN_MARKE = '\uE002';
 
-  /** Verirrte End-X-Metadaten mitten in einer Zeile (siehe {@link #klassifiziereZeilenenden}). */
-  private static final java.util.regex.Pattern ENDX_REST =
-      java.util.regex.Pattern.compile("\uE002\\d*\uE002?");
+  /** Verirrte Zeilenmetadaten mitten in einer Zeile (siehe {@link #zerlege}). */
+  private static final java.util.regex.Pattern MARKEN_REST =
+      java.util.regex.Pattern.compile("\uE002[\\d,]*\uE002?");
 
   /**
    * Fensterhälfte (Zeilen davor/danach) für die lokale Suche nach Ausrichtungs-Clustern. Lokal
@@ -94,10 +97,15 @@ final class FontgroessenFilter {
   private static final int MIN_RANDZEILEN = 5;
 
   /**
-   * Mindestbreite (pt) des Stegs zwischen zwei Spalten. Ein Wortzwischenraum misst 2–4 pt, der Steg
-   * einer Zusammenstellung ein Vielfaches davon; dazwischen liegt viel Luft.
+   * Mindestbreite (pt) des Stegs zwischen zwei Spalten, an den Rändern der <em>sichtbaren</em>
+   * Zeichen gemessen (siehe {@link GroessenFilterStripper#aufSpalte}).
+   *
+   * <p>Ausgezählt an den beiden Zusammenstellungen der Beispieldaten: Der schmalste echte Steg
+   * misst dort 6,9 pt (BT-Drs. 20/7619 und 19/24334 übereinstimmend), der breiteste
+   * Wortzwischenraum einer ganzseitenbreiten Zeile über der Blattmitte 5,4 pt. Dazwischen liegt die
+   * Schwelle. Sie war früher 12 pt und trennte damit gerade die engsten Stege nicht mehr.
    */
-  private static final float RINNE_MIN_PT = 12f;
+  private static final float RINNE_MIN_PT = 6f;
 
   private FontgroessenFilter() {}
 
@@ -124,6 +132,28 @@ final class FontgroessenFilter {
 
   static String extrahiere(PDDocument dokument, SuperskriptModus superskriptModus, Spalte spalte)
       throws IOException {
+    return klassifiziereZeilenenden(extrahiereZeilen(dokument, superskriptModus, spalte));
+  }
+
+  /**
+   * Eine Ausgabezeile samt ihrer Herkunft im Satzbild.
+   *
+   * <p>Sonst verlässt keine Koordinate diese Klasse. Die Zusammenstellung einer Beschlussempfehlung
+   * braucht sie: Ihre beiden Spalten stehen im Inhaltsstrom verschränkt und lassen sich nur über
+   * Seite und Grundlinie in eine gemeinsame Lesereihenfolge bringen.
+   *
+   * @param seite 1-basierte Seitennummer.
+   * @param grundlinie Grundlinie (pt von oben); {@link Float#NaN}, wenn unbekannt.
+   * @param endX rechtes Ende der Zeile (pt); {@link Float#NaN}, wenn unbekannt.
+   */
+  record Zeile(int seite, float grundlinie, float endX, String text) {}
+
+  /**
+   * Die Zeilen des Dokuments mit ihrer Geometrie. Hat keine Seite eine dominante Brotschrift,
+   * bleibt das Dokument ungefiltert und die Zeilen tragen keine Geometrie.
+   */
+  static List<Zeile> extrahiereZeilen(
+      PDDocument dokument, SuperskriptModus superskriptModus, Spalte spalte) throws IOException {
     var zaehler = new GroessenZaehler();
     zaehler.setLineSeparator("\n");
     var wegwerf = new StringWriter();
@@ -132,7 +162,7 @@ final class FontgroessenFilter {
     var schwellen = zaehler.schwellenProSeite();
     if (schwellen.isEmpty()) {
       log.debugf("Keine dominanten Fontgrößen; Kleingedrucktes wird nicht gefiltert.");
-      return wegwerf.toString();
+      return zerlege(wegwerf.toString());
     }
     log.debugf("Brotschriftgrößen (je Seite): %s", schwellen);
 
@@ -142,54 +172,85 @@ final class FontgroessenFilter {
     filter.setLineSeparator("\n");
     var ausgabe = new StringWriter();
     filter.writeText(dokument, ausgabe);
-    return klassifiziereZeilenenden(ausgabe.toString());
+    return zerlege(ausgabe.toString());
+  }
+
+  /** Trennt die {@link #ZEILEN_MARKE}-Metadaten wieder vom Text ab. */
+  private static List<Zeile> zerlege(String text) {
+    var roh = text.split("\n", -1);
+    var zeilen = new ArrayList<Zeile>(roh.length);
+    for (var zeile : roh) {
+      int seite = 0;
+      float grundlinie = Float.NaN;
+      float endX = Float.NaN;
+      if (!zeile.isEmpty() && zeile.charAt(zeile.length() - 1) == ZEILEN_MARKE) {
+        int start = zeile.lastIndexOf(ZEILEN_MARKE, zeile.length() - 2);
+        if (start >= 0) {
+          var felder = zeile.substring(start + 1, zeile.length() - 1).split(",");
+          try {
+            seite = Integer.parseInt(felder[0]);
+            grundlinie = Integer.parseInt(felder[1]) / 10f;
+            endX = Integer.parseInt(felder[2]);
+            zeile = zeile.substring(0, start);
+          } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
+            seite = 0;
+            grundlinie = Float.NaN;
+            endX = Float.NaN;
+          }
+        }
+      }
+      // Verirrte Metadaten mitten in der Zeile (Seitenwechsel ohne Zeilentrenner) sind wertlos.
+      if (zeile.indexOf(ZEILEN_MARKE) >= 0) {
+        zeile = MARKEN_REST.matcher(zeile).replaceAll("");
+      }
+      zeilen.add(new Zeile(seite, grundlinie, endX, zeile));
+    }
+    return zeilen;
   }
 
   /**
-   * Ersetzt die End-X-Metadaten der Zeilen durch die Umbruch-Klassifikation: Zeilen, die an einem
-   * lokalen Satzspiegelrand enden (Ausrichtungs-Cluster aus mindestens {@link #MIN_RANDZEILEN}
-   * gleich endenden Fensterzeilen), erhalten {@link TextBereiniger#WEICHES_ZEILENENDE}; Zeilen, die
-   * deutlich vor einem solchen Rand enden, {@link TextBereiniger#HARTES_ZEILENENDE}; alles andere
-   * bleibt unmarkiert. Cluster statt Perzentil, weil ein Fenster am Spaltenwechsel des
-   * zweispaltigen alten BGBl beide Spaltenränder enthält — maßgeblich ist der Rand, an dem die
-   * Zeile selbst ausgerichtet ist bzw. der nächste oberhalb ihres Endes.
+   * Hängt an jede Zeile die Umbruch-Klassifikation: Zeilen, die an einem lokalen Satzspiegelrand
+   * enden (Ausrichtungs-Cluster aus mindestens {@link #MIN_RANDZEILEN} gleich endenden
+   * Fensterzeilen), erhalten {@link TextBereiniger#WEICHES_ZEILENENDE}; Zeilen, die deutlich vor
+   * einem solchen Rand enden, {@link TextBereiniger#HARTES_ZEILENENDE}; alles andere bleibt
+   * unmarkiert. Cluster statt Perzentil, weil ein Fenster am Spaltenwechsel des zweispaltigen alten
+   * BGBl beide Spaltenränder enthält — maßgeblich ist der Rand, an dem die Zeile selbst
+   * ausgerichtet ist bzw. der nächste oberhalb ihres Endes.
    */
-  private static String klassifiziereZeilenenden(String text) {
-    var zeilen = text.split("\n", -1);
-    var endX = new float[zeilen.length];
-    Arrays.fill(endX, Float.NaN);
-    for (int i = 0; i < zeilen.length; i++) {
-      var zeile = zeilen[i];
-      if (zeile.isEmpty() || zeile.charAt(zeile.length() - 1) != ENDX_MARKE) {
-        continue;
+  static String klassifiziereZeilenenden(List<Zeile> zeilen) {
+    var markiert = markiereZeilenenden(zeilen);
+    var sb = new StringBuilder();
+    for (int i = 0; i < markiert.size(); i++) {
+      if (i > 0) {
+        sb.append('\n');
       }
-      int start = zeile.lastIndexOf(ENDX_MARKE, zeile.length() - 2);
-      if (start < 0) {
-        continue;
-      }
-      try {
-        endX[i] = Integer.parseInt(zeile, start + 1, zeile.length() - 1, 10);
-      } catch (NumberFormatException e) {
-        continue;
-      }
-      zeilen[i] = zeile.substring(0, start);
+      sb.append(markiert.get(i).text());
+    }
+    return sb.toString();
+  }
+
+  /**
+   * Wie {@link #klassifiziereZeilenenden}, aber zeilenweise. Die Zusammenstellung braucht das: Ihre
+   * beiden Spalten haben verschiedene Satzspiegelränder und müssen deshalb <em>vor</em> dem
+   * Zusammenführen klassifiziert werden — in der gemischten Fassung fände keine Spalte mehr ihren
+   * eigenen Rand wieder, und die Silbentrennung bliebe ungeheilt („An- gabe“).
+   */
+  static List<Zeile> markiereZeilenenden(List<Zeile> zeilen) {
+    var text = new String[zeilen.size()];
+    var endX = new float[zeilen.size()];
+    for (int i = 0; i < zeilen.size(); i++) {
+      text[i] = zeilen.get(i).text();
+      endX[i] = zeilen.get(i).endX();
     }
 
-    // Verirrte Metadaten mitten in der Zeile (Seitenwechsel ohne Zeilentrenner) sind wertlos.
-    for (int i = 0; i < zeilen.length; i++) {
-      if (zeilen[i].indexOf(ENDX_MARKE) >= 0) {
-        zeilen[i] = ENDX_REST.matcher(zeilen[i]).replaceAll("");
-      }
-    }
-
-    for (int i = 0; i < zeilen.length; i++) {
+    for (int i = 0; i < text.length; i++) {
       float x = endX[i];
       if (Float.isNaN(x)) {
         continue;
       }
       var fenster = new ArrayList<Float>();
       for (int j = Math.max(0, i - RAND_FENSTER);
-          j < Math.min(zeilen.length, i + RAND_FENSTER + 1);
+          j < Math.min(text.length, i + RAND_FENSTER + 1);
           j++) {
         if (!Float.isNaN(endX[j])) {
           fenster.add(endX[j]);
@@ -197,19 +258,24 @@ final class FontgroessenFilter {
       }
       if (istCluster(fenster, x)) {
         // Die Zeile endet an einem Satzspiegelrand → automatischer Blocksatz-Umbruch.
-        zeilen[i] = zeilen[i] + TextBereiniger.WEICHES_ZEILENENDE;
+        text[i] = text[i] + TextBereiniger.WEICHES_ZEILENENDE;
         continue;
       }
       // Gibt es deutlich oberhalb des Zeilenendes einen Satzspiegelrand, wäre dort noch Platz
       // gewesen → das Zeilenende ist bewusst gesetzt.
       for (float v : fenster) {
         if (v >= x + HART_ABSTAND_PT && istCluster(fenster, v)) {
-          zeilen[i] = zeilen[i] + TextBereiniger.HARTES_ZEILENENDE;
+          text[i] = text[i] + TextBereiniger.HARTES_ZEILENENDE;
           break;
         }
       }
     }
-    return String.join("\n", zeilen);
+    var ergebnis = new ArrayList<Zeile>(zeilen.size());
+    for (int i = 0; i < zeilen.size(); i++) {
+      var zeile = zeilen.get(i);
+      ergebnis.add(new Zeile(zeile.seite(), zeile.grundlinie(), zeile.endX(), text[i]));
+    }
+    return ergebnis;
   }
 
   /**
@@ -365,6 +431,12 @@ final class FontgroessenFilter {
     /** End-X (pt) des breitesten behaltenen Laufs der laufenden Zeile; NaN vor dem ersten. */
     private float zeilenEndX = Float.NaN;
 
+    /** Grundlinie (pt von oben) der laufenden Zeile: die tiefste ihrer behaltenen Läufe. */
+    private float zeilenGrundlinie = Float.NaN;
+
+    /** Seite, auf der die laufende Zeile steht. */
+    private int zeilenSeite = 0;
+
     GroessenFilterStripper(
         Map<Integer, Float> schwellen,
         Map<Integer, Float> untergrenzen,
@@ -383,9 +455,16 @@ final class FontgroessenFilter {
      * zusammenfasst: Die einander gegenüberstehenden Überschriften beider Spalten („Artikel 1“ und
      * „Artikel 1“) kämen sonst gemeinsam in einer Spalte an.
      *
+     * <p>Gemessen wird ausschließlich an den <em>sichtbaren</em> Zeichen. Der Zwischenraum zweier
+     * Spalten trägt im Textstrom regelmäßig noch Leerzeichen, die fast bis an die nächste Spalte
+     * reichen; nach ihren Rändern gemessen schrumpft ein 7-pt-Steg auf 4,7 pt und wurde für
+     * durchlaufenden Text gehalten. In BT-Drs. 20/7619 riss das die gesperrte Marke des Punktes 14
+     * mitten entzwei („… wird wie folgt gefasst: 14. u“ links, „n v e r ä n d e r t“ rechts).
+     *
      * @return die Zeichen der Spalte, oder {@code null}, wenn der Lauf ganz außerhalb liegt.
      */
-    private List<TextPosition> aufSpalte(List<TextPosition> positionen) {
+    private @org.jspecify.annotations.Nullable List<TextPosition> aufSpalte(
+        List<TextPosition> positionen) {
       if (spalte == Spalte.GANZ || positionen.isEmpty()) {
         return positionen;
       }
@@ -393,28 +472,40 @@ final class FontgroessenFilter {
       if (seite == null) {
         return positionen;
       }
+      if (positionen.get(0).getDir() != 0) {
+        // Gedrehter Text gehört keiner Spalte an — er steht quer am Blattrand. Der Randvermerk
+        // „Vorabfassung – wird durch die lektorierte Fassung ersetzt“ der Bundestagsdrucksachen
+        // steht so, mit Koordinaten in seinem eigenen, gedrehten Bezugssystem: Seine Grundlinie
+        // liefe quer durch beide Spalten und zerschnitte deren Zeilenfolge. Beim ungeteilten
+        // Auszug bleibt er erhalten und wird wie bisher vom TextBereiniger entfernt.
+        return null;
+      }
       float mitte = seite.getMediaBox().getWidth() / 2;
 
-      // Wo überschreitet der Lauf die Blattmitte?
-      int uebergang = -1;
-      for (int i = 0; i < positionen.size() - 1; i++) {
-        if (zeichenMitte(positionen.get(i)) < mitte
-            && zeichenMitte(positionen.get(i + 1)) >= mitte) {
-          uebergang = i;
+      // Das erste sichtbare Zeichen jenseits der Blattmitte und das letzte diesseits.
+      int erstesRechts = -1;
+      int letztesLinks = -1;
+      for (int i = 0; i < positionen.size(); i++) {
+        var position = positionen.get(i);
+        if (position.getUnicode().isBlank()) {
+          continue;
+        }
+        if (zeichenMitte(position) < mitte) {
+          letztesLinks = i;
+        } else {
+          erstesRechts = i;
           break;
         }
       }
 
-      if (uebergang < 0) {
+      if (erstesRechts < 0 || letztesLinks < 0) {
         // Der Lauf liegt ganz auf einer Seite der Mitte.
-        boolean links = zeichenMitte(positionen.get(0)) < mitte;
-        return links == (spalte == Spalte.LINKS) ? positionen : null;
+        return (erstesRechts < 0) == (spalte == Spalte.LINKS) ? positionen : null;
       }
 
-      var davor = positionen.get(uebergang);
+      var davor = positionen.get(letztesLinks);
       float luecke =
-          positionen.get(uebergang + 1).getXDirAdj()
-              - (davor.getXDirAdj() + davor.getWidthDirAdj());
+          positionen.get(erstesRechts).getXDirAdj() - (davor.getXDirAdj() + davor.getWidthDirAdj());
       if (luecke < RINNE_MIN_PT) {
         // Kein Spaltensteg, sondern durchlaufender Text über die Blattmitte hinweg: eine
         // ganzseitenbreite Zeile (Vorblatt, Bericht, Seitenkopf). Sie gehört keiner Spalte an und
@@ -422,9 +513,10 @@ final class FontgroessenFilter {
         // zweimal.
         return spalte == Spalte.LINKS ? positionen : null;
       }
+      // Die Leerzeichen des Stegs bleiben bei der linken Spalte; der Bereiniger stutzt sie.
       return spalte == Spalte.LINKS
-          ? positionen.subList(0, uebergang + 1)
-          : positionen.subList(uebergang + 1, positionen.size());
+          ? positionen.subList(0, erstesRechts)
+          : positionen.subList(erstesRechts, positionen.size());
     }
 
     private static float zeichenMitte(TextPosition position) {
@@ -462,7 +554,12 @@ final class FontgroessenFilter {
       for (var position : positionen) {
         float endX = position.getXDirAdj() + position.getWidthDirAdj();
         zeilenEndX = Float.isNaN(zeilenEndX) ? endX : Math.max(zeilenEndX, endX);
+        // Grundlinie = tiefstes Y des Laufs, wie schon in mitSuperskripten: Hochgestelltes sitzt
+        // höher und darf die Zeile nicht nach oben ziehen.
+        float y = position.getYDirAdj();
+        zeilenGrundlinie = Float.isNaN(zeilenGrundlinie) ? y : Math.max(zeilenGrundlinie, y);
       }
+      zeilenSeite = getCurrentPageNo();
       super.writeString(text, positionen);
     }
 
@@ -536,30 +633,35 @@ final class FontgroessenFilter {
       return true;
     }
 
-    /**
-     * Schreibt vor jedem Zeilentrenner das End-X der Zeile als Metadaten für {@link
-     * #klassifiziereZeilenenden}.
-     */
+    /** Schreibt vor jedem Zeilentrenner die Geometrie der Zeile als Metadaten. */
     @Override
     protected void writeLineSeparator() throws IOException {
-      schreibeEndXMarke();
+      schreibeZeilenMarke();
       super.writeLineSeparator();
     }
 
     /**
-     * Die letzte Zeile einer Seite endet ohne Zeilentrenner — ohne Flush würde ihr End-X erst an
-     * der ersten Zeile der Folgeseite landen und diese falsch klassifizieren.
+     * Die letzte Zeile einer Seite endet ohne Zeilentrenner — ohne Flush würde ihre Geometrie erst
+     * an der ersten Zeile der Folgeseite landen und diese falsch beschreiben.
      */
     @Override
     protected void writePageEnd() throws IOException {
-      schreibeEndXMarke();
+      schreibeZeilenMarke();
       super.writePageEnd();
     }
 
-    private void schreibeEndXMarke() throws IOException {
+    private void schreibeZeilenMarke() throws IOException {
       if (!Float.isNaN(zeilenEndX)) {
-        writeString(ENDX_MARKE + Integer.toString(Math.round(zeilenEndX)) + ENDX_MARKE);
+        writeString(
+            "%c%d,%d,%d%c"
+                .formatted(
+                    ZEILEN_MARKE,
+                    zeilenSeite,
+                    Math.round(zeilenGrundlinie * 10),
+                    Math.round(zeilenEndX),
+                    ZEILEN_MARKE));
         zeilenEndX = Float.NaN;
+        zeilenGrundlinie = Float.NaN;
       }
     }
 
