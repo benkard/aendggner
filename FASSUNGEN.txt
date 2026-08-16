@@ -39,6 +39,11 @@ dass die Fundstelle des Bundesrechts das Norm-XML ausschließlich als Archiv
 ausgibt; ohne dessen Auspacken bliebe die Einführung eine Anleitung zum
 Zwischenschritt von Hand.
 
+Endlich wird das Erscheinungsbild demjenigen angeglichen, was das Erzeugnis
+darstellt: Es tritt fortan schwarzweiß auf wie ein Gesetzblatt. Dabei hat sich
+ergeben, dass die Farbe in der Synopse nicht bloß schmückte, sondern trug; ihre
+Abschaffung hat deshalb einen Mangel der Auszeichnung offengelegt und behoben.
+
 
 Artikel 1
 Anbieterkennzeichnung und Datenschutzerklärung
@@ -182,6 +187,50 @@ Einführung in der Browserfassung
     nicht hinzu, sodass Hell- und Dunkelfassung ohne Zutun stimmen.
 
 
+Artikel 7
+Gestaltung in Schwarzweiß
+
+(1) Das Stilblatt der Seiten (style.css) wird auf reine Graustufen umgestellt. Die
+    bisherige Schmuckfarbe — ein warmes Braun — entfällt ersatzlos; an ihre Stelle
+    tritt die Textfarbe. Die Abrundung der Kästen, Felder und Knöpfe entfällt
+    gleichfalls; gedrucktes Papier trägt keine runden Ecken.
+
+(2) Weil die Schmuckfarbe bislang kenntlich machte, was anklickbar ist, werden die
+    Verweise fortan unterstrichen. Der Knopf kehrt beim Überfahren Grund und
+    Schrift um; die bisherige Aufhellung wäre an einem schwarzen Knopf ohne
+    Wirkung geblieben.
+
+(3) Die beiden allein stehenden Rotwerte entfallen. Die drei Zustände der Meldung
+    unterscheiden sich nunmehr durch matten Text (Arbeit), kräftigen Rahmen
+    (Fertigstellung) und doppelt starken Rahmen nebst Fettung (Fehler); der
+    Hinweis bei abgeschaltetem JavaScript trägt denselben starken Rahmen. Die
+    Beschriftungen bleiben, wie sie waren, und benennen den Zustand ohnehin.
+
+(4) Das eingebettete Stilblatt der Synopse (HtmlRenderer) wird ebenso umgestellt.
+    Streichung und Einfügung werden nicht mehr durch Rot und Grün geschieden,
+    sondern durch Durchstreichung und Unterstreichung, jeweils auf gemeinsamer
+    Hinterlegung, sowie durch die Spalte, in der sie stehen.
+
+(5) Dabei wird ein Mangel behoben: Die Einfügung hob die ihr vom Browser
+    zugedachte Unterstreichung bisher ausdrücklich auf. Damit war der grüne Grund
+    das einzige Merkmal, an dem sie zu erkennen war; wer Farben nicht oder anders
+    wahrnimmt oder die Synopse schwarzweiß ausdruckte, sah eine Einfügung
+    überhaupt nicht. Die Unterstreichung wird wiederhergestellt.
+
+(6) Die Abzeichen an den Normköpfen werden gleichfalls durch die Form geschieden:
+    „neu“ gefüllt, „aufgehoben“ gerahmt und durchgestrichen, „geändert“ schlicht
+    gerahmt, sämtlich in Versalien mit Sperrung. Sie sind ohnehin beschriftet; die
+    Farbe war dort von jeher bloße Verdopplung.
+
+(7) Dem Körper der Synopse werden Schrift- und Grundfarbe ausdrücklich zugewiesen.
+    Der klebende Spaltenkopf übernahm seinen Grund bisher durch Vererbung und
+    hatte mithin keinen verlässlichen. Für den Druck wird die Hinterlegung
+    festgelegt, damit sie nicht fortfällt.
+
+(8) Das Tabellenzeichen (favicon.svg) wird nachgezogen. Es führt die Werte
+    ausgeschrieben, weil ein Tabellenzeichen keine Stilblattgrößen erbt.
+
+
 Schlussbestimmung
 
 Die vorstehenden Änderungen sind durch die Prüfung sämtlicher Testfälle
@@ -197,6 +246,14 @@ Prüfung und einundzwanzig geänderte Normen ergeben, mithin dasselbe wie die
 Befehlszeile, und keine Beanstandung hinterlassen; die Erforderlichkeit der
 Freigabe für eingebettete Stile ist dadurch belegt, dass die Synopse ohne sie
 unformatiert erscheint.
+
+Die Umstellung des Erscheinungsbildes ist in Augenschein genommen worden, und
+zwar in Hell- und in Dunkelfassung: die Startseite nebst den drei Zuständen der
+Meldung, die Anbieterkennzeichnung sowie eine über die Befehlszeile erzeugte
+Synopse des Gebäudeenergiegesetzes (achtundsechzig angewandte Befehle,
+einundfünfzig zur manuellen Prüfung, siebenundvierzig geänderte Normen, mithin
+dasselbe wie zuvor). Streichung, Einfügung und die drei Abzeichen sind dabei
+ohne Farbe auseinanderzuhalten.
 
 
 ════════════════════════════════════════════════════════════════════════════════

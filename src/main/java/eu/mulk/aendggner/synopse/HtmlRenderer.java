@@ -206,23 +206,24 @@ public final class HtmlRenderer {
 
   private static final String CSS =
       """
+      /* Schwarz auf Papier wie ein Gesetzblatt. Streichung und Einfügung unterscheiden
+         sich deshalb nicht durch Farbe, sondern durch Form: durchgestrichen gegen
+         unterstrichen, dazu die Spalte, in der sie stehen. */
       :root {
         color-scheme: light dark;
-        --del-bg: #ffd7d7;
-        --del-fg: #8b0000;
-        --ins-bg: #d7f5d7;
-        --ins-fg: #005f00;
-        --rand: #ccc;
-        --dezent: #666;
+        --fg: #111;
+        --bg: #fff;
+        --rand: #bbb;
+        --dezent: #595959;
+        --hinterlegung: #ececec;
       }
       @media (prefers-color-scheme: dark) {
         :root {
-          --del-bg: #5a1f1f;
-          --del-fg: #ffb3b3;
-          --ins-bg: #1f4a1f;
-          --ins-fg: #b3ffb3;
-          --rand: #555;
-          --dezent: #aaa;
+          --fg: #e6e6e6;
+          --bg: #141414;
+          --rand: #4a4a4a;
+          --dezent: #a0a0a0;
+          --hinterlegung: #333;
         }
       }
       body {
@@ -231,13 +232,15 @@ public final class HtmlRenderer {
         max-width: 90rem;
         margin: 0 auto;
         padding: 1rem 2rem;
+        color: var(--fg);
+        background: var(--bg);
       }
       header h1 { margin-bottom: 0.2rem; }
       .langue { font-style: italic; margin-top: 0; }
       .quelle, .statistik, .gliederung, .ursachen { color: var(--dezent); font-size: 0.9rem; }
       .entwurfshinweis {
         border: 1px solid var(--rand);
-        border-left: 4px solid var(--del-fg);
+        border-left: 4px solid var(--fg);
         padding: 0.5rem 0.75rem;
         margin: 0.6rem 0;
         font-size: 0.95rem;
@@ -267,32 +270,41 @@ public final class HtmlRenderer {
         font-size: 0.95rem;
       }
       del, .alt del {
-        background: var(--del-bg);
-        color: var(--del-fg);
+        background: var(--hinterlegung);
+        color: inherit;
         text-decoration: line-through;
       }
       ins, .neu ins {
-        background: var(--ins-bg);
-        color: var(--ins-fg);
-        text-decoration: none;
+        background: var(--hinterlegung);
+        color: inherit;
+        text-decoration: underline;
       }
       .leer { color: var(--dezent); font-style: italic; }
+      /* Gerahmte Kästchen in Versalien; die drei Arten trennt die Form, nicht die Farbe.
+         Beschriftet sind sie ohnehin. */
       .badge {
         font-family: system-ui, sans-serif;
         font-size: 0.7rem;
         font-weight: normal;
-        border-radius: 0.6rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        border: 1px solid var(--rand);
+        color: var(--dezent);
         padding: 0.1rem 0.55rem;
         vertical-align: middle;
       }
-      .neu-badge { background: var(--ins-bg); color: var(--ins-fg); }
-      .aufgehoben-badge { background: var(--del-bg); color: var(--del-fg); }
-      .geaendert-badge { border: 1px solid var(--rand); color: var(--dezent); }
+      .neu-badge { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+      .aufgehoben-badge { text-decoration: line-through; }
+      /* .geaendert-badge trägt bereits den schlichten Rahmen aus .badge. */
       section.manuell { margin-top: 2rem; }
       section.manuell li { margin-bottom: 0.7rem; }
       .originaltext { color: var(--dezent); font-size: 0.85rem; }
       @media print {
         .vergleich { break-inside: avoid; }
+        /* Ohne diese Festlegung wirft der Druck die Hinterlegung weg; Durchstreichung
+           und Unterstreichung überstehen ihn ohnehin. */
+        :root { --hinterlegung: #e4e4e4; }
+        del, ins, .neu-badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       }
       """;
 }

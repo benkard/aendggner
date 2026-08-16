@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="ÄndGgner">
-  <!-- Farben wie in style.css: heller Grund, brauner Akzent. Ein Favicon erbt keine
+  <!-- Farben wie in style.css: Papier, Haarlinie, schwarzes Zeichen. Ein Favicon erbt keine
        CSS-Variablen, deshalb stehen die Werte hier ausgeschrieben. -->
-  <rect width="32" height="32" rx="6" fill="#fdfdfb"/>
-  <rect x="0.75" y="0.75" width="30.5" height="30.5" rx="5.25" fill="none" stroke="#d8d3c4"
+  <rect width="32" height="32" fill="#fff"/>
+  <rect x="0.75" y="0.75" width="30.5" height="30.5" fill="none" stroke="#bbb"
         stroke-width="1.5"/>
-  <text x="16" y="17" fill="#6b4423" font-family="Georgia, 'Times New Roman', serif"
+  <text x="16" y="17" fill="#111" font-family="Georgia, 'Times New Roman', serif"
         font-size="22" text-anchor="middle" dominant-baseline="central">§</text>
 </svg>
