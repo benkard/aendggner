@@ -311,11 +311,11 @@ etwa 6 MB). Die daneben liegende `aendggner.js.wat` ist ein Zwischenschritt des
 Übersetzers und gehört nicht auf den Server.
 
 Lokal ansehen — `file://` genügt nicht, Browser laden Wasm-Module und Worker
-nur über HTTP:
+nur über HTTP (http://localhost:8000/):
 
 [source,shell script]
 ----
-python3 -m http.server --directory target/web 8000
+jwebserver -d target/web
 ----
 
 Der öffentliche Betrieb braucht nur einen Webserver für statische Dateien;
