@@ -325,9 +325,15 @@ JAVA_HOME=/pfad/zu/oracle-graalvm ./mvnw -Pwasm package
 ----
 
 Ergebnis ist `target/web/` mit `index.html`, `app.js`, `worker.js`,
-`style.css`, `aendggner.js` und `aendggner.js.wasm` (rund 20 MB, komprimiert
-etwa 6 MB). Die daneben liegende `aendggner.js.wat` ist ein Zwischenschritt des
-Übersetzers und gehört nicht auf den Server.
+`style.css`, `favicon.svg`, `aendggner.js` und `aendggner.js.wasm` (rund 24 MB,
+komprimiert etwa 7 MB). Das Verzeichnis ist so, wie es dasteht, auslieferbar:
+`deploy/webpaket.sh` läuft am Ende desselben Befehls, wirft den mehrere hundert
+Megabyte großen Textzwischenschritt `aendggner.js.wat` fort, legt den Quelltext
+der gebauten Fassung als `aendggner-quelltext.tar.gz` samt
+`quelltext-fassung.txt` bei und komprimiert die großen Dateien nach `.gz` und
+`.br` vor. Trägt der Arbeitsbaum uneingecheckte Änderungen, bricht der Bau ab —
+der beigelegte Quelltext wäre dann nicht der gebaute; für einen Probelauf hilft
+`QUELLTEXT_UNGEPRUEFT=1`.
 
 Lokal ansehen — `file://` genügt nicht, Browser laden Wasm-Module und Worker
 nur über HTTP (http://localhost:8000/):
@@ -337,10 +343,47 @@ nur über HTTP (http://localhost:8000/):
 jwebserver -d target/web
 ----
 
-Der öffentliche Betrieb braucht nur einen Webserver für statische Dateien;
-eine `nginx`-Vorlage liegt unter `deploy/nginx-aendggner.conf`. Die
-Befehlszeilenfassung bleibt davon unberührt und ist weiterhin der Weg für
+Die Befehlszeilenfassung bleibt davon unberührt und ist weiterhin der Weg für
 Massenläufe.
+
+=== Ausrollen
+
+Betrieben wird die Fassung unter einem Unterpfad einer bestehenden Domain,
+https://matthias.benkard.de/aendggner/ — ein eigener Server und ein eigenes
+Zertifikat sind dafür nicht nötig. Nötig ist nur ein Webserver für statische
+Dateien.
+
+[source,shell script]
+----
+JAVA_HOME=/pfad/zu/oracle-graalvm ./mvnw -Pwasm package
+rsync -av --delete target/web/ server:/var/www/aendggner/
+----
+
+`deploy/nginx-aendggner.conf` ist dafür kein eigener `server`-Block, sondern ein
+Schnipsel zum Einfügen in den vorhandenen (`include`). Er bringt mit:
+
+* die Weiterleitung von `/aendggner` auf `/aendggner/`, ohne die alle relativen
+  Verweise der Seite auf die Domainwurzel zielten;
+* den MIME-Typ `application/wasm`, ohne den der Browser die Instanziierung des
+  Moduls verweigert;
+* `gzip_static`/`brotli_static` für die vorkomprimierten Dateien, statt 24 MB je
+  Abruf neu zu packen;
+* `Cache-Control: no-cache` statt einer Haltefrist: Die Dateinamen tragen keine
+  Fassungskennung, und ein Browser mit altem `app.js` und neuem `.wasm` bekäme
+  sonst eine Mischfassung, die es nie gegeben hat. Revalidiert wird per ETag, das
+  unveränderte Modul kostet dann ein 304 ohne Rumpf;
+* die Sicherheitskopfzeilen samt einer Content-Security-Policy. Zwei ihrer
+  Freigaben sind unvermeidlich und in der Datei begründet: `'wasm-unsafe-eval'`
+  für die Instanziierung des Moduls und `'unsafe-inline'` für Stile, weil die
+  Synopse als `blob:`-Dokument die Richtlinie der erzeugenden Seite erbt, ihr
+  Stylesheet aber eingebettet trägt.
+
+Der Footer der Startseite verweist auf den beigelegten Quelltext-Tarball; das
+verlangt AGPLv3 §13 für den Netzwerkbetrieb. Als fortlaufende Zweitquelle ist
+https://gerrit.benkard.de/plugins/gitiles/aendggner genannt. `impressum.html`
+und `datenschutz.html` tragen die Angaben nach § 5 DDG und Art. 13 DSGVO; die
+dort genannte Aufbewahrungsfrist der Zugriffsprotokolle (14 Tage) muss zu der
+des Servers passen.
 
 === Warum WebAssembly und nicht ein Java-Server
 
@@ -358,18 +401,6 @@ vermerkt:
   durch die reine Java-Umsetzung von jzlib.
 * Typisierte Felder lassen sich derzeit nicht nach `byte[]` umsetzen; der
   Dateiinhalt wandert deshalb als Base64-Text über die JS-Grenze.
-
-
-Vor dem produktiven, öffentlichen Betrieb sind zwingend zu erledigen:
-
-* `impressum.html` und `datenschutz.html`
-  (`src/main/resources/eu/mulk/aendggner/web/`) mit den tatsächlich
-  zutreffenden Angaben statt der `TODO`-Platzhalter füllen (Pflicht
-  nach § 5 DDG bzw. DSGVO für öffentlich erreichbare Dienste).
-* Den Quellcode-Link im Footer von `index.html` auf das tatsächlich
-  öffentlich erreichbare Repository setzen — das Projekt steht unter
-  AGPLv3 (`COPYING`), dessen §13 bei Netzwerkbetrieb einen
-  Quellcode-Zugriff für Nutzer:innen verlangt.
 
 
 == Running the Tests

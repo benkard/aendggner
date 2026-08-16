@@ -4,6 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>ÄndGgner — Änderungsgesetze konsolidieren</title>
+  <meta name="description" content="Wendet Änderungsgesetze und Gesetzentwürfe selbsttätig auf ein
+    Stammgesetz an und zeigt das Ergebnis als zweispaltige Synopse. Die Auswertung läuft
+    vollständig im Browser; die gewählten Dateien werden nicht übertragen.">
+  <link rel="canonical" href="https://matthias.benkard.de/aendggner/">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
   <script src="app.js" defer></script>
 </head>
@@ -16,6 +21,15 @@
   </header>
 
   <main>
+    <noscript>
+      <p class="noscript">
+        Dieses Werkzeug rechnet im Browser statt auf dem Server: Es braucht JavaScript und
+        WebAssembly. Ohne sie bleibt das nachstehende Formular wirkungslos. Wer beides nicht
+        einschalten möchte, verwende die Befehlszeilenfassung — sie liegt dem
+        <a href="aendggner-quelltext.tar.gz">Quelltext</a> bei und leistet dasselbe.
+      </p>
+    </noscript>
+
     <form id="synopse-formular">
       <div class="field">
         <label for="stamm">Stammgesetz</label>
@@ -62,7 +76,8 @@
   <footer>
     <a href="impressum.html">Impressum</a> ·
     <a href="datenschutz.html">Datenschutz</a> ·
-    <a href="https://TODO-QUELLCODE-URL-EINTRAGEN">Quellcode (AGPLv3)</a>
+    <a href="aendggner-quelltext.tar.gz">Quelltext dieser Fassung (AGPLv3)</a>
+    <span class="nebenquelle">(<a href="https://gerrit.benkard.de/plugins/gitiles/aendggner">Git</a>)</span>
   </footer>
 </body>
 </html>

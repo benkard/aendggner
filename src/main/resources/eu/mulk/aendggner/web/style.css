@@ -45,6 +45,21 @@ h1 {
   margin: 0;
 }
 
+/* Impressum und Datenschutz. */
+h2 {
+  margin: 1.75rem 0 0.5rem;
+  font-size: 1.125rem;
+}
+
+address {
+  font-style: normal;
+  margin: 0.5rem 0;
+}
+
+a {
+  color: var(--accent);
+}
+
 .field {
   margin-bottom: 1.25rem;
 }
@@ -92,6 +107,14 @@ button:hover {
   filter: brightness(1.1);
 }
 
+.noscript {
+  margin: 0 0 2rem;
+  padding: 1rem;
+  border: 1px solid #a33;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
 .disclaimer {
   margin-top: 2rem;
   padding: 1rem;
@@ -111,6 +134,10 @@ footer {
 
 footer a {
   color: var(--accent);
+}
+
+.nebenquelle {
+  font-size: 0.8125rem;
 }
 
 .meldung {

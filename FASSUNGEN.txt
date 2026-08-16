@@ -21,6 +21,113 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 16. August 2026,
+ zuletzt geändert durch die am 16. August 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Die Browserfassung war bislang für den öffentlichen Betrieb gesperrt: Die
+Anbieterkennzeichnung und die Datenschutzerklärung führten Platzhalter, und der
+Verweis auf den Quelltext, den die Lizenz des Erzeugnisses beim Netzbetrieb
+verlangt, zeigte auf keine Adresse. Mit dieser Fassung wird die Sperre
+aufgehoben; zugleich wird die Auslieferung auf den Betrieb unter einem Unterpfad
+einer bestehenden Domain eingerichtet.
+
+
+Artikel 1
+Anbieterkennzeichnung und Datenschutzerklärung
+
+(1) Die Anbieterkennzeichnung (impressum.html) wird mit den Angaben nach § 5 DDG
+    versehen; hinzu treten die Bezeichnung des nach § 18 Abs. 2 MStV
+    Verantwortlichen sowie ein Hinweis darauf, dass der Dienst unentgeltlich und
+    nichtkommerziell erbracht wird und die Synopsen ohne Gewähr ergehen.
+
+(2) Die Datenschutzerklärung (datenschutz.html) wird um die Bezeichnung des
+    Verantwortlichen (Art. 4 Nr. 7 DSGVO) und um die Rechte der betroffenen
+    Personen (Art. 15 bis 21, Art. 77 DSGVO) ergänzt. Für die Zugriffsprotokolle
+    werden die Rechtsgrundlage (Art. 6 Abs. 1 lit. f DSGVO) und die
+    Aufbewahrungsfrist (vierzehn Tage) benannt.
+
+(3) Die Aussage über die Dateien der Nutzer:innen bleibt unverändert; sie trifft
+    zu, weil die Verarbeitung ausschließlich im Browser stattfindet.
+
+
+Artikel 2
+Beilegung des Quelltextes
+
+(1) Es wird das Skript deploy/webpaket.sh eingeführt. Es tritt in der Phase
+    „package“ des Profils -Pwasm hinter den Übersetzer und macht aus dessen
+    Ergebnis ein auslieferbares Verzeichnis:
+    a)  Der Textzwischenschritt (aendggner.js.wat) wird entfernt.
+    b)  Der Quelltext der gebauten Fassung wird als aendggner-quelltext.tar.gz
+        nebst der Kennung der Fassung (quelltext-fassung.txt) beigelegt.
+    c)  Die großen Dateien werden nach .gz und .br vorkomprimiert.
+
+(2) Trägt der Arbeitsbaum uneingecheckte Änderungen, so bricht der Bau ab. Der
+    Grund ist folgender: Der beigelegte Quelltext wäre alsdann nicht derjenige
+    der ausgelieferten Fassung, und die Auflage des § 13 AGPLv3 wäre verfehlt.
+    Für Probeläufe kann die Prüfung durch QUELLTEXT_UNGEPRUEFT=1 abbedungen
+    werden.
+
+(3) Der Fuß der Startseite (index.html) verweist fortan auf den beigelegten
+    Quelltext; die fortlaufende Quelle wird als Zweitverweis daneben genannt.
+
+
+Artikel 3
+Auslieferungsvorlage
+
+Die Vorlage (deploy/nginx-aendggner.conf) wird vom eigenen server-Block auf ein
+location-Schnipsel umgestellt, das in den bestehenden Server eingefügt wird. Sie
+wird wie folgt geändert:
+
+1.  Aufgenommen wird die Weiterleitung des Pfades ohne abschließenden
+    Schrägstrich; ohne sie zielten sämtliche relativen Verweise der Seite auf die
+    Wurzel der Domain.
+
+2.  Die Dateien werden über „root“ statt über „alias“ zugeordnet, weil try_files
+    in einer Präfix-Location gegen den root auflöst und mit alias fehlgeht.
+
+3.  Die Haltefrist von sieben Tagen entfällt und wird durch Revalidierung
+    ersetzt. Der Grund ist folgender: Die Dateinamen tragen keine
+    Fassungskennung; ein Browser mit altem Steuerskript und neuem Rechenwerk
+    erhielte sonst eine Mischfassung, die es nie gegeben hat.
+
+4.  Die vorkomprimierten Dateien werden ausgeliefert, statt das Rechenwerk je
+    Abruf neu zu packen.
+
+5.  Aufgenommen werden die Sicherheitskopfzeilen nebst einer Inhaltsrichtlinie.
+    Zwei ihrer Freigaben sind unvermeidlich und in der Vorlage begründet:
+    diejenige für die Instanziierung des Moduls und diejenige für eingebettete
+    Stile, weil die Synopse als blob:-Dokument die Richtlinie der erzeugenden
+    Seite erbt, ihr Stylesheet aber eingebettet trägt.
+
+
+Artikel 4
+Ergänzungen der Oberfläche
+
+1.  Die Startseite erhält einen Hinweis für den Fall abgeschalteten JavaScripts;
+    bislang blieb das Formular alsdann wortlos wirkungslos.
+
+2.  Es wird ein Sinnbild (favicon.svg) eingeführt und in allen Seiten relativ
+    verwiesen; unter einem Unterpfad griffe der Abruf der Wurzel ins Leere.
+
+3.  Die Startseite erhält eine Kurzbeschreibung und die Angabe ihrer kanonischen
+    Adresse; das Stilblatt wird um die Auszeichnung der Überschriften zweiter
+    Ordnung, der Anschriften und der Hinweise ergänzt.
+
+
+Schlussbestimmung
+
+Die vorstehenden Änderungen sind durch die Prüfung sämtlicher Testfälle
+(dreihundertvier an der Zahl) bestätigt worden. Die Inhaltsrichtlinie ist gegen
+die laufende Anwendung erprobt worden: Der Lauf des IfSG-Falles im Browser hat
+unter ihr achtundvierzig angewandte Befehle, siebenundzwanzig zur manuellen
+Prüfung und einundzwanzig geänderte Normen ergeben, mithin dasselbe wie die
+Befehlszeile, und keine Beanstandung hinterlassen; die Erforderlichkeit der
+Freigabe für eingebettete Stile ist dadurch belegt, dass die Synopse ohne sie
+unformatiert erscheint.
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 15. August 2026,
  zuletzt geändert durch die am 15. August 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

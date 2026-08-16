@@ -392,6 +392,26 @@
                   </arguments>
                 </configuration>
               </execution>
+
+              <!--
+                Macht aus dem Übersetzerergebnis ein auslieferbares Verzeichnis: entfernt den
+                .wat-Zwischenschritt, legt den Quelltext der gebauten Fassung bei (AGPLv3 §13)
+                und komprimiert vor. Läuft in derselben Phase, aber nach „web-image“ — Maven
+                führt gleichphasige Ausführungen in Deklarationsreihenfolge aus.
+              -->
+              <execution>
+                <id>webpaket</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>${project.basedir}/deploy/webpaket.sh</executable>
+                  <arguments>
+                    <argument>${wasm.output.directory}</argument>
+                  </arguments>
+                </configuration>
+              </execution>
             </executions>
           </plugin>
 
