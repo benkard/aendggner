@@ -206,16 +206,20 @@ public final class HtmlRenderer {
 
   private static final String CSS =
       """
-      /* Schwarz auf Papier wie ein Gesetzblatt. Streichung und Einfügung unterscheiden
-         sich deshalb nicht durch Farbe, sondern durch Form: durchgestrichen gegen
-         unterstrichen, dazu die Spalte, in der sie stehen. */
+      /* Grundgerüst schwarzweiß wie ein Gesetzblatt; Farbe trägt allein die Änderung:
+         rot heißt weg, grün heißt hinzu. Damit die Aussage auch im Schwarzweiß-Ausdruck
+         und bei Farbfehlsichtigkeit erhalten bleibt, tritt zur Farbe stets die Form —
+         durchgestrichen gegen unterstrichen — sowie die Spalte, in der sie steht. */
       :root {
         color-scheme: light dark;
         --fg: #111;
         --bg: #fff;
         --rand: #bbb;
         --dezent: #595959;
-        --hinterlegung: #ececec;
+        --del-bg: #ffd7d7;
+        --del-fg: #8b0000;
+        --ins-bg: #d7f5d7;
+        --ins-fg: #005f00;
       }
       @media (prefers-color-scheme: dark) {
         :root {
@@ -223,7 +227,10 @@ public final class HtmlRenderer {
           --bg: #141414;
           --rand: #4a4a4a;
           --dezent: #a0a0a0;
-          --hinterlegung: #333;
+          --del-bg: #5a1f1f;
+          --del-fg: #ffb3b3;
+          --ins-bg: #1f4a1f;
+          --ins-fg: #b3ffb3;
         }
       }
       body {
@@ -240,7 +247,7 @@ public final class HtmlRenderer {
       .quelle, .statistik, .gliederung, .ursachen { color: var(--dezent); font-size: 0.9rem; }
       .entwurfshinweis {
         border: 1px solid var(--rand);
-        border-left: 4px solid var(--fg);
+        border-left: 4px solid var(--del-fg);
         padding: 0.5rem 0.75rem;
         margin: 0.6rem 0;
         font-size: 0.95rem;
@@ -270,41 +277,43 @@ public final class HtmlRenderer {
         font-size: 0.95rem;
       }
       del, .alt del {
-        background: var(--hinterlegung);
-        color: inherit;
+        background: var(--del-bg);
+        color: var(--del-fg);
         text-decoration: line-through;
       }
       ins, .neu ins {
-        background: var(--hinterlegung);
-        color: inherit;
+        background: var(--ins-bg);
+        color: var(--ins-fg);
         text-decoration: underline;
       }
       .leer { color: var(--dezent); font-style: italic; }
-      /* Gerahmte Kästchen in Versalien; die drei Arten trennt die Form, nicht die Farbe.
-         Beschriftet sind sie ohnehin. */
+      /* Kästchen in Versalien; die Farbe folgt derselben Regel wie im Diff. Beschriftet
+         sind sie ohnehin, sodass die Farbe hier nur bestätigt, was dasteht. */
       .badge {
         font-family: system-ui, sans-serif;
         font-size: 0.7rem;
         font-weight: normal;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        border: 1px solid var(--rand);
-        color: var(--dezent);
+        border: 1px solid transparent;
         padding: 0.1rem 0.55rem;
         vertical-align: middle;
       }
-      .neu-badge { background: var(--fg); color: var(--bg); border-color: var(--fg); }
-      .aufgehoben-badge { text-decoration: line-through; }
-      /* .geaendert-badge trägt bereits den schlichten Rahmen aus .badge. */
+      .neu-badge { background: var(--ins-bg); color: var(--ins-fg); }
+      .aufgehoben-badge { background: var(--del-bg); color: var(--del-fg); }
+      .geaendert-badge { border-color: var(--rand); color: var(--dezent); }
       section.manuell { margin-top: 2rem; }
       section.manuell li { margin-bottom: 0.7rem; }
       .originaltext { color: var(--dezent); font-size: 0.85rem; }
       @media print {
         .vergleich { break-inside: avoid; }
-        /* Ohne diese Festlegung wirft der Druck die Hinterlegung weg; Durchstreichung
-           und Unterstreichung überstehen ihn ohnehin. */
-        :root { --hinterlegung: #e4e4e4; }
-        del, ins, .neu-badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        /* Ohne diese Festlegung wirft der Druck die Hinterlegung weg. Durchstreichung
+           und Unterstreichung überstehen ihn ohnehin und tragen die Aussage auch dort,
+           wo schwarzweiß gedruckt wird. */
+        del, ins, .badge, .entwurfshinweis {
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
+        }
       }
       """;
 }

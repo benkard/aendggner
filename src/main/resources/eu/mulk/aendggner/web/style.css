@@ -1,10 +1,15 @@
-/* Schwarz auf Papier wie ein Gesetzblatt: keine Buntheit, nur Graustufen. */
+/* Schwarz auf Papier wie ein Gesetzblatt. Farbe tritt allein an den Balken der
+   Hinweiskästen auf und meint dort dasselbe wie in der Synopse: rot warnt, grün
+   bestätigt. Die Kästen bleiben auch ohne den Balken lesbar; er hebt sie hervor,
+   er trägt nicht allein. */
 :root {
   color-scheme: light dark;
   --fg: #111;
   --bg: #fff;
   --muted: #595959;
   --border: #bbb;
+  --warnung: #8b0000;
+  --bestaetigung: #005f00;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -13,6 +18,8 @@
     --bg: #141414;
     --muted: #a0a0a0;
     --border: #4a4a4a;
+    --warnung: #ffb3b3;
+    --bestaetigung: #b3ffb3;
   }
 }
 
@@ -114,11 +121,11 @@ button:hover {
   color: var(--fg);
 }
 
-/* Warnung ohne Rot: der doppelt starke Rahmen trägt das Gewicht. */
 .noscript {
   margin: 0 0 2rem;
   padding: 1rem;
-  border: 2px solid var(--fg);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--warnung);
   font-size: 0.875rem;
 }
 
@@ -184,12 +191,15 @@ footer a {
   font-size: 0.8125rem;
 }
 
-/* Die drei Zustände unterscheiden sich ohne Farbe: matter Text, kräftiger Rahmen,
-   doppelt starker Rahmen mit Fettung. */
+/* Der Balken links zeigt den Zustand an; der Text benennt ihn ohnehin, sodass die
+   Meldung auch ohne Farbe verständlich bleibt. Während der Arbeit steht kein Balken,
+   weil noch nichts feststeht. */
 .meldung {
   margin-top: 1.25rem;
   padding: 0.75rem 1rem;
   border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-left-color: var(--border);
   font-size: 0.9375rem;
 }
 
@@ -198,11 +208,11 @@ footer a {
 }
 
 .meldung.fertig {
-  border-color: var(--fg);
+  border-left-color: var(--bestaetigung);
 }
 
 .meldung.fehler {
-  border: 2px solid var(--fg);
+  border-left-color: var(--warnung);
   font-weight: bold;
 }
 

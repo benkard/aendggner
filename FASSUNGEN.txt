@@ -40,9 +40,12 @@ ausgibt; ohne dessen Auspacken bliebe die Einführung eine Anleitung zum
 Zwischenschritt von Hand.
 
 Endlich wird das Erscheinungsbild demjenigen angeglichen, was das Erzeugnis
-darstellt: Es tritt fortan schwarzweiß auf wie ein Gesetzblatt. Dabei hat sich
-ergeben, dass die Farbe in der Synopse nicht bloß schmückte, sondern trug; ihre
-Abschaffung hat deshalb einen Mangel der Auszeichnung offengelegt und behoben.
+darstellt: Es tritt fortan schwarzweiß auf wie ein Gesetzblatt. Farbe verbleibt,
+wo sie eine Aussage trägt — im Diff und an den Balken der Hinweiskästen —, und
+bedeutet dort überall dasselbe. Bei der Erprobung einer gänzlich farblosen
+Fassung hat sich ergeben, dass die Farbe im Diff nicht bloß schmückte, sondern
+allein trug; das hat einen Mangel der Auszeichnung offengelegt, der nunmehr auch
+neben der wiederhergestellten Farbe behoben bleibt.
 
 
 Artikel 1
@@ -188,9 +191,9 @@ Einführung in der Browserfassung
 
 
 Artikel 7
-Gestaltung in Schwarzweiß
+Gestaltung
 
-(1) Das Stilblatt der Seiten (style.css) wird auf reine Graustufen umgestellt. Die
+(1) Das Stilblatt der Seiten (style.css) wird auf Schwarzweiß umgestellt. Die
     bisherige Schmuckfarbe — ein warmes Braun — entfällt ersatzlos; an ihre Stelle
     tritt die Textfarbe. Die Abrundung der Kästen, Felder und Knöpfe entfällt
     gleichfalls; gedrucktes Papier trägt keine runden Ecken.
@@ -200,32 +203,33 @@ Gestaltung in Schwarzweiß
     Schrift um; die bisherige Aufhellung wäre an einem schwarzen Knopf ohne
     Wirkung geblieben.
 
-(3) Die beiden allein stehenden Rotwerte entfallen. Die drei Zustände der Meldung
-    unterscheiden sich nunmehr durch matten Text (Arbeit), kräftigen Rahmen
-    (Fertigstellung) und doppelt starken Rahmen nebst Fettung (Fehler); der
-    Hinweis bei abgeschaltetem JavaScript trägt denselben starken Rahmen. Die
-    Beschriftungen bleiben, wie sie waren, und benennen den Zustand ohnehin.
+(3) Farbe verbleibt allein dort, wo sie eine Aussage trägt, und bedeutet überall
+    dasselbe: Rot warnt, Grün bestätigt. Die Hinweiskästen erhalten dazu einen
+    Balken am linken Rand — der Hinweis bei abgeschaltetem JavaScript und die
+    Fehlermeldung einen roten, die Fertigmeldung einen grünen, die Meldung
+    während der Arbeit einen grauen, weil noch nichts feststeht. Die
+    Beschriftungen bleiben, wie sie waren, und benennen den Zustand ohnehin; der
+    Balken hebt den Kasten hervor, er trägt nicht allein.
 
-(4) Das eingebettete Stilblatt der Synopse (HtmlRenderer) wird ebenso umgestellt.
-    Streichung und Einfügung werden nicht mehr durch Rot und Grün geschieden,
-    sondern durch Durchstreichung und Unterstreichung, jeweils auf gemeinsamer
-    Hinterlegung, sowie durch die Spalte, in der sie stehen.
+(4) Das eingebettete Stilblatt der Synopse (HtmlRenderer) behält die Scheidung von
+    Streichung und Einfügung nach Rot und Grün; sie ist am Bildschirm die
+    schnellste. Zu ihr tritt jedoch die Form — durchgestrichen gegen
+    unterstrichen —, dazu die Spalte, in der die Marke steht.
 
-(5) Dabei wird ein Mangel behoben: Die Einfügung hob die ihr vom Browser
+(5) Damit wird ein Mangel behoben: Die Einfügung hob die ihr vom Browser
     zugedachte Unterstreichung bisher ausdrücklich auf. Damit war der grüne Grund
     das einzige Merkmal, an dem sie zu erkennen war; wer Farben nicht oder anders
     wahrnimmt oder die Synopse schwarzweiß ausdruckte, sah eine Einfügung
     überhaupt nicht. Die Unterstreichung wird wiederhergestellt.
 
-(6) Die Abzeichen an den Normköpfen werden gleichfalls durch die Form geschieden:
-    „neu“ gefüllt, „aufgehoben“ gerahmt und durchgestrichen, „geändert“ schlicht
-    gerahmt, sämtlich in Versalien mit Sperrung. Sie sind ohnehin beschriftet; die
-    Farbe war dort von jeher bloße Verdopplung.
+(6) Die Abzeichen an den Normköpfen behalten ihre Farben nach derselben Regel,
+    werden aber in Versalien mit Sperrung gesetzt. Sie sind ohnehin beschriftet;
+    die Farbe bestätigt dort nur, was dasteht.
 
 (7) Dem Körper der Synopse werden Schrift- und Grundfarbe ausdrücklich zugewiesen.
     Der klebende Spaltenkopf übernahm seinen Grund bisher durch Vererbung und
-    hatte mithin keinen verlässlichen. Für den Druck wird die Hinterlegung
-    festgelegt, damit sie nicht fortfällt.
+    hatte mithin keinen verlässlichen. Für den Druck werden die farbigen Flächen
+    von der Sparschaltung der Browser ausgenommen, damit sie nicht fortfallen.
 
 (8) Das Tabellenzeichen (favicon.svg) wird nachgezogen. Es führt die Werte
     ausgeschrieben, weil ein Tabellenzeichen keine Stilblattgrößen erbt.
@@ -253,7 +257,7 @@ Meldung, die Anbieterkennzeichnung sowie eine über die Befehlszeile erzeugte
 Synopse des Gebäudeenergiegesetzes (achtundsechzig angewandte Befehle,
 einundfünfzig zur manuellen Prüfung, siebenundvierzig geänderte Normen, mithin
 dasselbe wie zuvor). Streichung, Einfügung und die drei Abzeichen sind dabei
-ohne Farbe auseinanderzuhalten.
+auch dann auseinanderzuhalten, wenn man von ihren Farben absieht.
 
 
 ════════════════════════════════════════════════════════════════════════════════
