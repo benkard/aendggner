@@ -40,6 +40,12 @@ h1 {
   font-size: 1.75rem;
 }
 
+.langname {
+  color: var(--muted);
+  margin: 0 0 0.35rem;
+  font-size: 0.9rem;
+}
+
 .tagline {
   color: var(--muted);
   margin: 0;

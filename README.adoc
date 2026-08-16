@@ -1,4 +1,4 @@
-= ÄndGgner -- Programmbibliothek zur Konsolidierung von Änderungsgesetzen des Bundes und der Länder
+= ÄndGgner -- Nichtamtliche Zentralstelle für die maschinelle Fortschreibung von Stammgesetzen anhand von Änderungsvorschriften des Bundes und der Länder
 Matthias Andreas Benkard
 // Meta
 :experimental:
@@ -7,7 +7,7 @@ Matthias Andreas Benkard
 :toc:
 :stem:
 :toclevels: 2
-:description: ÄndGgner Manual
+:description: Handbuch der Nichtamtlichen Zentralstelle für die maschinelle Fortschreibung von Stammgesetzen
 :keywords: mulk
 // Settings
 :icons: font
