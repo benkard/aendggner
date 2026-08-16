@@ -252,7 +252,10 @@ final class StellenAufloeser {
    */
   private static SatzTeiler.@Nullable SatzBereich zeilenBlock(
       String text, String labelRegex, SatzTeiler.SatzBereich suchbereich) {
-    var muster = Pattern.compile("(?m)^([ \\t]*)" + labelRegex + "[ \\t].*$");
+    // Der Text hinter dem Label ist wahlfrei: eine Aufzählungseinheit, die sich vollständig in
+    // ihre Untergliederung ergießt, führt ihre Marke allein auf der Zeile (BayJG Art. 56 Abs. 2
+    // Nr. 12 — darunter nur die Buchstaben a und b). Ihr Block sind dann eben nur die Kindzeilen.
+    var muster = Pattern.compile("(?m)^([ \\t]*)" + labelRegex + "(?:[ \\t].*)?$");
     var matcher = muster.matcher(text).region(suchbereich.von(), suchbereich.bis());
     SatzTeiler.SatzBereich gefunden = null;
     int einrueckung = 0;

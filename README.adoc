@@ -131,12 +131,28 @@ deshalb vor den, der sie neu besetzt. Aus dieser einen Regel folgt die
 absteigende Abarbeitung einer aufsteigenden Kaskade („Der bisherige
 Absatz 3 wird Absatz 4“, „Der bisherige Absatz 4 wird Absatz 5“, …)
 ebenso wie der Vorrang einer Umnummerierung vor der Einfügung, die deren
-Bezeichnung neu vergibt. Verschoben wird dabei nur nach vorn, sodass
-jede Folgeänderung hinter der Umnummerierung bleibt, auf deren neue
-Bezeichnung sie zeigt. Die PDF-Aufbereitung toleriert dabei
-Drucksachen-Artefakte (Seitenköpfe und -füße, Vorabfassungs-Wasserzeichen,
-vertauschte oder gerade Anführungszeichen, verklebte Wortgrenzen, zerlegt
-kodierte Umlaute) und bestimmt die Brotschrift seitenweise, sodass auch
+Bezeichnung neu vergibt. Wer vorrückt, nimmt dabei seine eigenen Räumer
+mit: Auch eine über mehrere Punkte verschränkte Kaskade („Die bisherige
+Nr. 15 wird Nr. 16“, „Die bisherigen Nrn. 13 und 14 werden die Nrn. 14
+und 15“, „Nach Nr. 12 wird folgende Nr. 13 eingefügt“) tritt deshalb
+geschlossen vor die Einfügung, nicht bloß mit ihrem letzten Glied.
+
+Geordnet werden nicht die Befehle, sondern die einzelnen
+Anwendungsschritte. Ein Verbund aus Umnummerierung und Folgeänderung
+trägt nämlich zwei gegenläufige zeitliche Ansprüche: Die Umnummerierung
+gehört nach vorn, die Folgeänderung dagegen an ihre Dokumentstelle, weil
+sie die vorangegangenen Punkte als vollzogen voraussetzt — „Die
+bisherige Nr. 11 wird Nr. 12 und die Angabe „schriftliche“ wird
+gestrichen“ ist vorgezogen mehrdeutig, weil erst ein früherer Punkt die
+zweite Fundstelle des Wortes beseitigt. Verschoben wird stets nur nach
+vorn. Das Protokoll bleibt gleichwohl befehlsweise: Ein Verbund gilt nur
+dann als angewandt, wenn jeder seiner Teile gegriffen hat, sonst nennt
+die Meldung den Teil und den Grund.
+
+Die PDF-Aufbereitung toleriert Drucksachen-Artefakte (Seitenköpfe
+und -füße, Vorabfassungs-Wasserzeichen, vertauschte oder gerade
+Anführungszeichen, verklebte Wortgrenzen, zerlegt kodierte Umlaute) und
+bestimmt die Brotschrift seitenweise, sodass auch
 Ministeriumsentwürfe mit gemischten Layouts vollständig extrahiert
 werden. Fehlt im amtlichen Satz ein schließendes Anführungszeichen, endet
 das Zitat an der nächsten Strukturgrenze — an einer Artikel-Überschrift
@@ -161,7 +177,10 @@ wird aufgehoben“, „In Satz 1 wird die Satznummerierung „1“ gestrichen“
 „Dem Wortlaut werden die folgenden Abs. 1 bis 4 vorangestellt“, „Der
 bisherige Wortlaut wird Abs. 5“, Halbsatz-Ziele, Klauselketten mit
 gemeinsamem Schlussverb) sowie das Fortführungszeichen des GVBl (jedes
-neugefasste Aufzählungsglied öffnet erneut mit „).
+neugefasste Aufzählungsglied öffnet erneut mit „). Der Fall ist gegen
+die amtliche Nachfassung belegt: Alle 154 auf das BayJG zielenden
+Befehle des Heftes 6/2026 werden an 54 Normen selbsttätig angewandt,
+auch die verschränkte Neunummerierung des Bußgeldkatalogs in Art. 56.
 
 Die übrigen Länder gliedern ihre Stammgesetze wie der Bund in
 Paragraphen; die Unterschiede liegen im Gesetzblatt-Satz und in
@@ -169,7 +188,7 @@ Befehlsidiomen. Belegt sind Sachsen (SächsBeamtVG), Niedersachsen
 (NEFG) und Nordrhein-Westfalen — dort alle vier ändernden Artikel eines
 Heftes: Telemedienzuständigkeitsgesetz, Landesmediengesetz,
 Ausführungsgesetz zum 17. Rundfunkänderungsstaatsvertrag und, mit 101
-Befehlen an 31 Normen der größte Landesrechtsfall, das WDR-Gesetz —
+Befehlen an 31 Normen der größte Fall des Heftes, das WDR-Gesetz —
 mit Akzeptanztests gegen die
 amtlichen Nachfassungen; für Schleswig-Holstein, Berlin und Hessen
 reicht die Prüfung bis zur Befehlserkennung — dort vollständig, aber ohne

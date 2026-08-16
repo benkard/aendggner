@@ -73,20 +73,25 @@ public final class BefehlAnwender {
     var protokoll = new ArrayList<AngewandteAenderung>();
     String neuerLangtitel = null;
 
-    // Angewandt wird in Sachreihenfolge, protokolliert in der Reihenfolge des Änderungsgesetzes.
-    var ergebnisse = new AngewandteAenderung[befehle.size()];
-    for (int index : anwendungsReihenfolge(befehle)) {
-      var befehl = befehle.get(index);
+    // Angewandt wird schrittweise in Sachreihenfolge, protokolliert befehlsweise in der
+    // Reihenfolge des Änderungsgesetzes.
+    var schritte = schritte(befehle);
+    var ergebnisse = new AngewandteAenderung[schritte.size()];
+    for (int index : anwendungsReihenfolge(schritte)) {
+      var schritt = schritte.get(index);
       // „Die Überschrift wird wie folgt gefasst / durch die folgende Überschrift ersetzt“ auf
-      // oberster Ebene meint die Überschrift des Gesetzes selbst.
-      if (befehl instanceof Neufassung n && istNurUeberschrift(n.stelle())) {
+      // oberster Ebene meint die Überschrift des Gesetzes selbst — innerhalb eines Verbunds
+      // dagegen nie, dort steht sie für die Überschrift der Einheit, die der Verbund betrifft.
+      if (schritt.ganzerBefehl()
+          && schritt.teil() instanceof Neufassung n
+          && istNurUeberschrift(n.stelle())) {
         neuerLangtitel = n.neuerText().replaceAll("\\s+", " ").strip();
-        ergebnisse[index] = angewandt(befehl, "(Gesetzesüberschrift)");
+        ergebnisse[index] = angewandt(schritt.teil(), "(Gesetzesüberschrift)");
         continue;
       }
-      ergebnisse[index] = wendeAn(normen, gliederungen, befehl);
+      ergebnisse[index] = wendeAn(normen, gliederungen, schritt.teil());
     }
-    protokoll.addAll(Arrays.asList(ergebnisse));
+    protokoll.addAll(verdichte(befehle, schritte, ergebnisse));
 
     var neu = alt.mitNormen(normen).mitGliederungen(gliederungen);
     if (neuerLangtitel != null) {
@@ -96,46 +101,160 @@ public final class BefehlAnwender {
   }
 
   /**
-   * Reihenfolge, in der die Befehle anzuwenden sind: grundsätzlich die des Änderungsgesetzes.
-   *
-   * <p>Eine Umnummerierung „Der bisherige § 13 wird § 14“ wird jedoch vor eine vorangehende
-   * Einfügung gezogen, die denselben Paragraphen neu besetzt („In Kapitel 4 wird nach § 12 der
-   * folgende neue § 13 angefügt“). „Bisherig“ bezeichnet den Stand vor der Änderung; die
-   * Umnummerierung geht der Neubesetzung sachlich also voraus. In der Textreihenfolge angewandt
-   * liefen beide Befehle dagegen auf zwei Paragraphen gleicher Bezeichnung hinaus.
+   * Ein einzeln anzuwendender Schritt: der Teilbefehl selbst und der Index des Befehls, in dessen
+   * Protokolleintrag sein Ergebnis eingeht. Ein Verbund ({@link Sammelbefehl}) zerfällt in je einen
+   * Schritt pro Teilbefehl; jeder andere Befehl ist sein eigener einziger Schritt ({@code
+   * ganzerBefehl}).
    */
+  private record Schritt(int befehlIndex, Aenderungsbefehl teil, boolean ganzerBefehl) {}
+
+  /** Faltet die Befehlsliste zur Schrittliste auf, in Dokumentreihenfolge. */
+  private static List<Schritt> schritte(List<Aenderungsbefehl> befehle) {
+    var schritte = new ArrayList<Schritt>(befehle.size());
+    for (int i = 0; i < befehle.size(); i++) {
+      var befehl = befehle.get(i);
+      if (befehl instanceof Sammelbefehl s) {
+        falte(s, i, schritte);
+      } else {
+        schritte.add(new Schritt(i, befehl, true));
+      }
+    }
+    return schritte;
+  }
+
+  private static void falte(Sammelbefehl befehl, int befehlIndex, List<Schritt> ziel) {
+    for (var teil : befehl.teilbefehle()) {
+      if (teil instanceof Sammelbefehl geschachtelt) {
+        falte(geschachtelt, befehlIndex, ziel);
+      } else {
+        ziel.add(new Schritt(befehlIndex, teil, false));
+      }
+    }
+  }
+
   /**
-   * Anwendungsreihenfolge der Befehle. Sie folgt dem Dokument, mit einer Ausnahme: Umnummerierungen
-   * beziehen sich stets auf die ursprüngliche Zählung, nicht auf den Stand nach den vorangegangenen
-   * Punkten. Wer eine Bezeichnung räumt, muss daher vor den kommen, der sie neu besetzt — sonst
-   * trüge das Gesetz vorübergehend zwei gleich bezeichnete Einheiten und die Fundstelle wäre
-   * mehrdeutig. Aus dieser einen Regel folgt beides: die absteigende Reihenfolge einer
-   * aufsteigenden Kaskade („Abs. 3 wird 4“, „Abs. 4 wird 5“, …) und der Vorrang einer
+   * Anwendungsreihenfolge der Schritte. Sie folgt dem Dokument, mit einer Ausnahme:
+   * Umnummerierungen beziehen sich stets auf die ursprüngliche Zählung, nicht auf den Stand nach
+   * den vorangegangenen Punkten. Wer eine Bezeichnung räumt, muss daher vor den kommen, der sie neu
+   * besetzt — sonst trüge das Gesetz vorübergehend zwei gleich bezeichnete Einheiten und die
+   * Fundstelle wäre mehrdeutig. Aus dieser einen Regel folgt beides: die absteigende Reihenfolge
+   * einer aufsteigenden Kaskade („Abs. 3 wird 4“, „Abs. 4 wird 5“, …) und der Vorrang einer
    * Umnummerierung vor einer Einfügung, die deren Bezeichnung neu vergibt.
    *
-   * <p>Verschoben wird stets nur nach vorn: ein Befehl rückt vor den ersten, mit dem er kollidiert.
-   * So bleibt jede Folgeänderung hinter der Umnummerierung, auf deren neue Bezeichnung sie zeigt
-   * („Der bisherige Absatz 3 wird Absatz 4 und wie folgt geändert: …“).
+   * <p>Verschoben wird stets nur nach vorn, und wer vorrückt, nimmt mit, was ihm selbst vorausgehen
+   * muss: Vor jedem Schritt laufen erst diejenigen, die ihm eine Bezeichnung räumen, und vor diesen
+   * wiederum die ihren. Ohne diese Mitnahme zerrisse eine Kette wie „Nr. 15 wird Nr. 16“, „Nrn. 13
+   * und 14 werden die Nrn. 14 und 15“, „nach Nr. 12 wird Nr. 13 eingefügt“: die Einfügung zöge nur
+   * das letzte Glied vor sich, und dieses beträfe eine Bezeichnung, die noch besetzt ist. Ein
+   * Schritt ohne solche Voraussetzung bleibt dagegen an seinem Platz — daran hängt, dass eine
+   * Begleitänderung ihre Dokumentstelle behält.
+   *
+   * <p>Geordnet werden <em>Schritte</em> und nicht Befehle, weil ein Verbund aus Umnummerierung und
+   * Begleitänderung zwei gegenläufige zeitliche Ansprüche in einer Einheit trägt: Die
+   * Umnummerierung gehört nach vorn, ihre Begleitänderung aber an ihre Dokumentstelle, denn sie
+   * setzt die vorangegangenen Punkte als vollzogen voraus. „Die bisherige Nr. 11 wird Nr. 12 und
+   * die Angabe „schriftliche“ wird gestrichen“ (BayJG Art. 56 Abs. 1) trifft nach vorn gezogen noch
+   * zwei Fundstellen und wäre mehrdeutig; an seinem Platz belassen genau eine, weil der vorherige
+   * Punkt die andere längst ersetzt hat.
    */
-  private static List<Integer> anwendungsReihenfolge(List<Aenderungsbefehl> befehle) {
-    var reihenfolge = new ArrayList<Integer>(befehle.size());
-    for (int i = 0; i < befehle.size(); i++) {
-      reihenfolge.add(i);
+  private static List<Integer> anwendungsReihenfolge(List<Schritt> schritte) {
+    int anzahl = schritte.size();
+    var raeumt = new ArrayList<Set<String>>(anzahl);
+    var belegt = new ArrayList<Set<String>>(anzahl);
+    for (var schritt : schritte) {
+      raeumt.add(geraeumteBezeichnungen(schritt.teil()));
+      belegt.add(belegteBezeichnungen(schritt.teil()));
     }
-    for (int j = 0; j < befehle.size(); j++) {
-      var raeumt = geraeumteBezeichnungen(befehle.get(j));
-      if (raeumt.isEmpty()) {
-        continue;
-      }
-      for (int i = 0; i < j; i++) {
-        if (belegteBezeichnungen(befehle.get(i)).stream().anyMatch(raeumt::contains)) {
-          reihenfolge.remove(Integer.valueOf(j));
-          reihenfolge.add(reihenfolge.indexOf(i), j);
-          break;
+    var reihenfolge = new ArrayList<Integer>(anzahl);
+    // 0 = offen, 1 = in Arbeit (Zyklus-Bremse), 2 = eingereiht.
+    var stand = new byte[anzahl];
+    for (int i = 0; i < anzahl; i++) {
+      reiheEin(i, stand, raeumt, belegt, reihenfolge);
+    }
+    return reihenfolge;
+  }
+
+  /**
+   * Reiht den Schritt ein, nachdem alle Schritte eingereiht sind, die ihm eine seiner Bezeichnungen
+   * räumen. Eine ringförmige Abhängigkeit — zwei Schritte, die einander räumen — bricht an der
+   * Marke „in Arbeit“ ab; die beteiligten Schritte behalten dann ihre Dokumentreihenfolge.
+   */
+  private static void reiheEin(
+      int schritt,
+      byte[] stand,
+      List<Set<String>> raeumt,
+      List<Set<String>> belegt,
+      List<Integer> reihenfolge) {
+    if (stand[schritt] != 0) {
+      return;
+    }
+    stand[schritt] = 1;
+    var eigene = belegt.get(schritt);
+    if (!eigene.isEmpty()) {
+      for (int vorgaenger = 0; vorgaenger < stand.length; vorgaenger++) {
+        if (vorgaenger != schritt && raeumt.get(vorgaenger).stream().anyMatch(eigene::contains)) {
+          reiheEin(vorgaenger, stand, raeumt, belegt, reihenfolge);
         }
       }
     }
-    return reihenfolge;
+    stand[schritt] = 2;
+    reihenfolge.add(schritt);
+  }
+
+  /**
+   * Verdichtet die Schrittergebnisse zu je einem Protokolleintrag pro Befehl. Ein Verbund gilt nur
+   * dann als angewandt, wenn jeder seiner Teile griff; sonst nennt die Begründung die gescheiterten
+   * Teile in ihrer Reihenfolge im Verbund.
+   */
+  private static List<AngewandteAenderung> verdichte(
+      List<Aenderungsbefehl> befehle, List<Schritt> schritte, AngewandteAenderung[] ergebnisse) {
+    var protokoll = new ArrayList<AngewandteAenderung>(befehle.size());
+    int schritt = 0;
+    for (int i = 0; i < befehle.size(); i++) {
+      int von = schritt;
+      while (schritt < schritte.size() && schritte.get(schritt).befehlIndex() == i) {
+        schritt++;
+      }
+      if (von == schritt) {
+        // Ein Verbund ohne Teilbefehle — nichts anzuwenden, aber auch nichts zu verschweigen.
+        protokoll.add(manuell(befehle.get(i), "Verbund ohne Teilbefehle."));
+        continue;
+      }
+      if (schritte.get(von).ganzerBefehl()) {
+        protokoll.add(ergebnisse[von]);
+        continue;
+      }
+      protokoll.add(
+          verbund(befehle.get(i), Arrays.asList(ergebnisse).subList(von, schritt), schritte, von));
+    }
+    return protokoll;
+  }
+
+  private static AngewandteAenderung verbund(
+      Aenderungsbefehl befehl,
+      List<AngewandteAenderung> teilErgebnisse,
+      List<Schritt> schritte,
+      int von) {
+    var betroffene = new LinkedHashSet<String>();
+    var fehler = new ArrayList<String>();
+    for (int k = 0; k < teilErgebnisse.size(); k++) {
+      var ergebnis = teilErgebnisse.get(k);
+      betroffene.addAll(ergebnis.betroffeneEnbez());
+      if (ergebnis.status() != Status.ANGEWANDT) {
+        fehler.add(
+            "Teil "
+                + (k + 1)
+                + " ("
+                + schritte.get(von + k).teil().stelle().anzeigeText()
+                + "): "
+                + ergebnis.begruendung());
+      }
+    }
+    if (fehler.isEmpty()) {
+      return new AngewandteAenderung(befehl, Status.ANGEWANDT, "", betroffene);
+    }
+    return new AngewandteAenderung(
+        befehl, Status.MANUELL_PRUEFEN, String.join(" ", fehler), betroffene);
   }
 
   /** Bezeichnungen, die ein Befehl freigibt — die Ausgangsstellen seiner Umnummerierungen. */
@@ -1486,39 +1605,20 @@ public final class BefehlAnwender {
    * zusammen. Nur wenn alle Teile gelingen, gilt der Befehl als angewandt; sonst wird er zur
    * manuellen Prüfung markiert (bereits angewandte Teile bleiben wirksam).
    */
+  /**
+   * Ein Verbund, der erst hier auftaucht (in einem anderen Verbund geschachtelt), wird für sich
+   * genommen aufgefaltet und geordnet. Der Regelfall — der Verbund als eigener Gliederungspunkt —
+   * ist dagegen schon in {@link #anwenden} aufgefaltet und läuft nie hier durch.
+   */
   private static AngewandteAenderung wendeSammelAn(
       List<Norm> normen, List<Gliederung> gliederungen, Sammelbefehl befehl) {
-    var betroffene = new LinkedHashSet<String>();
-    var fehler = new ArrayList<String>();
-    // Auch innerhalb eines Verbunds gilt die Bezeichnungs-Reihenfolge: „Die bisherigen Nrn. 13 und
-    // 14 werden die Nrn. 14 und 15“ zerfällt in zwei Umnummerierungen, die aufsteigend angewandt
-    // eine doppelte Nr. 14 erzeugten.
-    var teile = befehl.teilbefehle();
-    var meldungen = new String[teile.size()];
-    for (int index : anwendungsReihenfolge(teile)) {
-      var teil = teile.get(index);
-      var ergebnis = wendeAn(normen, gliederungen, teil);
-      betroffene.addAll(ergebnis.betroffeneEnbez());
-      if (ergebnis.status() != Status.ANGEWANDT) {
-        meldungen[index] =
-            "Teil "
-                + (index + 1)
-                + " ("
-                + teil.stelle().anzeigeText()
-                + "): "
-                + ergebnis.begruendung();
-      }
+    var schritte = new ArrayList<Schritt>(befehl.teilbefehle().size());
+    falte(befehl, 0, schritte);
+    var ergebnisse = new AngewandteAenderung[schritte.size()];
+    for (int index : anwendungsReihenfolge(schritte)) {
+      ergebnisse[index] = wendeAn(normen, gliederungen, schritte.get(index).teil());
     }
-    for (var meldung : meldungen) {
-      if (meldung != null) {
-        fehler.add(meldung);
-      }
-    }
-    if (fehler.isEmpty()) {
-      return new AngewandteAenderung(befehl, Status.ANGEWANDT, "", betroffene);
-    }
-    return new AngewandteAenderung(
-        befehl, Status.MANUELL_PRUEFEN, String.join(" ", fehler), betroffene);
+    return verbund(befehl, Arrays.asList(ergebnisse), schritte, 0);
   }
 
   // --- Gemeinsame Helfer ---------------------------------------------------------------------

@@ -21,6 +21,91 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 15. August 2026,
+ zuletzt geändert durch die am 15. August 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Das Erzeugnis hat die mehrschrittige Umnummerierungssequenz bislang als eine ihm
+wesenseigene Grenze behandelt und ihre Folgeänderungen dem Abschnitt „Manuell
+prüfen“ zugewiesen. Die Prüfung des bayerischen Belegfalls (Art. 56 des
+Bayerischen Jagdgesetzes, Neunummerierung des Bußgeldkatalogs durch § 1 Nr. 48
+des Gesetzes vom 31. März 2026) hat ergeben, dass es sich um keine Grenze der
+Sache, sondern um drei voneinander unabhängige Mängel gehandelt hat. Sie werden
+mit dieser Fassung behoben.
+
+
+Artikel 1
+Ordnung der Anwendung nach Schritten
+
+(1) Der Anwender (BefehlAnwender) faltet die Befehlsliste vor der Anwendung zu
+    einer Liste von Schritten auf; ein Verbund (Sammelbefehl) liefert je
+    Teilbefehl einen Schritt, jeder andere Befehl einen einzigen. Geordnet
+    werden fortan die Schritte, protokolliert wird unverändert je Befehl.
+
+(2) Der Grund der Trennung ist folgender: Ein Verbund aus einer Umnummerierung
+    und einer Begleitänderung trägt zwei gegenläufige zeitliche Ansprüche. Die
+    Umnummerierung gehört vor denjenigen Befehl, der ihre Bezeichnung neu
+    besetzt; die Begleitänderung gehört an ihre Stelle im Dokument, denn sie
+    setzt die vorangegangenen Punkte als vollzogen voraus. Bislang setzte sich
+    der erste Anspruch für die ganze Einheit durch und zog die Begleitänderung
+    mit sich; sie traf dann auf einen Stand, den das Änderungsgesetz nicht
+    voraussetzt.
+
+(3) Die Ordnungsregel selbst bleibt unverändert („wer eine Bezeichnung räumt,
+    kommt vor demjenigen, der sie neu besetzt“), wird aber nunmehr vollständig
+    durchgesetzt: Vor jedem Schritt laufen erst diejenigen Schritte, die ihm
+    eine Bezeichnung räumen, und vor diesen wiederum die ihren. Eine ringförmige
+    Abhängigkeit bricht ab; die beteiligten Schritte behalten dann ihre
+    Dokumentreihenfolge.
+
+
+Artikel 2
+Erkennung der abgekürzten lokativen Folgeklausel
+
+Das Muster der lokativen Klausel (BefehlErkenner) schloss mit einer Wortgrenze.
+Hinter einem abgekürzten Bezeichnungswort steht jedoch bereits der
+Abkürzungspunkt, und zwischen ihm und dem folgenden Leerzeichen liegt keine
+Wortgrenze; der Klausel entging deshalb jede Kurzform („in Abs. 2 …“, „in
+Buchst. b …“). An die Stelle der Wortgrenze tritt die Bedingung, dass kein
+Buchstabe folgt.
+
+
+Artikel 3
+Auflösung der Aufzählungseinheit ohne eigenen Text
+
+Der Stellenaufloeser (StellenAufloeser) verlangte hinter der Aufzählungsmarke
+Text auf derselben Zeile. Eine Einheit, die sich vollständig in ihre
+Untergliederung ergießt, führt ihre Marke aber allein auf der Zeile (Art. 56
+Abs. 2 Nr. 12 des Bayerischen Jagdgesetzes, darunter nur die Buchstaben a und
+b); sie galt deshalb als nicht auffindbar. Der Text hinter der Marke ist fortan
+wahlfrei.
+
+
+Schlussbestimmung
+
+(1) Die vorstehenden Änderungen sind durch die Prüfung sämtlicher Testfälle
+    (dreihundertvier an der Zahl) sowie durch die vollständige Erstellung
+    (mvnw verify) bestätigt worden.
+
+(2) Der bayerische Belegfall weist nunmehr sämtliche einhundertvierundfünfzig
+    Anweisungen als angewandt aus (zuvor einhunderteinundfünfzig); die
+    Ausschussfassung der Beschlussempfehlung zum Gebäudeenergiegesetz weist
+    achtundsechzig statt siebenundsechzig aus. Die übrigen Bezugszahlen des
+    Bundes und der Länder sind unverändert geblieben.
+
+(3) Nicht behoben ist die Stellung eines eingefügten Blocks: Die Anweisung „Nach
+    Nr. 4 werden die folgenden Nrn. 5 bis 7 eingefügt“ (Art. 56 Abs. 1 des
+    Bayerischen Jagdgesetzes) wird angewandt, ihr Block tritt aber an das Ende
+    des Absatzes statt hinter die Nummer 4; ebenso verbleibt der leere
+    Platzhalter „7. (aufgehoben)“ der Altfassung zwischen den Nummern 9 und 10.
+    Beides bestand schon vor dieser Fassung und ist im Belegfall festgehalten.
+
+(4) Ferner ist festgehalten: Die Heilung doppelter Leerzeichen nach einer
+    Streichung (BefehlAnwender) wirkt auf den gesamten Zieltext und verkürzt
+    dabei die Einrückung der Aufzählungszeilen. Auch dies bestand schon zuvor.
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 14. August 2026,
  zuletzt geändert durch die am 14. August 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

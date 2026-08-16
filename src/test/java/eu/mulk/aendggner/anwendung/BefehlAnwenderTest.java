@@ -1378,4 +1378,104 @@ class BefehlAnwenderTest {
     assertThat(ergebnis.neu().norm("§ 3").orElseThrow().titel()).isEqualTo("Zwischennorm");
     assertThat(ergebnis.neu().norm("§ 4").orElseThrow().titel()).isEqualTo("Schlussvorschriften");
   }
+
+  @Test
+  void zieehtEineGanzeUmnummerierungsketteVorDieEinfuegung() {
+    // Eine Einfügung besetzt die Nr. 2, die eine Kette von Umnummerierungen erst räumen muss:
+    // „Nr. 3 wird Nr. 4“ hält „Nr. 2 wird Nr. 3“ auf, und diese hält die Einfügung auf. Vorgezogen
+    // werden muss deshalb nicht nur das letzte Glied der Kette, sondern die ganze Kette — sonst
+    // träfe „Nr. 2 wird Nr. 3“ auf eine noch besetzte Nr. 3 (BayJG Art. 56 Abs. 1 Buchst. hh/ii).
+    // Solange der Verbund als Ganzes vorrückte, war das umsonst zu haben; seit die Schritte
+    // einzeln geordnet werden, hängt es an der Mitnahme der Vorgänger.
+    var einfuegung =
+        new StrukturEinfuegung(
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("1")),
+            false,
+            Ebene.NUMMER,
+            "2",
+            "2. die Zulassung von Anträgen,",
+            PROV);
+    // So liefert der Erkenner eine Bereichs-Umnummerierung: das höhere Paar zuerst.
+    var kette =
+        new Sammelbefehl(
+            List.of(umnummerierungNummer("2", "3", "4"), umnummerierungNummer("2", "2", "3")));
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(einfuegung, kette));
+
+    assertThat(ergebnis.anzahlManuell()).isZero();
+    assertThat(absatzText(ergebnis.neu(), "§ 1", 1))
+        .isEqualTo(
+            "Die Erprobung umfasst\n"
+                + "  1. das Einlesen von Gesetzen,\n"
+                + "  2. die Zulassung von Anträgen,\n"
+                + "  3. die Anwendung von Befehlen und\n"
+                + "  4. die Ausgabe von Synopsen.");
+  }
+
+  @Test
+  void laesstDieBegleitaenderungAnIhrerDokumentstelle() {
+    // „Die bisherige Nr. 3 wird Nr. 4 und die Angabe „schriftliche “ wird gestrichen“: Die
+    // Umnummerierung muss vor den Befehl rücken, der die Nr. 3 neu besetzt — ihre Begleitänderung
+    // aber nicht. Vorgezogen träfe die Streichung noch zwei Fundstellen und bliebe mehrdeutig; an
+    // ihrem Platz trifft sie genau eine, weil der Punkt davor die andere längst getilgt hat
+    // (BayJG Art. 56 Abs. 1 Buchst. gg).
+    var neuBesetzung = umnummerierungNummer("1", "2", "3");
+    var tilgtDieErsteFundstelle =
+        new Ersetzung(
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("1")),
+            "die schriftliche Anmeldung",
+            "die Anmeldung",
+            false,
+            false,
+            PROV);
+    var verbund =
+        new Sammelbefehl(
+            List.of(
+                umnummerierungNummer("1", "3", "4"),
+                new Streichung(stelle(new Stelle.Paragraph("1")), "schriftliche ", PROV)));
+
+    var ergebnis =
+        BefehlAnwender.anwenden(
+            kaskadenGesetz(), List.of(neuBesetzung, tilgtDieErsteFundstelle, verbund));
+
+    // Beide Teile des Verbunds greifen — die Streichung ist an ihrer Dokumentstelle eindeutig.
+    assertThat(ergebnis.anzahlManuell()).isZero();
+    var text = absatzText(ergebnis.neu(), "§ 1", 0);
+    assertThat(text).contains("1. die Anmeldung,").contains("3. die Prüfung und");
+    // Die Umnummerierung ist vorgerückt, ihre Begleitänderung nicht: Nr. 4 trägt den Text der
+    // bisherigen Nr. 3, und zwar ohne „schriftliche“.
+    assertThat(text).contains("4. die Bestätigung.").doesNotContain("schriftliche");
+  }
+
+  private static Umnummerierung umnummerierungNummer(String absatz, String alt, String neu) {
+    return new Umnummerierung(
+        stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr(absatz), new Stelle.NummerNr(alt)),
+        stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr(absatz), new Stelle.NummerNr(neu)),
+        PROV);
+  }
+
+  /**
+   * Ein Gesetz für die Kaskadenprobe: Das Wort „schriftliche“ steht zweimal in derselben Norm, in
+   * der ersten und in der letzten Nummer. Die Nummer 2, die die Kette frei macht, bleibt hier
+   * unbesetzt — die Einfügung, die sie im echten Fall füllt, gehört nicht zur Ordnungsfrage.
+   */
+  private static Gesetz kaskadenGesetz() {
+    return new Gesetz(
+        "TestG",
+        "Gesetz zur Erprobung",
+        "Testgesetz",
+        List.of(
+            new Norm(
+                "§ 1",
+                "Verfahren",
+                null,
+                List.of(
+                    new Absatz(
+                        "1",
+                        "Die Erprobung umfasst\n"
+                            + "  1. die schriftliche Anmeldung,\n"
+                            + "  2. die Prüfung und\n"
+                            + "  3. die schriftliche Bestätigung.")),
+                false)));
+  }
 }

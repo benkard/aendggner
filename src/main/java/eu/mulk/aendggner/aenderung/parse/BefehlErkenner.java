@@ -587,11 +587,16 @@ final class BefehlErkenner {
   // „nach Satz 2 wird …“). Sie erbt nach einer Umnummerierung deren neue Bezeichnung als Kontext.
   // Wortanker („nach der Angabe „…““) zählen ausdrücklich nicht dazu: sie suchen ihren Text
   // normweit und dürfen nicht auf die neue Bezeichnung festgenagelt werden.
+  // Der Abschluss ist „kein Buchstabe mehr“ und nicht \b: hinter einem abgekürzten
+  // Bezeichnungswort steht bereits der Abkürzungspunkt, und zwischen ihm und dem folgenden
+  // Leerzeichen liegt keine Wortgrenze — mit \b entginge der Klausel jede bayerische
+  // Kurzform („in Abs. 2 …“, „in Buchst. b …“). Vor der Ausschreibung steht die Kurzform
+  // nur dann zurück, wenn diese länger passt (Alternativen sind absteigend geordnet).
   private static final Pattern LOKATIVE_KLAUSEL =
       Pattern.compile(
           "(?:in|im|nach|vor) (?:dem |der |den )?"
               + "(?:Satzteil|Satz|Sätze[n]?|Absatz|Abs\\.|Absätze[n]?|Nummer[n]?|Nrn?\\."
-              + "|Buchstabe[n]?|Buchst\\.|Halbsatz)\\b");
+              + "|Buchstabe[n]?|Buchst\\.|Halbsatz)(?!\\p{L})");
 
   // „In <Stelle> wird nach den Wörtern «1» ein Komma eingefügt.“ (Satzzeichen statt Wörter
   // einfügen)

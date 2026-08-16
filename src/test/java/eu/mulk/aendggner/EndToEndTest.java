@@ -260,18 +260,19 @@ class EndToEndTest {
     assertThat(parseErgebnis.befehle()).hasSize(154);
     assertThat(parseErgebnis.befehle()).noneMatch(b -> b instanceof UnbekannterBefehl);
 
-    // 4. Anwenden auf die alte Fassung. Von 154 Befehlen bleiben genau drei als „manuell prüfen“
-    //    stehen — Folgeänderungen innerhalb einer mehrschrittigen Umnummerierungssequenz, die
-    //    ÄndGgner bewusst nicht automatisch auflöst (statt fehlerhaft zu raten):
-    //      * Art. 56 (§ 1 Nr. 48): eine umfangreiche Neunummerierung des Bußgeldkatalogs
-    //        (Einfügen der Nrn. 5–7 und 13, Verschieben von Nr. 6→9, 11→12 …) verschiebt die
-    //        Zielnummern der begleitenden Buchstaben-/Wortänderungen.
-    //    Die Sequenz in Art. 29a (§ 1 Nr. 23) löst sich dagegen seit der Kaskaden-Ordnung des
-    //    BefehlAnwenders auf: „Der bisherige Abs. 4 wird Abs. 5“ läuft vor der Bereichs-
-    //    Umnummerierung „Die bisherigen Abs. 1 bis 3 werden die Abs. 2 bis 4“, sodass die auf den
-    //    neuen Abs. 5 zielenden Wort- und Satzbefehle ihren Alttext finden.
-    //    Diese Residuen sind exakt gepinnt; sie landen mit Begründung im Abschnitt „Manuell prüfen“
-    //    der Synopse und werden nie stillschweigend verworfen.
+    // 4. Anwenden auf die alte Fassung. Alle 154 Befehle greifen; kein Rest bleibt manuell.
+    //    Das Heft trägt zwei mehrschrittige Umnummerierungssequenzen, an denen sich die
+    //    Schritt-Ordnung des BefehlAnwenders bewährt:
+    //      * Art. 29a (§ 1 Nr. 23): „Der bisherige Abs. 4 wird Abs. 5“ läuft vor der Bereichs-
+    //        Umnummerierung „Die bisherigen Abs. 1 bis 3 werden die Abs. 2 bis 4“, sodass die auf
+    //        den neuen Abs. 5 zielenden Wort- und Satzbefehle ihren Alttext finden.
+    //      * Art. 56 (§ 1 Nr. 48): die Neunummerierung des Bußgeldkatalogs verschränkt Einfügungen
+    //        und Umnummerierungen über zehn Unterpunkte. Sie geht auf, weil die Umnummerierungen
+    //        vorrücken, ihre Begleitänderungen aber an ihrer Dokumentstelle bleiben — die Wortfolge
+    //        „schriftliche“ etwa steht erst nach dem vorangehenden Punkt nur noch einmal im
+    //        Artikel und ist damit eindeutig.
+    //    „Kein Rest“ heißt: jeder Befehl hat gegriffen. Es heißt nicht, dass die Norm in allem der
+    //    amtlichen Nachfassung gleicht — was daran noch fehlt, steht weiter unten an Art. 56.
     var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
     assertThat(anwendung.protokoll()).hasSameSizeAs(parseErgebnis.befehle());
     var manuellPfade =
@@ -279,7 +280,34 @@ class EndToEndTest {
             .filter(a -> a.status() == BefehlAnwender.Status.MANUELL_PRUEFEN)
             .map(a -> a.befehl().provenienz().gliederungsPfad())
             .toList();
-    assertThat(manuellPfade).containsExactlyInAnyOrder("48. a) ee)", "48. a) gg)", "48. b) cc)");
+    assertThat(manuellPfade).isEmpty();
+
+    // Der Bußgeldkatalog des Art. 56 trägt jetzt an den drei Stellen, an denen die Kaskade zuvor
+    // gescheitert war, den Wortlaut der amtlichen Nachfassung (BayJG.pdf):
+    var art56 = anwendung.neu().norm("Art. 56").orElseThrow();
+    var katalog = art56.absaetze().get(0).text();
+    assertThat(katalog)
+        // aus „Die bisherige Nr. 6 wird Nr. 9 und in Buchst. b …“ — die Begleitklausel findet ihre
+        // Stelle erst, seit die lokative Kurzform („in Buchst. b“) erkannt wird.
+        .contains("9. vorsätzlich oder fahrlässig entgegen Art. 32 Abs. 2 Satz 1, Abs. 4 oder 5")
+        .contains("b) die Abschussmeldung oder die Streckenliste")
+        // aus „Die bisherige Nr. 11 wird Nr. 12 und die Angabe „schriftliche“ wird gestrichen“ —
+        // eindeutig nur, weil die Streichung an ihrer Dokumentstelle bleibt.
+        .contains("12. ohne Begleitung oder Erlaubnis des Revierinhabers")
+        .doesNotContain("schriftliche");
+    // Abs. 2 Nr. 12 Buchst. b führt ihre Marke allein auf der Zeile — sie ist trotzdem auflösbar.
+    assertThat(art56.absaetze().get(1).text()).contains("(§ 2 Abs. 3 BJagdG)");
+
+    // Offen bleibt an dieser Norm eine Frage, die mit der Reihenfolge nichts zu tun hat und schon
+    // vorher so stand: Der eingefügte Block „Nach Nr. 4 werden die folgenden Nrn. 5 bis 7
+    // eingefügt“ landet am Ende des Absatzes statt hinter der Nr. 4, und der leere Platzhalter
+    // „7. (aufgehoben)“ der Altfassung bleibt zwischen den Nrn. 9 und 10 stehen. Beides ist hier
+    // festgehalten, damit es nicht unbemerkt bleibt — der Befehl gilt als angewandt, die Stellung
+    // seines Blocks ist aber falsch.
+    assertThat(katalog).contains("7. (aufgehoben)");
+    assertThat(katalog.indexOf("5.\t den Verboten des Art. 29 Abs. 2"))
+        .as("die eingefügten Nrn. 5 bis 7 stehen (noch) hinter der Nr. 16")
+        .isGreaterThan(katalog.indexOf("16."));
 
     // Art. 29a Abs. 5 trägt nach der Kaskade die neue Behördenbezeichnung und den eingefügten Satz.
     var art29a = anwendung.neu().norm("Art. 29a").orElseThrow();
@@ -975,8 +1003,8 @@ class EndToEndTest {
     var ohne = Pipeline.erzeugeSynopse(alt, List.of(entwurfPdf), null, false);
     var mit = Pipeline.erzeugeSynopse(alt, List.of(entwurfPdf, antragPdf), null, false);
 
-    assertThat(mit.anzahlAngewandt()).isEqualTo(ohne.anzahlAngewandt()).isEqualTo(151);
-    assertThat(mit.anzahlManuell()).isEqualTo(ohne.anzahlManuell()).isEqualTo(3);
+    assertThat(mit.anzahlAngewandt()).isEqualTo(ohne.anzahlAngewandt()).isEqualTo(154);
+    assertThat(mit.anzahlManuell()).isEqualTo(ohne.anzahlManuell()).isEqualTo(0);
     // Beide Läufe zeigen eine Entwurfsfassung, nicht geltendes Recht.
     assertThat(mit.html()).contains("Entwurfsfassung");
     assertThat(mit.html()).contains("[Änderungsantrag Drs. 19/10365]");
@@ -1033,6 +1061,15 @@ class EndToEndTest {
    * wird eine Fassung von 2023. Maßgeblich ist deshalb der Vergleich mit dem Entwurf — die
    * Ausschussfassung muss <em>mehr</em> Befehle tragen, denn der Ausschuss hat zwei Artikel
    * hinzugefügt (BGB und Betriebskostenverordnung).
+   *
+   * <p>Die Zahl stand bei 67, bevor die Anwendungsreihenfolge auf Schritte umgestellt wurde. Der
+   * hinzugekommene Befehl ist die Bereichs-Umnummerierung des Bußgeldkatalogs („Die bisherigen
+   * Nummern 19 bis 21 werden die Nummern 30 bis 32“, § 108 Absatz 1): Sie muss vor die Einfügung
+   * rücken, die ihre Ausgangsnummern neu vergibt, und dorthin trug die frühere einmalige
+   * Verschiebung nur ihr erstes Glied. Was in § 108 dabei herauskommt, sagt über die Ordnung nichts
+   * — die Norm liegt mitten im beschriebenen Stamm-Mismatch. Belegt ist die Ordnung an den
+   * Kaskaden, deren Stammfassung stimmt: BayJG Art. 29a und Art. 56 sowie WDR-Gesetz §§ 3 und 15,
+   * beide gegen die amtliche Nachfassung abgeglichen.
    */
   @Test
   void beschlussempfehlungLiefertDieAusschussfassung() throws Exception {
@@ -1046,7 +1083,7 @@ class EndToEndTest {
     var ausEmpfehlung = Pipeline.erzeugeSynopse(xml, List.of(empfehlung), null, false);
     var ausEntwurf = Pipeline.erzeugeSynopse(xml, List.of(entwurf), null, false);
 
-    assertThat(ausEmpfehlung.anzahlAngewandt()).isEqualTo(67);
+    assertThat(ausEmpfehlung.anzahlAngewandt()).isEqualTo(68);
     assertThat(ausEmpfehlung.anzahlAngewandt() + ausEmpfehlung.anzahlManuell())
         .as("die Ausschussfassung trägt mehr Befehle als der Entwurf")
         .isGreaterThan(ausEntwurf.anzahlAngewandt() + ausEntwurf.anzahlManuell());
