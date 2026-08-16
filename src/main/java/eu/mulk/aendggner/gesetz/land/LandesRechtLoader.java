@@ -49,7 +49,7 @@ public final class LandesRechtLoader {
           case KLARTEXT ->
               Normalizer.normalize(
                   new String(quelle.inhalt(), StandardCharsets.UTF_8), Normalizer.Form.NFC);
-          case XML ->
+          case XML, ZIP ->
               throw new IOException(
                   "Nicht unterstützter Dateityp %s für Stammgesetz %s (unterstützt: PDF, Klartext)"
                       .formatted(typ.anzeigeName(), quelle.name()));

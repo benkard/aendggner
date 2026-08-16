@@ -61,7 +61,10 @@ wortweise hervorgehoben).
 Eingaben:
 
 * Stammgesetz (Bundesrecht): XML im gii-norm-Format von
-  https://www.gesetze-im-internet.de/[gesetze-im-internet.de]
+  https://www.gesetze-im-internet.de/[gesetze-im-internet.de]. Das Portal gibt
+  es nur als Archiv aus (`…/<kurz>/xml.zip`); das Archiv wird unmittelbar
+  angenommen und der enthaltene XML-Eintrag daraus entpackt, ein Zwischenschritt
+  von Hand entfällt.
 * Stammgesetz (Landesrecht): konsolidierte Fassung als PDF oder als
   kanonischer Klartext im Format der `--extract-only`-Ausgabe. Eine Zeile
   „Inhaltsübersicht“ eröffnet darin die gleichnamige Norm, auf die die
@@ -309,6 +312,14 @@ Bevölkerungsschutzgesetz).
 Neben der CLI gibt es eine Browserfassung, die dieselbe Pipeline
 (`eu.mulk.aendggner.Pipeline`) über ein Upload-Formular zugänglich macht:
 Stammgesetz- und Änderungsgesetz-Datei(en) wählen, Synopse erhalten.
+
+Über dem Formular steht ein zugeklappter Einführungsblock, der zwei
+durchgerechnete Fälle mit Verweisen auf die amtlichen Fundstellen anbietet:
+das UWG (`gesetze-im-internet.de/uwg_2004/xml.zip`) mit dem Dritten Gesetz zu
+seiner Änderung (BGBl. 2026 I Nr. 43) und das AGG
+(`gesetze-im-internet.de/agg/xml.zip`) mit dem Regierungsentwurf BT-Drs.
+21/6178. Mitausgeliefert wird nichts; die Seite ruft die Dateien auch nicht
+selbst ab, sie verweist nur darauf.
 
 Sie braucht keinen Server: Die vollständige Verarbeitung — PDF-Textgewinnung
 mit PDFBox eingeschlossen — läuft als WebAssembly-Modul im Browser, übersetzt

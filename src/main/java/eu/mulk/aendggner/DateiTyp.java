@@ -3,22 +3,33 @@ package eu.mulk.aendggner;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Die drei Eingabeformate, die ÄndGgner unterscheidet, erkannt an den ersten Bytes.
+ * Die Eingabeformate, die ÄndGgner unterscheidet, erkannt an den ersten Bytes.
  *
- * <p>Ersetzt die frühere Tika-Erkennung: Unterschieden werden muss nur zwischen PDF, gii-XML und
- * Klartext, und dafür genügen die Signaturbytes. Das spart eine schwergewichtige Abhängigkeit samt
- * ServiceLoader- und XML-Konfiguration — was der Wasm-Übersetzung zugutekommt, für die jede
+ * <p>Ersetzt die frühere Tika-Erkennung: Unterschieden werden muss nur zwischen ZIP, PDF, gii-XML
+ * und Klartext, und dafür genügen die Signaturbytes. Das spart eine schwergewichtige Abhängigkeit
+ * samt ServiceLoader- und XML-Konfiguration — was der Wasm-Übersetzung zugutekommt, für die jede
  * dynamisch aufgelöste Abhängigkeit Handarbeit bedeutet.
  */
 public enum DateiTyp {
   PDF,
   XML,
+  ZIP,
   KLARTEXT;
 
   /** Wie weit hinein nach der Signatur gesucht wird (PDFs tragen gelegentlich Vorspann). */
   private static final int VORSCHAU_BYTES = 1024;
 
   public static DateiTyp erkenne(byte[] inhalt) {
+    // Die ZIP-Signatur steht an Byte 0 und wird deshalb zuerst und ohne Vorschaufenster geprüft:
+    // Ein Archiv, das zufällig „%PDF-“ in seinen komprimierten Daten führt, wäre sonst ein PDF.
+    if (inhalt.length >= 4
+        && inhalt[0] == 'P'
+        && inhalt[1] == 'K'
+        && inhalt[2] == 3
+        && inhalt[3] == 4) {
+      return ZIP;
+    }
+
     // ISO-8859-1 bildet jedes Byte auf genau ein Zeichen ab — hier geht es um Signaturen, nicht
     // um lesbaren Text, und die Zeichenzählung soll der Byteposition entsprechen.
     var vorschau =
@@ -41,7 +52,7 @@ public enum DateiTyp {
     return KLARTEXT;
   }
 
-  /** Für Fehlermeldungen: „PDF“, „XML“, „Klartext“. */
+  /** Für Fehlermeldungen: „PDF“, „XML“, „ZIP“, „Klartext“. */
   public String anzeigeName() {
     return this == KLARTEXT ? "Klartext" : name();
   }

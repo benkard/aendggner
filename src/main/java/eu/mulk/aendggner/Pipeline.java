@@ -278,11 +278,18 @@ public final class Pipeline {
     return ladeStammgesetz(Quelle.lies(baseFile));
   }
 
-  /** Gii-XML → {@link GiiXmlLoader}; PDF/Klartext (Landesrecht) → {@link LandesRechtLoader}. */
+  /**
+   * Gii-XML → {@link GiiXmlLoader}; PDF/Klartext (Landesrecht) → {@link LandesRechtLoader}.
+   *
+   * <p>Vorweg wird ausgepackt: gesetze-im-internet.de gibt das Norm-XML nur als {@code xml.zip}
+   * aus, und das soll unentpackt taugen (siehe {@link ZipAuspacker}). Die Änderungsdokumente
+   * bleiben davon unberührt — Gesetzblätter und Drucksachen kommen nirgends als Archiv.
+   */
   static Gesetz ladeStammgesetz(Quelle baseFile) throws Exception {
-    return DateiTyp.erkenne(baseFile.inhalt()) == DateiTyp.XML
-        ? new GiiXmlLoader().load(baseFile)
-        : new LandesRechtLoader().load(baseFile);
+    var quelle = ZipAuspacker.auspacken(baseFile);
+    return DateiTyp.erkenne(quelle.inhalt()) == DateiTyp.XML
+        ? new GiiXmlLoader().load(quelle)
+        : new LandesRechtLoader().load(quelle);
   }
 
   /**

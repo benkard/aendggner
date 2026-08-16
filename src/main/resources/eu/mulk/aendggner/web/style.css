@@ -121,6 +121,45 @@ button:hover {
   font-size: 0.875rem;
 }
 
+/* Zugeklappt eine Zeile, damit das Formular oben bleibt; aufgeklappt im Zuschnitt der
+   übrigen Kästen. */
+.einfuehrung {
+  margin: 0 0 1.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.einfuehrung summary {
+  font-weight: bold;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.einfuehrung > :not(summary) {
+  margin: 0.75rem 0 0;
+}
+
+.einfuehrung ol {
+  padding-left: 1.25rem;
+}
+
+.einfuehrung dt {
+  font-weight: bold;
+  margin-top: 0.75rem;
+}
+
+.einfuehrung dd {
+  margin: 0.25rem 0 0;
+}
+
+/* Der Erläuterungssatz unter einem Beispiel steht als span in der dd und braucht deshalb
+   eigene Absatzbildung. */
+.einfuehrung .hint {
+  display: block;
+}
+
 .disclaimer {
   margin-top: 2rem;
   padding: 1rem;

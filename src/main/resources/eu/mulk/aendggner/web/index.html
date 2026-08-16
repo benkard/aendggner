@@ -34,13 +34,66 @@
       </p>
     </noscript>
 
+    <details class="einfuehrung">
+      <summary>Noch keine Dateien? Zwei Beispiele zum Ausprobieren</summary>
+
+      <p>
+        Das Werkzeug braucht zweierlei: das <strong>Stammgesetz</strong> in seiner geltenden
+        Fassung und das <strong>Änderungsdokument</strong>, das es ändert. Beides liegt bei den
+        amtlichen Stellen bereit.
+      </p>
+
+      <ol>
+        <li>Die beiden Dateien eines Beispiels herunterladen.</li>
+        <li>Sie in die Felder darunter eintragen — das xml.zip so, wie es kommt, ohne Entpacken.</li>
+        <li>„Synopse erzeugen“ drücken.</li>
+      </ol>
+
+      <dl class="beispiele">
+        <dt>Verkündetes Änderungsgesetz — Gesetz gegen den unlauteren Wettbewerb</dt>
+        <dd>
+          Stammgesetz:
+          <a href="https://www.gesetze-im-internet.de/uwg_2004/xml.zip"
+             target="_blank" rel="noopener noreferrer">UWG (xml.zip, 22 KB)</a><br>
+          Änderung:
+          <a href="https://www.recht.bund.de/bgbl/1/2026/43/regelungstext.pdf?__blob=publicationFile&amp;v=1"
+             target="_blank" rel="noopener noreferrer">Drittes Gesetz zur Änderung des UWG,
+            BGBl. 2026 I Nr. 43 (PDF, 0,3 MB)</a><br>
+          <span class="hint">19 Befehle an 6 Normen, nichts manuell zu prüfen.</span>
+        </dd>
+
+        <dt>Gesetzentwurf — Allgemeines Gleichbehandlungsgesetz</dt>
+        <dd>
+          Stammgesetz:
+          <a href="https://www.gesetze-im-internet.de/agg/xml.zip"
+             target="_blank" rel="noopener noreferrer">AGG (xml.zip, 14 KB)</a><br>
+          Änderung:
+          <a href="https://dserver.bundestag.de/btd/21/061/2106178.pdf"
+             target="_blank" rel="noopener noreferrer">Zweites Gesetz zur Änderung des AGG,
+            BT-Drs. 21/6178 (PDF, 0,5 MB)</a><br>
+          <span class="hint">
+            23 Befehle an 14 Normen, einer zur manuellen Prüfung markiert. Zeigt zugleich, was
+            gälte, wenn der Entwurf so beschlossen würde — der Begründungsteil dahinter erzeugt
+            keine Befehle.
+          </span>
+        </dd>
+      </dl>
+
+      <p class="hint">
+        Die Verweise führen zu gesetze-im-internet.de, recht.bund.de und dserver.bundestag.de. Das
+        Werkzeug ruft dort nichts von sich aus ab: Es sieht nur die Dateien, die Sie ihm im Formular
+        übergeben.
+      </p>
+    </details>
+
     <form id="synopse-formular">
       <div class="field">
         <label for="stamm">Stammgesetz</label>
         <input type="file" id="stamm" name="stamm" required>
         <p class="hint">
-          gii-Norm-XML von gesetze-im-internet.de, oder — für Landesrecht — die konsolidierte
-          Fassung aus dem Landesportal (PDF oder Klartext).
+          gii-Norm-XML von gesetze-im-internet.de — auch als heruntergeladenes xml.zip, ohne
+          Entpacken —, oder für Landesrecht die konsolidierte Fassung aus dem Landesportal (PDF
+          oder Klartext).
         </p>
       </div>
 

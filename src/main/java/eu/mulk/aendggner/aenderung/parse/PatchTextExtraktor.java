@@ -44,7 +44,7 @@ public final class PatchTextExtraktor {
     return switch (typ) {
       case PDF -> extrahierePdf(quelle.inhalt());
       case KLARTEXT -> new String(quelle.inhalt(), StandardCharsets.UTF_8);
-      case XML ->
+      case XML, ZIP ->
           throw new IOException(
               "Nicht unterstützter Dateityp %s für %s (unterstützt: PDF, Klartext)"
                   .formatted(typ.anzeigeName(), quelle.name()));

@@ -32,6 +32,13 @@ verlangt, zeigte auf keine Adresse. Mit dieser Fassung wird die Sperre
 aufgehoben; zugleich wird die Auslieferung auf den Betrieb unter einem Unterpfad
 einer bestehenden Domain eingerichtet.
 
+Die nunmehr öffentlich erreichbare Startseite setzte sodann voraus, was
+Neuankömmlinge gerade nicht haben: geeignete Dateien. Sie erhält deshalb eine
+Einführung mit Verweisen auf zwei durchgerechnete Fälle. Dabei hat sich ergeben,
+dass die Fundstelle des Bundesrechts das Norm-XML ausschließlich als Archiv
+ausgibt; ohne dessen Auspacken bliebe die Einführung eine Anleitung zum
+Zwischenschritt von Hand.
+
 
 Artikel 1
 Anbieterkennzeichnung und Datenschutzerklärung
@@ -115,10 +122,75 @@ Ergänzungen der Oberfläche
     Ordnung, der Anschriften und der Hinweise ergänzt.
 
 
+Artikel 5
+Annahme von Archiven als Stammgesetz
+
+(1) Die Fundstelle des Bundesrechts (gesetze-im-internet.de) gibt das Norm-XML
+    nicht als solches, sondern allein als Archiv aus (…/<Kurzbezeichnung>/
+    xml.zip). Ein solches Archiv wird künftig unmittelbar als Stammgesetz
+    angenommen; der darin enthaltene XML-Eintrag wird ausgepackt.
+
+(2) Es wird die Klasse ZipAuspacker eingeführt. Sie liest das Zentralverzeichnis
+    am Dateiende — nicht die örtlichen Vorspanne, deren Größenangaben bei
+    nachgestellten Beschreibern erst hinter den Daten stehen —, wählt daraus den
+    einzigen auf „.xml“ endenden Eintrag und packt ihn aus. Verzeichniseinträge
+    und das von manchen Betriebssystemen beigefügte Beiwerk bleiben außer
+    Betracht; die Auswahl ist erforderlich, weil die Fundstelle den Gesetzen mit
+    Anlagen deren Bilddateien mit ins Archiv legt.
+
+(3) Das Format wird von Hand gelesen. Der Grund ist folgender: Von den
+    Archivklassen der Laufzeitumgebung trägt in der Browserfassung allein der
+    Entpacker (Inflater), den die Ersetzung InflaterErsatz auf eine reine
+    Java-Umsetzung zurückführt; die übrigen (ZipInputStream, ZipFile, CRC32)
+    beruhen auf Bindungen, die das Übersetzungswerkzeug nicht kennt. Auch die
+    Prüfsumme wird deshalb im Erzeugnis selbst berechnet.
+
+(4) Die Erkennung (DateiTyp) wird um die Art ZIP ergänzt. Ihre Prüfung geht der
+    Prüfung auf PDF voran, weil sie am ersten Byte verankert ist, während jene
+    ein Vorschaufenster durchsucht; ein Archiv mit der Zeichenfolge „%PDF-“ in
+    seinen gepackten Daten wäre sonst als PDF angesprochen worden.
+
+(5) Das Auspacken tritt in Pipeline.ladeStammgesetz vor die Erkennung. Die
+    Änderungsdokumente bleiben unberührt: Gesetzblätter und Drucksachen kommen
+    nirgends als Archiv. Die Quellenzeile der Synopse nennt weiterhin die
+    angegebene Datei (xml.zip), damit der Weg zur Fundstelle zurück erkennbar
+    bleibt.
+
+
+Artikel 6
+Einführung in der Browserfassung
+
+(1) Die Startseite erhält über dem Formular einen zugeklappten Block
+    („Noch keine Dateien? Zwei Beispiele zum Ausprobieren“). Zugeklappt nimmt er
+    eine Zeile ein; das Formular bleibt an seinem Platz.
+
+(2) Der Block nennt die drei Schritte und bietet zwei Fälle mit Verweisen auf die
+    amtlichen Fundstellen an:
+    a)  ein verkündetes Änderungsgesetz — das Gesetz gegen den unlauteren
+        Wettbewerb nebst dem Dritten Gesetz zu seiner Änderung (BGBl. 2026 I
+        Nr. 43), neunzehn Befehle an sechs Normen, nichts manuell zu prüfen;
+    b)  einen Gesetzentwurf — das Allgemeine Gleichbehandlungsgesetz nebst dem
+        Regierungsentwurf BT-Drs. 21/6178, dreiundzwanzig Befehle an vierzehn
+        Normen, einer zur manuellen Prüfung markiert.
+
+(3) Mitausgeliefert wird nichts; die Seite ruft von sich aus nichts ab. Die
+    Verweise öffnen ein eigenes Fenster, weil ein im selben Fenster geöffnetes
+    Schriftstück die bereits gewählten Dateien aus dem Formular nähme.
+
+(4) Der Hinweis am Feld „Stammgesetz“ nennt nunmehr auch das Archiv. Das
+    Stilblatt wird um die Auszeichnung des Blockes ergänzt; neue Farben treten
+    nicht hinzu, sodass Hell- und Dunkelfassung ohne Zutun stimmen.
+
+
 Schlussbestimmung
 
 Die vorstehenden Änderungen sind durch die Prüfung sämtlicher Testfälle
-(dreihundertvier an der Zahl) bestätigt worden. Die Inhaltsrichtlinie ist gegen
+(dreihundertzwölf an der Zahl, darunter acht neue zum Auspacken) bestätigt
+worden. Das Auspacken ist überdies gegen die Fundstelle selbst erprobt worden:
+Das unmittelbar bezogene Archiv des Gesetzes gegen den unlauteren Wettbewerb
+ergibt mit dem Regelungstext des Bundesgesetzblattes dieselbe Synopse wie die
+entpackte Fassung — die Ausfertigungen unterscheiden sich allein in der
+Quellenzeile. Die Inhaltsrichtlinie ist gegen
 die laufende Anwendung erprobt worden: Der Lauf des IfSG-Falles im Browser hat
 unter ihr achtundvierzig angewandte Befehle, siebenundzwanzig zur manuellen
 Prüfung und einundzwanzig geänderte Normen ergeben, mithin dasselbe wie die
