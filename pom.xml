@@ -20,6 +20,7 @@
     <enforced.maven-version>3.9.0</enforced.maven-version>
 
     <build-helper-plugin.version>3.6.0</build-helper-plugin.version>
+    <clean-plugin.version>3.3.2</clean-plugin.version>
     <compiler-plugin.version>3.15.0</compiler-plugin.version>
     <dependency-plugin.version>3.11.0</dependency-plugin.version>
     <enforcer-plugin.version>3.6.3</enforcer-plugin.version>
@@ -123,6 +124,20 @@
         <directory>src/main/resources</directory>
       </resource>
     </resources>
+
+    <!--
+      Der Beispielkorpus liegt unter src/test/resources, wird aber von den Tests über
+      Dateisystempfade gelesen, nicht über den Klassenpfad. Eine Kopie nach
+      target/test-classes wäre deshalb bei jedem Bau 35 MB umsonst.
+    -->
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <excludes>
+          <exclude>sampledata/**</exclude>
+        </excludes>
+      </testResource>
+    </testResources>
 
     <pluginManagement>
       <plugins>
@@ -332,18 +347,49 @@
             <artifactId>maven-compiler-plugin</artifactId>
             <configuration>
               <compilerArgs>
-                <arg>-Aproject=${project.groupId}/${project.artifactId}</arg>
                 <arg>--add-modules</arg>
                 <arg>org.graalvm.webimage.api</arg>
               </compilerArgs>
-              <annotationProcessorPaths>
-                <path>
-                  <groupId>info.picocli</groupId>
-                  <artifactId>picocli-codegen</artifactId>
-                  <version>${picocli.version}</version>
-                </path>
-              </annotationProcessorPaths>
+              <!--
+                Ohne Picocli-Annotationsprozessor: Er meldet die Befehlszeilenklasse
+                eu.mulk.aendggner.AendGgner mit „allDeclaredMethods“ zur Reflexion an, und
+                die Erreichbarkeitsanalyse zieht daraufhin die gesamte Befehlszeilenfassung
+                samt Picocli und den Dateizugriffen ins Browser-Image, obwohl BrowserMain
+                nichts davon anfasst. Im Browser gibt es keine Befehlszeile.
+              -->
+              <proc>none</proc>
+              <annotationProcessorPaths/>
             </configuration>
+          </plugin>
+
+          <!--
+            Ein vorangegangener gewöhnlicher Bau hat die Picocli-Konfiguration womöglich
+            schon nach target/classes gelegt; native-image liest sie von dort auch dann,
+            wenn dieser Bau sie nicht mehr erzeugt. Also fort damit, sonst hinge die
+            Bildgröße davon ab, was vorher lief.
+          -->
+          <plugin>
+            <artifactId>maven-clean-plugin</artifactId>
+            <version>${clean-plugin.version}</version>
+            <executions>
+              <execution>
+                <id>picocli-konfiguration-fort</id>
+                <phase>prepare-package</phase>
+                <goals>
+                  <goal>clean</goal>
+                </goals>
+                <configuration>
+                  <excludeDefaultDirectories>true</excludeDefaultDirectories>
+                  <filesets>
+                    <fileset>
+                      <directory>
+                        ${project.build.outputDirectory}/META-INF/native-image/picocli-generated
+                      </directory>
+                    </fileset>
+                  </filesets>
+                </configuration>
+              </execution>
+            </executions>
           </plugin>
 
           <plugin>
@@ -381,6 +427,9 @@
                   <executable>${native-image.executable}</executable>
                   <arguments>
                     <argument>--tool:svm-wasm</argument>
+                    <!-- Größe vor Durchsatz: Das Modul muss über die Leitung, und die
+                         Rechenzeit einer Synopse liegt ohnehin im Sekundenbereich. -->
+                    <argument>-Os</argument>
                     <!-- Der Textzwischenschritt (aendggner.js.wat) wird sonst mehrere hundert
                          Megabyte groß; auf die Größe des .wasm hat das keinen Einfluss. -->
                     <argument>-H:WasmComments=NONE</argument>

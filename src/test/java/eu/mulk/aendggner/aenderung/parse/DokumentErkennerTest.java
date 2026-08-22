@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 
 class DokumentErkennerTest {
 
-  private static final Path SAMPLEDATA = Path.of("src/main/resources/sampledata");
+  private static final Path SAMPLEDATA = Path.of("src/test/resources/sampledata");
 
   /**
    * Die Erkennung ist eine Heuristik auf Kopfzeilen; sie wird deshalb gegen wirkliche Dokumente

@@ -352,7 +352,10 @@
       "glob": "jdk/internal/icu/impl/data/icudt76b/ubidi.icu"
     },
     {
-      "glob": "org/apache/fontbox/**"
+      "glob": "org/apache/fontbox/cmap/Identity-H"
+    },
+    {
+      "glob": "org/apache/fontbox/cmap/Identity-V"
     },
     {
       "glob": "org/apache/pdfbox/resources/**"

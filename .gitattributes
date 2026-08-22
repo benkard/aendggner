@@ -1,0 +1,5 @@
+# Der Beispielkorpus besteht aus Gesetzes- und Drucksachen-PDFs fremder Urheberschaft.
+# Er ist nicht „Corresponding Source“ im Sinne der AGPLv3 — gebaut wird ohne ihn —, und
+# er machte das der Browserfassung beigelegte Quelltextarchiv dreißigmal so groß wie den
+# Quelltext selbst. Wer ihn braucht (für die Tests), holt das Repository.
+src/test/resources/sampledata/** export-ignore

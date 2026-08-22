@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Test;
  */
 class EndToEndTest {
 
-  private static final Path SAMPLEDATA = Path.of("src/main/resources/sampledata");
+  private static final Path SAMPLEDATA = Path.of("src/test/resources/sampledata");
   private static final Path STAMMGESETZ = SAMPLEDATA.resolve("IfSG/BJNR104510000.xml");
   private static final Path AENDERUNGSGESETZ = SAMPLEDATA.resolve("IfSG/bgbl120s2397_78991.pdf");
 

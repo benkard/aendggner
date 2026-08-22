@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 class ZusammenstellungsLeserTest {
 
   private static final Path EMPFEHLUNG =
-      Path.of("src/main/resources/sampledata/GEG/BT-Drs-20-7619_Beschlussempfehlung.pdf");
+      Path.of("src/test/resources/sampledata/GEG/BT-Drs-20-7619_Beschlussempfehlung.pdf");
 
   private static String fassung() throws Exception {
     try (var dokument = Loader.loadPDF(EMPFEHLUNG.toFile())) {

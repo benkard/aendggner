@@ -111,7 +111,7 @@ https://matthias.benkard.de/aendggner/.
 (2) Fortlaufende Quelltextquelle ist
 https://gerrit.benkard.de/plugins/gitiles/aendggner. Die jeweils betriebene
 Fassung liegt der Browserfassung überdies als `aendggner-quelltext.tar.gz` bei
-(§ 15 Absatz 4).
+(§ 15 Absatz 5).
 
 (3) Das Erzeugnis steht unter der GNU Affero General Public License, Fassung 3;
 der Lizenztext ist der Datei `COPYING` zu entnehmen.
@@ -486,15 +486,42 @@ JAVA_HOME=/pfad/zu/oracle-graalvm ./mvnw -Pwasm package
 ----
 
 (4) Ergebnis ist `target/web/` mit `index.html`, `app.js`, `worker.js`,
-`style.css`, `favicon.svg`, `aendggner.js` und `aendggner.js.wasm` (rund 24 MB,
-komprimiert etwa 7 MB). Das Verzeichnis ist so, wie es dasteht, auslieferbar:
+`style.css`, `favicon.svg`, `aendggner.js` und `aendggner.js.wasm` (rund 17 MB,
+komprimiert etwa 5 MB). Das Verzeichnis ist so, wie es dasteht, auslieferbar:
 `deploy/webpaket.sh` läuft am Ende desselben Befehls, wirft den mehrere hundert
-Megabyte großen Textzwischenschritt `aendggner.js.wat` fort, legt den Quelltext
-der gebauten Fassung als `aendggner-quelltext.tar.gz` samt
-`quelltext-fassung.txt` bei und komprimiert die großen Dateien nach `.gz` und
-`.br` vor.
+Megabyte großen Textzwischenschritt `aendggner.js.wat` fort, schickt das Modul
+durch `wasm-opt -Oz` und legt den Quelltext der gebauten Fassung als
+`aendggner-quelltext.tar.gz` samt `quelltext-fassung.txt` bei.
 
-(5) Trägt der Arbeitsbaum uneingecheckte Änderungen, so bricht die Herstellung
+(5) Die Größe des Moduls beruht auf vier Vorkehrungen; wer eine davon zurücknimmt,
+handelt sich die Megabyte wieder ein:
+
+1. `-Os` beim Übersetzen statt der auf Durchsatz gerichteten Voreinstellung;
+2. kein Picocli-Annotationsprozessor im Profil `wasm`. Er meldete die
+   Befehlszeilenklasse zur Reflexion an, worauf die Erreichbarkeitsanalyse die
+   gesamte Befehlszeilenfassung ins Browser-Image zog, die dort niemand aufruft;
+3. ein enger Ressourcen-Glob in `reachability-metadata.json`. Das frühere
+   `org/apache/fontbox/**` bettete 3,3 MB CJK-CMaps, `Scripts.txt` und — weil
+   `**` auch Klassendateien trifft — 0,7 MB `.class`-Dateien ein, von denen
+   deutsche Gesetzes-PDFs nichts brauchen. Geblieben sind die beiden
+   Identity-CMaps; `org/apache/pdfbox/resources/**` bleibt vollständig, damit die
+   Breitenberechnung bei nicht eingebetteten Schriften unangetastet ist;
+4. `wasm-opt -Oz` als Nachlauf. Die zugelassenen Wasm-Merkmale sind in
+   `webpaket.sh` einzeln aufgezählt und nicht als `--all-features` erteilt: Sonst
+   nutzt Binaryen auch Vorschläge, die noch kein Browser annimmt, und das Modul
+   scheitert erst beim Instanziieren.
+
+(6) Im Quelltextarchiv fehlt der Beispielkorpus; `.gitattributes` nimmt
+`src/test/resources/sampledata` von `git archive` aus. Es sind Gesetzes- und
+Drucksachentexte fremder Urheberschaft, an denen allein die Tests messen —
+Quelltext im Sinne der AGPLv3 sind sie nicht, gebaut wird ohne sie, und sie
+machten das Archiv dreißigmal so groß wie den Quelltext (29,7 MB statt 0,26 MB).
+`quelltext-fassung.txt` sagt dies und verweist für den vollständigen Korpus auf
+die Anschrift nach § 3 Absatz 2. Wächst das Archiv wieder über 8 MiB, so bricht
+`webpaket.sh` ab; alsdann sind Massendaten ins Repository geraten, die dort nicht
+hingehören.
+
+(7) Trägt der Arbeitsbaum uneingecheckte Änderungen, so bricht die Herstellung
 nach Absatz 3 ab, denn der beigelegte Quelltext wäre alsdann nicht der gebaute.
 Für einen Probelauf hilft `QUELLTEXT_UNGEPRUEFT=1`.
 
@@ -513,26 +540,37 @@ Weg für Massenläufe.
 [[ausrollen]]
 == § 15 Ausrollen
 
-(1) Betrieben wird die Fassung unter einem Unterpfad einer bestehenden Domain,
-https://matthias.benkard.de/aendggner/. Ein eigener Server und ein eigenes
-Zertifikat sind hierfür nicht erforderlich; erforderlich ist nur ein Webserver
-für statische Dateien.
+(1) Erforderlich ist nur ein Ort für statische Dateien. Ausgeliefert wird über
+Cloudflare Workers. Dort gilt eine Grenze von 25 MiB je Datei — unkomprimiert
+gemessen —, und komprimiert wird beim Ausliefern ohnehin. `webpaket.sh` legt
+deshalb keine `.gz`/`.br`-Beilagen mehr an und hält am Ende jede Datei gegen
+diese Grenze; überschreitet eine sie, so bricht der Bau ab, statt das Hochladen
+scheitern zu lassen.
 
 [source,shell script]
 ----
 JAVA_HOME=/pfad/zu/oracle-graalvm ./mvnw -Pwasm package
+----
+
+(2) Wer die Fassung stattdessen selbst ausliefert — unter einem Unterpfad einer
+bestehenden Domain, wie zuvor unter https://matthias.benkard.de/aendggner/ —,
+braucht die Vorkompression und fordert sie beim Bau an:
+
+[source,shell script]
+----
+JAVA_HOME=/pfad/zu/oracle-graalvm VORKOMPRIMIEREN=1 ./mvnw -Pwasm package
 rsync -av --delete target/web/ server:/var/www/aendggner/
 ----
 
-(2) `deploy/nginx-aendggner.conf` ist kein eigener `server`-Block, sondern ein
+(3) `deploy/nginx-aendggner.conf` ist kein eigener `server`-Block, sondern ein
 Schnipsel zum Einfügen in den vorhandenen (`include`). Er bringt mit:
 
 1. die Weiterleitung von `/aendggner` auf `/aendggner/`, ohne die alle relativen
    Verweise der Seite auf die Domainwurzel zielten;
 2. den MIME-Typ `application/wasm`, ohne den der Browser die Instanziierung des
    Moduls verweigert;
-3. `gzip_static`/`brotli_static` für die vorkomprimierten Dateien, statt 24 MB je
-   Abruf neu zu packen;
+3. `gzip_static`/`brotli_static` für die nach Absatz 2 vorkomprimierten Dateien,
+   statt 17 MB je Abruf neu zu packen;
 4. `Cache-Control: no-cache` statt einer Haltefrist. Die Dateinamen tragen keine
    Fassungskennung, und ein Browser mit altem `app.js` und neuem `.wasm` bekäme
    sonst eine Mischfassung, die es nie gegeben hat. Revalidiert wird per ETag; das
@@ -543,11 +581,11 @@ Schnipsel zum Einfügen in den vorhandenen (`include`). Er bringt mit:
    Synopse als `blob:`-Dokument die Richtlinie der erzeugenden Seite erbt, ihr
    Stylesheet aber eingebettet trägt.
 
-(3) `impressum.html` und `datenschutz.html` tragen die Angaben nach § 5 DDG und
+(4) `impressum.html` und `datenschutz.html` tragen die Angaben nach § 5 DDG und
 Art. 13 DSGVO. Die dort genannte Aufbewahrungsfrist der Zugriffsprotokolle
 (14 Tage) muss zu derjenigen des Servers passen.
 
-(4) Der Footer der Startseite verweist auf den beigelegten Quelltext-Tarball; dies
+(5) Der Footer der Startseite verweist auf den beigelegten Quelltext-Tarball; dies
 verlangt AGPLv3 § 13 für den Netzwerkbetrieb. Als fortlaufende Zweitquelle ist
 die Anschrift nach § 3 Absatz 2 genannt.
 
