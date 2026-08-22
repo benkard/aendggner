@@ -1,0 +1,12 @@
+# Auslieferung über Cloudflare Workers (README § 15). Der Worker führt keinen eigenen
+# Code aus: hochgeladen wird allein das Verzeichnis target/web, das `-Pwasm package`
+# erzeugt und deploy/webpaket.sh auslieferfertig hinterlässt.
+#
+# Nicht zu verwechseln ist der Cloudflare-Worker mit target/web/worker.js — letzterer ist
+# ein Web Worker des Browsers und für Cloudflare nur eine statische Datei unter vielen.
+
+name = "aendggner"
+compatibility_date = "2026-08-22"
+
+[assets]
+directory = "./target/web"
