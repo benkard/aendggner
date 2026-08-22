@@ -232,16 +232,18 @@ Nach absteigendem Nutzen:
   angefasst — ein Sammelheft mit mehreren Verkündungen, also zugleich ein Test der Artikel-/
   Verkündungsauswahl.
 . *Berlin, ganzseitenbreite Rahmen* (XY-Cut) — die letzte offene Layout-Frage, siehe „Noch offen“.
-. *Stellung eines eingefügten Blocks* — seit die Umnummerierungs-Kaskade des BayJG aufgeht, ist
-  dies der sichtbare Rest an Art. 56: „Nach Nr. 4 werden die folgenden Nrn. 5 bis 7 eingefügt“ gilt
-  als angewandt, der Block tritt aber ans Ende des Absatzes statt hinter die Nr. 4, und der leere
-  Platzhalter „7. (aufgehoben)“ bleibt zwischen den Nrn. 9 und 10 stehen. Beides ist im
-  Akzeptanztest festgehalten, damit es nicht unbemerkt bleibt.
+
+*Erledigt:* Die _Stellung eines eingefügten Blocks_ war der letzte sichtbare Rest an Art. 56 des
+BayJG. Ursache war nicht die Einfügung selbst, sondern die Neufassung der Nr. 4 einen Punkt zuvor:
+Sie setzte ihren Wortlaut ohne Einrückung, worauf der Zeilenblock dieser Marke bis ans Absatzende
+reichte — er reicht so weit, wie tiefer eingerückt wird. Art. 56 Abs. 1 gleicht seither in Aufbau
+und Wortlaut der amtlichen Nachfassung; der Akzeptanztest prüft das.
 
 Regressionsschutz: `./mvnw verify` prüft die bestehenden Belegfälle mit. Gepinnt ist dabei nicht
 überall dieselbe Art von Zahl — für UWG, AGG und ProdHaftG, dass *kein* Befehl manuell bleibt; für
 das BayJG die 154 erkannten Befehle, die vollständige Anwendung und den Wortlaut des
-Bußgeldkatalogs an drei Stellen; für Sachsen,
+Bußgeldkatalogs — dort auch Aufbau und Einrückung, weil an ihnen die Stellung eingefügter Blöcke
+hängt; für Sachsen,
 Niedersachsen und die vier NRW-Artikel die vollständige Anwendung bis auf das eine benannte
 Residuum im WDR-Gesetz; für Schleswig-Holstein, Berlin und Hessen die vollständige *Erkennung*
 (dort 21 Befehle). Wer eine dieser Zahlen

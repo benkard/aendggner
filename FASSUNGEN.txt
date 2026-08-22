@@ -21,6 +21,96 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 22. August 2026,
+ zuletzt geändert durch die am 22. August 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Zwei Mängel, die die vorangegangene Fassung aufgedeckt, aber nicht behoben hatte,
+wiegen schwerer als alles sonst Offene: Sie führen zu einem falschen Ergebnis,
+ohne es anzuzeigen. Ein Befehl gilt als angewandt, der Wortlaut des Zielgesetzes
+weicht gleichwohl von der amtlichen Nachfassung ab, und der Abschnitt „Manuell
+prüfen“ schweigt. Damit war das Leitprinzip des Erzeugnisses — niemals
+stillschweigend zu verwerfen — an dieser Stelle verfehlt.
+
+Bei ihrer Behebung hat sich ergeben, dass die beiden Mängel nicht nebeneinander
+standen, sondern eine Ursache teilten: die fehlende Einrückung. Sie ist im
+kanonischen Klartext nicht Schmuck, sondern trägt die Gliederung; wer sie
+verliert, verliert die Zugehörigkeit einer Zeile zu ihrer Einheit.
+
+
+Artikel 1
+Einrückung bei der Neufassung einer Aufzählungseinheit
+
+(1) Die Neufassung einer Nummer oder eines Buchstabens (BefehlAnwender.
+    wendeNeufassungAn) setzt den neuen Wortlaut fortan auf die Einrückung der
+    Einheit, an deren Stelle er tritt; bislang begann er in Spalte 0. Es gilt
+    damit dasselbe wie bei der Ersetzung einer solchen Einheit.
+
+(2) Der Grund ist folgender: Der Zeilenblock einer Aufzählungsmarke
+    (StellenAufloeser.zeilenBlock) reicht so weit, wie tiefer eingerückt wird.
+    Eine in Spalte 0 gesetzte Zeile nimmt daher den gesamten Rest des Absatzes
+    als ihre Kindzeilen an. Der nachfolgende Befehl „Nach Nr. 4 werden die
+    folgenden Nrn. 5 bis 7 eingefügt“ trat deshalb hinter die letzte Nummer des
+    Absatzes statt hinter die Nr. 4 — er galt als angewandt, stand aber falsch.
+
+(3) Die Neufassung eines Satzes oder Halbsatzes bleibt unberührt; ihr Bereich
+    beginnt mitten in der Zeile und trägt keine Einrückung.
+
+
+Artikel 2
+Heilung des Weißraums nach einer Streichung
+
+(1) Die Streichung von Wörtern (BefehlAnwender.wendeStreichungAn) heilte den
+    zurückbleibenden Weißraum bislang über den gesamten Zieltext; dieser ist bei
+    einer Stelle ohne Fein-Komponente der ganze Absatz. Sie fraß dabei die
+    Einrückung der Aufzählungszeilen: Aus den zwei Leerzeichen vor jeder Marke
+    wurde eines.
+
+(2) Geheilt wird fortan allein die Naht der Streichung (heileNaht): Aus zwei
+    Leerzeichen wird eines, vor einem Satzzeichen bleibt keines. Traf die
+    Streichung den Zeilenanfang, so ist der Weißraum vor der Naht Einrückung und
+    bleibt unangetastet.
+
+
+Artikel 3
+Weichen des leeren Platzhalters
+
+Vergibt ein eingefügter Block eine Bezeichnung, die ein leerer Platzhalter der
+Altfassung noch hält („7. (aufgehoben)“), so weicht dieser. Es ist dieselbe
+Regel, die schon bei der Umnummerierung auf eine weggefallene Bezeichnung gilt,
+und so zeigt es auch die amtliche Nachfassung. Verdrängt wird dabei nur ein
+Platzhalter, niemals ein Wortlaut; ein Platzhalter, den kein Befehl anrührt,
+bleibt stehen.
+
+
+Artikel 4
+Zwischenraum hinter der Aufzählungsmarke
+
+Im Satz des Gesetzblatts steht zwischen der Marke einer Aufzählungszeile und
+ihrem Text die Tabulatorspalte des Setzers. Der kanonische Klartext kennt dort
+ein einzelnes Leerzeichen. Die Aufbereitung eines Zitats (normalisiereZitatText)
+führt den Zwischenraum künftig auf dieses zurück; andernfalls trügen gerade die
+neu gesetzten Zeilen ein anderes Satzbild als die unberührten.
+
+
+Artikel 5
+Nachweis
+
+(1) Der Akzeptanztest des BayJG (EndToEndTest.bayJgGvblAcceptance) hielt die
+    beiden Mängel bislang ausdrücklich fest. Die betreffenden Zusicherungen
+    werden umgekehrt: Der eingefügte Block steht zwischen der Nr. 4 und der
+    Nr. 8, der Platzhalter ist gewichen, die Einrückung besteht fort.
+
+(2) Art. 56 Abs. 1 des Bayerischen Jagdgesetzes gleicht damit in Aufbau und
+    Wortlaut der amtlichen Nachfassung (BayJG.pdf); die Gegenprobe ist Zeile für
+    Zeile geführt worden.
+
+(3) Hinzu treten drei Prüfungen der zugrunde liegenden Regeln
+    (BefehlAnwenderTest). Der Gesamtbestand beträgt nunmehr 315 Prüfungen; keine
+    der gepinnten Zahlen der übrigen Belegfälle hat sich geändert.
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 16. August 2026,
  zuletzt geändert durch die am 16. August 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

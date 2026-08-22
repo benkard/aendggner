@@ -716,10 +716,11 @@ public final class BefehlAnwender {
                 return TextErgebnis.fehler(
                     "„" + befehl.woerter() + "“ kommt " + anzahl + "-mal vor.");
               }
+              int naht = text.indexOf(befehl.woerter());
               return TextErgebnis.ok(
-                  text.replace(befehl.woerter(), "")
-                      .replaceAll("  +", " ")
-                      .replaceAll(" ([,;.])", "$1"));
+                  heileNaht(
+                      text.substring(0, naht) + text.substring(naht + befehl.woerter().length()),
+                      naht));
             }));
   }
 
@@ -833,7 +834,27 @@ public final class BefehlAnwender {
       return angewandt(befehl, norm.enbez());
     }
 
-    // Neufassung eines Satzes / einer Nummer / eines Buchstabens: Bereich ersetzen.
+    // Neufassung einer Nummer / eines Buchstabens: Der neue Wortlaut tritt an die Stelle der
+    // alten Einheit — und zwar auf deren Einrückung. Ohne sie stünde die neugefasste Zeile in
+    // Spalte 0, und der Zeilenblock ihrer Marke reichte fortan bis ans Absatzende, weil er so
+    // weit reicht, wie tiefer eingerückt wird (StellenAufloeser.zeilenBlock): ein späterer
+    // Befehl „Nach Nr. 4 werden die folgenden Nrn. 5 bis 7 eingefügt“ träte dann hinter die
+    // letzte Nummer des Absatzes statt hinter die Nr. 4.
+    if (feinsteIstAufzaehlung(befehl.stelle())) {
+      return bearbeiteBereich(
+          normen,
+          befehl,
+          (text, bereich) ->
+              TextErgebnis.ok(
+                  text.substring(0, bereich.von())
+                      + rueckeZitatEin(
+                          normalisiereZitatText(befehl.neuerText()),
+                          einrueckungVon(text, bereich.von()))
+                      + text.substring(bereich.bis())));
+    }
+
+    // Neufassung eines Satzes / Halbsatzes: Bereich ersetzen. Eine Einrückung gibt es hier
+    // nicht — der Bereich beginnt mitten in der Zeile.
     return bearbeiteText(
         normen, befehl, text -> TextErgebnis.ok(normalisiereZitatText(befehl.neuerText())));
   }
@@ -1105,10 +1126,19 @@ public final class BefehlAnwender {
                 // Der Einfügeblock darf mehrere Einheiten enthalten („die Nummern 4a bis 4c“);
                 // jede Aufzählungszeile des Zitats bleibt eine eigene Zeile.
                 var block = rueckeZitatEin(normalisiereZitatText(befehl.text()), einrueckung);
-                return TextErgebnis.ok(
+                var neuerText =
                     befehl.vorher()
                         ? text.substring(0, position) + block + "\n" + text.substring(position)
-                        : text.substring(0, position) + "\n" + block + text.substring(position));
+                        : text.substring(0, position) + "\n" + block + text.substring(position);
+                // Vergibt der Block eine Bezeichnung, die ein leerer Platzhalter der Altfassung
+                // noch hält („7. (aufgehoben)“), so weicht dieser: Zwei Einheiten gleicher
+                // Bezeichnung kann es nicht geben, und Inhalt geht dabei nicht verloren. Es ist
+                // dieselbe Regel, die schon bei der Umnummerierung auf eine weggefallene
+                // Bezeichnung gilt, und so zeigt es die amtliche Nachfassung.
+                for (var marke : platzhalterMarken(block, befehl.ebene())) {
+                  neuerText = entferneWeggefallenenPlatzhalter(neuerText, marke);
+                }
+                return TextErgebnis.ok(neuerText);
               });
     };
   }
@@ -1419,6 +1449,36 @@ public final class BefehlAnwender {
       case Stelle.BuchstabeNr b -> b.kennung() + ")";
       default -> null;
     };
+  }
+
+  private static final Pattern LEERER_PLATZHALTER =
+      Pattern.compile("\\((?:weggefallen|gegenstandslos|aufgehoben)\\)");
+
+  /**
+   * Die Aufzählungsmarken, die ein eingefügter Block vergibt („5.“, „6.“, „7.“) — ohne solche, die
+   * er selbst als leeren Platzhalter führt, denn ein Platzhalter verdrängt keinen Platzhalter.
+   */
+  private static List<String> platzhalterMarken(String block, Ebene ebene) {
+    var muster =
+        switch (ebene) {
+          case NUMMER -> NUMMER_MARKER;
+          case BUCHSTABE -> BUCHSTABE_MARKER;
+          default -> null;
+        };
+    if (muster == null) {
+      return List.of();
+    }
+    var marken = new ArrayList<String>();
+    var marker = muster.matcher(block);
+    while (marker.find()) {
+      int zeilenEnde = block.indexOf('\n', marker.end());
+      var rest = block.substring(marker.end(), zeilenEnde < 0 ? block.length() : zeilenEnde);
+      if (LEERER_PLATZHALTER.matcher(rest.strip()).matches()) {
+        continue;
+      }
+      marken.add(marker.group(1) + (ebene == Ebene.BUCHSTABE ? ")" : "."));
+    }
+    return marken;
   }
 
   /**
@@ -1812,6 +1872,50 @@ public final class BefehlAnwender {
                     || k instanceof Stelle.BuchstabeNr);
   }
 
+  /**
+   * Wahr, wenn die feinste Komponente der Stelle eine Aufzählungseinheit ist (Nummer/Buchstabe).
+   */
+  private static boolean feinsteIstAufzaehlung(Stelle stelle) {
+    var komponenten = stelle.komponenten();
+    if (komponenten.isEmpty()) {
+      return false;
+    }
+    var feinste = komponenten.get(komponenten.size() - 1);
+    return feinste instanceof Stelle.NummerNr || feinste instanceof Stelle.BuchstabeNr;
+  }
+
+  /**
+   * Heilt den Weißraum an der Stelle, an der eine Streichung Text herausgenommen hat: Aus zwei
+   * Leerzeichen wird eines, vor einem Satzzeichen bleibt keines. Geheilt wird ausdrücklich nur die
+   * Naht und nicht der ganze Zieltext — dieser ist bei einer Stelle ohne Fein-Komponente der
+   * gesamte Absatz, und eine Heilung über ihn hinweg fräße die Einrückung der Aufzählungszeilen:
+   * Aus den zwei Leerzeichen vor jeder Marke würde eines. Traf die Streichung den Zeilenanfang, so
+   * ist der Weißraum vor der Naht Einrückung und bleibt unangetastet.
+   */
+  private static String heileNaht(String text, int naht) {
+    int von = naht;
+    while (von > 0 && text.charAt(von - 1) == ' ') {
+      von--;
+    }
+    int bis = naht;
+    while (bis < text.length() && text.charAt(bis) == ' ') {
+      bis++;
+    }
+    if (bis == von) {
+      return text;
+    }
+    if (von == 0 || text.charAt(von - 1) == '\n') {
+      return text.substring(0, naht) + text.substring(bis);
+    }
+    if (bis < text.length() && ",;.".indexOf(text.charAt(bis)) >= 0) {
+      return text.substring(0, von) + text.substring(bis);
+    }
+    if (bis - von == 1) {
+      return text;
+    }
+    return text.substring(0, von) + " " + text.substring(bis);
+  }
+
   private static @Nullable String labelVon(Stelle stelle) {
     for (var komponente : stelle.komponenten().reversed()) {
       if (komponente instanceof Stelle.NummerNr n) {
@@ -1969,6 +2073,11 @@ public final class BefehlAnwender {
   private static final Pattern AUFZAEHLUNGSZEILE =
       Pattern.compile("^(\\d+[a-z]?\\.|[a-z]{1,3}\\))\\s.*");
 
+  // Der Zwischenraum zwischen der Aufzählungsmarke und ihrem Text: im Gesetzblattsatz steht dort
+  // die Marken-Tabulatorspalte, im kanonischen Klartext ein einzelnes Leerzeichen.
+  private static final Pattern MARKEN_ZWISCHENRAUM =
+      Pattern.compile("^(\\d+[a-z]?\\.|[a-z]{1,3}\\))[ \\t]+");
+
   private static String normalisiereZitatText(String text) {
     var zeilen = text.split("\n");
     var sb = new StringBuilder();
@@ -1978,7 +2087,7 @@ public final class BefehlAnwender {
     // Stellenauflösung sie als Kindzeilen der Einheit erkennt.
     var fortsetzungsEinzug = "";
     for (var zeile : zeilen) {
-      var gestutzt = zeile.strip();
+      var gestutzt = MARKEN_ZWISCHENRAUM.matcher(zeile.strip()).replaceFirst("$1 ");
       if (gestutzt.isEmpty()) {
         continue;
       }

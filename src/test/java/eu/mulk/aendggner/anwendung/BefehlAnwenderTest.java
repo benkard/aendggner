@@ -1192,6 +1192,102 @@ class BefehlAnwenderTest {
         .isEqualTo("Zweck dieses Gesetzes ist die Erprobung, auch in Teilen,.");
   }
 
+  /**
+   * Ein Katalog, wie ihn das Stammgesetz führt: Aufzählungszeilen auf zwei Leerzeichen, darunter
+   * ein weggefallener Platzhalter.
+   */
+  private static Gesetz katalog() {
+    return new Gesetz(
+        "TestG",
+        "Gesetz zur Erprobung",
+        "Testgesetz",
+        List.of(
+            new Norm(
+                "§ 1",
+                "Zweck",
+                null,
+                List.of(
+                    new Absatz(
+                        "1",
+                        "Erprobt wird, wer\n"
+                            + "  1. Befehle erkennt,\n"
+                            + "  2. Befehle schriftlich anwendet,\n"
+                            + "  3. (weggefallen)\n"
+                            + "  4. Ergebnisse prüft.")),
+                false)),
+        List.of());
+  }
+
+  /**
+   * Die Neufassung einer Nummer setzt ihren Wortlaut auf die Einrückung der alten Einheit. Ohne sie
+   * stünde die Zeile in Spalte 0 und der Zeilenblock ihrer Marke reichte bis ans Absatzende — ein
+   * nachfolgender Einfügebefehl träte dann an die falsche Stelle.
+   */
+  @Test
+  void neufassungEinerNummerBehaeltDieEinrueckung() {
+    var befehl =
+        new Neufassung(
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("1"), new Stelle.NummerNr("2")),
+            "2. Befehle anwendet,",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(katalog(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "§ 1", 0))
+        .contains("\n  2. Befehle anwendet,\n")
+        .doesNotContain("\n2. ");
+  }
+
+  /**
+   * Die Heilung des Weißraums nach einer Streichung glättet die Naht und sonst nichts: Die
+   * Einrückung der Aufzählungszeilen bleibt, wie sie war.
+   */
+  @Test
+  void streichungLaesstDieEinrueckungUnberuehrt() {
+    var befehl =
+        new Streichung(
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("1")), "schriftlich ", PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(katalog(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "§ 1", 0))
+        .isEqualTo(
+            "Erprobt wird, wer\n"
+                + "  1. Befehle erkennt,\n"
+                + "  2. Befehle anwendet,\n"
+                + "  3. (weggefallen)\n"
+                + "  4. Ergebnisse prüft.");
+  }
+
+  /**
+   * Vergibt ein eingefügter Block eine Bezeichnung, die ein leerer Platzhalter noch hält, so weicht
+   * dieser — dieselbe Regel wie bei der Umnummerierung auf eine weggefallene Bezeichnung.
+   */
+  @Test
+  void eingefuegterBlockVerdraengtDenWeggefallenenPlatzhalter() {
+    var befehl =
+        new StrukturEinfuegung(
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("1"), new Stelle.NummerNr("2")),
+            false,
+            Ebene.NUMMER,
+            "3",
+            "3. Befehle ordnet,",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(katalog(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "§ 1", 0))
+        .isEqualTo(
+            "Erprobt wird, wer\n"
+                + "  1. Befehle erkennt,\n"
+                + "  2. Befehle schriftlich anwendet,\n"
+                + "  3. Befehle ordnet,\n"
+                + "  4. Ergebnisse prüft.");
+  }
+
   private static String absatzText(Gesetz gesetz, String enbez, int index) {
     return gesetz.norm(enbez).orElseThrow().absaetze().get(index).text();
   }

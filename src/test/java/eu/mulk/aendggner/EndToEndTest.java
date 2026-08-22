@@ -271,8 +271,9 @@ class EndToEndTest {
     //        vorrücken, ihre Begleitänderungen aber an ihrer Dokumentstelle bleiben — die Wortfolge
     //        „schriftliche“ etwa steht erst nach dem vorangehenden Punkt nur noch einmal im
     //        Artikel und ist damit eindeutig.
-    //    „Kein Rest“ heißt: jeder Befehl hat gegriffen. Es heißt nicht, dass die Norm in allem der
-    //    amtlichen Nachfassung gleicht — was daran noch fehlt, steht weiter unten an Art. 56.
+    //    „Kein Rest“ heißt zunächst nur: jeder Befehl hat gegriffen. Dass Art. 56 Abs. 1 darüber
+    //    hinaus in Aufbau und Wortlaut der amtlichen Nachfassung gleicht, prüfen die
+    //    Zusicherungen weiter unten.
     var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
     assertThat(anwendung.protokoll()).hasSameSizeAs(parseErgebnis.befehle());
     var manuellPfade =
@@ -298,16 +299,24 @@ class EndToEndTest {
     // Abs. 2 Nr. 12 Buchst. b führt ihre Marke allein auf der Zeile — sie ist trotzdem auflösbar.
     assertThat(art56.absaetze().get(1).text()).contains("(§ 2 Abs. 3 BJagdG)");
 
-    // Offen bleibt an dieser Norm eine Frage, die mit der Reihenfolge nichts zu tun hat und schon
-    // vorher so stand: Der eingefügte Block „Nach Nr. 4 werden die folgenden Nrn. 5 bis 7
-    // eingefügt“ landet am Ende des Absatzes statt hinter der Nr. 4, und der leere Platzhalter
-    // „7. (aufgehoben)“ der Altfassung bleibt zwischen den Nrn. 9 und 10 stehen. Beides ist hier
-    // festgehalten, damit es nicht unbemerkt bleibt — der Befehl gilt als angewandt, die Stellung
-    // seines Blocks ist aber falsch.
-    assertThat(katalog).contains("7. (aufgehoben)");
-    assertThat(katalog.indexOf("5.\t den Verboten des Art. 29 Abs. 2"))
-        .as("die eingefügten Nrn. 5 bis 7 stehen (noch) hinter der Nr. 16")
-        .isGreaterThan(katalog.indexOf("16."));
+    // Der Block aus „Nach Nr. 4 werden die folgenden Nrn. 5 bis 7 eingefügt“ steht an seinem Platz
+    // — zwischen der Nr. 4 und der Nr. 8 — und nicht mehr am Ende des Absatzes. Dass er dort
+    // landete, lag an der Neufassung der Nr. 4 einen Punkt zuvor: Sie setzte ihren Wortlaut ohne
+    // Einrückung, worauf der Zeilenblock der Nr. 4 bis ans Absatzende reichte (er reicht so weit,
+    // wie tiefer eingerückt wird).
+    assertThat(katalog.indexOf("  5. den Verboten des Art. 29 Abs. 2"))
+        .as("die eingefügten Nrn. 5 bis 7 stehen zwischen der Nr. 4 und der Nr. 8")
+        .isGreaterThan(katalog.indexOf("  4. entgegen Art. 29 Abs. 1"))
+        .isLessThan(katalog.indexOf("  8. entgegen Art. 31 Abs. 2"));
+    // Der leere Platzhalter „7. (aufgehoben)“ der Altfassung weicht dem eingefügten Block, weil
+    // dieser dieselbe Bezeichnung vergibt — dieselbe Regel wie bei der Umnummerierung auf eine
+    // weggefallene Bezeichnung. Verdrängt wird dabei nur ein Platzhalter, nie ein Wortlaut: Der
+    // Platzhalter „1. (aufgehoben)“ des Abs. 2, den kein Befehl anrührt, bleibt unberührt stehen.
+    assertThat(katalog).doesNotContain("(aufgehoben)");
+    assertThat(art56.absaetze().get(1).text()).contains("1. (aufgehoben)");
+    // Die Einrückung der Aufzählungszeilen übersteht die Streichungen des Hefts: Sie wird nicht
+    // mehr von der Leerzeichen-Heilung mitgenommen, die nur noch die Naht der Streichung glättet.
+    assertThat(katalog).contains("\n  12. ohne Begleitung").doesNotContain("\n 12. ");
 
     // Art. 29a Abs. 5 trägt nach der Kaskade die neue Behördenbezeichnung und den eingefügten Satz.
     var art29a = anwendung.neu().norm("Art. 29a").orElseThrow();
