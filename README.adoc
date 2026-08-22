@@ -582,8 +582,14 @@ Schnipsel zum Einfügen in den vorhandenen (`include`). Er bringt mit:
    Stylesheet aber eingebettet trägt.
 
 (4) `impressum.html` und `datenschutz.html` tragen die Angaben nach § 5 DDG und
-Art. 13 DSGVO. Die dort genannte Aufbewahrungsfrist der Zugriffsprotokolle
-(14 Tage) muss zu derjenigen des Servers passen.
+Art. 13 DSGVO. Für den Regelfall — Auslieferung über Cloudflare — nennt
+`datenschutz.html` Cloudflare als Auftragsverarbeiter nach Art. 28 DSGVO samt
+Drittlandsübermittlung und sagt, dass Zugriffsprotokolle dort anfallen und vom
+Verantwortlichen nicht abgerufen werden. Die daneben für die eigene Auslieferung
+(Absatz 2) genannte Frist von 14 Tagen muss zu derjenigen des eigenen Servers
+passen. Wer bei Cloudflare weitere Funktionen einschaltet — Web Analytics,
+Logpush, Bot Management, Turnstile —, muss die Erklärung ergänzen; sie ist so
+gefasst, dass keine davon in Betrieb ist.
 
 (5) Der Footer der Startseite verweist auf den beigelegten Quelltext-Tarball; dies
 verlangt AGPLv3 § 13 für den Netzwerkbetrieb. Als fortlaufende Zweitquelle ist
