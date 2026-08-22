@@ -83,8 +83,12 @@ cookie-/kostenpflichtiger Shop).
 |`Thueringen/GVBl-TH-2026-02_KiGaFinanzVO-AendVO-ua.pdf` — GVBl. Freistaat Thüringen Nr. 2 vom
 13.02.2026 (u. a. Vierte Verordnung zur Änderung der Thüringer Kindergartenfinanzierungs-
 verordnung)
-|Sammelheft (28 S.) mit mehreren Verkündungen; enthält eine Änderungsverordnung („§ 4 wird wie
-folgt geändert").
+|Sammelheft (28 S.) mit vier Verkündungen, davon eine Änderungsverordnung. Unterscheidend: Das
+Blatt führt *kein einziges* `„`, sondern setzt gerade Anführungszeichen beidseitig; dazu das
+Idiom „die Verweisung „X" durch die Verweisung „Y" ersetzt", ein Rahmen, der sich auf eine
+Untereinheit der umnummerierten Norm verengt, und eine Bereichs-Umnummerierung über einen
+aufgehobenen Platzhalter hinweg. Voller Akzeptanzfall, Stammfassung
+`Thueringen/ThuerKigaFinVO-alt.txt`.
 |===
 
 == Stand der Umsetzung
@@ -165,13 +169,23 @@ per `…id_/…`-Rohform laden. Achtung, `WebFetch` erreicht `web.archive.org` n
 juris-Landesportale:: Sackgasse — *geprüft* für `gesetze-rechtsprechung.sh.juris.de`
 (Schleswig-Holstein), `gesetze.berlin.de` (Berlin, trotz Eigennamen dieselbe Anwendung),
 `landesrecht-bw.de` (Baden-Württemberg) und `rv.hessenrecht.hessen.de` (Hessen, Kennung `bshe`).
-Alle vier sind seit etwa Ende 2022 reine Single-Page-Anwendungen; sämtliche Dokument-URLs liefern
+und `landesrecht.thueringen.de` (Thüringen).
+Alle fünf sind seit etwa Ende 2022 reine Single-Page-Anwendungen; sämtliche Dokument-URLs liefern
 nur die leere Anwendungshülle (rund 5,4 kB), die Inhalte hängen an einer tokenpflichtigen
 Schnittstelle. Auch archivierte
 Einzelnorm-Seiten sind bereits Hüllen. Brauchbar sind allenfalls Wayback-Snapshots aus der Zeit
 *vor* der Umstellung — die sind aber meist zu alt für die gesuchte Fassung. Für
-`landesrecht.thueringen.de` und `voris.niedersachsen.de`
-ist dasselbe zu erwarten, aber *nicht* nachgeprüft: Ein Versuch lohnt, bevor man aufgibt.
+`voris.niedersachsen.de` ist dasselbe zu erwarten, aber *nicht* nachgeprüft: Ein Versuch lohnt,
+bevor man aufgibt.
+
+Parlamentsdokumentationen:: Der Ausweg, wo das Landesrechtportal versperrt ist. Gibt der Landtag
+das Gesetzblatt heraus — in Thüringen ist das so —, so liegen dessen Hefte oft frei in der
+Parlamentsdatenbank, auch die alten:
+`parldok.thueringer-landtag.de/ParlDok/dokument/<WP>/art/GVBl/num/<Heft>/jahr/<Jahr>[/seite/<S>]`.
+Damit lässt sich eine konsolidierte Fassung aus dem Stammheft und den Änderungsheften
+zusammensetzen, wenn kein Portal sie fertig liefert (Rezept in `Thueringen/SOURCES`). Das Archiv
+der Staatskanzlei (`thueringen.de/th1/tsk/gvbl/`) hilft dagegen nicht: Es antwortet Skripten mit
+einer Bot-Schutz-Fehlerseite.
 
 Fällt das Portal aus, bleibt der Weg über das Gesetzblatt selbst: Trägt der Einleitungssatz des
 Änderungsgesetzes kein „zuletzt geändert durch“, so ist die Originalfassung zugleich die
@@ -228,10 +242,15 @@ Nach absteigendem Nutzen:
   auch die Inhaltsübersicht als Norm). Über Berlin oder Baden-Württemberg geht das nicht mehr:
   deren Portale sind als juris-Anwendung nachgeprüft. Ohne eine solche Stammfassung bleibt die
   Ergänzung nicht end-to-end prüfbar.
-. *Thüringen* (`Thueringen/GVBl-TH-2026-02_…`) ist als einziges beschafftes Heft noch gar nicht
-  angefasst — ein Sammelheft mit mehreren Verkündungen, also zugleich ein Test der Artikel-/
-  Verkündungsauswahl.
 . *Berlin, ganzseitenbreite Rahmen* (XY-Cut) — die letzte offene Layout-Frage, siehe „Noch offen“.
+
+*Erledigt:* _Thüringen_ ist vollständig umgesetzt (`EndToEndTest.thuerKiGaFinVOAendVO`, zehn
+Befehle, kein Rest). Es war das letzte beschaffte, nie angefasste Heft und hat drei allgemeine
+Befunde gebracht: gerade Anführungszeichen werden paarweise gelesen, wenn ein Text kein deutsches
+öffnendes Zeichen führt; eine Bereichs-Umnummerierung nennt Bezeichnungen, meint aber Einheiten und
+bleibt deshalb bis zur Anwendung ungeteilt; und der Wortbestand eines Dokuments entscheidet, ob ein
+Trennstrich vor einem Großbuchstaben eine Silbentrennung war. Die Stammfassung ist aus vier
+Gesetzblättern zusammengesetzt — siehe `Thueringen/SOURCES`.
 
 *Erledigt:* Die _Stellung eines eingefügten Blocks_ war der letzte sichtbare Rest an Art. 56 des
 BayJG. Ursache war nicht die Einfügung selbst, sondern die Neufassung der Nr. 4 einen Punkt zuvor:

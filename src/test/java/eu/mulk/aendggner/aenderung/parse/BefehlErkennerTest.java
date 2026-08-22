@@ -661,7 +661,7 @@ class BefehlErkennerTest {
     var teile =
         ((Sammelbefehl)
                 erkenne(
-                        "Die §§ 52 bis 56 werden wie folgt gefasst: „§ 52 (weggefallen) § 53"
+                        "Die §§ 52 bis 54 werden wie folgt gefasst: „§ 52 (weggefallen) § 53"
                             + " (weggefallen) § 54 (weggefallen)“.",
                         Stelle.LEER)
                     .orElseThrow())
@@ -670,6 +670,71 @@ class BefehlErkennerTest {
     assertThat(teile)
         .extracting(t -> t.stelle().anzeigeText())
         .containsExactly("§ 52", "§ 53", "§ 54");
+  }
+
+  /**
+   * Der neue Wortlaut einer Bereichs-Neufassung zitiert reihenweise andere Vorschriften.
+   * Geschnitten wird allein an den Bezeichnungen des angekündigten Bereichs — an den Querverweisen
+   * zu schneiden erfände Normen, die es nicht gibt.
+   */
+  @Test
+  void paragraphBereichNeufassungSchneidetNichtAnQuerverweisen() {
+    var teile =
+        ((Sammelbefehl)
+                erkenne(
+                        "Die §§ 1 bis 2 erhalten folgende Fassung: „§ 1 Zahlungen\nDie Zahlung"
+                            + " nach § 25 Satz 1 Nr. 2 erfolgt nach § 30 Abs. 2.\n§ 2"
+                            + " Auszahlung\nDie Zahlung nach § 26 Abs. 1 erfolgt jährlich.“",
+                        Stelle.LEER)
+                    .orElseThrow())
+            .teilbefehle();
+    assertThat(teile)
+        .hasSize(2)
+        .extracting(t -> t.stelle().anzeigeText())
+        .containsExactly("§ 1", "§ 2");
+  }
+
+  /**
+   * Nennt der Bereich mehr Paragraphen, als das Zitat trägt, so sagen Ankündigung und Wortlaut
+   * Verschiedenes; geraten wird nicht, der Befehl bleibt manuell zu prüfen.
+   */
+  @Test
+  void paragraphBereichNeufassungMitFehlendemNormkopfBleibtUnerkannt() {
+    assertThat(
+            erkenne(
+                "Die §§ 52 bis 56 werden wie folgt gefasst: „§ 52 (weggefallen) § 53"
+                    + " (weggefallen) § 54 (weggefallen)“.",
+                Stelle.LEER))
+        .isEmpty();
+  }
+
+  /**
+   * „Die bisherigen §§ 9 bis 12 werden die §§ 8 bis 10.“ — ungleich viele Bezeichnungen auf beiden
+   * Seiten. Bei Bereichen ist das kein Widerspruch, sondern eine Lücke; die Zuordnung bleibt bis
+   * zur Anwendung offen.
+   */
+  @Test
+  void ungleicherParagraphenBereichBleibtUngeteilt() {
+    var befehl = erkenne("Die bisherigen §§ 9 bis 12 werden die §§ 8 bis 10.", Stelle.LEER);
+    assertThat(befehl).get().isInstanceOf(Aenderungsbefehl.BereichsUmnummerierung.class);
+    var bereich = (Aenderungsbefehl.BereichsUmnummerierung) befehl.orElseThrow();
+    assertThat(bereich.stelle().anzeigeText()).isEqualTo("§ 9");
+    assertThat(bereich.bis().anzeigeText()).isEqualTo("§ 12");
+    assertThat(bereich.neu().anzeigeText()).isEqualTo("§ 8");
+    assertThat(bereich.neuBis().anzeigeText()).isEqualTo("§ 10");
+  }
+
+  /** Geht die Zählung auf, bleibt es bei der paarweisen Zuordnung. */
+  @Test
+  void gleicherParagraphenBereichWirdSofortGeteilt() {
+    var teile =
+        ((Sammelbefehl)
+                erkenne("Die §§ 46 und 47 werden zu den §§ 34 und 35.", Stelle.LEER).orElseThrow())
+            .teilbefehle();
+    assertThat(teile)
+        .hasSize(2)
+        .extracting(t -> t.stelle().anzeigeText())
+        .containsExactly("§ 46", "§ 47");
   }
 
   @Test

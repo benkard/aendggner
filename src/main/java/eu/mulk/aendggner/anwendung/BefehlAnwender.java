@@ -3,6 +3,7 @@ package eu.mulk.aendggner.anwendung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Anfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Aufhebung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.BereichsUmnummerierung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ebene;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.FussnotenAufhebung;
@@ -72,6 +73,11 @@ public final class BefehlAnwender {
     var gliederungen = new ArrayList<>(alt.gliederungen());
     var protokoll = new ArrayList<AngewandteAenderung>();
     String neuerLangtitel = null;
+
+    // Bereichsweise Umnummerierungen nennen Bezeichnungen, meinen aber Einheiten — erst am Gesetz
+    // steht fest, welche. Sie werden deshalb zuerst entfaltet; alles Weitere sieht nur noch
+    // gewöhnliche Umnummerierungen.
+    befehle = entfalteBereiche(befehle, normen);
 
     // Angewandt wird schrittweise in Sachreihenfolge, protokolliert befehlsweise in der
     // Reihenfolge des Änderungsgesetzes.
@@ -157,6 +163,84 @@ public final class BefehlAnwender {
    * zwei Fundstellen und wäre mehrdeutig; an seinem Platz belassen genau eine, weil der vorherige
    * Punkt die andere längst ersetzt hat.
    */
+  /**
+   * Entfaltet jede {@link BereichsUmnummerierung} zu einzelnen {@link Umnummerierung}en, indem sie
+   * die im Ausgangsbereich <em>vorhandenen</em> Normen der Reihe nach den neuen Bezeichnungen
+   * zuordnet. Aufgehobene Platzhalter zählen nicht mit: Sie tragen keinen Inhalt, und zwei
+   * Einheiten gleicher Bezeichnung kann es nicht geben — dieselbe Regel, nach der ein Platzhalter
+   * einer Einfügung weicht. Geht die Zählung nicht auf, bleibt der Befehl ungeteilt und wird als
+   * manuell zu prüfen gemeldet.
+   */
+  private static List<Aenderungsbefehl> entfalteBereiche(
+      List<Aenderungsbefehl> befehle, List<Norm> normen) {
+    var entfaltet = new ArrayList<Aenderungsbefehl>(befehle.size());
+    for (var befehl : befehle) {
+      if (befehl instanceof BereichsUmnummerierung bereich) {
+        var teile = entfalte(bereich, normen);
+        entfaltet.add(teile != null ? teile : befehl);
+      } else {
+        entfaltet.add(befehl);
+      }
+    }
+    return entfaltet;
+  }
+
+  private static @Nullable Aenderungsbefehl entfalte(
+      BereichsUmnummerierung bereich, List<Norm> normen) {
+    var von = paragraphNummer(bereich.stelle());
+    var bis = paragraphNummer(bereich.bis());
+    var neuVon = paragraphNummer(bereich.neu());
+    var neuBis = paragraphNummer(bereich.neuBis());
+    if (von == null || bis == null || neuVon == null || neuBis == null) {
+      return null;
+    }
+    var sigel = ((Stelle.Paragraph) bereich.stelle().komponenten().get(0)).sigel();
+    var vorhanden = new ArrayList<String>();
+    for (var norm : normen) {
+      var enbez = norm.enbez();
+      if (enbez == null || !enbez.startsWith(sigel + " ") || norm.weggefallen()) {
+        continue;
+      }
+      var nummer = enbez.substring(sigel.length() + 1).strip();
+      if (istImBereich(nummer, von, bis)) {
+        vorhanden.add(nummer);
+      }
+    }
+    int anzahl = neuBis - neuVon + 1;
+    if (vorhanden.size() != anzahl) {
+      return null;
+    }
+    var teile = new ArrayList<Aenderungsbefehl>(anzahl);
+    for (int i = 0; i < anzahl; i++) {
+      teile.add(
+          new Umnummerierung(
+              new Stelle(List.of(new Stelle.Paragraph(vorhanden.get(i), sigel))),
+              new Stelle(List.of(new Stelle.Paragraph(String.valueOf(neuVon + i), sigel))),
+              bereich.provenienz()));
+    }
+    return teile.size() == 1 ? teile.get(0) : new Sammelbefehl(teile);
+  }
+
+  /** Die numerische Bezeichnung eines Paragraphen-/Artikelziels, sonst {@code null}. */
+  private static @Nullable Integer paragraphNummer(Stelle stelle) {
+    if (stelle.komponenten().size() != 1
+        || !(stelle.komponenten().get(0) instanceof Stelle.Paragraph p)) {
+      return null;
+    }
+    var ziffern = p.nummer().replaceAll("[^0-9]", "");
+    return ziffern.isEmpty() ? null : Integer.valueOf(ziffern);
+  }
+
+  /** Liegt die Bezeichnung („9“, „9a“) im Bereich der beiden Zahlen? */
+  private static boolean istImBereich(String nummer, int von, int bis) {
+    var ziffern = nummer.replaceAll("[^0-9]", "");
+    if (ziffern.isEmpty()) {
+      return false;
+    }
+    int n = Integer.parseInt(ziffern);
+    return n >= von && n <= bis;
+  }
+
   private static List<Integer> anwendungsReihenfolge(List<Schritt> schritte) {
     int anzahl = schritte.size();
     var raeumt = new ArrayList<Set<String>>(anzahl);
@@ -466,6 +550,16 @@ public final class BefehlAnwender {
         case Anfuegung a -> wendeAnfuegungAn(normen, a);
         case Aufhebung a -> wendeAufhebungAn(normen, a);
         case Umnummerierung u -> wendeUmnummerierungAn(normen, u);
+        // Bereiche werden vor der Anwendung entfaltet (siehe #entfalteBereiche); hierher gelangt
+        // nur, was sich am Gesetz nicht auflösen ließ.
+        case BereichsUmnummerierung b ->
+            manuell(
+                befehl,
+                "Der Bereich "
+                    + b.stelle().anzeigeText()
+                    + " bis "
+                    + b.bis().anzeigeText()
+                    + " trägt nicht so viele Einheiten, wie der Befehl neue Bezeichnungen nennt.");
         case WortlautZuAbsatz w -> wendeWortlautZuAbsatzAn(normen, w);
         case WortlautZuSatz w -> wendeWortlautZuSatzAn(normen, w);
         case WortlautVoranstellung w -> wendeWortlautVoranstellungAn(normen, w);
@@ -2014,18 +2108,48 @@ public final class BefehlAnwender {
     }
 
     // Ohne Absatzmarker (Einzelabsatz-Normen wie „§ 19 Außerkrafttreten Dieses Gesetz tritt …“):
-    // Steht „§ N“ allein auf der ersten Zeile, ist die zweite Zeile die Überschrift und der Rest
-    // der Normtext.
+    // Steht „§ N“ allein auf der ersten Zeile, ist die folgende Zeile die Überschrift und der Rest
+    // der Normtext. Die Überschrift darf dabei über mehrere Zeilen laufen — der Satz bricht sie am
+    // Spaltenrand um („Zahlungen an den örtlichen Träger“ / „der öffentlichen Jugendhilfe“).
+    // Fortgesetzt wird sie nur über klein beginnende Zeilen: Ein Normtext beginnt großgeschrieben
+    // oder mit einem Marker.
     var zeilen = text.lines().map(String::strip).filter(z -> !z.isEmpty()).toList();
     if (zeilen.size() >= 3 && zeilen.get(0).matches("(?:§|Art\\.)\\s*\\d+[a-z]?")) {
-      titel = zeilen.get(1);
-      var rest = String.join("\n", zeilen.subList(2, zeilen.size()));
+      int nachTitel = titelEnde(zeilen, 1);
+      titel = String.join(" ", zeilen.subList(1, nachTitel));
+      var rest = String.join("\n", zeilen.subList(nachTitel, zeilen.size()));
       return new Norm(
           enbez,
           titel,
           vorlage.gliederung(),
           List.of(new Absatz(null, normalisiereZitatText(rest))),
           false);
+    }
+    // Dieselbe Norm, deren Überschrift der Satz an den Kopf gezogen hat („§ 1 Zahlungen an die
+    // Wohnsitzgemeinde“ in einer Zeile). Überschrift ist der Zeilenrest nur dann, wenn er keinen
+    // Satz abschließt — sonst trägt die Zeile bereits den Normtext.
+    var kopfZeile =
+        zeilen.isEmpty()
+            ? null
+            : Pattern.compile("^(?:§|Art\\.)\\s*\\d+[a-z]?\\s+(\\S.*)$").matcher(zeilen.get(0));
+    if (zeilen.size() >= 2
+        && kopfZeile != null
+        && kopfZeile.matches()
+        && !kopfZeile.group(1).endsWith(".")) {
+      var kopf = new ArrayList<String>();
+      kopf.add(kopfZeile.group(1).strip());
+      // Die Überschrift steht hier schon in Zeile 0; fortgesetzt werden kann sie ab Zeile 1.
+      int nachTitel = titelEnde(zeilen, 0);
+      kopf.addAll(zeilen.subList(1, nachTitel));
+      var rest = String.join("\n", zeilen.subList(nachTitel, zeilen.size()));
+      if (!rest.isBlank()) {
+        return new Norm(
+            enbez,
+            String.join(" ", kopf),
+            vorlage.gliederung(),
+            List.of(new Absatz(null, normalisiereZitatText(rest))),
+            false);
+      }
     }
     // Fallback: gesamter Text (ohne „§ N“-Präfix) als unnummerierter Absatz, Titel unverändert.
     var inhalt = text.replaceFirst("^(?:§|Art\\.)\\s*\\S+\\s*", "");
@@ -2035,6 +2159,21 @@ public final class BefehlAnwender {
         vorlage.gliederung(),
         List.of(new Absatz(null, normalisiereZitatText(inhalt))),
         false);
+  }
+
+  /**
+   * Der Index hinter der Überschrift: Ab {@code von} laufen so lange Überschriftenzeilen, wie sie
+   * klein beginnen — ein umbrochener Titel setzt klein fort, ein Normtext beginnt groß oder mit
+   * einem Marker.
+   */
+  private static int titelEnde(List<String> zeilen, int von) {
+    int i = von + 1;
+    while (i < zeilen.size()
+        && !zeilen.get(i).isEmpty()
+        && Character.isLowerCase(zeilen.get(i).codePointAt(0))) {
+      i++;
+    }
+    return i;
   }
 
   /** Zerlegt zitierten Text in Absätze anhand der „(n)“-Marker. */

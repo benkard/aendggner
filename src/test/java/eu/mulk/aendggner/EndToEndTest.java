@@ -960,6 +960,121 @@ class EndToEndTest {
   }
 
   /**
+   * Thüringen: Vierte Verordnung zur Änderung der Thüringer Kindergartenfinanzierungsverordnung
+   * (GVBl. für den Freistaat Thüringen Nr. 2 vom 13.02.2026, S. 77). Neun der zehn Befehle des
+   * Artikels 1 werden erkannt.
+   *
+   * <p>Das Heft ist ein Sammelheft: Es trägt vier Verkündungen, von denen nur diese eine ein
+   * Änderungsdokument ist. Die übrigen — ein Zuständigkeitsbeschluss mit eigener Nummernfolge, eine
+   * Stammverordnung und eine Inkrafttretens-Bekanntmachung — bleiben folgenlos.
+   *
+   * <p>Der unterscheidende Satzbefund: Das Heft führt <em>kein einziges</em> {@code „}, sondern
+   * setzt gerade Anführungszeichen beidseitig. Würden sie wie im BGBl durchweg schließend gelesen,
+   * fände der Zitatextraktor kein Zitat und keinen einzigen Befehl.
+   *
+   * <p>Kein voller Akzeptanztest: {@code landesrecht.thueringen.de} ist dieselbe anmeldepflichtige
+   * juris-Anwendung wie die Portale Schleswig-Holsteins, Berlins, Baden-Württembergs und Hessens.
+   */
+  @Test
+  void thuerKiGaFinVOAendVO() throws Exception {
+    var pdf = SAMPLEDATA.resolve("Thueringen/GVBl-TH-2026-02_KiGaFinanzVO-AendVO-ua.pdf");
+    assumeTrue(Files.exists(pdf), "GVBl-Thüringen-Beispiel-PDF fehlt");
+
+    var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(pdf));
+
+    // Gerade Anführungszeichen paarweise gelesen: Das Heft führt beide Sorten in gleicher Zahl.
+    assertThat(text).doesNotContain("\"");
+    assertThat(text.chars().filter(c -> c == '„').count())
+        .isEqualTo(text.chars().filter(c -> c == '“').count());
+
+    // Laufender Kolumnentitel und Seitenfuß herausgeschnitten. Der Kolumnentitel stand mitten in
+    // einem getrennten Wort — nach dem Schnitt ist die Silbentrennung geheilt.
+    assertThat(text).doesNotContain("Tag der Ausgabe");
+    assertThat(text).doesNotContain("Verordnungsblatt für den Freistaat");
+    assertThat(text).contains("Frauenhäusern und Frauenschutzwohnungen");
+
+    var alt = SAMPLEDATA.resolve("Thueringen/ThuerKigaFinVO-alt.txt");
+    var verordnung = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(alt);
+    assertThat(verordnung.jurabk()).isEqualTo("ThürKigaFinVO");
+    // Stand vor der Vierten ÄndVO: §§ 1 bis 12, darunter die aufgehobenen Platzhalter § 7 und
+    // § 10 und der 2023 eingefügte § 7a.
+    assertThat(verordnung.normen()).hasSize(13);
+    assertThat(verordnung.norm("§ 7").orElseThrow().weggefallen()).isTrue();
+    assertThat(verordnung.norm("§ 10").orElseThrow().weggefallen()).isTrue();
+    var ergebnis = new AenderungsgesetzParser().parse(text, verordnung, null);
+    // Artikel 2 regelt nur das Inkrafttreten.
+    assertThat(ergebnis.artikel()).containsExactly("1");
+    assertThat(ergebnis.befehle()).hasSize(10);
+    assertThat(ergebnis.befehle()).noneMatch(b -> b instanceof UnbekannterBefehl);
+
+    // „Die §§ 1 bis 3 erhalten folgende Fassung:“ — ein Zitat, drei Normen.
+    var bereichsNeufassung = (Aenderungsbefehl.Sammelbefehl) befehlZu(ergebnis, "1.");
+    assertThat(bereichsNeufassung.teilbefehle())
+        .extracting(b -> b.stelle().anzeigeText())
+        .containsExactly("§ 1", "§ 2", "§ 3");
+
+    // „die Verweisung „X“ durch die Verweisung „Y“ ersetzt“ — dasselbe Muster wie „die Angabe“.
+    var verweisung = (Aenderungsbefehl.Ersetzung) befehlZu(ergebnis, "2. b)");
+    assertThat(verweisung.stelle().anzeigeText()).isEqualTo("§ 4 Satz 2");
+    assertThat(verweisung.alt()).isEqualTo("§ 27 Abs. 1, 3 und 5");
+    assertThat(verweisung.neu()).isEqualTo("§ 27 Abs. 1");
+
+    // „Der bisherige § 8 wird § 7 und Absatz 1 wird wie folgt geändert:“ — der Rahmen verengt sich
+    // auf eine Untereinheit der umnummerierten Norm; die Unterpunkte meinen den NEUEN § 7.
+    var rahmenUmnummerierung = befehlZu(ergebnis, "6.");
+    assertThat(rahmenUmnummerierung).isInstanceOf(Aenderungsbefehl.Umnummerierung.class);
+    assertThat(rahmenUmnummerierung.stelle().anzeigeText()).isEqualTo("§ 8");
+    assertThat(befehlZu(ergebnis, "6. a)").stelle().anzeigeText()).isEqualTo("§ 7 Absatz 1 Satz 1");
+    assertThat(befehlZu(ergebnis, "6. b)").stelle().anzeigeText()).isEqualTo("§ 7 Absatz 1 Satz 2");
+
+    // „Die bisherigen §§ 9 bis 12 werden die §§ 8 bis 10.“ nennt vier Ausgangs-, aber drei
+    // Zielbezeichnungen — kein Widerspruch, sondern eine Lücke: § 10 ist aufgehoben und zählt nicht
+    // mit. Welche Einheiten der Bereich trägt, weiß erst das Gesetz; der Befehl bleibt deshalb bis
+    // zur Anwendung ungeteilt.
+    var bereich = befehlZu(ergebnis, "7.");
+    assertThat(bereich).isInstanceOf(Aenderungsbefehl.BereichsUmnummerierung.class);
+
+    // Anwendung auf die konsolidierte Fassung vom Stand der Dritten ÄndVO (siehe SOURCES).
+    var anwendung = BefehlAnwender.anwenden(verordnung, ergebnis.befehle());
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(10);
+    assertThat(anwendung.protokoll())
+        .noneMatch(a -> a.status() == BefehlAnwender.Status.MANUELL_PRUEFEN);
+
+    var neu = anwendung.neu();
+    // Die Verordnung zählt danach lückenlos §§ 1 bis 10: § 6 ist aufgehoben, § 7a wird § 6, § 8
+    // wird § 7, und aus §§ 9, 11 und 12 werden §§ 8, 9 und 10 — die aufgehobenen Platzhalter § 7
+    // und § 10 weichen den neuen Bezeichnungen.
+    assertThat(neu.normen())
+        .extracting(n -> n.enbez())
+        .containsExactly("§ 1", "§ 2", "§ 3", "§ 4", "§ 5", "§ 6", "§ 7", "§ 8", "§ 9", "§ 10");
+    assertThat(neu.norm("§ 6").orElseThrow().titel())
+        .isEqualTo("Zuschuss für die praxisintegrierte Ausbildung");
+    assertThat(neu.norm("§ 10").orElseThrow().titel()).isEqualTo("Inkrafttreten, Außerkrafttreten");
+
+    // Der umnummerierte § 7 (bisher § 8) trägt die beiden Verweisungs-Ersetzungen aus Punkt 6.
+    var paragraph7 = neu.norm("§ 7").orElseThrow().gesamtText();
+    assertThat(paragraph7)
+        .contains("Meldungen nach § 27 Abs. 1 ThürKigaG")
+        .contains("Meldungen nach § 30 Abs. 4 und 6 ThürKigaG")
+        .doesNotContain("§ 27 Abs. 1 und 3 ThürKigaG")
+        .doesNotContain("§ 27 Abs. 5 sowie");
+    // Die neu gefassten §§ 1 bis 3 stammen aus einem einzigen Zitat.
+    assertThat(neu.norm("§ 1").orElseThrow().gesamtText())
+        .contains("Die Zahlung der Landeszuschüsse nach § 25 Satz 1 Nr. 2 und 3 ThürKigaG");
+    // Die Überschrift des zitierten § 3 läuft über zwei Zeilen; sie gehört ganz in den Titel …
+    assertThat(neu.norm("§ 3").orElseThrow().titel())
+        .isEqualTo("Zahlungen an den örtlichen Träger der öffentlichen Jugendhilfe");
+    // … und die des § 1, die im Satz am Kopf klebt, gehört nicht zusätzlich in den Normtext.
+    assertThat(neu.norm("§ 1").orElseThrow().gesamtText())
+        .doesNotContain("Zahlungen an die Wohnsitzgemeinde");
+    // Die Silbentrennung des Spaltenumbruchs ist geheilt: „Thür-“ + „KigaG“ ist ein Wort, obwohl
+    // die Folgezeile großgeschrieben beginnt — der Wortbestand des Heftes bezeugt es.
+    assertThat(neu.norm("§ 5").orElseThrow().gesamtText())
+        .contains("nach den §§ 25 und 26 ThürKigaG")
+        .doesNotContain("Thür-KigaG");
+  }
+
+  /**
    * Änderungsantrag der GRÜNEN (Ltg-Drs. 19/10365) zum Landtags-Gesetzentwurf 19/9707: Er ändert
    * nicht das Stammgesetz, sondern die Drucksache — genau den Befehl § 3 Nr. 22, der die Artenliste
    * des neuen § 18 AVBayJG zitiert.

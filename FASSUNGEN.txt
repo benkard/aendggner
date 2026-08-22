@@ -38,6 +38,10 @@ kanonischen Klartext nicht Schmuck, sondern trägt die Gliederung; wer sie
 verliert, verliert die Zugehörigkeit einer Zeile zu ihrer Einheit.
 
 
+Erster Teil
+Behebung der festgehaltenen Mängel
+
+
 Artikel 1
 Einrückung bei der Neufassung einer Aufzählungseinheit
 
@@ -108,6 +112,112 @@ Nachweis
 (3) Hinzu treten drei Prüfungen der zugrunde liegenden Regeln
     (BefehlAnwenderTest). Der Gesamtbestand beträgt nunmehr 315 Prüfungen; keine
     der gepinnten Zahlen der übrigen Belegfälle hat sich geändert.
+
+
+Zweiter Teil
+Thüringen
+
+Mit der Mängelliste war die Arbeit wieder in die Breite zu führen. Von den seit
+Juli beschafften Gesetzblättern der Länder war eines nie angefasst worden: das
+Gesetz- und Verordnungsblatt für den Freistaat Thüringen. Es hat drei Befunde
+erbracht, die keineswegs thüringisch sind, sondern allgemein gelten, und einen
+Beschaffungsweg eröffnet, wo das Landesrechtportal versperrt ist.
+
+
+Artikel 6
+Gerade Anführungszeichen
+
+(1) Gerade Anführungszeichen (") wurden bislang ausnahmslos als schließende
+    gelesen (TextBereiniger.normalisiereAnfuehrungszeichen). Für das Bundes-
+    gesetzblatt und die Drucksachen trifft das zu; dort öffnet stets das
+    deutsche Zeichen, und ein gerades ist ein Satz- oder Extraktionsfehler.
+
+(2) Führt ein Text dagegen kein einziges öffnendes Zeichen („), so setzt er die
+    geraden beidseitig. Sie werden fortan paarweise gelesen: das erste öffnet,
+    das zweite schließt, und so fort. Bei ungerader Anzahl ist der Text
+    nachweislich unbalanciert; dann bleibt es bei der schließenden Lesart, und
+    es ergeht eine Warnung.
+
+(3) Ohne diese Unterscheidung fände der Zitatextraktor in einem so gesetzten
+    Blatt kein einziges Zitat; sämtliche Befehle des Heftes gingen verloren.
+
+(4) Eine Regel nach der Stellung des Zeichens (öffnend, wenn kein Leerzeichen
+    folgt) wäre untauglich: Das Thüringer Blatt führt Zitate, die mit einem
+    Leerzeichen beginnen, und umgekehrt schließende Zeichen, die unmittelbar am
+    Folgewort kleben.
+
+
+Artikel 7
+Bereichsweise Umnummerierung von Paragraphen
+
+(1) Der Befehl „Die bisherigen §§ 9 bis 12 werden die §§ 8 bis 10“ nennt vier
+    Ausgangs- und drei Zielbezeichnungen. Das ist kein Widerspruch: Der Bereich
+    nennt Bezeichnungen, gezählt werden aber Einheiten, und ein aufgehobener
+    Platzhalter darin ist keine Einheit — er trägt keinen Inhalt.
+
+(2) Welche Einheiten ein Bereich trägt, weiß erst das Gesetz. Ein solcher Befehl
+    bleibt deshalb bis zur Anwendung ungeteilt (Aenderungsbefehl.
+    BereichsUmnummerierung) und wird dort entfaltet (BefehlAnwender.
+    entfalteBereiche): Die vorhandenen Einheiten des Bereichs werden der Reihe
+    nach den neuen Bezeichnungen zugeordnet. Geht die Zählung auch dann nicht
+    auf, bleibt der Befehl manuell zu prüfen — mit Angabe des Grundes.
+
+(3) Geht die Zählung der Bezeichnungen schon im Wortlaut auf, so bleibt es bei
+    der bisherigen paarweisen Zuordnung.
+
+
+Artikel 8
+Weitere Befehlsformen und Satzbefunde
+
+(1) Die Verweisung tritt als Gegenstand einer Wortoperation neben Wort, Wörter,
+    Angabe und Zahl (BefehlErkenner): „In Satz 2 wird die Verweisung „X“ durch
+    die Verweisung „Y“ ersetzt.“
+
+(2) Der Rahmen einer Umnummerierung darf sich auf eine Untereinheit der
+    umnummerierten Einheit verengen: „Der bisherige § 8 wird § 7 und Absatz 1
+    wird wie folgt geändert:“. Die Unterpunkte meinen dann diesen Absatz des neu
+    bezeichneten Paragraphen.
+
+(3) Die Bereichs-Neufassung („Die §§ 1 bis 3 erhalten folgende Fassung:“) wird
+    fortan allein an den Bezeichnungen des angekündigten Bereichs geteilt, nicht
+    mehr an jedem Paragraphenzeichen des Zitats. Der neue Wortlaut zitiert
+    reihenweise andere Vorschriften; an diesen zu schneiden erfand Normen, die es
+    nicht gibt. Nennt der Bereich einen Normkopf, den das Zitat nicht führt, so
+    sagen Ankündigung und Wortlaut Verschiedenes — dann wird nicht geraten.
+
+(4) Ob ein Trennstrich vor einem Großbuchstaben eine Silbentrennung war,
+    entscheidet fortan der Wortbestand des Dokuments (TextBereiniger.
+    warTrennung): Trägt es das Wort auch ohne Strich, so war es eine Trennung.
+    Der Satz trennt auch binnengroßgeschriebene Kürzel („Thür-“ + „KigaG“),
+    während echte Bindestriche („Ton-Bild-Übertragung“) unangetastet bleiben.
+
+(5) Die Überschrift einer zitierten Neufassung darf über mehrere Zeilen laufen
+    (BefehlAnwender.parseNorm); fortgesetzt wird sie über klein beginnende
+    Zeilen. Steht sie in derselben Zeile wie die Bezeichnung, so gehört sie in
+    den Titel und nicht zusätzlich in den Normtext.
+
+(6) Der laufende Kolumnentitel und der Seitenfuß des Thüringer Blattes werden
+    entfernt (TextBereiniger). Sie stehen im Inhaltsstrom mitten im Text und
+    zerschneiden sogar getrennte Wörter; sie sind daher herauszuschneiden und
+    nicht als eigene Zeile zu entfernen.
+
+
+Artikel 9
+Belegfall Thüringen
+
+(1) Aufgenommen wird die Vierte Verordnung zur Änderung der Thüringer
+    Kindergartenfinanzierungsverordnung (GVBl. Nr. 2/2026 S. 77) als voller
+    Akzeptanzfall (EndToEndTest.thuerKiGaFinVOAendVO): zehn Befehle, kein Rest.
+
+(2) Die Stammfassung (Thueringen/ThuerKigaFinVO-alt.txt) ist aus vier
+    Gesetzblättern zusammengesetzt, da das Landesrechtportal Thüringens dieselbe
+    anmeldepflichtige Anwendung ist wie die Portale Schleswig-Holsteins, Berlins,
+    Baden-Württembergs und Hessens. Die Hefte gibt die Parlamentsdatenbank des
+    Landtags frei aus, der das Blatt herausgibt. Herkunft und Aufbereitung sind
+    in Thueringen/SOURCES niedergelegt.
+
+(3) Der Gesamtbestand beträgt nunmehr 325 Prüfungen; keine der gepinnten Zahlen
+    der übrigen Belegfälle hat sich geändert.
 
 
 ════════════════════════════════════════════════════════════════════════════════

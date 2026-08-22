@@ -116,6 +116,21 @@ public sealed interface Aenderungsbefehl {
       implements Aenderungsbefehl {}
 
   /**
+   * „Die bisherigen §§ 9 bis 12 werden die §§ 8 bis 10.“ — Umnummerierung eines Bereichs, dessen
+   * Zuordnung erst am Gesetz ablesbar ist.
+   *
+   * <p>Der Befehl nennt <em>Bezeichnungen</em>, gemeint sind aber <em>Einheiten</em>: Trägt der
+   * Ausgangsbereich einen aufgehobenen Platzhalter, so zählt der Verordnungsgeber ihn nicht mit —
+   * er trägt keinen Inhalt, den man umnummerieren könnte. Deshalb bleibt dieser Befehl bis zur
+   * Anwendung ungeteilt; erst dort werden die vorhandenen Einheiten des Bereichs der Reihe nach den
+   * neuen Bezeichnungen zugeordnet (siehe {@code BefehlAnwender}). Geht die Zählung auch dann nicht
+   * auf, bleibt er manuell zu prüfen.
+   */
+  record BereichsUmnummerierung(
+      Stelle stelle, Stelle bis, Stelle neu, Stelle neuBis, Provenienz provenienz)
+      implements Aenderungsbefehl {}
+
+  /**
    * „Der Wortlaut wird Absatz 1.“ — der bisher unnummerierte Normtext erhält die Absatznummer, wird
    * also zum ersten Absatz (Vorbereitung für das Anfügen weiterer Absätze).
    */

@@ -1,0 +1,53 @@
+Änderungsverordnung:
+- Vierte Verordnung zur Änderung der Thüringer
+  Kindergartenfinanzierungsverordnung vom 16.01.2026, verkündet am
+  13.02.2026 (GVBl. für den Freistaat Thüringen Nr. 2 S. 77), in Kraft
+  mit Wirkung vom 01.01.2026
+  (GVBl-TH-2026-02_KiGaFinanzVO-AendVO-ua.pdf)
+- Das Heft ist ein Sammelheft mit vier Verkündungen; nur diese eine ist
+  ein Änderungsdokument. Artikel 2 regelt das Inkrafttreten.
+
+Stammfassung (ThuerKigaFinVO-alt.txt):
+- Das Landesrechtportal landesrecht.thueringen.de ist dieselbe
+  anmeldepflichtige juris-Anwendung wie die Portale Schleswig-Holsteins,
+  Berlins, Baden-Württembergs und Hessens: Jede Dokument-URL liefert nur
+  die rund 5,4 kB große Hülle der Single-Page-Anwendung. Auch das
+  GVBl-Archiv der Staatskanzlei (thueringen.de/th1/tsk/gvbl/) ist für
+  Skripte gesperrt (Bot-Schutz, liefert eine Fehlerseite).
+- Frei zugänglich ist dagegen die Parlamentsdokumentation des
+  Thüringer Landtags, der das Blatt herausgibt. Schema:
+  parldok.thueringer-landtag.de/ParlDok/dokument/<WP>/art/GVBl/num/<Heft>/jahr/<Jahr>[/seite/<S>]
+  Die Wahlperiode muss stimmen (2018 = 06, 2021/2023 = 07, ab 2024 = 08);
+  passt sie nicht, kommt statt des PDF eine HTML-Seite („Das aufgerufene
+  Dokument ist in der Datenbank noch nicht verfügbar“). Mit /seite/<S>
+  antwortet der Dienst nur, wenn dort eine Verkündung beginnt — so lässt
+  sich zu einer Fundstelle das Heft finden.
+- Die konsolidierte Fassung ist deshalb aus den Gesetzblättern selbst
+  zusammengesetzt. Verwendet wurden:
+  * Stammfassung: Thüringer Kindertagesbetreuungsfinanzierungsverordnung
+    (ThürKitaFinVO) vom 03.12.2018 (GVBl. 2018 Nr. 13 S. 717)
+  * Erste ÄndVO vom 01.12.2021 (GVBl. 2021 Nr. 31 S. 597) — benennt die
+    Verordnung in Thüringer Kindergartenfinanzierungsverordnung
+    (ThürKigaFinVO) um und zieht die Verweisungen vom ThürKitaG auf das
+    ThürKigaG nach
+  * Zweite ÄndVO vom 26.09.2023 (GVBl. 2023 Nr. 13 S. 287) — fügt § 7a
+    ein und hebt § 10 auf
+  * Dritte ÄndVO vom 17.10.2024 (GVBl. 2024 Nr. 16 S. 682) — hebt § 7
+    auf; ihre Nr. 1 tritt erst am 01.01.2026 in Kraft und gilt damit für
+    die hier gesuchte Fassung bereits
+- Aufbereitung: Rohtext über das werkzeugeigene --extract-only (das Heft
+  ist zweispaltig; pdftotext -layout verschränkt die Spalten), dann die
+  Ligatur-Artefakte des älteren Heftsatzes geheilt („fi nanzierung“,
+  „pfl ege“), dann jeder Änderungsbefehl als eine geprüfte Ersetzung
+  angewandt — schlägt eine fehl, bricht die Aufbereitung ab; geraten wird
+  nichts. Zuletzt die kanonische Form hergestellt: Normkopf und Titel auf
+  einer Zeile, Absatzmarker am Zeilenanfang.
+- Aufgehobene Paragraphen stehen als Platzhalter („§ 7 (aufgehoben)“,
+  „§ 10 (aufgehoben)“), wie es die konsolidierten Fassungen halten. Genau
+  daran hängt Punkt 7 der Vierten ÄndVO: „Die bisherigen §§ 9 bis 12
+  werden die §§ 8 bis 10“ nennt vier Bezeichnungen für drei Einheiten,
+  weil der Platzhalter § 10 keine Einheit ist.
+- Gegenprobe: Alle zehn Befehle der Vierten ÄndVO finden ihr Ziel und
+  ihren zitierten Ausgangswortlaut; keiner bleibt manuell. Eine amtliche
+  konsolidierte Nachfassung war nicht zu beschaffen (siehe oben), ein
+  zeichengenauer Abgleich mit ihr steht deshalb aus.

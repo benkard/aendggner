@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Anfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Aufhebung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.BereichsUmnummerierung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ebene;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.GliederungsUeberschriften;
@@ -1573,5 +1574,60 @@ class BefehlAnwenderTest {
                             + "  2. die Prüfung und\n"
                             + "  3. die schriftliche Bestätigung.")),
                 false)));
+  }
+
+  /**
+   * „Die bisherigen §§ 2 bis 4 werden die §§ 2 und 3.“ — der Bereich nennt drei Bezeichnungen, das
+   * Gesetz trägt darin aber nur zwei Einheiten: § 3 ist aufgehoben und zählt nicht mit. Erst am
+   * Gesetz steht die Zuordnung fest.
+   */
+  @Test
+  void bereichsUmnummerierungUeberspringtAufgehobeneEinheiten() {
+    var gesetz =
+        new Gesetz(
+            "TestG",
+            "Gesetz zur Erprobung",
+            "Testgesetz",
+            List.of(
+                new Norm("§ 1", "Zweck", null, List.of(new Absatz(null, "Erprobung.")), false),
+                new Norm(
+                    "§ 2", "Mittel", null, List.of(new Absatz(null, "Mittel sind frei.")), false),
+                new Norm("§ 3", "(aufgehoben)", null, List.of(), true),
+                new Norm(
+                    "§ 4", "Schluss", null, List.of(new Absatz(null, "Tritt in Kraft.")), false)),
+            List.of());
+
+    var befehl =
+        new BereichsUmnummerierung(
+            stelle(new Stelle.Paragraph("2")),
+            stelle(new Stelle.Paragraph("4")),
+            stelle(new Stelle.Paragraph("2")),
+            stelle(new Stelle.Paragraph("3")),
+            PROV);
+    var ergebnis = BefehlAnwender.anwenden(gesetz, List.of(befehl));
+
+    assertThat(ergebnis.anzahlManuell()).isZero();
+    assertThat(ergebnis.neu().normen())
+        .extracting(Norm::enbez)
+        .containsExactly("§ 1", "§ 2", "§ 3");
+    assertThat(ergebnis.neu().norm("§ 3").orElseThrow().titel()).isEqualTo("Schluss");
+  }
+
+  /**
+   * Trägt der Bereich mehr Einheiten, als der Befehl neue Bezeichnungen nennt, so ist er nicht
+   * auflösbar — dann wird nicht geraten, sondern gemeldet.
+   */
+  @Test
+  void unaufloesbarerBereichBleibtManuell() {
+    var befehl =
+        new BereichsUmnummerierung(
+            stelle(new Stelle.Paragraph("1")),
+            stelle(new Stelle.Paragraph("3")),
+            stelle(new Stelle.Paragraph("1")),
+            stelle(new Stelle.Paragraph("1")),
+            PROV);
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+    assertThat(ergebnis.anzahlManuell()).isEqualTo(1);
+    assertThat(ergebnis.protokoll().get(0).begruendung()).contains("nicht so viele Einheiten");
   }
 }

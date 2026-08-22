@@ -315,4 +315,38 @@ class TextBereinigerTest {
     assertThat(TextBereiniger.bereinige("§ 19„\nAußerkrafttreten"))
         .isEqualTo("„§ 19\nAußerkrafttreten");
   }
+
+  /**
+   * Manche Gesetzblätter setzen gerade Anführungszeichen beidseitig (GVBl. für den Freistaat
+   * Thüringen). Führt ein Text kein einziges {@code „}, werden sie paarweise gelesen — sonst fände
+   * der Zitatextraktor dort kein Zitat.
+   */
+  @Test
+  void geradeAnfuehrungszeichenWerdenPaarweiseGelesen() {
+    var bereinigt =
+        TextBereiniger.bereinige(
+            "In Satz 2 wird die Verweisung \"§ 27 Abs. 1, 3 und 5\" durch die Verweisung"
+                + " \"§ 27 Abs. 1\" ersetzt.");
+    assertThat(bereinigt)
+        .isEqualTo(
+            "In Satz 2 wird die Verweisung „§ 27 Abs. 1, 3 und 5“ durch die Verweisung"
+                + " „§ 27 Abs. 1“ ersetzt.");
+  }
+
+  /**
+   * Führt der Text dagegen das deutsche öffnende Zeichen, so ist ein gerades ein Satz- oder
+   * Extraktionsfehler und schließend zu lesen — so steht es in BGBl und Drucksachen.
+   */
+  @Test
+  void geradesZeichenNebenDeutschemBleibtSchliessend() {
+    var bereinigt = TextBereiniger.bereinige("Das Wort „alt\" wird durch das Wort „neu“ ersetzt.");
+    assertThat(bereinigt).isEqualTo("Das Wort „alt“ wird durch das Wort „neu“ ersetzt.");
+  }
+
+  /** Bei ungerader Anzahl lässt sich nicht paaren; dann bleibt es bei der schließenden Lesart. */
+  @Test
+  void ungeradeAnzahlGeraderZeichenWirdNichtGepaart() {
+    var bereinigt = TextBereiniger.bereinige("Die Angabe \"X\" wird durch \"Y gestrichen.");
+    assertThat(bereinigt).doesNotContain("„").contains("“");
+  }
 }

@@ -3,6 +3,7 @@ package eu.mulk.aendggner.aenderung.parse;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Anfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Aufhebung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.BereichsUmnummerierung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ebene;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.FussnotenAufhebung;
@@ -27,6 +28,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.jboss.logging.Logger;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -38,8 +40,11 @@ import org.jspecify.annotations.Nullable;
  */
 final class BefehlErkenner {
 
+  private static final Logger log = Logger.getLogger(BefehlErkenner.class);
+
   // Wiederkehrende Bausteine.
-  private static final String WOERTER = "(?:die Wörter|das Wort|die Angabe|die Zahl)";
+  private static final String WOERTER =
+      "(?:die Wörter|das Wort|die Angabe|die Zahl|die Verweisung)";
   private static final String Z = "«(\\d+)»";
 
   // Der Doppelpunkt fehlt gelegentlich (Seitenumbruch-Artefakt); für einen Punkt mit Unterpunkten
@@ -131,7 +136,7 @@ final class BefehlErkenner {
   // darf auch hier verkürzt sein („Die Angabe „X“ wird durch „Y“ ersetzt“, hessisches GVBl).
   private static final Pattern ERSETZUNG_OHNE_STELLE =
       Pattern.compile(
-          "^(?:Die Wörter|Das Wort|Die Angabe|Die Zahl) "
+          "^(?:Die Wörter|Das Wort|Die Angabe|Die Zahl|Die Verweisung) "
               + Z
               + " (?:wird|werden) (jeweils )?durch (?:"
               + WOERTER
@@ -145,7 +150,7 @@ final class BefehlErkenner {
   private static final Pattern ERSETZUNG_MIT_ANKER =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?nach "
-              + "(?:dem Wort|den Wörtern|der Angabe|der Zahl) "
+              + "(?:dem Wort|den Wörtern|der Angabe|der Zahl|der Verweisung) "
               + Z
               + " "
               + WOERTER
@@ -161,7 +166,7 @@ final class BefehlErkenner {
   private static final Pattern WORT_VORANSTELLUNG =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?"
-              + "(?:dem Wort|den Wörtern|der Angabe|der Zahl) "
+              + "(?:dem Wort|den Wörtern|der Angabe|der Zahl|der Verweisung) "
               + Z
               + " "
               + WOERTER
@@ -217,7 +222,7 @@ final class BefehlErkenner {
   private static final Pattern WOERTER_EINFUEGUNG =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?(nach|vor) "
-              + "(?:dem Wort|den Wörtern|der Angabe|der Zahl) "
+              + "(?:dem Wort|den Wörtern|der Angabe|der Zahl|der Verweisung) "
               + Z
               + " "
               + WOERTER
@@ -390,7 +395,7 @@ final class BefehlErkenner {
   // allem als rechte Klausel eines Verbunds auf („… ersetzt und die Angabe „X“ wird gestrichen“).
   private static final Pattern STREICHUNG_OHNE_STELLE =
       Pattern.compile(
-          "^(?:Die Wörter|Das Wort|Die Angabe|Die Zahl) "
+          "^(?:Die Wörter|Das Wort|Die Angabe|Die Zahl|Die Verweisung) "
               + Z
               + " (?:wird|werden) "
               + "(?:jeweils )?gestrichen\\.$");
@@ -431,15 +436,19 @@ final class BefehlErkenner {
               + "(\\d+) bis (\\d+)\\.$");
 
   // „Die §§ 46 und 47 werden zu den §§ 34 und 35.“ — paarweise §-Umnummerierung (auch Bereiche).
+  // Wie bei der Einzelform steht auch hier oft „bisherigen“ dabei („Die bisherigen §§ 9 bis 12
+  // werden die §§ 8 bis 10.“, GVBl. für den Freistaat Thüringen).
   private static final Pattern UMNUMMERIERUNG_PARAGRAPHEN =
-      Pattern.compile("^Die (§§|Artt?\\.) (.+?) werden (?:zu den \\1 |zu \\1 |die \\1 )(.+?)\\.$");
+      Pattern.compile(
+          "^Die (?:bisherigen )?(§§|Artt?\\.) (.+?) "
+              + "werden (?:zu den \\1 |zu \\1 |die \\1 )(.+?)\\.$");
 
   // „Die §§ 52 bis 56 werden wie folgt gefasst: „§ 52 (weggefallen) …““ — Neufassung eines
-  // §-Bereichs;
-  // der Zitatblock wird an „§ N“-Grenzen in Einzel-Neufassungen zerlegt.
+  // §-Bereichs; der Zitatblock wird in Einzel-Neufassungen zerlegt (siehe {@link
+  // #paragraphBereichNeufassung}).
   private static final Pattern PARAGRAPH_BEREICH_NEUFASSUNG =
       Pattern.compile(
-          "^Die (?:§§|Artt?\\.) (\\d+[a-z]?) bis (\\d+[a-z]?) "
+          "^Die (§§|Artt?\\.) (\\d+[a-z]?) bis (\\d+[a-z]?) "
               + NEUFASSUNG_VERB
               + ": "
               + Z
@@ -463,7 +472,7 @@ final class BefehlErkenner {
   private static final Pattern KOMMA_UND_WOERTER_EINFUEGUNG =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?(nach|vor) "
-              + "(?:dem Wort|den Wörtern|der Angabe|der Zahl) "
+              + "(?:dem Wort|den Wörtern|der Angabe|der Zahl|der Verweisung) "
               + Z
               // Das wiederholte Verb fehlt im amtlichen Satz oft („… ein Komma und die Angabe „…“
               // eingefügt“, GV. NRW.).
@@ -603,7 +612,7 @@ final class BefehlErkenner {
   private static final Pattern KOMMA_EINFUEGUNG =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?(nach|vor) "
-              + "(?:dem Wort|den Wörtern|der Angabe|der Zahl) "
+              + "(?:dem Wort|den Wörtern|der Angabe|der Zahl|der Verweisung) "
               + Z
               + " (ein Komma|ein Semikolon|einen Punkt) eingefügt\\.$");
 
@@ -631,13 +640,20 @@ final class BefehlErkenner {
   }
 
   // „§ 50 wird zu § 38 und wird wie folgt geändert:“ — Umnummerierung als Begleitbefehl eines
-  // Kontextrahmens; die Folgebefehle beziehen sich auf die neue Bezeichnung.
+  // Kontextrahmens; die Folgebefehle beziehen sich auf die neue Bezeichnung. Der Rahmen darf sich
+  // dabei auf eine Untereinheit der umnummerierten Einheit verengen („Der bisherige § 8 wird § 7
+  // und Absatz 1 wird wie folgt geändert:“, GVBl. für den Freistaat Thüringen): Gruppe 4 nennt sie,
+  // die Folgebefehle meinen dann diesen Absatz des neubezeichneten Paragraphen.
   private static final Pattern UMNUMMERIERUNGS_RAHMEN =
       Pattern.compile(
           "^(?:Der bisherige |Die bisherige |Das bisherige )?(.+?) wird (?:zu )?"
               + "(§|Art\\.|Absatz|Abs\\.|Satz|Nummer|Nr\\.|Buchstabe|Buchst\\."
               + "|Teil|Abschnitt|Unterabschnitt|Buch|Kapitel|Anlage)"
-              + " (\\d+[a-z]?) und (?:wird |werden )?wie folgt geändert:$");
+              // Der Wächter „(?!wird |werden )“ ist nötig: ohne ihn verschlänge die Untereinheit
+              // in der schlichten Form („Abs. 3 wird Abs. 2 und wird wie folgt geändert:“) das
+              // Verb und wäre als Stelle unparsbar.
+              + " (\\d+[a-z]?) und (?:(?!wird |werden )(.+?) )?"
+              + "(?:wird |werden )?wie folgt geändert:$");
 
   /** Ein Kontextrahmen samt optionalem Begleitbefehl (Umnummerierung des Rahmens selbst). */
   record Rahmen(Stelle stelle, @Nullable Aenderungsbefehl begleitbefehl) {}
@@ -751,6 +767,17 @@ final class BefehlErkenner {
       if (alt.isPresent()) {
         var neu = new Stelle(List.of(komponenteFuer(m.group(2), m.group(3))));
         var befehl = new Umnummerierung(kontext.plus(alt.get()), kontext.plus(neu), provenienz);
+        // Nennt der Rahmen eine Untereinheit, so zeigt er auf sie — die Umnummerierung selbst
+        // bleibt davon unberührt. Ist die Untereinheit unparsbar, ist der ganze Satz nicht sicher
+        // zu deuten; dann kein Rahmen (der Befehl wird als unbekannt gemeldet, statt die
+        // Folgebefehle stillschweigend auf den ganzen Paragraphen zu münzen).
+        if (m.group(4) != null) {
+          var unter = StellenParser.parse(m.group(4));
+          if (unter.isEmpty()) {
+            return Optional.empty();
+          }
+          return Optional.of(new Rahmen(neu.plus(unter.get()), befehl));
+        }
         return Optional.of(new Rahmen(neu, befehl));
       }
     }
@@ -902,7 +929,9 @@ final class BefehlErkenner {
     }
 
     if ((m = PARAGRAPH_BEREICH_NEUFASSUNG.matcher(text)).matches()) {
-      return paragraphBereichNeufassung(zitat(zitate, m.group(3)), kontext, provenienz);
+      var sigel = m.group(1).startsWith("Art") ? "Art." : "§";
+      return paragraphBereichNeufassung(
+          sigel, m.group(2), m.group(3), zitat(zitate, m.group(4)), kontext, provenienz);
     }
 
     if ((m = NEUFASSUNG_MIT_STELLE.matcher(text)).matches()) {
@@ -1836,7 +1865,32 @@ final class BefehlErkenner {
       String sigel, String altPhrase, String neuPhrase, Stelle kontext, Provenienz provenienz) {
     var alt = StellenParser.parseMehrfach(sigel + altPhrase);
     var neu = StellenParser.parseMehrfach(sigel + neuPhrase);
-    if (alt.isEmpty() || alt.size() != neu.size()) {
+    if (alt.isEmpty()) {
+      return Optional.empty();
+    }
+    if (alt.size() != neu.size()) {
+      // Ungleich viele Ausgangs- und Zielbezeichnungen. Sind beide Seiten Bereiche, so ist das
+      // kein Widerspruch, sondern der Regelfall über eine Lücke hinweg: Der Bereich nennt
+      // Bezeichnungen, gezählt werden aber Einheiten, und ein aufgehobener Platzhalter darin zählt
+      // nicht mit. Welche Einheiten der Bereich trägt, weiß erst das Gesetz — der Befehl bleibt
+      // deshalb bis zur Anwendung ungeteilt.
+      var vonBis = BEREICH.matcher(altPhrase);
+      var neuVonBis = BEREICH.matcher(neuPhrase);
+      if (vonBis.matches() && neuVonBis.matches()) {
+        return Optional.of(
+            new BereichsUmnummerierung(
+                kontext.plus(paragraphStelle(sigel, vonBis.group(1))),
+                kontext.plus(paragraphStelle(sigel, vonBis.group(2))),
+                kontext.plus(paragraphStelle(sigel, neuVonBis.group(1))),
+                kontext.plus(paragraphStelle(sigel, neuVonBis.group(2))),
+                provenienz));
+      }
+      // Sonst sagt der Befehl nicht, welche Einheit ausfällt; es zu erraten hieße, den Wortlaut zu
+      // erfinden. Er bleibt unerkannt („Manuell prüfen“) — aber nicht stillschweigend.
+      log.warnf(
+          "Umnummerierung „%s%s … %s%s“ nennt %d Ausgangs-, aber %d Zielbezeichnungen — der Befehl"
+              + " ist nicht eindeutig und bleibt manuell zu prüfen.",
+          sigel, altPhrase, sigel, neuPhrase, alt.size(), neu.size());
       return Optional.empty();
     }
     var teile = new ArrayList<Aenderungsbefehl>();
@@ -2023,10 +2077,33 @@ final class BefehlErkenner {
    * Zerlegt den Zitatblock einer §-Bereichs-Neufassung („§ 52 (weggefallen) § 53 (weggefallen) …“)
    * an den „§ N“-Grenzen und erzeugt je eine {@link Neufassung} für den betroffenen Paragraphen.
    */
+  /**
+   * Zerlegt den Zitatblock einer Bereichs-Neufassung („Die §§ 1 bis 3 erhalten folgende Fassung:
+   * …“) in die Einzel-Neufassungen.
+   *
+   * <p>Maßgeblich ist dabei der <em>angekündigte Bereich</em>, nicht das bloße Vorkommen eines
+   * Paragraphenzeichens: Der neue Wortlaut zitiert reihenweise andere Vorschriften („… nach § 25
+   * Satz 1 Nr. 2 ThürKigaG …“), und an denen zu schneiden erfände Normen, die es nicht gibt. Der
+   * Zerleger sucht deshalb der Reihe nach genau die Bezeichnungen des Bereichs. Ein Normkopf steht
+   * im Satz am Zeilenanfang — findet sich die gesuchte Bezeichnung dort, gilt sie; sonst wird sie
+   * auch mitten in der Zeile angenommen (der amtliche Satz reiht weggefallene Paragraphen
+   * gelegentlich hintereinander: „§ 52 (weggefallen) § 53 (weggefallen)“).
+   *
+   * <p>Trägt der Bereich Buchstabenzusätze („§§ 7a bis 7c“), so ist seine Zählung nicht ableitbar;
+   * dann bleibt es beim Schnitt an jeder Paragraphengrenze.
+   */
   private static Optional<Aenderungsbefehl> paragraphBereichNeufassung(
-      String block, Stelle kontext, Provenienz provenienz) {
+      String sigel, String von, String bis, String block, Stelle kontext, Provenienz provenienz) {
+    var text = block.strip();
+    var bezeichnungen = bereichsBezeichnungen(von, bis);
+    var stuecke =
+        bezeichnungen != null
+            ? schneideAnBezeichnungen(text, sigel, bezeichnungen)
+            : List.of(text.split("(?=(?:§|Art\\.)\\s*\\d)"));
+    if (stuecke == null) {
+      return Optional.empty();
+    }
     var teile = new ArrayList<Aenderungsbefehl>();
-    var stuecke = block.strip().split("(?=(?:§|Art\\.)\\s*\\d)");
     for (var stueck : stuecke) {
       var s = stueck.strip();
       if (s.isEmpty()) {
@@ -2044,6 +2121,70 @@ final class BefehlErkenner {
       return Optional.empty();
     }
     return Optional.of(teile.size() == 1 ? teile.get(0) : new Sammelbefehl(teile));
+  }
+
+  /** „9 bis 12“ — ein Bereich von Paragraphen- bzw. Artikelbezeichnungen. */
+  private static final Pattern BEREICH = Pattern.compile("(\\d+[a-z]?) bis (\\d+[a-z]?)");
+
+  private static Stelle paragraphStelle(String sigel, String nummer) {
+    return new Stelle(List.of(new Stelle.Paragraph(nummer, sigel.strip())));
+  }
+
+  /** Die Bezeichnungen eines rein numerischen Bereichs („1“, „3“ → 1, 2, 3), sonst {@code null}. */
+  private static @Nullable List<String> bereichsBezeichnungen(String von, String bis) {
+    if (!von.matches("\\d+") || !bis.matches("\\d+")) {
+      return null;
+    }
+    int a = Integer.parseInt(von);
+    int b = Integer.parseInt(bis);
+    if (b < a) {
+      return null;
+    }
+    var liste = new ArrayList<String>();
+    for (int i = a; i <= b; i++) {
+      liste.add(String.valueOf(i));
+    }
+    return liste;
+  }
+
+  /**
+   * Schneidet den Block vor jeder der genannten Bezeichnungen. Fehlt eine davon, ist das Zitat
+   * nicht der angekündigte Bereich — dann kein Schnitt ({@code null}), der Befehl bleibt manuell.
+   */
+  private static @Nullable List<String> schneideAnBezeichnungen(
+      String text, String sigel, List<String> bezeichnungen) {
+    var grenzen = new ArrayList<Integer>();
+    int ab = 0;
+    for (var bezeichnung : bezeichnungen) {
+      var kopf =
+          Pattern.compile(
+              "(?m)^[ \\t]*" + Pattern.quote(sigel) + "\\s*" + bezeichnung + "(?![\\da-z])");
+      var m = kopf.matcher(text);
+      int gefunden = m.find(ab) ? m.start() : -1;
+      if (gefunden < 0) {
+        var irgendwo =
+            Pattern.compile(Pattern.quote(sigel) + "\\s*" + bezeichnung + "(?![\\da-z])")
+                .matcher(text);
+        gefunden = irgendwo.find(ab) ? irgendwo.start() : -1;
+      }
+      if (gefunden < 0) {
+        // Der angekündigte Bereich und das Zitat sagen Verschiedenes. Welcher von beiden gilt,
+        // entscheidet das Werkzeug nicht — der Befehl bleibt manuell zu prüfen.
+        log.warnf(
+            "Bereichs-Neufassung: Das Zitat führt keinen Normkopf „%s %s“, obwohl der Bereich ihn"
+                + " nennt — der Befehl ist nicht eindeutig und bleibt manuell zu prüfen.",
+            sigel, bezeichnung);
+        return null;
+      }
+      grenzen.add(gefunden);
+      ab = gefunden + 1;
+    }
+    var stuecke = new ArrayList<String>();
+    for (int i = 0; i < grenzen.size(); i++) {
+      int ende = i + 1 < grenzen.size() ? grenzen.get(i + 1) : text.length();
+      stuecke.add(text.substring(grenzen.get(i), ende));
+    }
+    return stuecke;
   }
 
   /**

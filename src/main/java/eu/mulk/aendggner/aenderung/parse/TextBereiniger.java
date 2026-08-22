@@ -5,6 +5,7 @@ import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+import org.jboss.logging.Logger;
 
 /**
  * Bereinigt aus PDFs extrahierten Rohtext eines Änderungsgesetzes: entfernt Kolumnentitel,
@@ -23,6 +24,8 @@ import java.util.regex.Pattern;
  * diese Klasse nie.
  */
 public final class TextBereiniger {
+
+  private static final Logger log = Logger.getLogger(TextBereiniger.class);
 
   /**
    * Vom {@link FontgroessenFilter} an eine Zeile angehängt, deren Ende deutlich vor dem lokalen
@@ -265,6 +268,20 @@ public final class TextBereiniger {
           "\\s*\\d{0,4}\\s*Gesetz- und Verordnungsblatt für Berlin\\s+\\d+\\. Jahrgang"
               + "\\s+Nr\\.\\s*\\d+\\s+\\d{1,2}\\. \\p{L}+ \\d{4}\\s*");
 
+  // GVBl. für den Freistaat Thüringen: Kolumnentitel auf ungeraden Seiten („Nr. 2 - Tag der
+  // Ausgabe: Erfurt, den 13. Februar 2026    77“) und Seitenfuß auf geraden („78  Gesetz- und
+  // Verordnungsblatt für den Freistaat Thüringen“). Beide stehen im Inhaltsstrom mitten im Text —
+  // der Kolumnentitel zerschneidet sogar getrennte Wörter („Frauen-“ + Kopf + „häusern“) —, sind
+  // also wie der Berliner Seitenkopf herauszuschneiden statt als eigene Zeile zu entfernen.
+  private static final Pattern GVBL_TH_KOPF =
+      Pattern.compile(
+          "[ \\t]*Nr\\. \\d+ - Tag der Ausgabe: \\p{L}+, den"
+              + " \\d{1,2}\\. \\p{L}+ \\d{4}[ \\t]*\\d{1,4}[ \\t]*");
+  private static final Pattern GVBL_TH_FUSS =
+      Pattern.compile(
+          "[ \\t]*\\d{1,4}[ \\t]+Gesetz- und Verordnungsblatt für den Freistaat"
+              + " Thüringen[ \\t]*");
+
   // Sachnummern mit Leerzeichen: Niedersachsen zitiert eingeschobene Paragraphen als „§ 2 a“, der
   // Rest der Rechtssprache als „§ 2a“. Auf die kanonische Form ziehen, damit Stellen- und
   // Ebenenparser greifen. Ein folgendes „)“ oder „.“ schließt Aufzählungsmarker des
@@ -301,6 +318,8 @@ public final class TextBereiniger {
     text = VORABFASSUNG.matcher(text).replaceAll("\n");
     text = UNVERAENDERT_GESPERRT.matcher(text).replaceAll("unverändert");
     text = GVBL_BERLIN_KOPF.matcher(text).replaceAll("\n");
+    text = GVBL_TH_KOPF.matcher(text).replaceAll("\n");
+    text = GVBL_TH_FUSS.matcher(text).replaceAll("\n");
     var zeilen = entferneKolumnentitel(zerlegeInZeilen(text));
     var verbunden = verbindeUmbrueche(zeilen);
     // Falsch-positive markerlose Zusammenzüge („durch“ + „die“ → „durchdie“) reparieren — die
@@ -346,18 +365,60 @@ public final class TextBereiniger {
   /**
    * PDF-Extraktoren liefern je nach Schriftart unterschiedliche Glyphen für die deutschen
    * Anführungszeichen; der Parser verlässt sich auf {@code „}/{@code “}.
+   *
+   * <p>Für das gerade Anführungszeichen {@code "} entscheidet dabei nicht die Glyphe allein,
+   * sondern das ganze Dokument. Im BGBl und in den Drucksachen öffnet stets {@code „}; ein gerades
+   * Zeichen ist dort ein Satz- oder Extraktionsfehler und schließend zu lesen. Es gibt aber
+   * Gesetzblätter, die gerade Anführungszeichen <em>beidseitig</em> setzen — das GVBl. für den
+   * Freistaat Thüringen führt kein einziges {@code „}. Würden dort alle Zeichen schließend gelesen,
+   * fände der {@link ZitatExtraktor} kein einziges Zitat und sämtliche Befehle des Heftes gingen
+   * verloren. Führt ein Text also gerade Zeichen und kein {@code „}, so werden sie
+   * <em>paarweise</em> gelesen: das erste öffnet, das zweite schließt, und so fort.
+   *
+   * <p>Die Paarung setzt einen balancierten Text voraus; bei ungerader Anzahl ist er es
+   * nachweislich nicht, dann bleibt es bei der schließenden Lesart und es ergeht eine Warnung.
+   * Nicht brauchbar ist dagegen eine Regel nach der Stellung (öffnend = kein Leerzeichen dahinter):
+   * Der Thüringer Satz führt Zitate, die mit einem Leerzeichen beginnen („{@code " Zuständige
+   * Behörde …}“), und {@link #trenneVerklebteZitatgrenzen} bezeugt umgekehrt schließende Zeichen,
+   * die unmittelbar am Folgewort kleben.
    */
   private static String normalisiereAnfuehrungszeichen(String text) {
-    return text
-        // Doppelte Low-9- und gerade Anführungszeichen am Wortanfang → „
-        .replace('‚', '‘') // ‚ bleibt einfaches öffnendes Zitat
-        .replace("‟", "“") // ‟ → “
-        .replace("«", "„") // « → „ (selten, aus Fremdsatz)
-        .replace("»", "“") // » → “
-        // Gerade und englische schließende Anführungszeichen: in BGBl-/Drucksachentexten öffnet
-        // stets „, also sind diese Glyphen (fast immer Satz-/OCR-Fehler) schließend zu lesen.
-        .replace("”", "“")
-        .replace("\"", "“");
+    text =
+        text.replace('‚', '‘') // ‚ bleibt einfaches öffnendes Zitat
+            .replace("‟", "“") // ‟ → “
+            .replace("«", "„") // « → „ (selten, aus Fremdsatz)
+            .replace("»", "“"); // » → “
+
+    if (text.indexOf('„') < 0 && text.indexOf('"') >= 0) {
+      long gerade = text.chars().filter(c -> c == '"').count();
+      if (gerade % 2 == 0) {
+        return paareGeradeAnfuehrungszeichen(text).replace("”", "“");
+      }
+      log.warnf(
+          "Der Text führt %d gerade Anführungszeichen und kein „ — die ungerade Anzahl lässt keine"
+              + " Paarung zu; sie werden schließend gelesen.",
+          gerade);
+    }
+
+    // Gerade und englische schließende Anführungszeichen: in BGBl-/Drucksachentexten öffnet
+    // stets „, also sind diese Glyphen (fast immer Satz-/OCR-Fehler) schließend zu lesen.
+    return text.replace("”", "“").replace("\"", "“");
+  }
+
+  /** Liest gerade Anführungszeichen abwechselnd als öffnend und schließend. */
+  private static String paareGeradeAnfuehrungszeichen(String text) {
+    var gepaart = new StringBuilder(text.length());
+    boolean offen = false;
+    for (int i = 0; i < text.length(); i++) {
+      char c = text.charAt(i);
+      if (c == '"') {
+        gepaart.append(offen ? '“' : '„');
+        offen = !offen;
+      } else {
+        gepaart.append(c);
+      }
+    }
+    return gepaart.toString();
   }
 
   /**
@@ -478,6 +539,9 @@ public final class TextBereiniger {
    * ist („…vorgesehen und“ + „d) die Überwachung …“).
    */
   private static ArrayList<Zeile> verbindeUmbrueche(List<Zeile> zeilen) {
+    // Der Wortbestand des ganzen Dokuments entscheidet über Trennstriche vor Großbuchstaben
+    // (siehe #warTrennung).
+    var wortbestand = wortbestand(zeilen);
     // Markerlose Trennungen sind nur erkennbar, wenn die Quelle die Trailing-Space-Konvention
     // verwendet (PDF-Extraktion). Handgeschriebene Klartextdateien haben keine Trailing-Spaces —
     // dort würde die Heuristik reguläre Umbrüche verschmelzen, also bleibt sie aus.
@@ -527,7 +591,14 @@ public final class TextBereiniger {
           if (Character.isLowerCase(erstesZeichen) && !KONJUNKTION.matcher(naechste).matches()) {
             zeile = gestutzt.substring(0, gestutzt.length() - 1) + naechste;
           } else if (Character.isUpperCase(erstesZeichen) || Character.isDigit(erstesZeichen)) {
-            zeile = gestutzt + naechste;
+            // Vor einem Großbuchstaben ist der Strich im Regelfall echt („Ton-Bild-Übertragung“),
+            // kann aber auch eine Trennung binnengroßgeschriebener Kürzel sein („Thür-“ + „KigaG“
+            // im GVBl. für den Freistaat Thüringen). Das Dokument selbst entscheidet: Kommt die
+            // strichlose Form anderswo vor, war es eine Trennung.
+            zeile =
+                warTrennung(gestutzt, naechste, wortbestand)
+                    ? gestutzt.substring(0, gestutzt.length() - 1) + naechste
+                    : gestutzt + naechste;
           } else {
             break;
           }
@@ -544,6 +615,46 @@ public final class TextBereiniger {
       ergebnis.add(new Zeile(zeile, umbruch));
     }
     return ergebnis;
+  }
+
+  /**
+   * Sammelt die Wörter des Dokuments (ohne Satzzeichen), um Trennstriche vor Großbuchstaben zu
+   * beurteilen.
+   */
+  private static java.util.Set<String> wortbestand(List<Zeile> zeilen) {
+    var woerter = new java.util.HashSet<String>();
+    for (var zeile : zeilen) {
+      for (var wort : WORTGRENZE.split(zeile.text())) {
+        if (!wort.isEmpty()) {
+          woerter.add(wort);
+        }
+      }
+    }
+    return woerter;
+  }
+
+  private static final Pattern WORTGRENZE = Pattern.compile("[^\\p{L}\\p{N}.-]+");
+
+  /**
+   * War der Trennstrich am Zeilenende eine Trennung? Beweis ist der Wortbestand des Dokuments:
+   * Trägt es das zusammengesetzte Wort ohne Strich, so war der Strich der des Setzers.
+   */
+  private static boolean warTrennung(
+      String gestutzt, String naechste, java.util.Set<String> wortbestand) {
+    var vorn = gestutzt.substring(0, gestutzt.length() - 1);
+    int anfang = vorn.length();
+    while (anfang > 0 && (Character.isLetterOrDigit(vorn.charAt(anfang - 1)))) {
+      anfang--;
+    }
+    var kopf = vorn.substring(anfang);
+    if (kopf.isEmpty()) {
+      return false;
+    }
+    var rumpf = WORTGRENZE.split(naechste, 2)[0];
+    if (rumpf.isEmpty()) {
+      return false;
+    }
+    return wortbestand.contains(kopf + rumpf);
   }
 
   private static boolean endetMitSilbentrennung(String gestutzteZeile) {
