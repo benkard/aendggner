@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
+// SPDX-License-Identifier: AGPL-3.0-or-later
 package eu.mulk.aendggner.anwendung;
 
 import static org.assertj.core.api.Assertions.assertThat;

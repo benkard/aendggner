@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
+// SPDX-License-Identifier: AGPL-3.0-or-later
 package eu.mulk.aendggner.wasm;
 
 import eu.mulk.aendggner.Pipeline;
@@ -6,8 +8,8 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.function.Function;
-import java.util.logging.LogManager;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import org.graalvm.webimage.api.JS;
 import org.graalvm.webimage.api.JSNumber;
@@ -20,14 +22,14 @@ import org.graalvm.webimage.api.JSValue;
  * damit dieselbe {@link Pipeline} auf wie Befehlszeile und Tests.
  *
  * <p>Erwartet ein JS-Objekt <code>{stamm: {name, base64}, patches: [{name, base64}], artikel,
- * vollstaendig}</code> und liefert <code>{html, angewandt, manuell, normen}</code> oder
- * <code>{fehler}</code> zurück. Geworfen wird nichts: Eine Ausnahme im Wasm hinterlässt auf der
- * JS-Seite nur einen unlesbaren Stapel, also wird jeder Fehler als Text zurückgereicht.
+ * vollstaendig}</code> und liefert <code>{html, angewandt, manuell, normen}</code> oder <code>
+ * {fehler}</code> zurück. Geworfen wird nichts: Eine Ausnahme im Wasm hinterlässt auf der JS-Seite
+ * nur einen unlesbaren Stapel, also wird jeder Fehler als Text zurückgereicht.
  *
  * <p>Der Dateiinhalt wandert als Base64-Text über die Grenze, nicht als {@code Uint8Array}: Die
- * Umsetzung typisierter Felder nach {@code byte[]} ist in Web Image derzeit defekt
- * („byteArrayHub is not defined“). Zeichenketten überqueren die Grenze zuverlässig, und die
- * Base64-Dekodierung ist reines Java.
+ * Umsetzung typisierter Felder nach {@code byte[]} ist in Web Image derzeit defekt („byteArrayHub
+ * is not defined“). Zeichenketten überqueren die Grenze zuverlässig, und die Base64-Dekodierung ist
+ * reines Java.
  */
 public final class BrowserMain {
 
@@ -71,7 +73,9 @@ public final class BrowserMain {
 
       var ergebnis =
           Pipeline.erzeugeSynopse(
-              stamm, List.copyOf(patches), artikel == null || artikel.isBlank() ? null : artikel,
+              stamm,
+              List.copyOf(patches),
+              artikel == null || artikel.isBlank() ? null : artikel,
               vollstaendig);
 
       // Java-Werte kämen auf der JS-Seite als undurchsichtige Proxys an; JSString/JSNumber

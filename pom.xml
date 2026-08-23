@@ -1,4 +1,6 @@
 <?xml version="1.0"?>
+<!-- SPDX-FileCopyrightText: 2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
+     SPDX-License-Identifier: AGPL-3.0-or-later -->
 <project
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
   xmlns="http://maven.apache.org/POM/4.0.0"
@@ -192,6 +194,12 @@
         <version>${spotless-plugin.version}</version>
         <configuration>
           <java>
+            <!-- src/wasm/java tritt dem Quellbaum erst im Profil -Pwasm bei; damit die
+                 beiden Wasm-Klassen dennoch stets mitgeprüft werden, sind die
+                 Quellverzeichnisse hier ausdrücklich benannt. -->
+            <includes>
+              <include>src/*/java/**/*.java</include>
+            </includes>
             <removeUnusedImports/>
             <importOrder>
               <order>java,javax,org,com,de,io,dagger,eu.mulk,</order>
@@ -200,6 +208,12 @@
               <version>${google.java.format.version}</version>
               <style>GOOGLE</style>
             </googleJavaFormat>
+            <licenseHeader>
+              <content><![CDATA[// SPDX-FileCopyrightText: 2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
+]]></content>
+            </licenseHeader>
           </java>
         </configuration>
       </plugin>

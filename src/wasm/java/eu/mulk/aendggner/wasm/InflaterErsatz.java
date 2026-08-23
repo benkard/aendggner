@@ -1,3 +1,5 @@
+// SPDX-FileCopyrightText: 2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
+// SPDX-License-Identifier: AGPL-3.0-or-later
 package eu.mulk.aendggner.wasm;
 
 import com.jcraft.jzlib.JZlib;
@@ -10,22 +12,26 @@ import java.util.zip.DataFormatException;
 /**
  * Ersetzt java.util.zip.Inflater durch die reine Java-Umsetzung von jzlib.
  *
- * <p>Web Image kennt die nativen zlib-Bindungen des JDK nicht (GR-65205); ohne Inflate ist kein
- * PDF lesbar, denn nahezu jeder Inhaltsstrom ist FlateDecode-komprimiert.
+ * <p>Web Image kennt die nativen zlib-Bindungen des JDK nicht (GR-65205); ohne Inflate ist kein PDF
+ * lesbar, denn nahezu jeder Inhaltsstrom ist FlateDecode-komprimiert.
  */
 @TargetClass(java.util.zip.Inflater.class)
 final class Target_java_util_zip_Inflater {
 
-  @Inject @RecomputeFieldValue(kind = RecomputeFieldValue.Kind.Reset)
+  @Inject
+  @RecomputeFieldValue(kind = RecomputeFieldValue.Kind.Reset)
   com.jcraft.jzlib.Inflater impl;
 
-  @Inject @RecomputeFieldValue(kind = RecomputeFieldValue.Kind.Reset)
+  @Inject
+  @RecomputeFieldValue(kind = RecomputeFieldValue.Kind.Reset)
   boolean nowrap;
 
-  @Inject @RecomputeFieldValue(kind = RecomputeFieldValue.Kind.Reset)
+  @Inject
+  @RecomputeFieldValue(kind = RecomputeFieldValue.Kind.Reset)
   boolean fertig;
 
-  @Inject @RecomputeFieldValue(kind = RecomputeFieldValue.Kind.Reset)
+  @Inject
+  @RecomputeFieldValue(kind = RecomputeFieldValue.Kind.Reset)
   boolean braucheWoerterbuch;
 
   @Substitute
