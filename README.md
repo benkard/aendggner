@@ -120,7 +120,7 @@ Im Sinne dieses Handbuchs ist
 <https://aendggner.app.kellertomaten.de/>.
 
 (2) Fortlaufende Quelltextquelle ist
-<https://gerrit.benkard.de/plugins/gitiles/aendggner>. Die jeweils betriebene
+<https://git.benkard.de/mulk/aendggner>. Die jeweils betriebene
 Fassung liegt der Browserfassung überdies als `aendggner-quelltext.tar.gz` bei
 (§ 15 Absatz 5).
 

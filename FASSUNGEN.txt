@@ -442,6 +442,25 @@ ein Verzeichnis betrachtet, das nur Markdown darstellt, sah es als Rohtext.
     Fundstellen in diesem Verzeichnis bleiben als geschichtliche Angabe stehen.
 
 
+Artikel 14
+Neue Anschrift der fortlaufenden Quelltextquelle
+
+Die fortlaufende Quelltextquelle ist von Gerrit („gerrit.benkard.de/plugins/
+gitiles/aendggner“) nach „https://git.benkard.de/mulk/aendggner“ umgezogen.
+
+(1) Die Anschrift ist an allen fünf Stellen nachgezogen: im Handbuch (§ 3
+    Abs. 2), im Feld „SPDX-PackageDownloadLocation“ der „REUSE.toml“, in der
+    Zeile „Fortlaufend“ des beigelegten „quelltext-fassung.txt“
+    („deploy/webpaket.sh“) sowie in den Fußzeilen der Startseite und des
+    Impressums.
+
+(2) Im Impressum trug der Verweis bislang die Beschriftung „Gerrit“; sie lautet
+    fortan „Git“, denn sie benennt nunmehr keine bestimmte Oberfläche mehr.
+
+(3) Die Nennung nach AGPLv3 § 13 bleibt damit erreichbar; das ist der Zweck der
+    Angabe, nicht bloß ihre Zier.
+
+
 ════════════════════════════════════════════════════════════════════════════════
  Fassung vom 22. August 2026,
  zuletzt geändert durch die am 22. August 2026 vorgenommenen Änderungen

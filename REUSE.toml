@@ -18,7 +18,7 @@
 version = 1
 SPDX-PackageName = "ÄndGgner"
 SPDX-PackageSupplier = "Matthias Andreas Benkard <code@mail.matthias.benkard.de>"
-SPDX-PackageDownloadLocation = "https://gerrit.benkard.de/plugins/gitiles/aendggner"
+SPDX-PackageDownloadLocation = "https://git.benkard.de/mulk/aendggner"
 
 
 # ── Eigenes, aber ohne Kommentarsyntax ───────────────────────────────────────

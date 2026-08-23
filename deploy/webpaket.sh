@@ -113,7 +113,7 @@ fi
   echo "Gebaut:  $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
   echo
   echo "Vollständig in aendggner-quelltext.tar.gz; Bauanleitung darin in README.md."
-  echo "Fortlaufend: https://gerrit.benkard.de/plugins/gitiles/aendggner"
+  echo "Fortlaufend: https://git.benkard.de/mulk/aendggner"
   echo
   echo "Nicht im Archiv liegt der Beispielkorpus (src/test/resources/sampledata): Gesetzes-"
   echo "und Drucksachentexte fremder Urheberschaft, an denen die Tests messen. Gebaut wird"
