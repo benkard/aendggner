@@ -38,7 +38,7 @@ java -jar target/aendggner-0.1.0-SNAPSHOT.jar stammgesetz.xml aenderungsgesetz.p
 ----
 
 Ohne Einrichtung läuft dasselbe im Browser unter
-https://matthias.benkard.de/aendggner/; die dort angebotenen zwei
+https://aendggner.app.kellertomaten.de/; die dort angebotenen zwei
 durchgerechneten Beispiele sind der kürzeste Weg zum ersten Ergebnis
 (§ 14).
 
@@ -108,7 +108,7 @@ Angewandt::
 == § 3 Bezugsquellen und Anschriften
 
 (1) Die Browserfassung wird betrieben unter
-https://matthias.benkard.de/aendggner/.
+https://aendggner.app.kellertomaten.de/.
 
 (2) Fortlaufende Quelltextquelle ist
 https://gerrit.benkard.de/plugins/gitiles/aendggner. Die jeweils betriebene
@@ -555,7 +555,7 @@ JAVA_HOME=/pfad/zu/oracle-graalvm ./mvnw -Pwasm package
 ----
 
 (2) Wer die Fassung stattdessen selbst ausliefert — unter einem Unterpfad einer
-bestehenden Domain, wie zuvor unter https://matthias.benkard.de/aendggner/ —,
+bestehenden Domain, wie zuvor unter https://aendggner.app.kellertomaten.de/ —,
 braucht die Vorkompression und fordert sie beim Bau an:
 
 [source,shell script]
