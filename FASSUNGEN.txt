@@ -434,6 +434,13 @@ ein Verzeichnis betrachtet, das nur Markdown darstellt, sah es als Rohtext.
     doppelte Zählung der Absätze 6 und 7 ein, die bewusst unangetastet bleibt,
     weil das Handbuch selbst sie führt.
 
+(5) Die AsciiDoc-Fassung entfällt sogleich; zwei Wortlaute desselben Handbuchs
+    nebeneinander zu pflegen wäre eine Fehlerquelle. Die beiden Verweise des
+    Bauwerks — die Bauanleitung im beigelegten Quelltextarchiv
+    („deploy/webpaket.sh“) und der Hinweis auf den Abschnitt „Ausrollen“
+    („deploy/nginx-aendggner.conf“) — sind auf „README.md“ nachgezogen. Die
+    Fundstellen in diesem Verzeichnis bleiben als geschichtliche Angabe stehen.
+
 
 ════════════════════════════════════════════════════════════════════════════════
  Fassung vom 22. August 2026,
