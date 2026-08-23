@@ -267,10 +267,15 @@ public final class HtmlRenderer {
          Normen in der Antiqua. Amtskopf und Vorschrift sind zweierlei, im Gesetzblatt wie
          hier.
 
-         Schmuckfarbe gibt es nicht. Farbe trägt allein die Änderung: rot heißt weg, grün
-         heißt hinzu. Damit die Aussage auch im Schwarzweiß-Ausdruck und bei
-         Farbfehlsichtigkeit erhalten bleibt, tritt zur Farbe stets die Form —
-         durchgestrichen gegen unterstrichen — sowie die Spalte, in der sie steht. */
+         Schmuckfarbe gibt es nicht. Farbe trägt allein die Änderung: rot heißt weg, blau
+         heißt hinzu. Rot gegen Blau und nicht das naheliegendere Rot gegen Grün, weil
+         die Hinterlegung für sich allein tragen soll: Rot und Grün sind gerade das Paar,
+         das bei Protanopie und Deuteranopie zusammenfällt — beide erscheinen als
+         dasselbe blasse Beige. Blau bleibt Blau, wo Rot zu Beige wird, und ist zugleich
+         merklich dunkler; die Hinterlegungen sind damit nach Farbort wie nach Helligkeit
+         geschieden und brauchen keine Unterstreichung als Krücke. Die Durchstreichung
+         der Streichungen bleibt gleichwohl: Sie ist beim gestrichenen Wort die übliche
+         Auszeichnung und trägt den Schwarzweiß-Ausdruck. */
       :root {
         color-scheme: light dark;
         --fg: #000;
@@ -281,10 +286,10 @@ public final class HtmlRenderer {
         --linie: #000;
         --muted: #444;
         --tisch: #9a9a9a;
-        --del-bg: #ffd7d7;
+        --del-bg: #ffdad6;
         --del-fg: #8b0000;
-        --ins-bg: #d7f5d7;
-        --ins-fg: #005f00;
+        --ins-bg: #a8ccff;
+        --ins-fg: #003a75;
         --grotesk: Arial, "Helvetica Neue", Helvetica, system-ui, sans-serif;
         --antiqua: Georgia, "Times New Roman", serif;
       }
@@ -300,10 +305,10 @@ public final class HtmlRenderer {
           --linie: #7a7a7a;
           --muted: #a8a8a8;
           --tisch: #000;
-          --del-bg: #5a1f1f;
+          --del-bg: #5a2320;
           --del-fg: #ffb3b3;
-          --ins-bg: #1f4a1f;
-          --ins-fg: #b3ffb3;
+          --ins-bg: #1b3f74;
+          --ins-fg: #b3d4ff;
         }
       }
       * { box-sizing: border-box; }
@@ -423,9 +428,9 @@ public final class HtmlRenderer {
         align-items: start;
         margin-top: 0.5rem;
       }
-      /* Die alte Fassung liegt auf dem hellen Raster wie ein Durchschlag, die neue auf dem
-         weißen Feld; beim Springen zwischen den Spalten ist damit ohne Hinsehen klar, wo man
-         steht. Die Hinterlegungen der Änderungen heben sich von beiden Gründen ab. */
+      /* Beide Fassungen stehen auf demselben weißen Feld. Welche Spalte welche ist, sagt
+         der Spaltenkopf; ihn durch zweierlei Grund zu wiederholen, kostete nur den Abstand,
+         den die Hinterlegungen der Änderungen zum Grund haben. */
       .vergleich > div {
         padding: 0.5rem 0.6rem;
         border: 1px solid var(--linie);
@@ -434,19 +439,20 @@ public final class HtmlRenderer {
         font-family: var(--antiqua);
         font-size: 0.875rem;
         line-height: 1.45;
+        background: var(--feld);
       }
-      .vergleich > .alt { background: var(--tint); }
-      .vergleich > .neu { background: var(--feld); }
 
       del, .alt del {
         background: var(--del-bg);
         color: var(--del-fg);
         text-decoration: line-through;
       }
+      /* text-decoration: none ist keine Zierde, sondern nötig: Die Unterstreichung von <ins>
+         steht im Stilblatt des Browsers und bliebe sonst stehen. */
       ins, .neu ins {
         background: var(--ins-bg);
         color: var(--ins-fg);
-        text-decoration: underline;
+        text-decoration: none;
       }
       .leer { font-family: var(--grotesk); font-size: 0.75rem; color: var(--muted); }
 
@@ -531,20 +537,20 @@ public final class HtmlRenderer {
           --linie: #000;
           --muted: #333;
           --tisch: #fff;
-          --del-bg: #ffd7d7;
+          --del-bg: #ffdad6;
           --del-fg: #8b0000;
-          --ins-bg: #d7f5d7;
-          --ins-fg: #005f00;
+          --ins-bg: #a8ccff;
+          --ins-fg: #003a75;
         }
         body { padding: 0; font-size: 9pt; }
         .bogen { max-width: none; padding: 0; }
         .spaltenkopf { position: static; }
         .vergleich, section.norm { break-inside: avoid; }
-        /* Ohne diese Festlegung wirft der Druck die Hinterlegung weg. Durchstreichung und
-           Unterstreichung überstehen ihn ohnehin und tragen die Aussage auch dort, wo
-           schwarzweiß gedruckt wird; der Raster der Stelle aber hat keine solche zweite
-           Gestalt — er sagt, was gedruckt und was eingetragen ist. */
-        del, ins, .badge, .entwurfshinweis, .spaltenkopf div, .vergleich > .alt,
+        /* Ohne diese Festlegung wirft der Druck die Hinterlegung weg. Die Durchstreichung
+           übersteht ihn ohnehin und trägt die Streichung auch dort, wo schwarzweiß gedruckt
+           wird; die Einfügung aber hat keine solche zweite Gestalt mehr, und der Raster der
+           Stelle hatte nie eine — er sagt, was gedruckt und was eingetragen ist. */
+        del, ins, .badge, .entwurfshinweis, .spaltenkopf div,
         .vorspann dt, section.norm::before,
         section.gliederung-aenderungen > h2, section.manuell > h2 {
           -webkit-print-color-adjust: exact;

@@ -353,6 +353,60 @@ in fast jedem Merkmal danebenlag. Sie wird berichtigt.
     Artikels 9 sind auf den neuen Vorspann umgestellt.
 
 
+Artikel 12
+Die Hinterlegung der Änderungen trägt allein
+
+Die Synopse zeichnete jede Änderung zweifach aus: durch Farbe (rot heißt weg,
+grün heißt hinzu) und durch Form (durchgestrichen gegen unterstrichen). Die
+Unterstreichung der Einfügungen ist als störend beanstandet worden — sie
+zerschneidet die Unterlängen der Antiqua und lässt eingefügte Wortstücke wie
+Verweise aussehen. Sie entfällt. Damit aber fällt die Stütze weg, auf der das
+Farbgerüst bei Farbfehlsichtigkeit ruhte, und diese Stütze war nicht entbehrlich:
+Rot gegen Grün ist gerade das Paar, das bei Protanopie und Deuteranopie
+zusammenfällt. Die Hinterlegung muss deshalb für sich allein tragen können,
+und dazu genügt das bisherige Paar nicht.
+
+(1) An die Stelle des Grüns tritt ein Blau. Blau bleibt Blau, wo Rot zu Beige
+    wird, und ist zugleich merklich dunkler; die beiden Hinterlegungen sind
+    damit nach Farbort wie nach Helligkeit geschieden. Die Werte lauten hell
+    „#ffdad6“ gegen „#a8ccff“, dunkel „#5a2320“ gegen „#1b3f74“; das Druckbild
+    führt die hellen Werte, weil die Voreinstellung des Browsers in den Druck
+    fortgilt.
+
+(2) Die Notwendigkeit ist gemessen und nicht behauptet. Nach Simulation der drei
+    Formen der Dichromasie beträgt der Farbabstand der beiden bisherigen
+    Hinterlegungen bei Deuteranopie ΔE = 4,8 im hellen und ΔE = 4,4 im dunklen
+    Gerüst — sie waren dort ununterscheidbar. Das neue Paar hält in allen drei
+    Formen ΔE zwischen 24 und 58 und dazu ein Helligkeitsverhältnis von 1,10
+    bis 1,44. Der Text steht in allen vier Fällen über dem Verhältnis 4,5 zu 1
+    der Zugänglichkeitsrichtlinien (6,85 bis 7,75).
+
+(3) Die Unterstreichung der Einfügungen entfällt. Sie ausdrücklich abzustellen
+    („text-decoration: none“) ist geboten und nicht überflüssig: Sie steht im
+    Stilblatt des Browsers und bliebe sonst stehen — ein Mangel, der erst der
+    Ansicht des Erzeugnisses und nicht dem Quelltext anzusehen war.
+
+(4) Die Durchstreichung der Streichungen bleibt. Sie ist beim gestrichenen Wort
+    die übliche Auszeichnung, stört den Lesefluss nicht und trägt allein den
+    Schwarzweiß-Ausdruck.
+
+(5) Alte und neue Fassung stehen fortan auf demselben weißen Feld. Der
+    Durchschlag-Raster unter der alten Spalte wiederholte nur, was der
+    Spaltenkopf ohnehin sagt, und mindert den Abstand, den die Hinterlegungen
+    zum Grund haben. Im Druckbild entfällt damit auch die Anweisung, den Grund
+    der alten Spalte mitzudrucken.
+
+(6) Die Kästchen folgen dem Farbgerüst: „neu“ wird blau. Der linke Rand des
+    Entwurfshinweises bleibt rot.
+
+(7) Nachgewiesen ist die Wirkung nicht am Quelltext, sondern an der erzeugten
+    Datei: Für die Synopse des Bayerischen Jagdgesetzes (154 Befehle, 54
+    geänderte Normen) ist im hellen, im dunklen und im Druckgerüst erhoben
+    worden, dass keine der achthundertachtzig Einfügungen unterstrichen ist und
+    beide Spalten denselben Grund tragen. Dreihundertsiebenundzwanzig Testfälle
+    bestehen fort.
+
+
 ════════════════════════════════════════════════════════════════════════════════
  Fassung vom 22. August 2026,
  zuletzt geändert durch die am 22. August 2026 vorgenommenen Änderungen
