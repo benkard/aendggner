@@ -62,6 +62,16 @@ final class LandesRechtTextParser {
       Pattern.compile(
           "^(Buch|Teil|Kapitel|Abschnitt|Unterabschnitt|Titel) (\\d+[a-z]?)\\s+(\\S.*)$");
 
+  // Gliederungs-Überschrift mit ausgeschriebenem Ordinale und nachgestelltem Schlüsselwort
+  // („Erster Teil“, „Achtundzwanzigster Teil“). So gliedern Hessen und das ältere Bundesrecht.
+  // Der Titel steht — wie bei GLIEDERUNG_ARABISCH — auf derselben Zeile; damit ein Satz, der
+  // zufällig so beginnt („Erster Teil der Verordnung ist …“), nicht als Überschrift gilt, muss er
+  // dieselbe Probe bestehen wie ein Normtitel: großgeschriebener Anfang, kein Schlusspunkt.
+  private static final Pattern GLIEDERUNG_ORDINALWORT =
+      Pattern.compile(
+          "^(\\p{Lu}\\p{Ll}*(?:ter|ster)) (Buch|Teil|Kapitel|Abschnitt|Unterabschnitt|Titel)"
+              + "(?:\\s+((?:\\p{Lu}|\\().*[^.]))?\\s*$");
+
   // Römische Gliederung ohne Schlüsselwort („I. Rechtsform und Aufgaben“, NRW). Sie ist nur an der
   // Stellung erkennbar, deshalb gilt dieselbe Absicherung wie für UNTER_GLIEDERUNG: kurzer,
   // großgeschriebener, satzzeichenfreier Titel und ein Normkopf oder eine weitere Überschrift als
@@ -83,7 +93,12 @@ final class LandesRechtTextParser {
   // Zeilenanfang aus („Art. 4 Abs. 3 …“, „§ 5 Absatz 2 …“).
   private static final Pattern NORM_KOPF =
       Pattern.compile(
-          "^(§|Art\\.)\\s+(\\d+[a-z]?)\\s+"
+          "^(§|Art\\.)\\s+(\\d+[a-z]?)"
+              // Die Überschrift darf fehlen: Verordnungen führen ihre Paragraphen vielfach ohne
+              // Titel (so die hessische Verkehrsrechts-Zuständigkeitsverordnung). Eine Zeile, die
+              // aus nichts als der Bezeichnung besteht, ist dann der Normkopf; ein Querverweis
+              // steht nie allein auf einer Zeile, und die Monotonieprobe sichert zusätzlich ab.
+              + "(?:\\s+"
               // Querverweis-Schlüsselwörter nur als ganzes Wort ausschließen: „§ 4 Satz 2“ ist ein
               // Verweis, „§ 4 Satzungen“ dagegen ein Normtitel. Der Schutz „(?![a-zäöüß])“
               // verhindert,
@@ -94,7 +109,7 @@ final class LandesRechtTextParser {
               // ganzen Satz. So wird ein am Zeilenanfang stehender Querverweis-Satz („§ 7
               // GAPInVeKoSG
               // findet entsprechend Anwendung.“) nicht fälschlich als Normkopf „§ 7“ gelesen.
-              + "((?:\\p{Lu}|\\().*[^.])\\s*$");
+              + "((?:\\p{Lu}|\\().*[^.]))?\\s*$");
 
   private static final Pattern WEGGEFALLEN_TITEL =
       Pattern.compile("^\\((?:aufgehoben|weggefallen)\\)$");
@@ -155,6 +170,7 @@ final class LandesRechtTextParser {
 
       var gliederung = zeile != null ? GLIEDERUNG.matcher(zeile) : null;
       var arabisch = zeile != null ? GLIEDERUNG_ARABISCH.matcher(zeile) : null;
+      var ordinalwort = zeile != null ? GLIEDERUNG_ORDINALWORT.matcher(zeile) : null;
       var roemisch = zeile != null ? GLIEDERUNG_ROEMISCH.matcher(zeile) : null;
       var unterGliederung = zeile != null ? UNTER_GLIEDERUNG.matcher(zeile) : null;
       var normKopf = zeile != null ? NORM_KOPF.matcher(zeile) : null;
@@ -167,6 +183,7 @@ final class LandesRechtTextParser {
           zeile != null
               && (gliederung.matches()
                   || arabisch.matches()
+                  || ordinalwort.matches()
                   || (roemisch.matches() && istUnterGliederung(roemisch, zeilen, i))
                   || (unterGliederung.matches() && istUnterGliederung(unterGliederung, zeilen, i)))
               && (!INHALTSUEBERSICHT.equals(normEnbez) || folgtNormkopf(zeilen, i));
@@ -208,9 +225,19 @@ final class LandesRechtTextParser {
                   arabisch.group(1) + " " + arabisch.group(2),
                   titel.isEmpty() ? null : titel);
           gliederungen.add(aktuelleGliederung);
+        } else if (ordinalwort.matches()) {
+          gliederungsZaehler++;
+          elternKennzahl = String.format("%03d", gliederungsZaehler);
+          var titel = ordinalwort.group(3) != null ? ordinalwort.group(3).strip() : "";
+          aktuelleGliederung =
+              new Gliederung(
+                  elternKennzahl,
+                  ordinalwort.group(1) + " " + ordinalwort.group(2),
+                  titel.isEmpty() ? null : titel);
+          gliederungen.add(aktuelleGliederung);
         } else if (normKopf.matches() && istNeuerNormKopf(normKopf.group(2), letzteNormNummer)) {
           normEnbez = normKopf.group(1) + " " + normKopf.group(2);
-          normTitel = normKopf.group(3).strip();
+          normTitel = normKopf.group(3) != null ? normKopf.group(3).strip() : null;
           letzteNormNummer = numerisch(normKopf.group(2));
         } else if (roemisch.matches()) {
           gliederungsZaehler++;
@@ -248,6 +275,7 @@ final class LandesRechtTextParser {
     return INHALTSUEBERSICHT.equals(zeile)
         || GLIEDERUNG.matcher(zeile).matches()
         || GLIEDERUNG_ARABISCH.matcher(zeile).matches()
+        || GLIEDERUNG_ORDINALWORT.matcher(zeile).matches()
         || NORM_KOPF.matcher(zeile).matches()
         || (roemisch.matches() && istUnterGliederung(roemisch, zeilen, i));
   }
@@ -304,7 +332,12 @@ final class LandesRechtTextParser {
     var titel = unterGliederung.group(2);
     if (titel.length() > 80
         || !Character.isUpperCase(titel.codePointAt(0))
-        || titel.matches(".*[.,;:]$")) {
+        || titel.matches(".*[.,;:]$")
+        // Eine Überschrift endet nicht auf einer Konjunktion — ein Aufzählungsglied schon, und
+        // zwar gerade dann, wenn ihm das nächste folgt und die Stellungsprobe deshalb anschlägt
+        // („2. Aufsicht über technische Prüfstellen nach § 13 Abs. 1 Satz 1 und“, § 17 der
+        // hessischen Verkehrsrechts-Zuständigkeitsverordnung).
+        || titel.matches("(?s).*\\b(und|oder|sowie)$")) {
       return false;
     }
     for (int j = index + 1; j < zeilen.size(); j++) {

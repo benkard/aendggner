@@ -888,12 +888,13 @@ class EndToEndTest {
 
   /**
    * Hessen: Die Elfte Verordnung zur Änderung der Verordnung zur Bestimmung verkehrsrechtlicher
-   * Zuständigkeiten (GVBl. 2026 Nr. 5). Der Test hält Extraktion und Befehlserkennung fest — alle
-   * 21 Befehle des Artikels 1 werden erkannt.
+   * Zuständigkeiten (GVBl. 2026 Nr. 5). Voller Akzeptanzfall: Alle 21 Befehle des Artikels 1 werden
+   * erkannt und angewandt, und jede der 52 Normen gleicht danach zeichengenau der amtlichen
+   * Nachfassung.
    *
-   * <p>Kein voller Akzeptanztest: {@code hessenrecht.hessen.de} ist dieselbe anmeldepflichtige
-   * juris-Anwendung wie die Portale Schleswig-Holsteins und Berlins, die Stammfassung ist daraus
-   * nicht zu beschaffen.
+   * <p>Die Stammfassung ist über eine Browsersteuerung aus dem Landesrechtsportal beschafft — es
+   * ist eine Einseitenanwendung, die Skriptabfragen nur ihre Hülle zurückgibt. Herkunft und
+   * Aufbereitung stehen in {@code Hessen/SOURCES}.
    *
    * <p>Der hessische Sperrsatz („Der Mi n is t er“) bleibt bewusst unbehandelt: Er trifft nur den
    * Unterschriftenblock am Dokumentende, keinen einzigen Befehl.
@@ -914,12 +915,20 @@ class EndToEndTest {
     // Der Sperrsatz beschränkt sich auf den Unterschriftenblock — hier bewusst nicht geheilt.
     assertThat(text).contains("Min isterpräsident");
 
-    var verordnung =
-        new Gesetz(
-            "VerkZustV",
-            "Verordnung zur Bestimmung verkehrsrechtlicher Zuständigkeiten",
-            null,
-            List.of());
+    var alt = SAMPLEDATA.resolve("Hessen/StVRZustV-alt.txt");
+    assumeTrue(Files.exists(alt), "Hessische Stammfassung fehlt");
+    var verordnung = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(alt);
+    assertThat(verordnung.jurabk()).isEqualTo("StVRZustV HE 2007");
+    // Diese Verordnung führt keine Paragraphenüberschriften und gliedert sich in ausgeschriebene
+    // Ordinalzahlen („Erster Teil“); beides kannte der Klartext-Parser bis dahin nicht.
+    assertThat(verordnung.normen()).hasSize(52);
+    assertThat(verordnung.norm("§ 1").orElseThrow().titel()).isNull();
+    assertThat(verordnung.gliederungen()).hasSize(28);
+    assertThat(verordnung.gliederungen())
+        .extracting(g -> g.bezeichnung())
+        .allMatch(b -> b.endsWith(" Teil"));
+    assertThat(verordnung.gliederungen().get(0).bezeichnung()).isEqualTo("Erster Teil");
+
     var ergebnis = new AenderungsgesetzParser().parse(text, verordnung, null);
     // Artikel 2 regelt nur das Inkrafttreten.
     assertThat(ergebnis.artikel()).containsExactly("1");
@@ -959,6 +968,45 @@ class EndToEndTest {
     assertThat(bereich.teilbefehle())
         .extracting(b -> b.stelle().anzeigeText())
         .containsExactly("§ 14 Nummer 4", "§ 14 Nummer 3");
+
+    // Auch die Bereichsaufhebung spannt absteigend auf („Nr. 9 bis 11 werden aufgehoben“): Ob eine
+    // aufgehobene Einheit einen nummerierten Platzhalter hinterlässt, entscheidet sich am Bestand,
+    // der ihr folgt — von hinten aufgehoben, sieht jede den endgültigen.
+    var aufhebung = (Aenderungsbefehl.Sammelbefehl) befehlZu(ergebnis, "5. h)");
+    assertThat(aufhebung.teilbefehle())
+        .extracting(b -> b.stelle().anzeigeText())
+        .containsExactly("§ 14 Nummer 11", "§ 14 Nummer 10", "§ 14 Nummer 9");
+
+    // --- Anwendung ---------------------------------------------------------------------------
+    var anwendung = BefehlAnwender.anwenden(verordnung, ergebnis.befehle());
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(21);
+    assertThat(anwendung.protokoll())
+        .noneMatch(x -> x.status() == BefehlAnwender.Status.MANUELL_PRUEFEN);
+
+    // § 13: Die Streichung der Absatzbezeichnung „(1)“ nimmt dem Wortlaut seine Nummer und lässt
+    // ihn im Übrigen stehen; die Aufhebung des Abs. 2 beseitigt ihn ganz, weil eine Norm ohne
+    // Absatzzählung keinen nummerierten Platzhalter tragen kann.
+    var dreizehn = anwendung.neu().norm("§ 13").orElseThrow();
+    assertThat(dreizehn.absaetze()).hasSize(1);
+    assertThat(dreizehn.absaetze().get(0).nummer()).isNull();
+
+    // § 14: Das Wort, das an die Stelle des Kommas tritt, bekommt seinen Zwischenraum.
+    assertThat(anwendung.neu().norm("§ 14").orElseThrow().gesamtText())
+        .contains("Fachkräfte) und")
+        .doesNotContain("(weggefallen)");
+
+    // Der Abgleich gegen die amtliche Nachfassung, Norm für Norm.
+    var soll = SAMPLEDATA.resolve("Hessen/StVRZustV-neu.txt");
+    assumeTrue(Files.exists(soll), "Hessische Nachfassung fehlt");
+    var amtlich = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(soll);
+    assertThat(amtlich.normen()).hasSize(52);
+    for (var normSoll : amtlich.normen()) {
+      var normIst = anwendung.neu().norm(normSoll.enbez());
+      assertThat(normIst).as("Norm %s fehlt", normSoll.enbez()).isPresent();
+      assertThat(normIst.orElseThrow().gesamtText().replaceAll("\\s+", " ").strip())
+          .as("Norm %s", normSoll.enbez())
+          .isEqualTo(normSoll.gesamtText().replaceAll("\\s+", " ").strip());
+    }
   }
 
   /**

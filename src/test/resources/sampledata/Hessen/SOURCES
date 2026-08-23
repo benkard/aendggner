@@ -1,0 +1,58 @@
+Beispieldaten Hessen — Herkunft und Aufbereitung
+================================================
+
+1. Änderungsdokument
+   GVBl-2026-05_11-AendVO-verkehrsrechtl-Zustaendigkeiten.pdf
+   Gesetz- und Verordnungsblatt für das Land Hessen, Teil I, Nr. 5 vom 3. Februar 2026:
+   Elfte Verordnung zur Änderung der Verordnung zur Bestimmung verkehrsrechtlicher
+   Zuständigkeiten vom 28. Januar 2026.
+   Bezogen über starweb.hessen.de/cache/GVBL/2026/00005.pdf.
+
+2. Stammfassung (vor der Änderung)
+   StVRZustV-alt.txt
+   Verordnung zur Bestimmung verkehrsrechtlicher Zuständigkeiten vom 12. November 2007,
+   Gesamtausgabe in der Gültigkeit vom 1. Januar 2026 bis 3. Februar 2026.
+
+3. Nachfassung (nach der Änderung), nur als Prüfmaßstab
+   StVRZustV-neu.txt
+   Dieselbe Verordnung, Gesamtausgabe in der Gültigkeit ab 4. Februar 2026.
+
+Bezugsweg (neu, für alle juris-Landesportale brauchbar)
+-------------------------------------------------------
+Das hessische Landesrechtsportal rv.hessenrecht.hessen.de ist eine Einseitenanwendung: Eine
+Skriptabfrage erhält nur die rund 5,4 kB große Anwendungshülle, gleich unter welcher Adresse.
+Der gerenderte Text ist dagegen im Browser vorhanden. Beschafft wurde er deshalb über eine
+Browsersteuerung, Dokument für Dokument, nicht im Massenabzug.
+
+Maßgeblich ist die Schaltfläche „Gesamtausgaben-Liste“ der Dokumentansicht: Sie führt jede
+Fassung mit ihrem Geltungszeitraum und macht sie unter einer datierbaren Adresse abrufbar,
+
+    /bshe/document/aiz-jlr-<Dokumentkennung>@<JJJJMMTT>
+
+hier aiz-jlr-NNLHE000050B9@20260101 (Vorfassung) und @20260204 (Nachfassung). Diese Adressen
+wirken nur im Browser; unter curl liefern auch sie nur die Hülle.
+
+Rechtsstellung: Verkündungsblatt und konsolidierte Fassung sind amtliche Werke nach § 5 UrhG
+und damit gemeinfrei; §§ 62 und 63 UrhG (Änderungsverbot, Quellenangabe) bleiben zu beachten.
+Die technische Aufbereitung durch die juris GmbH begründet kein eigenes Recht am Text. Das
+Portal führt im Kopf seiner Seiten eine Vorbehaltsangabe zum Text- und Data-Mining
+(„tdm-reservation“); sie kann für gemeinfreie amtliche Werke keine Wirkung entfalten, und
+abgerufen wurde ohnehin nur je ein einzelnes Werk zur Prüfung dieses Erzeugnisses.
+
+Aufbereitung zum kanonischen Klartext
+-------------------------------------
+Aus dem ausgelesenen Text wurde maschinell hergestellt (Skript im Arbeitsverzeichnis, nicht im
+Erzeugnis):
+
+  a) Vorspann abgeschnitten — Metadaten, nichtamtliches Inhaltsverzeichnis, Eingangsformel und
+     die amtliche Inhaltsübersicht. Letztere führt keine „§ N“-Angaben, sondern Teilüberschriften
+     mit Paragraphenspannen; kein Befehl der Änderungsverordnung zielt auf sie.
+  b) Die Fußmarken jedes Blocks („zur Einzelansicht § 12“) entfernt; sie sind Bedienelemente.
+  c) Gliederungsüberschrift und ihr — mitunter mehrzeiliger — Titel auf eine Zeile geführt,
+     getrennt durch zwei Leerzeichen („Erster Teil  Allgemeine Zuständigkeiten …“).
+  d) Aufzählungsmarke und ihr Text auf eine Zeile geführt; das Portal setzt sie getrennt.
+  e) Titelblock vorangestellt, Ablage in NFC.
+
+Die Paragraphen dieser Verordnung tragen keine Überschriften, und ihre Gliederung führt
+ausgeschriebene Ordinalzahlen („Erster Teil“). Beides hat der LandesRechtTextParser bis dahin
+nicht gekannt; beides ist nunmehr allgemein unterstützt.

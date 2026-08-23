@@ -717,10 +717,12 @@ class BefehlAnwenderTest {
   void wendetBereichsAufhebungAn() {
     // „Die Nummern 1 bis 3 werden aufgehoben.“ innerhalb von § 1 Absatz 2.
     var teile =
+        // Absteigend, wie der Erkenner eine Bereichsaufhebung aufspannt: Ob eine aufgehobene
+        // Einheit einen Platzhalter hinterlässt, entscheidet sich am Bestand, der ihr folgt.
         List.<eu.mulk.aendggner.aenderung.Aenderungsbefehl>of(
             new Aufhebung(
                 stelle(
-                    new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("1")),
+                    new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("3")),
                 PROV),
             new Aufhebung(
                 stelle(
@@ -728,17 +730,18 @@ class BefehlAnwenderTest {
                 PROV),
             new Aufhebung(
                 stelle(
-                    new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("3")),
+                    new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("1")),
                 PROV));
 
     var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(new Sammelbefehl(teile)));
 
     assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
     var text = absatzText(ergebnis.neu(), "§ 1", 1);
-    assertThat(text)
-        .contains("1. (weggefallen)")
-        .contains("2. (weggefallen)")
-        .contains("3. (weggefallen)");
+    // Ein Platzhalter hält einen Platz nur dort, wo ihm eine weitere Einheit derselben Art folgt.
+    // Hier ist die ganze Aufzählung aufgehoben — es bleibt nichts, dessen Bezeichnung zu schonen
+    // wäre, und der Einleitungssatz steht allein. So hält es auch die amtliche Nachfassung des
+    // § 14 der hessischen Verkehrsrechts-Zuständigkeitsverordnung.
+    assertThat(text).isEqualTo("Die Erprobung umfasst");
   }
 
   // --- Anhang/Anlage als Norm-Ziel -----------------------------------------------------------

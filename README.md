@@ -431,17 +431,21 @@ auch die verschränkte Neunummerierung des Bußgeldkatalogs in Art. 56.
 
 (2) Die übrigen Länder gliedern ihre Stammgesetze wie der Bund in Paragraphen;
 die Unterschiede liegen im Gesetzblatt-Satz und in den Befehlsidiomen. Belegt sind
-Sachsen (SächsBeamtVG), Niedersachsen (NEFG), Thüringen (ThürKigaFinVO) und
+Sachsen (SächsBeamtVG), Niedersachsen (NEFG), Thüringen (ThürKigaFinVO), Hessen
+(Verkehrsrechts-Zuständigkeitsverordnung — deren Paragraphen tragen keine
+Überschriften und deren Teile schreiben ihr Ordinale aus) und
 Nordrhein-Westfalen — dort alle vier ändernden Artikel eines Heftes:
 Telemedienzuständigkeitsgesetz, Landesmediengesetz, Ausführungsgesetz zum
 17. Rundfunkänderungsstaatsvertrag und, mit 101 Befehlen an 31 Normen der größte
 Fall des Heftes, das WDR-Gesetz —, jeweils mit Akzeptanztests gegen die amtlichen
 Nachfassungen.
 
-(3) Für Schleswig-Holstein, Berlin und Hessen reicht die Prüfung bis zur
+(3) Für Schleswig-Holstein und Berlin reicht die Prüfung bis zur
 Befehlserkennung — dort vollständig, aber ohne Anwendung —, weil deren
-Landesportale ihre Stammfassungen nur über eine anmeldepflichtige Schnittstelle
-ausgeben. Thüringens Portal gibt sie ebensowenig aus; dort ist die konsolidierte
+Stammfassungen noch nicht beschafft sind. Die Landesportale geben sie einer
+Skriptabfrage nicht aus, sondern nur ihre leere Anwendungshülle; einem Browser
+dagegen schon, und auf diesem Wege ist die hessische Stammfassung beschafft
+worden. Thüringens Portal gibt sie ebensowenig aus; dort ist die konsolidierte
 Fassung aus dem Stammheft und den drei Änderungsheften des Gesetzblattes
 zusammengesetzt, die die Parlamentsdatenbank des Landtags frei ausgibt.
 

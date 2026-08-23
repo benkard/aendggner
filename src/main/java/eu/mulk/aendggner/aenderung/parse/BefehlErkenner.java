@@ -1437,7 +1437,11 @@ final class BefehlErkenner {
     }
 
     if ((m = AUFHEBUNG.matcher(text)).matches()) {
-      return ausStellen(m.group(1), s -> new Aufhebung(kontext.plus(s), provenienz));
+      // Absteigend: Ob eine aufgehobene Einheit einen nummerierten Platzhalter hinterlässt, hängt
+      // davon ab, ob ihr noch eine Einheit folgt (siehe BefehlAnwender#haeltPlatz). Von hinten
+      // aufgehoben, sieht jede Einheit den endgültigen Bestand — von vorn sähe sie die
+      // Geschwister, die derselbe Befehl gleich mit beseitigt.
+      return ausStellen(m.group(1), true, s -> new Aufhebung(kontext.plus(s), provenienz));
     }
 
     if ((m = UEBERSCHRIFT_STREICHUNG.matcher(text)).matches()) {
@@ -1954,6 +1958,11 @@ final class BefehlErkenner {
    */
   private static Optional<Aenderungsbefehl> ausStellen(
       String phrase, Function<Stelle, Aenderungsbefehl> bauer) {
+    return ausStellen(phrase, false, bauer);
+  }
+
+  private static Optional<Aenderungsbefehl> ausStellen(
+      String phrase, boolean absteigend, Function<Stelle, Aenderungsbefehl> bauer) {
     var stellen = StellenParser.parseMehrfach(phrase);
     if (stellen.isEmpty()) {
       // „Im Satzteil vor Nummer 1 …“, „In der Angabe vor Nummer 1 …“ — reiner Chapeau-Qualifier
@@ -1966,7 +1975,8 @@ final class BefehlErkenner {
     if (stellen.size() == 1) {
       return Optional.of(bauer.apply(stellen.get(0)));
     }
-    return Optional.of(new Sammelbefehl(stellen.stream().map(bauer).toList()));
+    var geordnet = absteigend ? stellen.reversed() : stellen;
+    return Optional.of(new Sammelbefehl(geordnet.stream().map(bauer).toList()));
   }
 
   /**

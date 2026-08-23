@@ -769,14 +769,10 @@ public final class BefehlAnwender {
                   return TextErgebnis.fehler("Der Text endet nicht mit „" + befehl.alt() + "“.");
                 }
                 var rumpf = gestutzt.substring(0, gestutzt.length() - befehl.alt().length());
-                // Tritt an die Stelle des Satzzeichens ein Klammerzusatz („Der Punkt am Ende wird
-                // durch die Angabe „(Gesellschaftsdialog).“ ersetzt“), gehört davor ein Leerzeichen
-                // —
-                // so setzt es auch die amtliche Nachfassung.
                 var fuge =
-                    befehl.neu().startsWith("(")
+                    brauchtFuge(befehl.alt(), befehl.neu())
                             && !rumpf.isEmpty()
-                            && Character.isLetterOrDigit(rumpf.charAt(rumpf.length() - 1))
+                            && !Character.isWhitespace(rumpf.charAt(rumpf.length() - 1))
                         ? " "
                         : "";
                 return TextErgebnis.ok(rumpf + fuge + befehl.neu());
@@ -793,8 +789,40 @@ public final class BefehlAnwender {
                         + anzahl
                         + "-mal vor (ohne „jeweils“ mehrdeutig).");
               }
+              if (brauchtFuge(befehl.alt(), befehl.neu())) {
+                return TextErgebnis.ok(ersetzeMitFuge(text, befehl.alt(), befehl.neu()));
+              }
               return TextErgebnis.ok(text.replace(befehl.alt(), befehl.neu()));
             }));
+  }
+
+  private static final Pattern NUR_SATZZEICHEN = Pattern.compile("\\p{Punct}+");
+
+  /**
+   * Tritt an die Stelle eines Satzzeichens ein Wort oder ein Klammerzusatz, so gehört ein
+   * Leerzeichen davor. „Die bisherige Nr. 7 wird Nr. 5 und das Komma wird durch das Wort „und“
+   * ersetzt“ führt sonst auf „…Fachkräfte)und“ statt auf „…Fachkräfte) und“; so setzt es auch die
+   * amtliche Nachfassung. Maßgeblich ist, dass das Ersetzte <em>nur</em> aus Satzzeichen besteht —
+   * eine Ersetzung ganzer Wörter bringt ihren Zwischenraum schon mit.
+   */
+  private static boolean brauchtFuge(String alt, String neu) {
+    return NUR_SATZZEICHEN.matcher(alt).matches()
+        && !neu.isEmpty()
+        && (Character.isLetter(neu.codePointAt(0)) || neu.charAt(0) == '(');
+  }
+
+  private static String ersetzeMitFuge(String text, String alt, String neu) {
+    var sb = new StringBuilder();
+    int von = 0;
+    for (int idx = text.indexOf(alt); idx >= 0; idx = text.indexOf(alt, von)) {
+      sb.append(text, von, idx);
+      if (idx > 0 && !Character.isWhitespace(text.charAt(idx - 1))) {
+        sb.append(' ');
+      }
+      sb.append(neu);
+      von = idx + alt.length();
+    }
+    return sb.append(text, von, text.length()).toString();
   }
 
   private static AngewandteAenderung wendeStreichungAn(List<Norm> normen, Streichung befehl) {
@@ -1338,10 +1366,14 @@ public final class BefehlAnwender {
       var absaetze = new ArrayList<>(norm.absaetze());
       for (int i = 0; i < absaetze.size(); i++) {
         if (nummer.equals(absaetze.get(i).nummer())) {
-          // Als weggefallen markieren (Nummer behalten) — konsistent mit der Aufhebung über einen
-          // Absatz-Lokator; eine etwaige Folge-Umnummerierung „Abs. N+1 wird Abs. N“ räumt den
-          // weggefallenen Absatz dann weg.
-          absaetze.set(i, new Absatz(nummer, "(weggefallen)"));
+          // Gestrichen wird die Bezeichnung, nicht der Absatz: „Die Absatzbezeichnung „(1)“ wird
+          // gestrichen“ nimmt dem Wortlaut seine Nummer und lässt ihn im Übrigen unberührt. Das
+          // unterscheidet diesen Befehl von der Aufhebung über einen Absatz-Lokator („Abs. 1 wird
+          // aufgehoben“), die den Wortlaut beseitigt und einen nummerierten Platzhalter
+          // zurücklässt. Beides zusammen — Streichung der Bezeichnung des einen, Aufhebung des
+          // anderen Absatzes — führt eine zweigliedrige Vorschrift auf einen unnummerierten
+          // Wortlaut zurück (so § 13 der hessischen Verkehrsrechts-Zuständigkeitsverordnung).
+          absaetze.set(i, new Absatz(null, absaetze.get(i).text()));
           normen.set(aufloesung.normIndex(), norm.mitAbsaetzen(absaetze));
           return angewandt(befehl, norm.enbez());
         }
@@ -1372,7 +1404,15 @@ public final class BefehlAnwender {
       var norm = normen.get(fundstelle.normIndex());
       var absaetze = new ArrayList<>(norm.absaetze());
       var alter = absaetze.get(fundstelle.absatzIndex());
-      absaetze.set(fundstelle.absatzIndex(), new Absatz(alter.nummer(), "(weggefallen)"));
+      // Ein Platzhalter braucht eine Nummer, um einen Platz zu halten. Führt die Norm nach der
+      // Aufhebung keine Absatzzählung mehr — weil ihr erster Absatz unnummeriert ist — und steht
+      // der aufgehobene Absatz am Ende, so ist kein Platz zu halten: der Absatz entfällt ganz.
+      boolean ohneZaehlung = !absaetze.isEmpty() && absaetze.get(0).nummer() == null;
+      if (ohneZaehlung && fundstelle.absatzIndex() == absaetze.size() - 1) {
+        absaetze.remove((int) fundstelle.absatzIndex());
+      } else {
+        absaetze.set(fundstelle.absatzIndex(), new Absatz(alter.nummer(), "(weggefallen)"));
+      }
       normen.set(fundstelle.normIndex(), norm.mitAbsaetzen(absaetze));
       return angewandt(befehl, norm.enbez());
     }
@@ -1383,7 +1423,7 @@ public final class BefehlAnwender {
         befehl,
         (text, bereich) -> {
           var label = labelVon(stelle);
-          if (label != null) {
+          if (label != null && haeltPlatz(text, bereich.bis(), label)) {
             var einrueckung = einrueckungVon(text, bereich.von());
             return TextErgebnis.ok(
                 text.substring(0, bereich.von())
@@ -2022,6 +2062,26 @@ public final class BefehlAnwender {
       }
     }
     return null;
+  }
+
+  /**
+   * Hält die aufgehobene Aufzählungseinheit einen Platz? Ein Platzhalter „9. (weggefallen)“ ist nur
+   * dort sinnvoll, wo ihm eine weitere Einheit derselben Art folgt, deren Bezeichnung er unberührt
+   * lassen soll. Steht die aufgehobene Einheit am Ende der Aufzählung — auch dann, wenn ihr nur
+   * weitere Platzhalter folgen —, so ist kein Platz zu halten und sie entfällt ganz. So endet § 14
+   * der hessischen Verkehrsrechts-Zuständigkeitsverordnung nach Aufhebung der Nrn. 9 bis 11 mit der
+   * Nr. 6, wie es auch die amtliche Nachfassung tut.
+   */
+  private static boolean haeltPlatz(String text, int ab, String label) {
+    var art =
+        label.endsWith(")")
+            ? Pattern.compile("^\\s*[a-zA-Z]{1,2}\\)\\s+(.*)$")
+            : Pattern.compile("^\\s*\\d+[a-z]?\\.\\s+(.*)$");
+    return text.substring(ab)
+        .lines()
+        .map(art::matcher)
+        .filter(java.util.regex.Matcher::matches)
+        .anyMatch(m -> !m.group(1).strip().equals("(weggefallen)"));
   }
 
   private static String einrueckungVon(String text, int position) {

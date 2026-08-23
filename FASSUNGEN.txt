@@ -461,6 +461,112 @@ gitiles/aendggner“) nach „https://git.benkard.de/mulk/aendggner“ umgezogen
     Angabe, nicht bloß ihre Zier.
 
 
+
+Artikel 15
+Beschaffung konsolidierter Landesfassungen aus Einseitenanwendungen
+
+(1) Die Landesrechtsportale, die auf der Anwendung der juris GmbH beruhen, geben
+    einer Skriptabfrage nur ihre rund 5,4 Kilobyte große Anwendungshülle aus.
+    Sie galten deshalb bislang als unerreichbar. Einem Browser geben sie den
+    Wortlaut; über eine Browsersteuerung ist er, Werk für Werk und nicht im
+    Massenabzug, auszulesen.
+
+(2) Maßgeblich ist die Gesamtausgaben-Liste der Dokumentansicht. Sie führt jede
+    Fassung mit ihrem Geltungszeitraum und macht sie unter einer datierbaren
+    Anschrift der Form „…/document/aiz-jlr-<Kennung>@<JJJJMMTT>“ abrufbar.
+    Vor- und Nachfassung eines Änderungsvorgangs sind damit unmittelbar
+    bezeichenbar; das Ergebnis der Anwendung wird gegen die Nachfassung prüfbar.
+
+(3) Zwei Fallstricke sind vermerkt: Die Seite baut sich nachlädig auf, sodass
+    ein Auszug des sichtbaren Bereichs mitten im Gesetz abbricht — maßgeblich
+    ist der Textinhalt des Dokumentbehälters. Und die Portale führen im Kopf
+    ihrer Seiten einen Vorbehalt zum Text- und Data-Mining; für gemeinfreie
+    amtliche Werke nach § 5 des Urheberrechtsgesetzes kann er keine Wirkung
+    entfalten.
+
+(4) Herkunft und Aufbereitung im einzelnen verzeichnet die neue Datei
+    „src/test/resources/sampledata/Hessen/SOURCES“.
+
+
+Artikel 16
+Der hessische Belegfall
+
+(1) Aufgenommen werden die konsolidierte Fassung der Verordnung zur Bestimmung
+    verkehrsrechtlicher Zuständigkeiten in der Gültigkeit vom 1. Januar bis zum
+    3. Februar 2026 („StVRZustV-alt.txt“) sowie, allein als Prüfmaßstab, die
+    Fassung ab dem 4. Februar 2026 („StVRZustV-neu.txt“).
+
+(2) Der Belegfall („EndToEndTest.verkehrsZustVAendVOHessen“) reichte bislang nur
+    bis zur Befehlserkennung. Er umfasst nunmehr die Anwendung: Alle 21 Befehle
+    des Artikels 1 der Elften Änderungsverordnung werden angewandt, keiner
+    bleibt zur Prüfung von Hand, und jede der 52 Normen gleicht danach
+    zeichengenau der amtlichen Nachfassung.
+
+
+Artikel 17
+Normköpfe ohne Überschrift und ausgeschriebene Gliederungs-Ordinale
+
+Der Klartext-Parser des Landesrechts (LandesRechtTextParser) wird wie folgt
+geändert:
+
+1.  Der Normkopf darf ohne Überschrift stehen. Verordnungen führen ihre
+    Paragraphen vielfach ohne Titel; eine Zeile, die aus nichts als der
+    Bezeichnung besteht, ist dann der Normkopf. Ein Querverweis steht nie allein
+    auf einer Zeile, und die Monotonieprobe sichert zusätzlich ab.
+
+2.  Es wird die Gliederungs-Überschrift mit ausgeschriebenem Ordinale und
+    nachgestelltem Schlüsselwort aufgenommen („Erster Teil“,
+    „Achtundzwanzigster Teil“). Damit ein Satz, der zufällig so beginnt, nicht
+    als Überschrift gilt, hat ihr Titel dieselbe Probe zu bestehen wie ein
+    Normtitel: großgeschriebener Anfang, kein Schlusspunkt.
+
+3.  Ein Aufzählungsglied, dessen Text auf einer Konjunktion endet („und“,
+    „oder“, „sowie“), gilt nicht mehr als Unter-Überschrift. Die
+    Stellungsprobe schlug bei ihm gerade deshalb an, weil ihm das nächste Glied
+    folgt. Zwei Glieder des § 17 der hessischen Verordnung waren so bislang der
+    Norm entzogen.
+
+
+Artikel 18
+Streichung der Absatzbezeichnung, Platzhalter und Zwischenraum
+
+Der Befehlsanwender (BefehlAnwender) wird wie folgt geändert:
+
+1.  Die Anweisung „Die Absatzbezeichnung „(1)“ wird gestrichen“ nimmt dem
+    Wortlaut fortan seine Nummer und lässt ihn im Übrigen unberührt. Bislang
+    beseitigte sie den Absatz und hinterließ einen nummerierten Platzhalter;
+    das ist der Inhalt der Aufhebung über einen Absatz-Lokator, nicht der
+    Streichung einer Bezeichnung.
+
+2.  Ein Platzhalter „(weggefallen)“ hält einen Platz nur dort, wo ihm eine
+    weitere Einheit derselben Art folgt, deren Bezeichnung er schonen soll.
+    Steht die aufgehobene Einheit am Ende — auch dann, wenn ihr nur weitere
+    Platzhalter folgen —, so entfällt sie ganz. Dasselbe gilt für einen
+    aufgehobenen Absatz am Ende einer Norm, die keine Absatzzählung mehr führt.
+
+3.  Tritt an die Stelle eines Satzzeichens ein Wort oder ein Klammerzusatz, so
+    gehört ein Leerzeichen davor. Die Anweisung „das Komma wird durch das Wort
+    „und“ ersetzt“ führte sonst auf „…Fachkräfte)und“. Die bisherige, auf
+    Klammerzusätze am Einheitsende beschränkte Regel geht darin auf.
+
+4.  Der Befehlserkenner spannt eine Bereichs- oder Koordinationsaufhebung
+    fortan absteigend auf. Ob eine aufgehobene Einheit einen Platzhalter
+    hinterlässt, entscheidet sich nach Nummer 2 am Bestand, der ihr folgt; von
+    hinten aufgehoben, sieht jede Einheit den endgültigen Bestand.
+
+
+Artikel 19
+Zwei stille Mängel
+
+(1) An zwei Stellen wurde „List.remove“ ein geboxter Index übergeben. Der Aufruf
+    band an die Überladung, die ein gleiches Element sucht, fand keines und
+    entfernte nichts — ohne Fehler zu melden. Betroffen war neben der Aufhebung
+    eines Absatzes auch dessen Neufassung durch mehrere Absätze: Der alte Absatz
+    blieb dort neben den neuen stehen.
+
+(2) Der Mangel nach Absatz 1 ist an beiden Stellen durch Entboxung des Index
+    behoben.
+
 ════════════════════════════════════════════════════════════════════════════════
  Fassung vom 22. August 2026,
  zuletzt geändert durch die am 22. August 2026 vorgenommenen Änderungen

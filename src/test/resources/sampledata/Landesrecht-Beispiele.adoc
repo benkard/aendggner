@@ -12,11 +12,10 @@ WICHTIG: Anders als Bayern (Art./§-Inversion) gliedern alle übrigen Länder ih
 in *§* (wie der Bund) mit `Artikel N` als Änderungsgesetz-Container. Die neuen Testdimensionen
 liegen daher im *PDF-Layout* und in *Befehlsidiom-Varianten*, nicht in der Gliederung.
 
-Zu jedem Beispiel ist bislang nur das *Änderungsgesetz* beschafft. Die jeweils zugehörige
-*konsolidierte Stammfassung* (nötig für einen Akzeptanztest wie bei BayJG) fehlt noch; sie käme
-je Land aus einem eigenen Portal (juris-basiert: landesrecht-bw, recht.nrw, revosax, voris,
-hessenrecht, gesetze-rechtsprechung.sh.juris.de; Eigensystem: Berlin) oder als handgepflegter
-`--extract-only`-Klartext analog zu `BayJG/BayJG-alt.txt`.
+Zu jedem Beispiel gehört ein *Änderungsgesetz*; wo auch die *konsolidierte Stammfassung* vorliegt
+(nötig für einen Akzeptanztest wie bei BayJG), ist der Fall bis zur Anwendung belegt. Die
+Stammfassung kommt je Land aus dem Portal des Landes oder als handgepflegter Klartext analog zu
+`BayJG/BayJG-alt.txt`; welcher Weg trägt, steht unter „Beschaffung der Stammfassungen“.
 
 == Übersicht
 
@@ -48,7 +47,10 @@ Zuständigkeiten)
 |*Sperrsatz* in Datums- und Signaturzeilen („3 . F e bru a r 2 02 6", „Der Mi n is t er pr
 äs i d e nt") — er trifft, anders als erwartet, nur den Unterschriftenblock und keinen Befehl;
 *abgekürztes „Abs."/„Nr." im §-Kontext*; die *FFN-Fußnote der Überschrift* („* Ändert FFN 61-60")
-steht am Seitenfuß mitten zwischen zwei Gliederungspunkten.
+steht am Seitenfuß mitten zwischen zwei Gliederungspunkten. Die Stammverordnung führt *keine
+Paragraphenüberschriften* und gliedert sich in *ausgeschriebene Ordinalzahlen* („Erster Teil").
+Voller Akzeptanzfall, Stammfassung `Hessen/StVRZustV-alt.txt`, Prüfmaßstab
+`Hessen/StVRZustV-neu.txt`.
 
 |Niedersachsen
 |`Niedersachsen/Nds-GVBl-2026-10_ELER-Foerdergesetz-AendG.pdf` — Nds. GVBl. 2026 Nr. 10 vom
@@ -141,13 +143,15 @@ vollständig belegt.
   Aufzählungspunkt *vollständig* erkannt — alle sechs Befehle, einschließlich der Änderungen an der
   unnummerierten Anlage. Ein voller Akzeptanztest bleibt an der Stammfassung hängen (siehe „Noch
   offen“).
-* *Hessen* ist bis zur Befehlserkennung umgesetzt (`EndToEndTest.verkehrsZustVAendVOHessen`): alle
-  21 Befehle des Artikels 1 werden erkannt. Der als Härtetest erwartete Sperrsatz erwies sich als
+* *Hessen* ist *vollständig* umgesetzt (`EndToEndTest.verkehrsZustVAendVOHessen`): alle
+  21 Befehle des Artikels 1 werden erkannt und angewandt, und alle 52 Normen gleichen danach
+  zeichengenau der amtlichen Nachfassung vom 4. Februar 2026. Der als Härtetest erwartete Sperrsatz erwies sich als
   harmlos — er trifft nur den Unterschriftenblock. Zu tun war dreierlei: die laufende GVBl-Fußzeile
   und der Masthead als Kolumnentitel, die Sternchen-Fußnote der Überschrift („* Ändert FFN 61-60“,
   am Seitenfuß zwischen zwei Gliederungspunkten) ebenso, und zwei Befehlsformen — der Zusatz
   „am Ende“ darf beim Satzzeichen fehlen, und das Objekt hinter „durch“ darf auch ohne Fundstelle
-  verkürzt sein. Ein voller Akzeptanztest ist *nicht* möglich — siehe „Noch offen“.
+  verkürzt sein. Die Stammfassung ist über eine *Browsersteuerung* aus dem Landesrechtsportal
+  beschafft; damit ist die juris-Sackgasse aufgebrochen (siehe „Beschaffung der Stammfassungen“).
 * Baden-Württemberg (GBl 2026 Nr. 26): großes Anlage-lastiges Änderungsgesetz (§§ 4–57a + Anlagen
   1/3b/4b); Stammfassung/Akzeptanztest noch offen.
 
@@ -168,7 +172,21 @@ Ergebnis lässt sich gegen die amtliche Nachfassung prüfen. Die Slugs findet di
 Vorfassung kommt über die Wayback-CDX-API: Fassungs-IDs abfragen, die zum Zeitraum passende wählen,
 per `…id_/…`-Rohform laden. Achtung, `WebFetch` erreicht `web.archive.org` nicht — nur `curl`.
 
-juris-Landesportale:: Sackgasse — *geprüft* für `gesetze-rechtsprechung.sh.juris.de`
+juris-Landesportale, Browsersteuerung:: Der Weg, der die Sackgasse aufbricht — *erprobt an Hessen*.
+Diese Portale sind Einseitenanwendungen: Jede Skriptabfrage erhält nur die rund 5,4 kB große
+Anwendungshülle, gleich unter welcher Adresse. Ein *Browser* dagegen bekommt den Text. Er ist
+deshalb Dokument für Dokument über eine Browsersteuerung auszulesen, nicht im Massenabzug.
+Maßgeblich ist die Schaltfläche „Gesamtausgaben-Liste“ der Dokumentansicht: Sie führt jede Fassung
+mit ihrem Geltungszeitraum und macht sie unter einer *datierbaren* Adresse abrufbar —
+`/<Kennung>/document/aiz-jlr-<Dokumentkennung>@<JJJJMMTT>`; Vor- und Nachfassung sind damit
+unmittelbar adressierbar und das Ergebnis gegen die amtliche Nachfassung prüfbar. Zwei
+Fallstricke: Die Seite rendert nachlädig, sodass ein Auszug des sichtbaren Bereichs mitten im
+Gesetz abbricht — maßgeblich ist der Textinhalt des Dokumentbehälters (`div.docLayoutText`); und
+die Portale führen im Seitenkopf eine Vorbehaltsangabe zum Text- und Data-Mining
+(„tdm-reservation“), die für gemeinfreie amtliche Werke nach § 5 UrhG keine Wirkung entfalten
+kann. Rezept im einzelnen: `Hessen/SOURCES`.
+
+juris-Landesportale, Skript:: Sackgasse — *geprüft* für `gesetze-rechtsprechung.sh.juris.de`
 (Schleswig-Holstein), `gesetze.berlin.de` (Berlin, trotz Eigennamen dieselbe Anwendung),
 `landesrecht-bw.de` (Baden-Württemberg) und `rv.hessenrecht.hessen.de` (Hessen, Kennung `bshe`).
 und `landesrecht.thueringen.de` (Thüringen).
@@ -203,7 +221,8 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
 
 == Noch offen
 
-* *Schleswig-Holstein — Stammfassung nicht beschaffbar*: Das Landesportal
+* *Schleswig-Holstein — Stammfassung noch nicht beschafft* (der Weg über die Browsersteuerung ist
+  seit Hessen offen und hier noch nicht gegangen): Das Landesportal
   `gesetze-rechtsprechung.sh.juris.de` ist seit Ende 2022 eine reine Single-Page-Anwendung; die
   Dokumentinhalte liegen hinter einer anmeldepflichtigen „mylex“-API (`connectUrl` aus dem
   `localStorage`), sämtliche Dokument-URLs liefern nur die leere Anwendungshülle. Die Wayback
@@ -212,13 +231,10 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
   vom 05.02.2025 eingefügt). Auch die archivierten Einzelnorm-Seiten (113 Stück) sind bereits
   SPA-Hüllen ohne Inhalt. Ein voller Akzeptanztest bleibt daher offen, bis die konsolidierte
   Fassung aus einer anderen Quelle vorliegt.
-* *Berlin — Stammfassung nicht beschaffbar*: `gesetze.berlin.de` ist trotz des Eigennamens dieselbe
+* *Berlin — Stammfassung noch nicht beschafft* (desgleichen): `gesetze.berlin.de` ist trotz des Eigennamens dieselbe
   juris-Anwendung wie das schleswig-holsteinische Portal (Kennung `bsbe`) und ebenso
   anmeldepflichtig. In der Wayback Machine gibt es keine serverseitig gerenderten Volltexte des
   ASOG oder des LAF-Errichtungsgesetzes.
-* *Hessen — Stammfassung nicht beschaffbar*: `rv.hessenrecht.hessen.de` ist dieselbe juris-Anwendung
-  (Kennung `bshe`) wie die Portale Schleswig-Holsteins und Berlins; Dokument-URLs liefern nur die
-  Anwendungshülle. Die Befehlserkennung ist vollständig belegt, die Anwendung bleibt offen.
 * *Anlagen im kanonischen Klartext*: Anlagen sind als Änderungsziel unterstützt — im gii-XML sind
   sie eigene Normen („Anlage 8“, „Anhang“), und `Stelle.anlagenEnbez()` löst sie auf; im GEG werden
   anlagenbezogene Befehle angewandt. Der `LandesRechtTextParser` kennt jedoch nur „§“- und
@@ -239,12 +255,26 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
 Kein Land scheitert noch an reiner Extraktionsschwäche; offen sind Modell- und Beschaffungsfragen.
 Nach absteigendem Nutzen:
 
-. *Ein Anlage-tragendes Stammgesetz über `recht.nrw.de` beschaffen* — und dann die
-  *Anlagen-Normköpfe im `LandesRechtTextParser`* ergänzen (er kennt neben „§“/„Art.“ inzwischen
-  auch die Inhaltsübersicht als Norm). Über Berlin oder Baden-Württemberg geht das nicht mehr:
-  deren Portale sind als juris-Anwendung nachgeprüft. Ohne eine solche Stammfassung bleibt die
-  Ergänzung nicht end-to-end prüfbar.
+. *Die übrigen drei Stammfassungen über die Browsersteuerung holen* — Schleswig-Holstein
+  (Gemeindeordnung, Kreisordnung), Berlin (ASOG, LAF-Errichtungsgesetz) und Baden-Württemberg
+  (Kommunalwahlordnung). Der Weg steht seit Hessen fest und ist unter „Beschaffung der
+  Stammfassungen“ beschrieben; damit werden aus drei Erkennungsfällen volle Akzeptanzfälle.
+. *Anlagen-Normköpfe im `LandesRechtTextParser`* ergänzen (er kennt neben „§“/„Art.“ inzwischen
+  auch die Inhaltsübersicht als Norm). Berlins Artikel 1 und Baden-Württembergs Verordnung ändern
+  Anlagen; mit deren Stammfassungen aus Schritt 1 wird die Ergänzung end-to-end prüfbar.
 . *Berlin, ganzseitenbreite Rahmen* (XY-Cut) — die letzte offene Layout-Frage, siehe „Noch offen“.
+
+*Erledigt:* _Hessen_ ist vollständig umgesetzt (`EndToEndTest.verkehrsZustVAendVOHessen`,
+einundzwanzig Befehle, kein Rest; alle zweiundfünfzig Normen gleichen der amtlichen Nachfassung).
+Der Fall hat den Beschaffungsweg über die Browsersteuerung eröffnet und fünf allgemeine Befunde
+gebracht: Ein Normkopf darf ohne Überschrift stehen; eine Gliederung darf ihr Ordinale
+ausschreiben („Erster Teil“); die Streichung einer Absatzbezeichnung nimmt dem Wortlaut seine
+Nummer, statt ihn zu beseitigen; ein Platzhalter „(weggefallen)“ steht nur dort, wo ihm eine
+weitere Einheit folgt, deren Bezeichnung er schonen soll; und ein Wort, das an die Stelle eines
+Satzzeichens tritt, bekommt seinen Zwischenraum. Zwei vorbestehende stille Mängel kamen dabei ans
+Licht: `List.remove` erhielt einen geboxten Index und entfernte deshalb nichts (das traf auch die
+Neufassung eines Absatzes durch mehrere), und ein Aufzählungsglied, das auf „und“ endet, galt als
+Unter-Überschrift.
 
 *Erledigt:* _Thüringen_ ist vollständig umgesetzt (`EndToEndTest.thuerKiGaFinVOAendVO`, zehn
 Befehle, kein Rest). Es war das letzte beschaffte, nie angefasste Heft und hat drei allgemeine
@@ -266,6 +296,7 @@ das BayJG die 154 erkannten Befehle, die vollständige Anwendung und den Wortlau
 Bußgeldkatalogs — dort auch Aufbau und Einrückung, weil an ihnen die Stellung eingefügter Blöcke
 hängt; für Sachsen,
 Niedersachsen und die vier NRW-Artikel die vollständige Anwendung bis auf das eine benannte
-Residuum im WDR-Gesetz; für Schleswig-Holstein, Berlin und Hessen die vollständige *Erkennung*
-(dort 21 Befehle). Wer eine dieser Zahlen
+Residuum im WDR-Gesetz; für Hessen die vollständige Anwendung und den Gleichlauf
+aller 52 Normen mit der amtlichen Nachfassung; für Schleswig-Holstein und Berlin die vollständige
+*Erkennung*. Wer eine dieser Zahlen
 ändern muss, sollte den Grund im Test vermerken.

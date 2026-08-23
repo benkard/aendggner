@@ -625,9 +625,12 @@ class BefehlErkennerTest {
                 erkenne("Die Nummern 1 bis 3 werden aufgehoben.", Stelle.LEER).orElseThrow())
             .teilbefehle();
     assertThat(teile).hasSize(3).allMatch(t -> t instanceof Aufhebung);
+    // Absteigend seit der hessischen Verkehrsrechts-Zuständigkeitsverordnung: Ob eine aufgehobene
+    // Einheit einen nummerierten Platzhalter hinterlässt, hängt davon ab, ob ihr noch eine Einheit
+    // folgt. Von hinten aufgehoben, sieht jede den endgültigen Bestand.
     assertThat(teile)
         .extracting(t -> t.stelle().anzeigeText())
-        .containsExactly("Nummer 1", "Nummer 2", "Nummer 3");
+        .containsExactly("Nummer 3", "Nummer 2", "Nummer 1");
   }
 
   @Test
@@ -636,9 +639,10 @@ class BefehlErkennerTest {
         ((Sammelbefehl)
                 erkenne("Die Absätze 4 und 5 werden aufgehoben.", Stelle.LEER).orElseThrow())
             .teilbefehle();
+    // Absteigend, aus demselben Grund wie bei der Bereichsaufhebung.
     assertThat(teile)
         .extracting(t -> t.stelle().anzeigeText())
-        .containsExactly("Absatz 4", "Absatz 5");
+        .containsExactly("Absatz 5", "Absatz 4");
   }
 
   @Test
