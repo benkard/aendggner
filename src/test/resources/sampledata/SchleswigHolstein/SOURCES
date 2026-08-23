@@ -1,0 +1,52 @@
+Beispieldaten Schleswig-Holstein — Herkunft und Aufbereitung
+============================================================
+
+1. Änderungsdokument
+   GVOBl-2026-27_Kommunalrecht-AendG.pdf
+   Gesetz- und Verordnungsblatt für Schleswig-Holstein 2026 Nr. 27 vom 30. März 2026:
+   Gesetz zur Änderung kommunalrechtlicher Vorschriften vom 26. März 2026.
+   Bezogen über verkuendungsportal.schleswig-holstein.de.
+
+2. Stammfassungen (vor der Änderung), Gültigkeit vom 16.08.2025 bis 30.03.2026
+   GO-SH-alt.txt   Gemeindeordnung für Schleswig-Holstein (Gemeindeordnung – GO –)
+                   in der Fassung vom 28. Februar 2003
+   KrO-SH-alt.txt  Kreisordnung für Schleswig-Holstein (Kreisordnung – KrO –)
+                   in der Fassung vom 28. Februar 2003
+
+3. Nachfassungen (ab 31.03.2026), allein als Prüfmaßstab
+   GO-SH-neu.txt, KrO-SH-neu.txt
+
+Bezugsweg
+---------
+Wie in Hessen über eine Browsersteuerung: `gesetze-rechtsprechung.sh.juris.de` ist eine
+Einseitenanwendung, die Skriptabfragen nur ihre Hülle ausgibt. Das Rezept steht in
+`Hessen/SOURCES`; die Dokumentkennungen lauten hier
+
+    Gemeindeordnung   jlr-NNLSH00002AA4
+    Kreisordnung      jlr-NNLSH00002AA9
+
+und die datierbaren Anschriften entsprechend
+`…/bssh/document/aiz-jlr-<Kennung>@20250816` (Vorfassung) und `@20260331` (Nachfassung).
+Zu finden sind die Normen über die juris-Abkürzungen „GemO SH“ und „KrO SH“; die Suche nach
+dem Langtitel liefert vorrangig Entscheidungen.
+
+Rechtsstellung: amtliche Werke nach § 5 UrhG, gemeinfrei; §§ 62 und 63 UrhG bleiben zu
+beachten. Die Aufbereitung durch die juris GmbH begründet kein eigenes Recht am Text.
+Abgerufen wurde je Gesetz eine Fassung zur Prüfung dieses Erzeugnisses, kein Massenabzug.
+
+Aufbereitung zum kanonischen Klartext
+-------------------------------------
+Maschinell wie in Hessen (Vorspann und Fußmarken entfernt, Gliederungs- und Normüberschrift
+je auf eine Zeile geführt, Aufzählungsmarke und Text vereinigt, NFC). Zwei Eigenheiten kamen
+hinzu:
+
+  a) Anders als in Hessen tragen diese Normen Überschriften. Sie stehen unmittelbar unter der
+     Bezeichnung, ohne Leerzeile; genau daran sind sie vom Wortlaut zu unterscheiden, der
+     stets durch eine Leerzeile abgesetzt ist.
+  b) Das Portal trennt die Sachnummer ab („§ 57 c“, „§ 135 a“). Kanonisch ist „§ 57c“;
+     zusammengezogen wurden so zehn Normköpfe der Gemeindeordnung, die sonst dem Gesetz
+     entgangen wären.
+
+Der Klammerzusatz „(Gemeindeordnung - GO -)“ trennt Kurztitel und Abkürzung mit einem
+Bindestrich statt des amtlichen Gedankenstrichs; der Parser nimmt beides an, sofern der
+Strich von Leerraum umgeben ist.

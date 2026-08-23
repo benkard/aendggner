@@ -492,12 +492,16 @@ class EndToEndTest {
   }
 
   /**
-   * Schleswig-Holstein: Extraktion und Befehlserkennung auf dem Kommunalrecht-Änderungsgesetz
-   * (GVOBl. Schl.-H. 2026/27). Kein voller Akzeptanztest — die konsolidierte Gemeindeordnung ist
-   * aus freien Quellen nicht in der maßgeblichen Fassung zu beschaffen (das juris-Landesportal
-   * liefert nur eine anmeldepflichtige API; die letzten frei archivierten Volltexte stammen aus
-   * 2022 und kennen den hier geänderten § 34a noch nicht). Geprüft wird deshalb alles bis
-   * einschließlich der Befehlserkennung, gegen ein Stammgesetz ohne Normen.
+   * Schleswig-Holstein: das Kommunalrecht-Änderungsgesetz (GVOBl. Schl.-H. 2026/27). Voller
+   * Akzeptanzfall für beide geänderten Gesetze: Artikel 1 fasst § 34a Abs. 1 der Gemeindeordnung
+   * neu, Artikel 2 den gleichlautenden § 29a Abs. 1 der Kreisordnung; Artikel 3 ändert ein anderes
+   * Änderungsgesetz und wird zu Recht nicht gewählt.
+   *
+   * <p>Beide Stammfassungen sind über eine Browsersteuerung aus dem Landesrechtsportal beschafft,
+   * das Skriptabfragen nur seine Anwendungshülle ausgibt; Herkunft und Aufbereitung stehen in
+   * {@code SchleswigHolstein/SOURCES}. Der Fall trägt zwei Eigenheiten des Portalsatzes: die
+   * abgetrennte Sachnummer („§ 57 c“) und den Bindestrich statt des Gedankenstrichs im
+   * Klammerzusatz „(Gemeindeordnung - GO -)“.
    */
   @Test
   void kommunalrechtAendGSchleswigHolstein() throws Exception {
@@ -519,10 +523,24 @@ class EndToEndTest {
 
     // Artikel 1 ändert die Gemeindeordnung, Artikel 2 die Kreisordnung, Artikel 3 ein anderes
     // Änderungsgesetz — nur der jeweils zutreffende Artikel wird gewählt.
-    var gemeindeordnung =
-        new Gesetz("GO", "Gemeindeordnung für Schleswig-Holstein", "Gemeindeordnung", List.of());
-    var kreisordnung =
-        new Gesetz("KrO", "Kreisordnung für Schleswig-Holstein", "Kreisordnung", List.of());
+    var altGo = SAMPLEDATA.resolve("SchleswigHolstein/GO-SH-alt.txt");
+    var altKro = SAMPLEDATA.resolve("SchleswigHolstein/KrO-SH-alt.txt");
+    assumeTrue(Files.exists(altGo) && Files.exists(altKro), "Stammfassungen Schl.-H. fehlen");
+    var lader = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader();
+    var gemeindeordnung = lader.load(altGo);
+    var kreisordnung = lader.load(altKro);
+
+    // Kurztitel und Abkürzung sind auch dann getrennt, wenn der Klammerzusatz statt des
+    // Gedankenstrichs einen Bindestrich führt, wie ihn das Portal setzt.
+    assertThat(gemeindeordnung.jurabk()).isEqualTo("GO");
+    assertThat(gemeindeordnung.kurzue()).isEqualTo("Gemeindeordnung");
+    // 167 Normen: Die abgetrennte Sachnummer des Portalsatzes („§ 57 c“) ist bei der Aufbereitung
+    // zusammengezogen — sonst fehlten zehn Paragraphen. Ein Satz, der mit einem Querverweis
+    // beginnt („§ 102 mit Ausnahme des Absatzes 2 …“), eröffnet dagegen keine Norm.
+    assertThat(gemeindeordnung.normen()).hasSize(167);
+    assertThat(gemeindeordnung.norm("§ 57c")).isPresent();
+    assertThat(gemeindeordnung.norm("§ 135a")).isPresent();
+    assertThat(kreisordnung.normen()).hasSize(86);
 
     var go = new AenderungsgesetzParser().parse(text, gemeindeordnung, null);
     assertThat(go.artikel()).containsExactly("1");
@@ -540,6 +558,35 @@ class EndToEndTest {
     assertThat(kro.artikel()).containsExactly("2");
     assertThat(kro.befehle()).hasSize(1);
     assertThat(kro.befehle().get(0).stelle().anzeigeText()).isEqualTo("§ 29a Absatz 1");
+
+    // --- Anwendung, je gegen die amtliche Nachfassung vom 31. März 2026 --------------------
+    pruefeGegenNachfassung(gemeindeordnung, go, "SchleswigHolstein/GO-SH-neu.txt");
+    pruefeGegenNachfassung(kreisordnung, kro, "SchleswigHolstein/KrO-SH-neu.txt");
+  }
+
+  /**
+   * Wendet die erkannten Befehle an und hält das Ergebnis Norm für Norm gegen die amtliche
+   * Nachfassung. Kein Befehl darf zur Prüfung von Hand bleiben, keine Norm abweichen.
+   */
+  private static void pruefeGegenNachfassung(
+      Gesetz alt, AenderungsgesetzParser.ParseErgebnis erkannt, String nachfassung)
+      throws Exception {
+    var anwendung = BefehlAnwender.anwenden(alt, erkannt.befehle());
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(erkannt.befehle().size());
+    assertThat(anwendung.protokoll())
+        .noneMatch(x -> x.status() == BefehlAnwender.Status.MANUELL_PRUEFEN);
+
+    var pfad = SAMPLEDATA.resolve(nachfassung);
+    assumeTrue(Files.exists(pfad), "Nachfassung " + nachfassung + " fehlt");
+    var soll = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(pfad);
+    assertThat(soll.normen()).hasSameSizeAs(alt.normen());
+    for (var normSoll : soll.normen()) {
+      var normIst = anwendung.neu().norm(normSoll.enbez());
+      assertThat(normIst).as("Norm %s fehlt", normSoll.enbez()).isPresent();
+      assertThat(normIst.orElseThrow().gesamtText().replaceAll("\\s+", " ").strip())
+          .as("Norm %s", normSoll.enbez())
+          .isEqualTo(normSoll.gesamtText().replaceAll("\\s+", " ").strip());
+    }
   }
 
   /**

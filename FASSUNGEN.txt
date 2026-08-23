@@ -567,6 +567,40 @@ Zwei stille Mängel
 (2) Der Mangel nach Absatz 1 ist an beiden Stellen durch Entboxung des Index
     behoben.
 
+
+Artikel 20
+Der schleswig-holsteinische Belegfall
+
+(1) Aufgenommen werden die konsolidierten Fassungen der Gemeindeordnung und der
+    Kreisordnung für Schleswig-Holstein, je in der Gültigkeit vom 16. August 2025
+    bis zum 30. März 2026 („GO-SH-alt.txt“, „KrO-SH-alt.txt“) sowie, allein als
+    Prüfmaßstab, die Fassungen ab dem 31. März 2026.
+
+(2) Der Belegfall („EndToEndTest.kommunalrechtAendGSchleswigHolstein“) reichte
+    bislang nur bis zur Befehlserkennung. Er umfasst nunmehr die Anwendung auf
+    beide Stammgesetze — der erste Fall, in dem ein Änderungsgesetz deren zwei
+    fortschreibt. Beide gleichen danach Norm für Norm der amtlichen Nachfassung,
+    die Gemeindeordnung in 167, die Kreisordnung in 86 Normen.
+
+(3) Zwei Eigenheiten des Portalsatzes waren zu behandeln. Die Sachnummer steht
+    dort abgetrennt („§ 57 c“); kanonisch ist „§ 57c“, und ohne diesen Handgriff
+    wären zehn Paragraphen der Gemeindeordnung dem Gesetz entgangen. Der
+    Handgriff gehört zur Aufbereitung und ist in „SOURCES“ verzeichnet.
+
+(4) Die zweite Eigenheit betrifft den Quelltext und ist unter Artikel 21 geregelt.
+
+
+Artikel 21
+Bindestrich und Gedankenstrich im Klammerzusatz
+
+Der Klartext-Parser des Landesrechts (LandesRechtTextParser) trennt Kurztitel und
+Abkürzung des Klammerzusatzes („Gemeindeordnung – GO –“) fortan auch dann, wenn
+statt des Gedankenstrichs ein Bindestrich steht; so setzen ihn die
+Landesrechtsportale. Verwechslungsfrei ist er, weil er an dieser Stelle von
+Leerraum umgeben ist — innerhalb eines Namens steht ein Bindestrich stets ohne.
+Ohne diese Ergänzung blieb der Kurztitel ungetrennt, der Einleitungssatz des
+Änderungsgesetzes fand sein Ziel nicht, und es wurde kein Artikel gewählt.
+
 ════════════════════════════════════════════════════════════════════════════════
  Fassung vom 22. August 2026,
  zuletzt geändert durch die am 22. August 2026 vorgenommenen Änderungen

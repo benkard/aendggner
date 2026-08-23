@@ -44,7 +44,11 @@ final class LandesRechtTextParser {
   private static final Pattern JURABK_ZEILE = Pattern.compile("^\\(([^()]+)\\)$");
 
   /** Trennt im Klammerzusatz den Kurztitel von der Abkürzung („Kurztitel – Abk“). */
-  private static final Pattern KURZTITEL_TRENNER = Pattern.compile("\\s+[–—]\\s+");
+  // Der Gedankenstrich zwischen Kurztitel und Abkürzung („Gemeindeordnung – GO –“). Der
+  // Bindestrich steht ihm gleich: Die Landesrechtsportale setzen ihn an dieser Stelle statt des
+  // Gedankenstrichs. Verwechslungsfrei ist er, weil er hier von Leerraum umgeben ist — innerhalb
+  // eines Namens steht ein Bindestrich stets ohne.
+  private static final Pattern KURZTITEL_TRENNER = Pattern.compile("\\s+[–—-]\\s+");
 
   // Kopf der Druckfassung („BayJG: Bayerisches Jagdgesetz … (Art. 1–64)“), ggf. mit
   // umbrochenem Rest („1–64)“) auf der Folgezeile.

@@ -190,6 +190,10 @@ SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
 path = [
   "src/test/resources/sampledata/BayJG/BayJG-alt.txt",
   "src/test/resources/sampledata/Hessen/StVRZustV-alt.txt",
+  "src/test/resources/sampledata/SchleswigHolstein/GO-SH-alt.txt",
+  "src/test/resources/sampledata/SchleswigHolstein/GO-SH-neu.txt",
+  "src/test/resources/sampledata/SchleswigHolstein/KrO-SH-alt.txt",
+  "src/test/resources/sampledata/SchleswigHolstein/KrO-SH-neu.txt",
   "src/test/resources/sampledata/Hessen/StVRZustV-neu.txt",
   "src/test/resources/sampledata/NRW/17-RAEStV-AusfG-alt.txt",
   "src/test/resources/sampledata/NRW/LMG-NRW-alt.txt",
@@ -208,6 +212,7 @@ path = [
   "src/test/resources/sampledata/BayJG/SOURCES",
   "src/test/resources/sampledata/GEG/SOURCES",
   "src/test/resources/sampledata/Hessen/SOURCES",
+  "src/test/resources/sampledata/SchleswigHolstein/SOURCES",
   "src/test/resources/sampledata/IfSG/SOURCES",
   "src/test/resources/sampledata/NRW/SOURCES",
   "src/test/resources/sampledata/ProdHaftG/SOURCES",

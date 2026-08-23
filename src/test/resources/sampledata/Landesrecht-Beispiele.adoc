@@ -38,7 +38,10 @@ a)/aa)/bb)/cc); Artikel 1 ändert eine *Anlage* mit eigener Nummern-Gliederung.
 30.03.2026 (Gesetz zur Änderung des Gesetzes zur Änderung kommunalrechtlicher Vorschriften)
 |Neues Neufassungsidiom „§ 34a Absatz 1 *erhält folgende Fassung*:" (statt „wird wie folgt
 gefasst"); *hochgestellte Fußnotenmarker an Artikel-Überschriften* („Artikel 1 ¹)"); Meta-
-Änderung an einem anderen Änderungsgesetz („Artikel 5 wird gestrichen").
+Änderung an einem anderen Änderungsgesetz („Artikel 5 wird gestrichen"). Voller Akzeptanzfall für
+*zwei* Stammgesetze zugleich (Gemeindeordnung, Kreisordnung); der Portalsatz trennt die
+*Sachnummer* ab („§ 57 c") und setzt im Klammerzusatz einen *Bindestrich* statt des
+Gedankenstrichs.
 
 |Hessen
 |`Hessen/GVBl-2026-05_11-AendVO-verkehrsrechtl-Zustaendigkeiten.pdf` — GVBl. Hessen Nr. 5 vom
@@ -105,55 +108,12 @@ aufgehobenen Platzhalter hinweg. Voller Akzeptanzfall, Stammfassung
   dem zweispaltigen Nds. GVBl 2022 Nr. 33) und `EndToEndTest.nefgAcceptance` (alle sieben Befehle
   angewandt, kein Rest — einschließlich der beiden niedersächsischen Einfügeformen: Sachnummer mit
   Leerzeichen „§ 2 a“ und gliederungsbezogene Einfügung „In Kapitel 4 wird nach § 12 …“).
-* *Schleswig-Holstein* ist bis einschließlich der Befehlserkennung umgesetzt
+* *Schleswig-Holstein* ist *vollständig* umgesetzt
   (`EndToEndTest.kommunalrechtAendGSchleswigHolstein`): Artikel 1 trifft die Gemeindeordnung,
-  Artikel 2 die Kreisordnung, je ein Neufassungsbefehl, kein unbekannter Befehl. Ein voller
-  Akzeptanztest ist *nicht* möglich — siehe „Noch offen“.
-* *Nordrhein-Westfalen* ist der Massentest-Fall: aus demselben Heft sind alle vier ändernden
-  Artikel als Akzeptanzfälle hinterlegt.
-+
---
-`EndToEndTest.tmzGesetzAcceptance`:: Artikel 3 (Telemedienzuständigkeitsgesetz), vier Befehle,
-kein Rest. Stamm `NRW/TMZ-Gesetz-alt.txt`.
-`EndToEndTest.wdrGesetzAcceptance`:: Artikel 1 (WDR-Gesetz), 101 Befehle an 31 Normen, davon 100
-angewandt. Stamm `NRW/WDR-Gesetz-alt.txt` (Fassung vom 01.01.2025). Der Fall trägt die
-Umnummerierungs-Kaskaden (§ 3: Absatz 2 → zwei Absätze, die Absätze 3 bis 11 rücken auf, ein neuer
-Absatz 13 kommt hinzu; § 15 Absatz 3: Nummer 22 entfällt, 23 bis 37 rücken auf), den Sammelrahmen
-„Es werden ersetzt:“ und die Angabe-Befehle auf die Inhaltsübersicht. Einziges Residuum ist
-Nr. 13 e) aa): „der Punkt am Ende des Satzes“ ist in einer zweisätzigen Nummer nicht eindeutig.
-`EndToEndTest.lmgNrwAcceptance`:: Artikel 2 (Landesmediengesetz), 18 Befehle, kein Rest. Stamm
-`NRW/LMG-NRW-alt.txt` (Fassung vom 01.01.2025).
-`EndToEndTest.rundfunkAusfuehrungsgesetzAcceptance`:: Artikel 4 (17. RÄStV-AusfG), ein Befehl,
-kein Rest. Stamm `NRW/17-RAEStV-AusfG-alt.txt` (Erstfassung vom 17.12.2015, bis 2026 unverändert).
-Der Artikel führt seinen Befehl *ohne* Gliederungspunkt — der Text nach der Änderungsformel ist
-der Befehl —, und das Zitat der neuen Fassung trägt verschachtelte Anführungszeichen (ein
-vollständiges „durch Artikel 3 …“ innerhalb einer eckigen Klammer). Beides trägt die vorhandene
-Maschinerie.
---
-+
-Alle vier Ergebnisse sind normweise gegen die amtliche Fassung vom 01.04.2026 abgeglichen. Es
-bleiben nur Abweichungen, in denen die amtliche Nachfassung selbst vom Befehlswortlaut abweicht
-(§ 15 WDR-Gesetz: „des“ vor „Bundesreisekostengesetzes“ entfallen; § 7 und § 21 WDR-Gesetz: ein
-überzähliges Anführungszeichen aus dem Änderungsgesetz; § 93 LMG NRW: zusätzlich die Wörter
-„Film (“ gestrichen) — ÄndGgner wendet dort den Wortlaut an. Damit ist das Heft GV. NRW. 7/2026
-vollständig belegt.
-* *Berlin* ist bis zur Befehlserkennung umgesetzt (`EndToEndTest.asogLafAendGBerlin`): Artikel 2
-  (LAF-Errichtungsgesetz) wird vollständig erkannt, beide Punkte erben ihr Ziel aus der
-  Änderungsformel. Artikel 1 wird seit der Wortanker-Einfügung und der Zitatgrenze am
-  Aufzählungspunkt *vollständig* erkannt — alle sechs Befehle, einschließlich der Änderungen an der
-  unnummerierten Anlage. Ein voller Akzeptanztest bleibt an der Stammfassung hängen (siehe „Noch
-  offen“).
-* *Hessen* ist *vollständig* umgesetzt (`EndToEndTest.verkehrsZustVAendVOHessen`): alle
-  21 Befehle des Artikels 1 werden erkannt und angewandt, und alle 52 Normen gleichen danach
-  zeichengenau der amtlichen Nachfassung vom 4. Februar 2026. Der als Härtetest erwartete Sperrsatz erwies sich als
-  harmlos — er trifft nur den Unterschriftenblock. Zu tun war dreierlei: die laufende GVBl-Fußzeile
-  und der Masthead als Kolumnentitel, die Sternchen-Fußnote der Überschrift („* Ändert FFN 61-60“,
-  am Seitenfuß zwischen zwei Gliederungspunkten) ebenso, und zwei Befehlsformen — der Zusatz
-  „am Ende“ darf beim Satzzeichen fehlen, und das Objekt hinter „durch“ darf auch ohne Fundstelle
-  verkürzt sein. Die Stammfassung ist über eine *Browsersteuerung* aus dem Landesrechtsportal
-  beschafft; damit ist die juris-Sackgasse aufgebrochen (siehe „Beschaffung der Stammfassungen“).
-* Baden-Württemberg (GBl 2026 Nr. 26): großes Anlage-lastiges Änderungsgesetz (§§ 4–57a + Anlagen
-  1/3b/4b); Stammfassung/Akzeptanztest noch offen.
+  Artikel 2 die Kreisordnung, je ein Neufassungsbefehl, kein unbekannter Befehl — und beide
+  Gesetze gleichen nach der Anwendung Norm für Norm der amtlichen Nachfassung vom 31. März 2026
+  (167 bzw. 86 Normen). Artikel 3 ändert ein anderes Änderungsgesetz und wird zu Recht nicht
+  gewählt. Beide Stammfassungen sind über die Browsersteuerung beschafft.
 
 == Beschaffung der Stammfassungen
 
@@ -221,16 +181,7 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
 
 == Noch offen
 
-* *Schleswig-Holstein — Stammfassung noch nicht beschafft* (der Weg über die Browsersteuerung ist
-  seit Hessen offen und hier noch nicht gegangen): Das Landesportal
-  `gesetze-rechtsprechung.sh.juris.de` ist seit Ende 2022 eine reine Single-Page-Anwendung; die
-  Dokumentinhalte liegen hinter einer anmeldepflichtigen „mylex“-API (`connectUrl` aus dem
-  `localStorage`), sämtliche Dokument-URLs liefern nur die leere Anwendungshülle. Die Wayback
-  Machine hat die serverseitig gerenderte Gesamtausgabe der Gemeindeordnung zuletzt am
-  14.11.2022 erfasst — dort fehlt der hier geänderte § 34a noch (er wurde erst durch das Gesetz
-  vom 05.02.2025 eingefügt). Auch die archivierten Einzelnorm-Seiten (113 Stück) sind bereits
-  SPA-Hüllen ohne Inhalt. Ein voller Akzeptanztest bleibt daher offen, bis die konsolidierte
-  Fassung aus einer anderen Quelle vorliegt.
+
 * *Berlin — Stammfassung noch nicht beschafft* (desgleichen): `gesetze.berlin.de` ist trotz des Eigennamens dieselbe
   juris-Anwendung wie das schleswig-holsteinische Portal (Kennung `bsbe`) und ebenso
   anmeldepflichtig. In der Wayback Machine gibt es keine serverseitig gerenderten Volltexte des
@@ -255,14 +206,20 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
 Kein Land scheitert noch an reiner Extraktionsschwäche; offen sind Modell- und Beschaffungsfragen.
 Nach absteigendem Nutzen:
 
-. *Die übrigen drei Stammfassungen über die Browsersteuerung holen* — Schleswig-Holstein
-  (Gemeindeordnung, Kreisordnung), Berlin (ASOG, LAF-Errichtungsgesetz) und Baden-Württemberg
-  (Kommunalwahlordnung). Der Weg steht seit Hessen fest und ist unter „Beschaffung der
-  Stammfassungen“ beschrieben; damit werden aus drei Erkennungsfällen volle Akzeptanzfälle.
+. *Die beiden übrigen Stammfassungen über die Browsersteuerung holen* — Berlin (ASOG,
+  LAF-Errichtungsgesetz) und Baden-Württemberg (Kommunalwahlordnung). Der Weg ist unter
+  „Beschaffung der Stammfassungen“ beschrieben; Hessen und Schleswig-Holstein sind ihn gegangen.
 . *Anlagen-Normköpfe im `LandesRechtTextParser`* ergänzen (er kennt neben „§“/„Art.“ inzwischen
   auch die Inhaltsübersicht als Norm). Berlins Artikel 1 und Baden-Württembergs Verordnung ändern
   Anlagen; mit deren Stammfassungen aus Schritt 1 wird die Ergänzung end-to-end prüfbar.
 . *Berlin, ganzseitenbreite Rahmen* (XY-Cut) — die letzte offene Layout-Frage, siehe „Noch offen“.
+
+*Erledigt:* _Schleswig-Holstein_ ist vollständig umgesetzt — der erste Fall mit *zwei*
+Stammgesetzen in einem Änderungsgesetz. Zwei Eigenheiten des Portalsatzes waren zu beheben: Er
+trennt die Sachnummer ab („§ 57 c“ statt „§ 57c“, zehn Normen der Gemeindeordnung wären sonst
+dem Gesetz entgangen), und er setzt im Klammerzusatz einen Bindestrich statt des amtlichen
+Gedankenstrichs, weshalb Kurztitel und Abkürzung ungetrennt blieben und kein Artikel gewählt
+wurde. Der Parser nimmt den Strich nunmehr in beiden Gestalten an, sofern Leerraum ihn umgibt.
 
 *Erledigt:* _Hessen_ ist vollständig umgesetzt (`EndToEndTest.verkehrsZustVAendVOHessen`,
 einundzwanzig Befehle, kein Rest; alle zweiundfünfzig Normen gleichen der amtlichen Nachfassung).
@@ -297,6 +254,6 @@ Bußgeldkatalogs — dort auch Aufbau und Einrückung, weil an ihnen die Stellun
 hängt; für Sachsen,
 Niedersachsen und die vier NRW-Artikel die vollständige Anwendung bis auf das eine benannte
 Residuum im WDR-Gesetz; für Hessen die vollständige Anwendung und den Gleichlauf
-aller 52 Normen mit der amtlichen Nachfassung; für Schleswig-Holstein und Berlin die vollständige
-*Erkennung*. Wer eine dieser Zahlen
+aller 52 Normen mit der amtlichen Nachfassung; für Schleswig-Holstein die vollständige Anwendung auf beide
+Stammgesetze; für Berlin die vollständige *Erkennung*. Wer eine dieser Zahlen
 ändern muss, sollte den Grund im Test vermerken.
