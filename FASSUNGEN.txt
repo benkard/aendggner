@@ -213,6 +213,75 @@ Unberührte Bestandteile
     fünfundzwanzig Testfälle bestehen fort.
 
 
+Artikel 9
+Gestaltung der Synopse
+
+Mit Artikel 7 trug die Aufgabeseite das Gewand eines amtlichen Formblatts, das
+Erzeugnis aber noch sein altes: Antiqua auf Weiß, kein Briefkopf, kein Fußsteg,
+ein anders benanntes Farbgerüst. Wer das Formular ausfüllte und dann die Synopse
+öffnete, sah zwei Dokumente zweier Häuser. Sie treten fortan als Vorgang und
+Erzeugnis desselben Hauses auf: der Antrag als Formblatt ÄG-1, die darauf
+ergehende Synopse als Formblatt ÄG-2.
+
+(1) Das Farbgerüst des HtmlRenderers wird auf die Marken der Aufgabeseite
+    gebracht („--rand“ wird „--raster“, „--dezent“ wird „--muted“) und um
+    „--papier“, „--kasten“ und „--amt“ ergänzt. Dass es zweimal geführt wird,
+    ist unvermeidlich und nunmehr an beiden Stellen vermerkt: Die Synopse wird
+    aus einem blob:-Verweis geöffnet und im Befehlszeilenbetrieb als einzelne
+    Datei abgelegt; sie kann kein fremdes Stilblatt einbinden.
+
+(2) Die Schrift ist geteilt. Der Vordruck — Briefkopf, Kennung, Überschriften,
+    Spaltenköpfe, Kästchen, Fußsteg — steht in der Groteske, der Wortlaut der
+    Normen in der Antiqua. Amtskopf und Vorschrift sind zweierlei, im
+    Gesetzblatt wie hier.
+
+(3) Der Kopf trägt denselben Aufbau wie die Aufgabeseite: links die ausstellende
+    Stelle mit ihrer Langbezeichnung, rechts die Kennung („Formblatt ÄG-2“,
+    „Stammgesetz“, „Erstellt“, bei Entwürfen „Stand: Entwurfsfassung“, „Geltung:
+    nichtamtlich“), darunter die Doppellinie und der Vorspann mit Herkunft und
+    Statistik. Die Wendung „erstellt am … mit ÄndGgner“ wandert in den Fußsteg,
+    damit das Datum nicht zweimal dasteht.
+
+(4) Die beiden Felder des Spaltenkopfes treten als schwarze Balken auf wie die
+    Legende des Feldblocks; ebenso die Überschriften der Abschnitte „Geänderte
+    Gliederungs-Überschriften“ und „Manuell prüfen“.
+
+(5) Die alte Fassung liegt auf dem Kastenton wie ein Durchschlag, die neue auf
+    Bogenweiß. Beim Springen zwischen den Spalten ist damit ohne Hinsehen klar,
+    wo man steht; die Hinterlegungen der Änderungen heben sich von beiden
+    Gründen weiterhin ab.
+
+(6) Jede Norm trägt im Steg links eine Randziffer, wie der Vordruck die
+    Feldziffer. Sie entsteht aus einem Zähler des Stilblattes und macht die
+    Abschnitte überdies zitierbar.
+
+
+Artikel 10
+Drei Mängel, die dabei zutage traten
+
+(1) Der Spaltenkopf klebte (position: sticky) innerhalb des Kopfblocks. Sein
+    Klebebereich endete deshalb mit dem Vorspann, sodass er beim Blättern
+    alsbald verschwand. Er steht nunmehr mit der Gegenüberstellung in einem
+    eigenen Block: Der Bereich reicht über alle Normen und endet vor dem
+    Abschnitt „Manuell prüfen“, der keine Spalten hat.
+
+(2) Auf schmalen Geräten standen zwei Spalten Gesetzestext zu je einem Anteil
+    nebeneinander; lesbar war das nicht. Unterhalb von sechzig Halbgevierten
+    wird gestapelt, und da dort der Spaltenkopf nichts mehr trägt, beschriftet
+    sich jede Spalte selbst.
+
+(3) Die Druckblöcke beider Stilblätter setzten nur einen Teil des Farbgerüstes
+    zurück. Da „prefers-color-scheme“ im Druck fortgilt, wäre aus einem dunkel
+    eingestellten Browser heraus die alte Spalte als schwarzer Block aus dem
+    Drucker gekommen. Beide Blöcke setzen nunmehr sämtliche Marken.
+
+(4) Nachgewiesen an zwei wirklichen Läufen der Befehlszeilenfassung: dem
+    verkündeten Dritten Gesetz zur Änderung des UWG (19 Befehle, 0 manuell,
+    6 Normen) und dem Regierungsentwurf zum AGG (23 Befehle, 1 manuell,
+    14 Normen, Entwurfsfassung). Dreihundertsiebenundzwanzig Testfälle bestehen,
+    darunter zwei neue für Kennung, Fußsteg und Entwurfsausweis.
+
+
 ════════════════════════════════════════════════════════════════════════════════
  Fassung vom 22. August 2026,
  zuletzt geändert durch die am 22. August 2026 vorgenommenen Änderungen

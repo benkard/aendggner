@@ -108,6 +108,24 @@ class HtmlRendererTest {
   }
 
   @Test
+  void traegtKennungUndFusssteg() {
+    var html = HtmlRenderer.rendere(synopse(), "test.xml + test.pdf");
+
+    assertThat(html).contains("&#8209;2").contains("Stammgesetz").contains("nichtamtlich");
+    assertThat(html).contains("Grundlage: test.xml + test.pdf");
+    assertThat(html).contains("maßgeblich ist allein die amtliche Verkündung");
+    assertThat(html).doesNotContain("Entwurfsfassung");
+  }
+
+  @Test
+  void weistDieEntwurfsfassungInDerKennungAus() {
+    var html = HtmlRenderer.rendere(synopse(), "quelle", true);
+
+    assertThat(html).contains("<dt>Stand</dt><dd>Entwurfsfassung</dd>");
+    assertThat(html).contains("nicht geltendes Recht");
+  }
+
+  @Test
   void markiertNeueNormenAlsEingefuegt() {
     var alt = gesetz("Text.");
     var neuGesetz =

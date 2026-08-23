@@ -487,7 +487,9 @@ footer nav {
 
 /* Ein Formblatt gehört ausgedruckt: ohne Unterlage, ohne Bogenrand, mit Linien in
    Schwarz. Der Knopf und das Merkblatt entfallen, weil auf Papier weder gedrückt noch
-   aufgeklappt wird. */
+   aufgeklappt wird. Gedruckt wird stets auf weißes Papier, auch aus einem dunkel
+   eingestellten Browser heraus — prefers-color-scheme gilt im Druck fort. Deshalb ist
+   das ganze Farbgerüst zurückzusetzen und nicht nur ein Teil davon. */
 @media print {
   :root {
     --fg: #000;
@@ -498,6 +500,8 @@ footer nav {
     --raster: #999;
     --kasten: #fff;
     --amt: #000;
+    --warnung: #8b0000;
+    --bestaetigung: #005f00;
   }
 
   body {
