@@ -70,7 +70,11 @@ folgende Fassung"). Saubere einspaltige PDFs über die stabile API `verkuendung-
 |`BadenWuerttemberg/GBl-2026-26_KommunalwahlO-AendVO.pdf` — GBl. BW 2026 Nr. 26 vom 27.02.2026
 (Verordnung des Innenministeriums zur Änderung der Kommunalwahlordnung)
 |Standard-HdR-Befehle im GBl-Layout; „werden nach dem Wort … die Wörter … eingefügt",
-„werden die Wörter … gestrichen".
+„werden die Wörter … gestrichen". Unterscheidend ist der *Seitenfuß mitten im Befehlstext* — er
+trennt dort den Zieltext eines Befehls von seinem Verb —, dazu die *Blattzählung* („Seite 2 von
+7") zwischen zwei Gliederungspunkten, der *Dativ ohne Artikel* („Absatz 2 wird folgender Satz
+angefügt") und der *Klammerzusatz hinter einer Anlagenbezeichnung*. Voller Belegfall,
+Stammfassung `BadenWuerttemberg/KomWO-BW-alt.txt`, Prüfmaßstab `KomWO-BW-neu.txt`.
 
 |Nordrhein-Westfalen
 |`NRW/GV-NRW-2026-S202_22-Rundfunkaenderungsgesetz.pdf` — GV. NRW. 2026 Nr. 7 vom 31.03.2026,
@@ -167,8 +171,15 @@ Absatz zugeschlagen, weshalb dessen Text nicht auf den Punkt endet, den der Befe
   *Browsersteuerung* aus dem Landesrechtsportal beschafft; damit ist die juris-Sackgasse
   aufgebrochen (siehe „Beschaffung der Stammfassungen“).
 
-* Baden-Württemberg (GBl 2026 Nr. 26): großes Anlage-lastiges Änderungsgesetz (§§ 4–57a + Anlagen
-  1/3b/4b); Stammfassung/Akzeptanztest noch offen.
+* *Baden-Württemberg* ist umgesetzt (`EndToEndTest.kommunalwahlOAendVOBadenWuerttemberg`):
+  37 Befehle, 31 angewandt; 91 der 93 Normen gleichen der amtlichen Fassung vom 1. Mai 2026.
+  Die sechs liegengebliebenen Befehle ändern sämtlich die *Muster* der Anlagen (Wahlschein,
+  Merkblätter, deren Fußnoten und Spiegelstriche). Sie sind nicht anwendbar, weil das Portal die
+  Muster nicht als Text ausliefert: Die Anlagen 2 bis 14 bestehen dort nur aus Kopf und
+  Fundstelle. Was nicht vorliegt, lässt sich nicht ändern — eine Grenze der Quelle, nicht des
+  Werkzeugs. Die zweite benannte Abweichung sitzt in § 20: Der Befehl ersetzt „Name" durch „der
+  vollständige Familienname", und im Zieltext steht davor bereits „der"; die amtliche Nachfassung
+  räumt das auf, der Befehlswortlaut tut es nicht.
 
 == Beschaffung der Stammfassungen
 
@@ -252,16 +263,22 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
 
 == Wo weitermachen
 
-Kein Land scheitert noch an reiner Extraktionsschwäche; offen sind Modell- und Beschaffungsfragen.
-Nach absteigendem Nutzen:
+Kein Land scheitert noch an reiner Extraktionsschwäche, und jedes Land mit einem Änderungs-
+dokument trägt nunmehr einen Belegfall bis zur Anwendung. Nach absteigendem Nutzen:
 
-. *Baden-Württembergs Kommunalwahlordnung über die Browsersteuerung holen* — der Weg ist unter
-  „Beschaffung der Stammfassungen“ beschrieben; Hessen, Schleswig-Holstein und Berlin sind ihn
-  gegangen. Die Anlagen 1, 3b und 4b sind der zweite Beleg für den Rang der Anlagen-Einheiten.
 . *Berlin, ganzseitenbreite Rahmen* (XY-Cut) — die letzte offene Layout-Frage, siehe „Noch
   offen“. Sie ist seit dieser Welle *belegt*: Die Anlage Nummer 31 des ASOG weicht allein
   deshalb von der Nachfassung ab, weil der Titelblock des Änderungsgesetzes im Inhaltsstrom
   mitten in ihrem Zitat steht.
+. *Weitere Länder erfassen* — Rheinland-Pfalz (Verkündungsplattform erst ab 01.07.2026), Bremen,
+  Hamburg, Mecklenburg-Vorpommern, Saarland, Brandenburg, Sachsen-Anhalt.
+
+*Erledigt:* _Baden-Württemberg_ ist umgesetzt. Der Fall hat vier allgemeine Funde gebracht: Der
+Seitenfuß eines Gesetzblatts kann mitten im Befehlstext stehen und dessen Zieltext von seinem Verb
+trennen; die Blattzählung kann für sich allein zwischen zwei Gliederungspunkten stehen; der Dativ
+einer Anfügung darf seinen Artikel verlieren („Absatz 2 wird folgender Satz angefügt“); und hinter
+einer Anlagenbezeichnung darf ein beschreibender Klammerzusatz stehen. Dazu ein Anwendungsfund:
+Ein gestrichener Halbsatz nimmt sein Semikolon mit, und der Satz behält seinen Schlusspunkt.
 
 *Erledigt:* _Berlin_ ist umgesetzt. Die Nummern einer Anlage sind eigene Normen mit eigener
 Absatzzählung, deren Bezeichnung die Anlage voranstellt („Anlage Nummer 23“) — so führt sie das
@@ -315,5 +332,7 @@ Niedersachsen und die vier NRW-Artikel die vollständige Anwendung bis auf das e
 Residuum im WDR-Gesetz; für Hessen die vollständige Anwendung und den Gleichlauf
 aller 52 Normen mit der amtlichen Nachfassung; für Schleswig-Holstein die vollständige Anwendung auf beide
 Stammgesetze; für Berlin die vollständige Anwendung des Artikels 2, fünf von sechs
-Befehlen des Artikels 1 und die drei benannten Abweichungen von der Nachfassung. Wer eine dieser Zahlen
+Befehlen des Artikels 1 und die drei benannten Abweichungen von der Nachfassung; für
+Baden-Württemberg einunddreißig von siebenunddreißig Befehlen und die zwei benannten
+Abweichungen. Wer eine dieser Zahlen
 ändern muss, sollte den Grund im Test vermerken.

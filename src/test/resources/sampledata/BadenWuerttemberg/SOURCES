@@ -1,0 +1,59 @@
+Beispieldaten Baden-Württemberg — Herkunft und Aufbereitung
+===========================================================
+
+1. Änderungsdokument
+   GBl-2026-26_KommunalwahlO-AendVO.pdf
+   Gesetzblatt für Baden-Württemberg 2026 Nr. 26 vom 27. Februar 2026:
+   Verordnung des Innenministeriums zur Änderung der Kommunalwahlordnung
+   vom 9. Februar 2026. In Kraft getreten am 1. Mai 2026.
+
+2. Stammfassungen
+   KomWO-BW-alt.txt  Kommunalwahlordnung vom 2. September 1983,
+                     Gültigkeit 01.08.2023–30.04.2026 (92 Normen)
+   KomWO-BW-neu.txt  dieselbe ab 01.05.2026, allein als Prüfmaßstab (93 Normen)
+
+Bezugsweg
+---------
+Wie in Hessen, Schleswig-Holstein und Berlin über eine Browsersteuerung;
+`landesrecht-bw.de` ist dieselbe juris-Anwendung (Kennung `bsbw`). Rezept in
+`Hessen/SOURCES`, Auszugsverfahren in `Berlin/SOURCES` (base64-kodierte Stücke,
+weil der Auszug sonst bei 50000 Zeichen abbricht).
+
+    Kommunalwahlordnung   jlr-NNLBW00007D1A   @20230801 / @20260501
+
+Die Gesamtausgaben-Liste nennt die Geltungszeiträume und damit den Stichtag: Die
+Vorfassung gilt bis 30.04.2026, die Nachfassung ab 01.05.2026 — der Tag des
+Inkrafttretens, den das Gesetzblatt selbst nicht auf der ersten Seite nennt.
+
+Rechtsstellung: amtliche Werke nach § 5 UrhG; im Übrigen wie in `Hessen/SOURCES`
+dargelegt.
+
+Aufbereitung zum kanonischen Klartext
+-------------------------------------
+Maschinell wie in Berlin, mit einer Zutat: Baden-Württemberg schreibt seine
+Gliederung als „1. ABSCHNITT“ mit dem Titel auf der Folgezeile; kanonisch ist
+„Abschnitt 1  Titel“. Der Klammerzusatz des Langtitels steht auf eigener Zeile.
+
+Zwei Eigenheiten des Gesetzblatt-Satzes, im Produktivcode behoben
+-----------------------------------------------------------------
+Der Seitenfuß („Gesetzblatt für Baden-Württemberg, Jahrgang 2026, Nr. 26 vom
+27. Februar 2026 Seite 2 von 7“) steht im Inhaltsstrom *mitten im Befehlstext*
+und trennt dort den Zieltext eines Befehls von seinem Verb („… die Wörter
+‚Telegramm, Fernschreiben,‘“ / Fußzeile / „gestrichen.“). Er wird herausge-
+schnitten wie der Berliner Seitenkopf. Die Blattzählung („Seite 2 von 7“) steht
+mitunter für sich allein zwischen zwei Gliederungspunkten und wird als
+Kolumnentitel entfernt.
+
+Was nicht anwendbar ist — und warum
+-----------------------------------
+Sechs der siebenunddreißig Befehle (16. a) bis 18.) ändern die *Muster* der
+Anlagen: den Wahlschein, die Merkblätter, deren Fußnoten und Spiegelstriche. Sie
+bleiben liegen, weil das Landesrechtsportal die Muster nicht als Text ausliefert:
+Die Anlagen 2 bis 14 bestehen dort nur aus Kopf und Fundstelle, der Wahlschein
+(Anlage 1) nur aus den Hinweisen für Briefwähler. Was nicht vorliegt, lässt sich
+nicht ändern; das ist eine Grenze der Quelle.
+
+Eine benannte Abweichung von der Nachfassung bleibt außerdem in § 20: Der Befehl
+ersetzt das Wort „Name“ durch „der vollständige Familienname“, und im Zieltext
+steht davor bereits „der“ — die amtliche Nachfassung räumt das auf, der
+Befehlswortlaut tut es nicht.

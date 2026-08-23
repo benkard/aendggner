@@ -1655,10 +1655,24 @@ public final class BefehlAnwender {
                     + " (weggefallen)"
                     + text.substring(bereich.bis()));
           }
-          return TextErgebnis.ok(
-              (text.substring(0, bereich.von()) + text.substring(bereich.bis()))
-                  .replaceAll("  +", " ")
-                  .strip());
+          var rumpf = text.substring(0, bereich.von());
+          var rest = text.substring(bereich.bis());
+          // Ein Halbsatz nimmt sein Trennzeichen mit. „A; B.“ ohne den zweiten Halbsatz ist „A.“
+          // und nicht „A;“ — das Semikolon trennte ja gerade ihn ab, und der Satz braucht seinen
+          // Schlusspunkt. So setzt es auch die amtliche Nachfassung (§ 24 Abs. 2 KomWO BW).
+          var danach = rest.stripLeading();
+          boolean satzEndeErreicht =
+              danach.isEmpty()
+                  || Character.isUpperCase(danach.codePointAt(0))
+                  || danach.startsWith("§");
+          if (stelle.komponenten().stream().anyMatch(k -> k instanceof Stelle.HalbsatzNr)
+              && satzEndeErreicht) {
+            var gestutzt = rumpf.stripTrailing();
+            if (gestutzt.endsWith(";") || gestutzt.endsWith(",")) {
+              rumpf = gestutzt.substring(0, gestutzt.length() - 1) + ".";
+            }
+          }
+          return TextErgebnis.ok((rumpf + rest).replaceAll("  +", " ").strip());
         });
   }
 

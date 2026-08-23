@@ -191,6 +191,8 @@ SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
 [[annotations]]
 path = [
   "src/test/resources/sampledata/BayJG/BayJG-alt.txt",
+  "src/test/resources/sampledata/BadenWuerttemberg/KomWO-BW-alt.txt",
+  "src/test/resources/sampledata/BadenWuerttemberg/KomWO-BW-neu.txt",
   "src/test/resources/sampledata/Berlin/ASOG-Bln-alt.txt",
   "src/test/resources/sampledata/Berlin/ASOG-Bln-neu.txt",
   "src/test/resources/sampledata/Berlin/LAF-ErrG-alt.txt",
@@ -215,6 +217,7 @@ SPDX-License-Identifier = "AGPL-3.0-or-later AND LicenseRef-AmtlichesWerk"
 [[annotations]]
 path = [
   "src/test/resources/sampledata/AGG/SOURCES",
+  "src/test/resources/sampledata/BadenWuerttemberg/SOURCES",
   "src/test/resources/sampledata/BayJG/SOURCES",
   "src/test/resources/sampledata/GEG/SOURCES",
   "src/test/resources/sampledata/Berlin/SOURCES",

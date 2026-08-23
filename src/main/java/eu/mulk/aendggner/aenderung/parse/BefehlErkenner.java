@@ -292,9 +292,14 @@ final class BefehlErkenner {
 
   // Auch mit Artefakt-Toleranz: verdoppeltes „wird“ und Leerzeichen vor dem Doppelpunkt
   // („In § 51 Absatz 1 wird folgender Satz wird angefügt : „…““, BR-Drs).
+  //
+  // Der Artikel des Dativs darf fehlen: Baden-Württemberg schreibt „Absatz 2 wird folgender Satz
+  // angefügt:“ statt „Dem Absatz 2 …“. Verwechslungsfrei ist das, weil der Befehl das Angefügte
+  // eigens benennt — „Absatz 2 wird angefügt“ ohne diese Nennung bliebe die Anfügung des Absatzes
+  // selbst und wird von diesem Muster nicht getroffen.
   private static final Pattern STRUKTUR_ANFUEGUNG_MIT_STELLE =
       Pattern.compile(
-          "^(?:Dem|Der|In) (.+?) (?:wird|werden) (?:der |die |das )?folgende[nrs]? (.+?)"
+          "^(?:Dem |Der |In |)(.+?) (?:wird|werden) (?:der |die |das )?folgende[nrs]? (.+?)"
               + "(?: wird| werden)? angefügt ?: "
               + ENUM
               + Z

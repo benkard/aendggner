@@ -178,62 +178,54 @@ final class StellenAufloeser {
    */
   private static SatzTeiler.@Nullable SatzBereich loeseFeinKomponentenAuf(
       Stelle stelle, String text) {
-    // Nennt die Stelle einen Satz und darin eine Nummer („§ 5 Absatz 2 Satz 1 Nummer 3“), so ist
-    // der Satz der Suchbereich der Nummer. Ohne diese Verengung suchte die Marke „3.“ im ganzen
-    // Absatz und fand sie auch in der Aufzählung eines anderen Satzes — die Stelle galt dann als
-    // mehrdeutig und der Befehl blieb liegen.
-    var satzRahmen = satzRahmen(stelle, text);
-    if (satzRahmen != null && satzRahmen.bis() == satzRahmen.von()) {
-      return null;
-    }
-    SatzTeiler.SatzBereich bereich = satzRahmen;
-    boolean zeilenKette = false;
+    // Die Glieder werden in der Reihenfolge aufgelöst, in der die Stelle sie nennt, und jedes
+    // verengt den Suchbereich des nächsten. Das ist keine Feinheit, sondern die Aussage der
+    // Zitierweise selbst: „Absatz 2 Nummer 1 Satz 2“ meint den zweiten Satz der Nummer 1,
+    // „Satz 1 Nummer 3“ dagegen die dritte Nummer des ersten Satzes. Wer stets zuerst den Satz
+    // oder stets zuerst die Nummer suchte, träfe in einem der beiden Fälle die falsche Einheit
+    // oder gar keine.
+    var bereich = new SatzTeiler.SatzBereich(0, text.length());
+    boolean verengt = false;
     for (var komponente : stelle.komponenten()) {
-      String labelRegex =
-          switch (komponente) {
-            case Stelle.NummerNr nummer -> Pattern.quote(nummer.nummer()) + "\\.";
-            case Stelle.BuchstabeNr buchstabe -> Pattern.quote(buchstabe.kennung()) + "\\)";
-            default -> null;
-          };
-      if (labelRegex == null) {
-        continue;
+      switch (komponente) {
+        case Stelle.NummerNr nummer -> {
+          bereich = zeilenBlock(text, Pattern.quote(nummer.nummer()) + "\\.", bereich);
+          verengt = true;
+        }
+        case Stelle.BuchstabeNr buchstabe -> {
+          bereich = zeilenBlock(text, Pattern.quote(buchstabe.kennung()) + "\\)", bereich);
+          verengt = true;
+        }
+        case Stelle.SatzNr satz -> {
+          bereich = satzBereichIn(text, bereich, satz);
+          verengt = true;
+        }
+        default -> {}
       }
-      bereich =
-          zeilenBlock(
-              text,
-              labelRegex,
-              bereich != null ? bereich : new SatzTeiler.SatzBereich(0, text.length()));
       if (bereich == null) {
         return null;
       }
-      zeilenKette = true;
     }
-    if (zeilenKette) {
-      return bereich;
-    }
-    if (satzRahmen != null) {
-      return halbsatzBereich(text, stelle, satzRahmen);
-    }
-    // Halbsatz ohne Satzangabe („in Halbsatz 1“ im Rahmen eines Satzes bzw. Absatzes).
+    // Der Halbsatz teilt zuletzt, was die übrigen Glieder übriggelassen haben.
     if (stelle.komponenten().stream().anyMatch(k -> k instanceof Stelle.HalbsatzNr)) {
-      return halbsatzBereich(text, stelle, new SatzTeiler.SatzBereich(0, text.length()));
+      return halbsatzBereich(text, stelle, bereich);
     }
-    return null;
+    return verengt ? bereich : null;
   }
 
   /**
-   * Der Bereich des von der Stelle benannten Satzes; {@code null}, wenn sie keinen nennt. Ein
-   * leerer Bereich ({@code von == bis}) bedeutet: Der Satz ist benannt, aber nicht auffindbar.
+   * Der Bereich des benannten Satzes <em>innerhalb</em> des schon verengten Bereichs. Gezählt wird
+   * in diesem Ausschnitt, nicht im ganzen Absatz — sonst wäre „Nummer 1 Satz 2“ der zweite Satz des
+   * Absatzes statt der zweite Satz der Nummer 1.
    */
-  private static SatzTeiler.@Nullable SatzBereich satzRahmen(Stelle stelle, String text) {
-    for (var komponente : stelle.komponenten()) {
-      if (komponente instanceof Stelle.SatzNr satz) {
-        int nummer = Integer.parseInt(satz.nummer().replaceAll("[a-z]$", ""));
-        var bereich = satzBereich(text, nummer, SatzTeiler.teile(text));
-        return bereich == null ? new SatzTeiler.SatzBereich(0, 0) : bereich;
-      }
-    }
-    return null;
+  private static SatzTeiler.@Nullable SatzBereich satzBereichIn(
+      String text, SatzTeiler.SatzBereich rahmen, Stelle.SatzNr satz) {
+    int nummer = Integer.parseInt(satz.nummer().replaceAll("[a-z]$", ""));
+    var ausschnitt = text.substring(rahmen.von(), rahmen.bis());
+    var innen = satzBereich(ausschnitt, nummer, SatzTeiler.teile(ausschnitt));
+    return innen == null
+        ? null
+        : new SatzTeiler.SatzBereich(rahmen.von() + innen.von(), rahmen.von() + innen.bis());
   }
 
   /**

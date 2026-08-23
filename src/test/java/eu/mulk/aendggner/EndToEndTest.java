@@ -1047,6 +1047,84 @@ class EndToEndTest {
   }
 
   /**
+   * Baden-Württemberg: Die Verordnung des Innenministeriums zur Änderung der Kommunalwahlordnung
+   * (GBl. 2026 Nr. 26). 37 Befehle, 31 angewandt; 91 der 93 Normen gleichen danach der amtlichen
+   * Fassung vom 1. Mai 2026.
+   *
+   * <p>Zwei Eigenheiten des GBl-Satzes waren zu beheben: Der Seitenfuß steht im Inhaltsstrom
+   * <em>mitten im Befehlstext</em> und trennt dort den Zieltext eines Befehls von seinem Verb, und
+   * die Blattzählung („Seite 2 von 7“) steht mitunter für sich zwischen zwei Gliederungspunkten.
+   * Dazu zwei Befehlsidiome: der Dativ ohne Artikel („Absatz 2 wird folgender Satz angefügt“) und
+   * der Klammerzusatz hinter einer Anlagenbezeichnung („In Anlage 3b (Muster des Merkblatts …)“).
+   *
+   * <p>Die sechs liegengebliebenen Befehle betreffen sämtlich die <em>Muster</em> der Anlagen
+   * (Wahlschein, Merkblätter). Sie sind nicht anwendbar, weil das Landesrechtsportal die Muster
+   * nicht als Text ausliefert: Die Anlagen 2 bis 14 bestehen dort nur aus Kopf und Fundstelle. Was
+   * nicht vorliegt, lässt sich nicht ändern — das ist eine Grenze der Quelle, nicht des Werkzeugs.
+   */
+  @Test
+  void kommunalwahlOAendVOBadenWuerttemberg() throws Exception {
+    var alt = SAMPLEDATA.resolve("BadenWuerttemberg/KomWO-BW-alt.txt");
+    var pdf = SAMPLEDATA.resolve("BadenWuerttemberg/GBl-2026-26_KommunalwahlO-AendVO.pdf");
+    assumeTrue(Files.exists(alt) && Files.exists(pdf), "KomWO-BW-Beispieldaten fehlen");
+
+    var gesetz = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(alt);
+    assertThat(gesetz.jurabk()).isEqualTo("KomWO");
+    // 92 Normen; der Befehl 15. fügt den § 57a hinzu, den die Nachfassung dann als 93. führt.
+    assertThat(gesetz.normen()).hasSize(92);
+
+    var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(pdf));
+    // Der Seitenfuß ist heraus — samt der Blattzählung, die für sich allein stand.
+    assertThat(text).doesNotContain("Gesetzblatt für Baden-Württemberg, Jahrgang");
+    assertThat(text).doesNotContain("Seite 2 von 7");
+    // Ohne ihn steht der Befehl wieder zusammenhängend da.
+    assertThat(text.replaceAll("\\s+", " "))
+        .contains("die Wörter „Telegramm, Fernschreiben,“ gestrichen");
+
+    var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, null);
+    assertThat(parseErgebnis.artikel()).containsExactly("1");
+    assertThat(parseErgebnis.befehle()).hasSize(37);
+
+    var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
+    var manuellPfade =
+        anwendung.protokoll().stream()
+            .filter(a -> a.status() == BefehlAnwender.Status.MANUELL_PRUEFEN)
+            .map(a -> a.befehl().provenienz().gliederungsPfad())
+            .toList();
+    assertThat(manuellPfade)
+        .containsExactly("16. a)", "16. b)", "16. b) aa)", "16. b) bb)", "17.", "18.");
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(31);
+
+    // „Absatz 2 Satz 3 Halbsatz 2 wird gestrichen“ — der Halbsatz nimmt sein Semikolon mit, und
+    // der Satz behält seinen Schlusspunkt; so setzt es auch die amtliche Nachfassung.
+    // (Der gleichlautende Halbsatz eines späteren Satzes bleibt unberührt.)
+    assertThat(anwendung.neu().norm("§ 24").orElseThrow().absaetze().get(1).text())
+        .contains("Absatz 1 Satz 3 gilt entsprechend. Im übrigen")
+        .doesNotContain("entsprechend; anstelle der Wohnung ist der Wohnort anzugeben");
+
+    // Norm für Norm gegen die amtliche Fassung vom 1. Mai 2026.
+    var soll =
+        new eu.mulk.aendggner.gesetz.land.LandesRechtLoader()
+            .load(SAMPLEDATA.resolve("BadenWuerttemberg/KomWO-BW-neu.txt"));
+    var abweichend = new java.util.ArrayList<String>();
+    for (var normSoll : soll.normen()) {
+      var normIst = anwendung.neu().norm(normSoll.enbez()).orElseThrow();
+      if (!normIst
+          .gesamtText()
+          .replaceAll("\\s+", " ")
+          .strip()
+          .equals(normSoll.gesamtText().replaceAll("\\s+", " ").strip())) {
+        abweichend.add(normSoll.enbez());
+      }
+    }
+    // § 20: Der Befehl ersetzt das Wort „Name“ durch „der vollständige Familienname“; im Zieltext
+    //   steht davor bereits „der“, sodass es doppelt erscheint. Die amtliche Nachfassung räumt das
+    //   auf, der Befehlswortlaut tut es nicht — ÄndGgner wendet den Wortlaut an.
+    // Anlage 1: die sechs Muster-Befehle, siehe oben.
+    assertThat(abweichend).containsExactly("§ 20", "Anlage 1");
+  }
+
+  /**
    * Nordrhein-Westfalen: Artikel 4 desselben Heftes fasst § 1 des Ausführungsgesetzes zum
    * Siebzehnten Rundfunkänderungsstaatsvertrag neu. Damit sind alle vier ändernden Artikel des
    * Heftes GV. NRW. 7/2026 belegt.

@@ -284,6 +284,22 @@ public final class TextBereiniger {
           "[ \\t]*\\d{1,4}[ \\t]+Gesetz- und Verordnungsblatt für den Freistaat"
               + " Thüringen[ \\t]*");
 
+  // GBl. für Baden-Württemberg: Der Seitenfuß („Gesetzblatt für Baden-Württemberg, Jahrgang 2026,
+  // Nr. 26 vom 27. Februar 2026 Seite 2 von 7“) steht gleichfalls im Inhaltsstrom, und zwar mitten
+  // im Befehlstext — er trennt dort sogar den Zieltext eines Befehls von seinem Verb („… die
+  // Wörter ‚Telegramm, Fernschreiben,‘“ / Fußzeile / „gestrichen.“). Auch Seitenzahl und Blattzahl
+  // stehen mitunter getrennt vom übrigen Fuß.
+  private static final Pattern GBL_BW_FUSS =
+      Pattern.compile(
+          "[ \\t]*Gesetzblatt für Baden-Württemberg, Jahrgang \\d{4},[ \\t\\n]*"
+              + "Nr\\.\\s*\\d+ vom \\d{1,2}\\. \\p{L}+ \\d{4}"
+              + "(?:[ \\t\\n]*Seite \\d+ von \\d+)?[ \\t]*");
+
+  // Die Blattzählung des GBl. BW („Seite 2 von 7“) steht im Inhaltsstrom mitunter für sich allein,
+  // getrennt vom übrigen Seitenfuß, und zwar zwischen zwei Gliederungspunkten — sie hinge sonst dem
+  // vorangehenden Befehl an und machte ihn unkenntlich.
+  private static final Pattern GBL_BW_BLATTZAHL = Pattern.compile("^\\s*Seite \\d+ von \\d+\\s*$");
+
   // Sachnummern mit Leerzeichen: Niedersachsen zitiert eingeschobene Paragraphen als „§ 2 a“, der
   // Rest der Rechtssprache als „§ 2a“. Auf die kanonische Form ziehen, damit Stellen- und
   // Ebenenparser greifen. Ein folgendes „)“ oder „.“ schließt Aufzählungsmarker des
@@ -322,6 +338,7 @@ public final class TextBereiniger {
     text = GVBL_BERLIN_KOPF.matcher(text).replaceAll("\n");
     text = GVBL_TH_KOPF.matcher(text).replaceAll("\n");
     text = GVBL_TH_FUSS.matcher(text).replaceAll("\n");
+    text = GBL_BW_FUSS.matcher(text).replaceAll("\n");
     var zeilen = entferneKolumnentitel(zerlegeInZeilen(text));
     var verbunden = verbindeUmbrueche(zeilen);
     // Falsch-positive markerlose Zusammenzüge („durch“ + „die“ → „durchdie“) reparieren — die
@@ -511,6 +528,7 @@ public final class TextBereiniger {
         || GVOBL_SH_LAND.matcher(zeile).matches()
         || GVOBL_SH_HEFT.matcher(zeile).matches()
         || GVBL_HESSEN_FUSS.matcher(zeile).matches()
+        || GBL_BW_BLATTZAHL.matcher(zeile).matches()
         || GVBL_HESSEN_KOPF.matcher(zeile).matches()
         || ZUSAMMENSTELLUNG_SPALTENKOPF.matcher(zeile).matches()
         || FUNDSTELLEN_FUSSNOTE.matcher(zeile).matches();

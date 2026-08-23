@@ -159,6 +159,17 @@ public final class StellenParser {
           if (wert != null && NUMMER_WERT.matcher(wert).matches()) {
             komponenten.add(new Stelle.Gliederungseinheit("Anlage", wert));
             i++;
+            // „In Anlage 3b (Muster des Merkblatts zu den Stimmzetteln …) wird …“ — der
+            // Klammerzusatz beschreibt die Anlage und ist nicht selbst Änderungsziel; er wird
+            // übersprungen. Ohne das bräche die Stellenangabe hier ab und der ganze Befehl bliebe
+            // unerkannt.
+            var folgt = naechstesWort(woerter, i);
+            if (folgt != null && folgt.startsWith("(")) {
+              while (i + 1 < woerter.length && !woerter[i + 1].endsWith(")")) {
+                i++;
+              }
+              i++;
+            }
             continue;
           }
           // „die Anlage zu § 2 Absatz 4 Satz 1“ — ein Gesetz mit einer einzigen Anlage benennt sie
