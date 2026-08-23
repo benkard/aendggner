@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
+// SPDX-License-Identifier: AGPL-3.0-or-later
+
 // Nimmt die Dateien aus dem Formular entgegen, reicht sie an den Worker und zeigt die Synopse.
 // Es gibt keinen Server: Alles läuft im Browser.
 

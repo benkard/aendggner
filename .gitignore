@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Eclipse
 .project
 .classpath
@@ -32,6 +35,9 @@ nb-configuration.xml
 
 # Shell
 .envrc
+
+# Wrangler
+.wrangler/
 
 # Maven
 target/

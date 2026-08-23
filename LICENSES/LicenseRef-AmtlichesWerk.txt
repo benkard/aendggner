@@ -1,0 +1,46 @@
+Amtliche Werke nach § 5 UrhG
+===========================
+
+Diese Kennung bezeichnet keine erteilte Lizenz, sondern hält die gesetzliche
+Rechtslage der so ausgezeichneten Dateien fest. Sie wird im Erzeugnis „ÄndGgner“
+für den Beispielkorpus unter src/test/resources/sampledata/ verwendet.
+
+1. Gemeinfreiheit
+
+   Gesetze, Rechtsverordnungen, amtliche Erlasse und Bekanntmachungen sowie
+   Entscheidungen und amtlich verfasste Leitsätze zu Entscheidungen genießen
+   nach § 5 Absatz 1 des Urheberrechtsgesetzes keinen urheberrechtlichen
+   Schutz. Das erfasst die hier abgelegten Verkündungsblätter des Bundes und
+   der Länder (Bundesgesetzblatt, Gesetz- und Verordnungsblätter) samt der
+   darin verkündeten Stammgesetze und Änderungsvorschriften sowie die
+   Drucksachen und Plenarprotokolle des Deutschen Bundestages, des Bundesrates
+   und der Landtage.
+
+   Referentenentwürfe, Regierungsentwürfe und amtliche Synopsen, die von den
+   Bundes- oder Landesministerien im amtlichen Interesse zur allgemeinen
+   Kenntnisnahme veröffentlicht wurden, sind andere amtliche Werke im Sinne
+   des § 5 Absatz 2 UrhG und stehen den vorgenannten gleich.
+
+2. Änderungsverbot und Quellenangabe
+
+   § 5 Absatz 1 und 2 UrhG lassen die entsprechend anzuwendenden Vorschriften
+   der §§ 62 Absatz 1 bis 3 und 63 Absatz 1 und 2 UrhG unberührt: Die Werke
+   dürfen nicht geändert werden, und die Quelle ist anzugeben. Die maßgeblichen
+   Fundstellen — Verkündungsblatt, Drucksachennummer, Abrufadresse und
+   Abrufdatum — sind für jede Datei in der Datei SOURCES des jeweiligen
+   Verzeichnisses nachgewiesen.
+
+3. Technische Aufbereitung
+
+   Ein Teil der Dateien stammt aus den amtlichen Rechtsportalen
+   (gesetze-im-internet.de des Bundesministeriums der Justiz, betrieben von der
+   juris GmbH, sowie die entsprechenden Portale der Länder) und liegt in deren
+   Satz- und Auszeichnungsform vor (PDF, gii-XML, EPUB). Diese technische
+   Aufbereitung begründet nach § 5 UrhG kein eigenes Recht am Text.
+
+4. Zweck und Verhältnis zur AGPL
+
+   Der Korpus dient allein als Prüfmaterial der Tests. Er ist nicht
+   „Corresponding Source“ im Sinne der GNU Affero General Public License, unter
+   der der Quelltext des Erzeugnisses steht; gebaut wird ohne ihn, und die
+   Datei .gitattributes nimmt ihn deshalb vom Quelltextarchiv aus.

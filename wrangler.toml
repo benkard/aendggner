@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Auslieferung über Cloudflare Workers (README § 15). Der Worker führt keinen eigenen
 # Code aus: hochgeladen wird allein das Verzeichnis target/web, das `-Pwasm package`
 # erzeugt und deploy/webpaket.sh auslieferfertig hinterlässt.

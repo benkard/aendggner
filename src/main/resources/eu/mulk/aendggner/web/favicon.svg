@@ -1,3 +1,5 @@
+<!-- SPDX-FileCopyrightText: 2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
+     SPDX-License-Identifier: AGPL-3.0-or-later -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="ÄndGgner">
   <!-- Farben wie in style.css: Papier, Haarlinie, schwarzes Zeichen. Ein Favicon erbt keine
        CSS-Variablen, deshalb stehen die Werte hier ausgeschrieben. -->

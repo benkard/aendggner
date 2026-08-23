@@ -1,4 +1,7 @@
 #!/bin/sh
+# SPDX-FileCopyrightText: 2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Baut die Browserfassung und schiebt sie zu Cloudflare Workers (README § 15).
 #
 #   1. ./mvnw -Pwasm package — erzeugt target/web und lässt deploy/webpaket.sh darüber

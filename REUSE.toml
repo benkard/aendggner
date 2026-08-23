@@ -1,0 +1,215 @@
+# Zuordnung von Urheberschaft und Lizenz für Dateien, die keinen Kommentar vertragen
+# (Binärdateien, JSON, reiner Text) sowie für unverändert übernommene Fremddateien.
+# Alle übrigen Dateien tragen ihre SPDX-Kopfzeilen unmittelbar in sich.
+#
+# Der Beispielkorpus unter src/test/resources/sampledata/ ist nach Herkunft gegliedert:
+#
+#   1. Bund — Verkündungsblätter und Parlamentsdokumente (§ 5 Abs. 1 UrhG)
+#   2. Bund — ministerielle Entwürfe und Synopsen (§ 5 Abs. 2 UrhG)
+#   3. gesetze-im-internet.de — konsolidierte Stammfassungen (BMJ, Aufbereitung juris)
+#   4. Länder — Verkündungsblätter, Landtagsdrucksachen, Landesportale
+#   5. Selbst abgeleitete Textfassungen und Herkunftsnachweise
+#
+# Maßgeblich für die Fundstelle jeder einzelnen Datei — Verkündungsblatt,
+# Drucksachennummer, Abrufadresse, Abrufdatum — bleibt die Datei SOURCES des
+# jeweiligen Verzeichnisses; sie ist der Quellennachweis nach § 63 UrhG, den
+# LICENSES/LicenseRef-AmtlichesWerk.txt in Bezug nimmt.
+
+version = 1
+SPDX-PackageName = "ÄndGgner"
+SPDX-PackageSupplier = "Matthias Andreas Benkard <code@mail.matthias.benkard.de>"
+SPDX-PackageDownloadLocation = "https://gerrit.benkard.de/plugins/gitiles/aendggner"
+
+
+# ── Eigenes, aber ohne Kommentarsyntax ───────────────────────────────────────
+#
+# mini-gii.xml und maven.config bekommen bewusst keine Kopfzeile: Ersteres wird von
+# GiiXmlLoader gelesen, Letzteres von Maven vor jedem Bau, und beide sollen von der
+# Auszeichnung unberührt bleiben.
+
+[[annotations]]
+path = [
+  "FASSUNGEN.txt",
+  ".mvn/maven.config",
+  "src/main/resources/META-INF/native-image/eu.mulk/aendggner/reachability-metadata.json",
+  "src/test/resources/eu/mulk/aendggner/mini-gii.xml",
+]
+SPDX-FileCopyrightText = "2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+
+
+# ── Mitgelieferter Maven-Wrapper ─────────────────────────────────────────────
+#
+# Unverändert von der Apache Software Foundation übernommen; mvnw und mvnw.cmd
+# tragen den ASF-Kopf bereits im Original und werden deshalb nicht angefasst.
+
+[[annotations]]
+path = [
+  "mvnw",
+  "mvnw.cmd",
+  ".mvn/wrapper/maven-wrapper.properties",
+]
+SPDX-FileCopyrightText = "The Apache Software Foundation"
+SPDX-License-Identifier = "Apache-2.0"
+
+
+# ── 1. Bund: Verkündungsblätter und Parlamentsdokumente ──────────────────────
+
+[[annotations]]
+path = [
+  "src/test/resources/sampledata/AGG/BT-Drs-21-6178_Regierungsentwurf.pdf",
+  "src/test/resources/sampledata/GEG/BR-Drs-170-23.pdf",
+  "src/test/resources/sampledata/GEG/BT-Drs-20-6875_Regierungsentwurf.pdf",
+  "src/test/resources/sampledata/GEG/BT-Drs-20-7619_Beschlussempfehlung.pdf",
+  "src/test/resources/sampledata/GEG/BT-Drs-21-6278_Regierungsentwurf.pdf",
+  "src/test/resources/sampledata/GEG/BT-Drs-21-7071_Beschlussempfehlung.pdf",
+  "src/test/resources/sampledata/GEG/bgbl123s0280_regelungstext.pdf",
+  "src/test/resources/sampledata/IfSG/0645-20.pdf",
+  "src/test/resources/sampledata/IfSG/1918111.pdf",
+  "src/test/resources/sampledata/IfSG/1923944.pdf",
+  "src/test/resources/sampledata/IfSG/1924232.pdf",
+  "src/test/resources/sampledata/IfSG/1924334.pdf",
+  "src/test/resources/sampledata/IfSG/bgbl120s2397_78991.pdf",
+  "src/test/resources/sampledata/ProdHaftG/BT-Drs-21-4297_Regierungsentwurf.pdf",
+  "src/test/resources/sampledata/UWG/BR-Drs-8-26.pdf",
+  "src/test/resources/sampledata/UWG/BR-Drs-8-26_zu.pdf",
+  "src/test/resources/sampledata/UWG/BT-Drs-21-1855_Regierungsentwurf.pdf",
+  "src/test/resources/sampledata/UWG/bgbl126s0043_regelungstext.pdf",
+]
+SPDX-FileCopyrightText = "Bundesrepublik Deutschland"
+SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
+
+
+# ── 2. Bund: ministerielle Entwürfe und Synopsen ─────────────────────────────
+
+[[annotations]]
+path = [
+  "src/test/resources/sampledata/AGG/RefE_2_AGGAEndG_2026-04-14.pdf",
+  "src/test/resources/sampledata/AGG/RegE_AGG_AendG_2026-05-06.pdf",
+  "src/test/resources/sampledata/AGG/Synopse_AGGAendG_RegE_2026.pdf",
+  "src/test/resources/sampledata/GEG/Referentenentwurf_GModG_2026-05-05.pdf",
+  "src/test/resources/sampledata/GEG/Regierungsentwurf_GModG_2026-05-13.pdf",
+  "src/test/resources/sampledata/ProdHaftG/RefE_Produkthaftung_2025-09-11.pdf",
+  "src/test/resources/sampledata/ProdHaftG/RegE_Produkthaftungsrecht_2025-12-17.pdf",
+  "src/test/resources/sampledata/ProdHaftG/Synopse_Produkthaftungsrecht_RegE.pdf",
+]
+SPDX-FileCopyrightText = "Bundesrepublik Deutschland, vertreten durch die jeweils federführenden Bundesministerien"
+SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
+
+
+# ── 3. gesetze-im-internet.de: konsolidierte Stammfassungen ──────────────────
+
+[[annotations]]
+path = [
+  "src/test/resources/sampledata/AGG/AGG.pdf",
+  "src/test/resources/sampledata/AGG/BJNR189710006.epub",
+  "src/test/resources/sampledata/AGG/BJNR189710006.xml",
+  "src/test/resources/sampledata/GEG/GEG.pdf",
+  "src/test/resources/sampledata/GEG/BJNR172810020.epub",
+  "src/test/resources/sampledata/GEG/BJNR172810020.xml",
+  "src/test/resources/sampledata/IfSG/IfSG.pdf",
+  "src/test/resources/sampledata/IfSG/BJNR104510000.epub",
+  "src/test/resources/sampledata/IfSG/BJNR104510000.xml",
+  "src/test/resources/sampledata/IfSG/IfSG - Gesetz zur Verhütung und Bekämpfung von Infektionskrankheiten beim Menschen.webarchive",
+  "src/test/resources/sampledata/ProdHaftG/ProdHaftG.pdf",
+  "src/test/resources/sampledata/ProdHaftG/BJNR021980989.epub",
+  "src/test/resources/sampledata/ProdHaftG/BJNR021980989.xml",
+  "src/test/resources/sampledata/UWG/UWG.pdf",
+  "src/test/resources/sampledata/UWG/BJNR141400004.epub",
+  "src/test/resources/sampledata/UWG/BJNR141400004.xml",
+]
+SPDX-FileCopyrightText = "Bundesrepublik Deutschland, vertreten durch das Bundesministerium der Justiz; technische Aufbereitung: juris GmbH"
+SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
+
+
+# ── 4. Länder ────────────────────────────────────────────────────────────────
+
+[[annotations]]
+path = [
+  "src/test/resources/sampledata/BayJG/BayJG.pdf",
+  "src/test/resources/sampledata/BayJG/gvbl-2026-06.pdf",
+  "src/test/resources/sampledata/BayJG/Ltg-Drs-19-9707_Gesetzentwurf.pdf",
+  "src/test/resources/sampledata/BayJG/Ltg-Drs-19-10365_Aenderungsantrag-Gruene.pdf",
+  "src/test/resources/sampledata/BayJG/Plenarprotokoll-19-72_2te-Lesung.pdf",
+]
+SPDX-FileCopyrightText = "Freistaat Bayern"
+SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
+
+[[annotations]]
+path = ["src/test/resources/sampledata/NRW/GV-NRW-2026-S202_22-Rundfunkaenderungsgesetz.pdf"]
+SPDX-FileCopyrightText = "Land Nordrhein-Westfalen"
+SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
+
+[[annotations]]
+path = [
+  "src/test/resources/sampledata/Niedersachsen/Nds-GVBl-2026-10_ELER-Foerdergesetz-AendG.pdf",
+  "src/test/resources/sampledata/Niedersachsen/Nds-GVBl-2026-23_BeurtVO-Steuer_amtliche-Satznummern.pdf",
+]
+SPDX-FileCopyrightText = "Land Niedersachsen"
+SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
+
+[[annotations]]
+path = ["src/test/resources/sampledata/Sachsen/SaechsGVBl-2026-S134_AendG-SaechsBeamtVG_revosax.pdf"]
+SPDX-FileCopyrightText = "Freistaat Sachsen"
+SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
+
+[[annotations]]
+path = ["src/test/resources/sampledata/Thueringen/GVBl-TH-2026-02_KiGaFinanzVO-AendVO-ua.pdf"]
+SPDX-FileCopyrightText = "Freistaat Thüringen"
+SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
+
+[[annotations]]
+path = ["src/test/resources/sampledata/Berlin/GVBl-2026-17_ASOG-LAF-AendG.pdf"]
+SPDX-FileCopyrightText = "Land Berlin"
+SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
+
+[[annotations]]
+path = ["src/test/resources/sampledata/BadenWuerttemberg/GBl-2026-26_KommunalwahlO-AendVO.pdf"]
+SPDX-FileCopyrightText = "Land Baden-Württemberg"
+SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
+
+[[annotations]]
+path = ["src/test/resources/sampledata/Hessen/GVBl-2026-05_11-AendVO-verkehrsrechtl-Zustaendigkeiten.pdf"]
+SPDX-FileCopyrightText = "Land Hessen"
+SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
+
+[[annotations]]
+path = ["src/test/resources/sampledata/SchleswigHolstein/GVOBl-2026-27_Kommunalrecht-AendG.pdf"]
+SPDX-FileCopyrightText = "Land Schleswig-Holstein"
+SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
+
+
+# ── 5. Selbst abgeleitete Textfassungen und Herkunftsnachweise ───────────────
+#
+# Die *-alt.txt tragen amtlichen Wortlaut in selbst hergestellter Aufbereitung
+# (Einrückung, Superskript-Satznummern, Gliederungsüberschriften); der Wortlaut ist
+# gemeinfrei, die Aufbereitung eigene Arbeit. Die SOURCES-Dateien sind vollständig
+# eigener Text, stehen aber im selben Zusammenhang.
+
+[[annotations]]
+path = [
+  "src/test/resources/sampledata/BayJG/BayJG-alt.txt",
+  "src/test/resources/sampledata/NRW/17-RAEStV-AusfG-alt.txt",
+  "src/test/resources/sampledata/NRW/LMG-NRW-alt.txt",
+  "src/test/resources/sampledata/NRW/TMZ-Gesetz-alt.txt",
+  "src/test/resources/sampledata/NRW/WDR-Gesetz-alt.txt",
+  "src/test/resources/sampledata/Niedersachsen/NEFG-alt.txt",
+  "src/test/resources/sampledata/Sachsen/SaechsBeamtVG-alt.txt",
+  "src/test/resources/sampledata/Thueringen/ThuerKigaFinVO-alt.txt",
+]
+SPDX-FileCopyrightText = "2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>"
+SPDX-License-Identifier = "AGPL-3.0-or-later AND LicenseRef-AmtlichesWerk"
+
+[[annotations]]
+path = [
+  "src/test/resources/sampledata/AGG/SOURCES",
+  "src/test/resources/sampledata/BayJG/SOURCES",
+  "src/test/resources/sampledata/GEG/SOURCES",
+  "src/test/resources/sampledata/IfSG/SOURCES",
+  "src/test/resources/sampledata/NRW/SOURCES",
+  "src/test/resources/sampledata/ProdHaftG/SOURCES",
+  "src/test/resources/sampledata/Thueringen/SOURCES",
+  "src/test/resources/sampledata/UWG/SOURCES",
+]
+SPDX-FileCopyrightText = "2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>"
+SPDX-License-Identifier = "AGPL-3.0-or-later"

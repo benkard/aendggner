@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Der Beispielkorpus besteht aus Gesetzes- und Drucksachen-PDFs fremder Urheberschaft.
 # Er ist nicht „Corresponding Source“ im Sinne der AGPLv3 — gebaut wird ohne ihn —, und
 # er machte das der Browserfassung beigelegte Quelltextarchiv dreißigmal so groß wie den

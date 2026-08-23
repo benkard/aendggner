@@ -1,4 +1,7 @@
 #!/bin/sh
+# SPDX-FileCopyrightText: 2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 # Macht aus dem Übersetzerergebnis ein auslieferbares Verzeichnis. Läuft in der Phase
 # „package“ des Profils -Pwasm, unmittelbar nach native-image.
 #

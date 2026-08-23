@@ -1,5 +1,7 @@
 = Beispieldaten: Landesrecht weiterer Länder
 Matthias Andreas Benkard
+// SPDX-FileCopyrightText: 2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
+// SPDX-License-Identifier: AGPL-3.0-or-later
 
 Ergänzend zum bayerischen Belegfall (`BayJG/`) sind hier Änderungsgesetze und
 Änderungsverordnungen aus dem Landesrecht weiterer Länder gesammelt. Sie dienen als
