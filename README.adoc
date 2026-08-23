@@ -1,5 +1,7 @@
 = ÄndGgner -- Nichtamtliche Zentralstelle für die maschinelle Fortschreibung von Stammgesetzen anhand von Änderungsvorschriften des Bundes und der Länder
 Matthias Andreas Benkard
+// SPDX-FileCopyrightText: 2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
+// SPDX-License-Identifier: AGPL-3.0-or-later
 // Meta
 :experimental:
 :data-uri:
@@ -650,3 +652,43 @@ vollständige Änderungshefte auf die zugehörige Stammfassung anwenden und das
 Ergebnis gegen die amtliche Nachfassung stellen. Die hierfür verwendeten
 Beispieldaten nebst Herkunftsnachweis (`SOURCES`) liegen unter
 `src/test/resources/sampledata/`.
+
+== Lizenz
+
+Der Quelltext steht unter der GNU Affero General Public License, Version 3 oder
+(nach Wahl) einer späteren Fassung — `AGPL-3.0-or-later`. Den Wortlaut trägt
+`LICENSES/AGPL-3.0-or-later.txt`; `COPYING` verweist als symbolische Verknüpfung
+darauf.
+
+Das Erzeugnis folgt der https://reuse.software/spec/[REUSE-Spezifikation]: Jede
+Datei ist einer Urheberschaft und einer SPDX-Lizenz zugeordnet, entweder durch
+eine Kopfzeile in der Datei selbst oder — bei Binärdateien und Dateien ohne
+Kommentarsyntax — durch einen Eintrag in `REUSE.toml`. Geprüft wird das mit:
+
+[source,shell script]
+----
+uvx reuse lint
+----
+
+Drei Lizenzen kommen vor:
+
+`AGPL-3.0-or-later`::
+  Der eigene Quelltext samt Weboberfläche, Bauwerk und Dokumentation.
+
+`Apache-2.0`::
+  Der unverändert mitgelieferte Maven-Wrapper (`mvnw`, `mvnw.cmd`,
+  `.mvn/wrapper/`).
+
+`LicenseRef-AmtlichesWerk`::
+  Der Beispielkorpus unter `src/test/resources/sampledata/`: Gesetzblätter,
+  Drucksachen, Plenarprotokolle und ministerielle Entwürfe des Bundes und der
+  Länder. Sie sind nach § 5 UrhG amtliche Werke und damit gemeinfrei; das
+  Änderungsverbot und das Gebot der Quellenangabe (§§ 62, 63 UrhG) bleiben
+  unberührt. Die Fundstellen weist die Datei `SOURCES` des jeweiligen
+  Verzeichnisses nach. Der Korpus ist kein „Corresponding Source“ im Sinne der
+  AGPL — gebaut wird ohne ihn —, und `.gitattributes` nimmt ihn deshalb vom
+  Quelltextarchiv aus.
+
+Die Kopfzeilen der Java-Dateien pflegt Spotless (`licenseHeader`); der an die
+Phase `verify` gebundene Lauf von `spotless:check` hält den Bau an, sobald eine
+Quelldatei ohne Kopfzeile hinzukommt.

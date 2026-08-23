@@ -21,6 +21,128 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 23. August 2026,
+ zuletzt geändert durch die am 23. August 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Das Erzeugnis steht seit seinem ersten Tage unter der GNU Affero General Public
+License; ausgesprochen war das indes nur an drei verstreuten Stellen — im
+Lizenzvolltext „COPYING“, in einem Satz des Impressums und in einer Bemerkung der
+Datei „.gitattributes“. Keine einzige Quelldatei nannte ihren Urheber oder ihre
+Lizenz. Wer eine Datei für sich betrachtete — und so betrachtet sie jeder, der
+sie übernimmt —, fand daran nichts.
+
+Erschwerend tritt die Eigenart dieses Erzeugnisses hinzu: Sein Prüfbestand
+besteht aus fünfundvierzig PDF-Dateien, fünf EPUB-Dateien und den XML-Fassungen
+fremder Werke, nämlich der Gesetzblätter, Drucksachen und Entwürfe des Bundes und
+der Länder. Deren Rechtsstellung — gemeinfrei nach § 5 UrhG, gleichwohl gebunden
+an Änderungsverbot und Quellenangabe nach §§ 62 und 63 UrhG — war bislang nur
+menschenlesbar in den „SOURCES“-Dateien niedergelegt. Sie ist nunmehr auch
+maschinenlesbar erfasst, und zwar nach Herkunft geschieden.
+
+Maßstab ist die REUSE-Spezifikation in der Fassung 3.3.
+
+
+Artikel 1
+Lizenzbezeichnung
+
+(1) Der eigene Quelltext steht fortan unter „AGPL-3.0-or-later“, also unter der
+    Version 3 der Lizenz oder, nach Wahl des Empfängers, einer späteren Fassung.
+    Bislang sprach das Impressum von der „Version 3“ ohne Nachfolgeklausel.
+
+(2) Die Angabe ist an allen Stellen dieselbe: im Impressum, im Fußzeilenverweis
+    der Startseite, in einem neu aufgenommenen „licenses“-Block der „pom.xml“ und
+    im Abschnitt „Lizenz“ des Handbuchs.
+
+
+Artikel 2
+Verzeichnis der Lizenztexte
+
+(1) Das Verzeichnis „LICENSES“ nimmt die Wortlaute auf: „AGPL-3.0-or-later.txt“,
+    „Apache-2.0.txt“ für den unverändert mitgelieferten Maven-Wrapper und
+    „LicenseRef-AmtlichesWerk.txt“.
+
+(2) „COPYING“ bleibt an seiner Stelle, tritt aber als symbolische Verknüpfung
+    auf. Der gewohnte Pfad trägt damit fort, ohne dass zwei Wortlaute
+    nebeneinander zu pflegen wären; die Prüfung übergeht Verknüpfungen, sodass
+    für den Lizenztext selbst keine sachfremde Lizenzangabe zu erfinden war.
+
+
+Artikel 3
+Amtliche Werke
+
+(1) „LICENSES/LicenseRef-AmtlichesWerk.txt“ bezeichnet keine erteilte Lizenz,
+    sondern hält die gesetzliche Rechtslage fest: die Gemeinfreiheit nach § 5
+    Abs. 1 UrhG für Verkündungsblätter, Drucksachen und Plenarprotokolle, nach
+    § 5 Abs. 2 UrhG für ministerielle Entwürfe und Synopsen, ferner das
+    fortbestehende Änderungsverbot und Gebot der Quellenangabe.
+
+(2) Ausdrücklich festgehalten ist, dass die technische Aufbereitung durch die
+    Rechtsportale kein eigenes Recht am Text begründet und dass der Prüfbestand
+    kein „Corresponding Source“ im Sinne der AGPL ist.
+
+(3) Maßgeblich für die Fundstelle der einzelnen Datei bleibt die Datei „SOURCES“
+    des jeweiligen Verzeichnisses; die Lizenzdatei nimmt sie in Bezug.
+
+
+Artikel 4
+Zuordnung im Einzelnen
+
+(1) Dateien mit Kommentarsyntax tragen ihre Angabe in sich: zwei Zeilen
+    „SPDX-FileCopyrightText“ und „SPDX-License-Identifier“ im jeweils üblichen
+    Stil, vor dem vorhandenen erläuternden Kommentar und ohne diesen anzutasten.
+    Bei „index.html“ und den übrigen Seiten steht sie hinter der Typangabe, bei
+    „webpaket.sh“ und „cloudflare.sh“ hinter der Aufrufzeile, bei den
+    AsciiDoc-Dateien innerhalb des Dokumentenkopfes.
+
+(2) Für Binärdateien, für JSON und für reinen Text ordnet „REUSE.toml“ zu. Der
+    Prüfbestand ist darin nach Herkunft geschieden: Bund (Verkündung und
+    Parlament), Bund (ministerielle Entwürfe), gesetze-im-internet.de nebst der
+    Aufbereitung durch die juris GmbH, sodann neun Länder je einzeln.
+
+(3) Die selbst abgeleiteten Textfassungen („*-alt.txt“) tragen „AGPL-3.0-or-later
+    AND LicenseRef-AmtlichesWerk“: Der Wortlaut ist amtlich, die Aufbereitung —
+    Einrückung, Superskript-Satznummern, Gliederungsüberschriften — eigene
+    Arbeit.
+
+(4) „mini-gii.xml“ und „.mvn/maven.config“ erhalten bewusst keine Kopfzeile,
+    sondern einen Eintrag in „REUSE.toml“: Ersteres liest der GiiXmlLoader,
+    Letzteres Maven vor jedem Bau, und beide sollen von der Auszeichnung
+    unberührt bleiben.
+
+
+Artikel 5
+Fortdauernde Prüfung
+
+(1) Spotless pflegt die Kopfzeilen der Java-Dateien („licenseHeader“). Der Lauf
+    von „spotless:check“ ist an die Phase „verify“ gebunden und hält den Bau an,
+    sobald eine Quelldatei ohne Kopfzeile oder ohne die vereinbarte Formatierung
+    hinzukommt.
+
+(2) Dabei hat sich ergeben, dass „src/wasm/java“ der Formatprüfung bislang
+    verborgen war: Das Verzeichnis tritt dem Quellbaum erst im Profil „wasm“ bei.
+    Die Quellverzeichnisse sind nunmehr ausdrücklich benannt; die beiden
+    Wasm-Klassen sind erstmals umformatiert worden.
+
+(3) Ein Ausrollwerkzeug hinterließ mit „.wrangler“ ein Zwischenverzeichnis im
+    Arbeitsbaum; es ist fortan übergangen.
+
+
+Artikel 6
+Nachweis
+
+(1) Die Prüfung meldet Konformität mit der Fassung 3.3 der Spezifikation:
+    einhundertvierundfünfzig von einhundertvierundfünfzig Dateien tragen Urheber-
+    und Lizenzangabe, keine Lizenz bleibt ungenutzt, keine fehlt.
+
+(2) Dreihundertfünfundzwanzig Testfälle bestehen unverändert; am Verhalten des
+    Erzeugnisses ändert sich nichts.
+
+(3) Das ausgelieferte Quelltextarchiv ist von sich aus konform, denn
+    „.gitattributes“ nimmt den Prüfbestand von ihm aus.
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 22. August 2026,
  zuletzt geändert durch die am 22. August 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

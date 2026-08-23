@@ -12,6 +12,15 @@
   <artifactId>aendggner</artifactId>
   <version>${revision}</version>
 
+  <licenses>
+    <license>
+      <name>AGPL-3.0-or-later</name>
+      <url>https://www.gnu.org/licenses/agpl-3.0.html</url>
+      <distribution>repo</distribution>
+      <comments>Wortlaut im Quelltext unter LICENSES/AGPL-3.0-or-later.txt (COPYING).</comments>
+    </license>
+  </licenses>
+
   <properties>
     <maven.compiler.parameters>true</maven.compiler.parameters>
     <maven.compiler.release>21</maven.compiler.release>
@@ -216,6 +225,17 @@
             </licenseHeader>
           </java>
         </configuration>
+        <executions>
+          <!-- Hält den Bau an, sobald eine Quelldatei ohne SPDX-Kopfzeile oder ohne
+               die vereinbarte Formatierung hinzukommt. -->
+          <execution>
+            <id>spotless-check</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>check</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
 
       <plugin>
