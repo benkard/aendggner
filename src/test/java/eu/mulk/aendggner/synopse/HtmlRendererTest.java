@@ -108,20 +108,22 @@ class HtmlRendererTest {
   }
 
   @Test
-  void traegtKennungUndFusssteg() {
+  void traegtVorspannUndFusssteg() {
     var html = HtmlRenderer.rendere(synopse(), "test.xml + test.pdf");
 
-    assertThat(html).contains("&#8209;2").contains("Stammgesetz").contains("nichtamtlich");
-    assertThat(html).contains("Grundlage: test.xml + test.pdf");
+    assertThat(html).contains("<dt>Stammgesetz</dt><dd>TestG</dd>");
+    assertThat(html).contains("<dt>Grundlage</dt><dd>test.xml + test.pdf</dd>");
+    assertThat(html).contains("<dt>Geltung</dt><dd>nichtamtlich</dd>");
+    assertThat(html).contains("class=\"vordrucknummer\">ÄG&#8209;2<");
     assertThat(html).contains("maßgeblich ist allein die amtliche Verkündung");
-    assertThat(html).doesNotContain("Entwurfsfassung");
+    assertThat(html).doesNotContain("Entwurfsstand");
   }
 
   @Test
-  void weistDieEntwurfsfassungInDerKennungAus() {
+  void weistDenEntwurfsstandImVorspannAus() {
     var html = HtmlRenderer.rendere(synopse(), "quelle", true);
 
-    assertThat(html).contains("<dt>Stand</dt><dd>Entwurfsfassung</dd>");
+    assertThat(html).contains("<dt>Geltung</dt><dd>nichtamtlich, Entwurfsstand</dd>");
     assertThat(html).contains("nicht geltendes Recht");
   }
 

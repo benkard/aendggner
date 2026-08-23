@@ -1,35 +1,43 @@
 /* SPDX-FileCopyrightText: 2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
    SPDX-License-Identifier: AGPL-3.0-or-later */
 
-/* Ein Vordruck, kein Aufsatz: Der Bogen liegt auf einer Unterlage, trägt oben einen
-   Briefkopf mit Formblattkennung und darunter einen Feldblock mit numerierten Feldern.
-   Farbe tritt an drei Stellen auf und meint dort jeweils dasselbe: Behördenrot führt
-   das Auge zu den Kennungen und Feldziffern, rot warnt, grün bestätigt. Kein Kasten
-   verlässt sich auf seine Farbe allein; Wort und Zeichen tragen die Aussage mit. */
+/* Ein Vordruck nach dem Vorbild der amtlichen Steuerformulare. Dort gilt eine einzige,
+   durchgehaltene Regel, und sie steht sogar im Formular selbst: „Weiße Felder bitte
+   ausfüllen“. Grau ist, was die Stelle gedruckt hat — Beschriftungen, Leitspalten,
+   Abschnittsköpfe, die Verfügung am Ende. Weiß ist, was der Antragsteller beiträgt.
+   Diese Regel trägt hier die gesamte Gestaltung.
+
+   Alles andere folgt daraus: schwarze Haarlinien, aneinanderstoßende Zellen ohne Abstand
+   und ohne Rundung, kleine enge Groteske, Beschriftung innen oben links im Feld,
+   Erläuterungen in noch kleinerer Schrift dahinter, die Vordrucknummer winzig in den
+   Fußecken. Schmuckfarbe gibt es nicht: Rot und Grün treten allein dort auf, wo sie etwas
+   bedeuten — Fehler und Bestätigung —, und nie als einziger Träger der Aussage. */
 :root {
   color-scheme: light dark;
-  --fg: #111;
-  --bg: #fff;
-  --papier: #f3f1ea;
-  --muted: #595959;
-  --border: #bbb;
-  --raster: #d6d2c6;
-  --kasten: #f0ede4;
-  --amt: #8b0f21;
+  --fg: #000;
+  --papier: #fff;
+  --feld: #fff;
+  --grund: #d5d5d5;
+  --tint: #e4e4e4;
+  --linie: #000;
+  --muted: #444;
+  --tisch: #9a9a9a;
   --warnung: #8b0000;
   --bestaetigung: #005f00;
 }
 
+/* Im Dunkeln kehrt sich nicht die Farbe um, sondern das Verhältnis: Der Grund der Stelle
+   bleibt heller als das Feld, das auszufüllen ist. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --fg: #e6e6e6;
-    --bg: #1c1c1c;
-    --papier: #0f0f0f;
-    --muted: #a0a0a0;
-    --border: #4a4a4a;
-    --raster: #3c3c3c;
-    --kasten: #242424;
-    --amt: #e79aa4;
+    --fg: #e8e8e8;
+    --papier: #1a1a1a;
+    --feld: #101010;
+    --grund: #333333;
+    --tint: #242424;
+    --linie: #7a7a7a;
+    --muted: #a8a8a8;
+    --tisch: #000;
     --warnung: #ffb3b3;
     --bestaetigung: #b3ffb3;
   }
@@ -39,286 +47,247 @@
   box-sizing: border-box;
 }
 
-/* Die Unterlage endet nie, auch wenn der Bogen kürzer ist als das Fenster. */
 html {
-  background: var(--papier);
+  background: var(--tisch);
 }
 
 body {
-  margin: 2rem auto 3rem;
-  padding: 2rem 2.25rem 2.5rem;
-  max-width: 46rem;
-  border: 1px solid var(--fg);
-  font-family: system-ui, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  font-size: 1rem;
+  margin: 0;
+  padding: 1.5rem 1rem;
+  font-family: Arial, "Helvetica Neue", Helvetica, system-ui, sans-serif;
+  font-size: 0.8125rem;
+  line-height: 1.4;
   color: var(--fg);
-  background: var(--bg);
-  line-height: 1.55;
 }
 
-/* Auf schmalen Geräten wäre der Bogenrand nur ein Verlust an Satzbreite. */
-@media (max-width: 48rem) {
-  body {
-    margin: 0;
-    padding: 1.25rem 1rem 2rem;
-    border: none;
-  }
+/* Der Bogen. Kein Rahmen: Ein Blatt Papier hat keinen, die Kante entsteht aus dem
+   Farbunterschied zur Unterlage. */
+.bogen {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1.75rem 1.75rem 0.75rem;
+  background: var(--papier);
 }
 
-/* Der Briefkopf: links die ausstellende Stelle, rechts die Kennung des Vordrucks.
-   Darunter die Doppellinie — kräftig in Amtsrot, dünn in Rasterfarbe —, deren zweite
-   Linie der Oberrand des Satzspiegels ist. */
-.briefkopf {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 1rem 2rem;
-  align-items: end;
-  padding-bottom: 0.7rem;
-  border-bottom: 3px solid var(--amt);
+@media (max-width: 40rem) {
+  body { padding: 0; }
+  .bogen { padding: 1rem 0.75rem 0.5rem; }
 }
 
-/* Gestapelt zöge die Kennung sonst über die ganze Breite und sähe aus wie ein Kasten
-   des Satzspiegels statt wie ein Stempel am Kopfrand. */
-@media (max-width: 34rem) {
-  .briefkopf {
-    grid-template-columns: 1fr;
-    align-items: start;
-  }
-
-  .kennung {
-    justify-self: start;
-  }
-}
-
-h1,
-.wortmarke {
-  margin: 0;
-  font-size: 1.9rem;
-  font-weight: bold;
-  letter-spacing: 0.06em;
-  line-height: 1.1;
-}
-
-.wortmarke a {
-  text-decoration: none;
-}
-
-.langname {
-  margin: 0 0 0.3rem;
-  max-width: 26rem;
-  font-size: 0.75rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
   line-height: 1.35;
+}
+
+.stelle {
+  margin: 0 0 0.9rem;
+  font-size: 0.6875rem;
   color: var(--muted);
-}
-
-/* Die Kennung steht als Verzeichnis im Text und nicht als Zierrat im Stilblatt: Sie
-   lässt sich damit auswählen und vorlesen. „Nichtamtlich“ ist dabei keine Pointe,
-   sondern die Klarstellung, die die amtliche Anmutung nötig macht. */
-.kennung {
-  display: grid;
-  grid-template-columns: auto auto;
-  gap: 0 0.6rem;
-  margin: 0;
-  padding: 0.4rem 0.6rem;
-  border: 1px solid var(--raster);
-  font-size: 0.75rem;
-  line-height: 1.5;
-}
-
-.kennung dt {
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.kennung dd {
-  margin: 0;
-  font-weight: bold;
-  color: var(--amt);
-  white-space: nowrap;
-}
-
-main {
-  margin-top: 3px;
-  padding-top: 1.5rem;
-  border-top: 1px solid var(--raster);
-}
-
-.betreff {
-  margin: 0 0 1.75rem;
-  font-size: 1.05rem;
-}
-
-/* Impressum und Datenschutz. */
-main > h1 {
-  margin-bottom: 1.25rem;
-  font-size: 1.4rem;
-}
-
-h2 {
-  margin: 1.75rem 0 0.5rem;
-  font-size: 0.9rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-address {
-  font-style: normal;
-  margin: 0.5rem 0;
-}
-
-code {
-  font-size: 0.9375em;
 }
 
 /* Ohne Schmuckfarbe trägt allein die Unterstreichung das Klick-Signal. */
 a {
-  color: var(--fg);
+  color: inherit;
   text-decoration: underline;
 }
 
-/* Der Vorgabe-Umriss verschwindet auf dem hellen Bogen fast; im Amtsrot ist der Halt
-   der Tastatur überall zu sehen. */
+/* Der Vorgabe-Umriss ist auf dem grauen Raster kaum auszumachen. */
 :focus-visible {
-  outline: 2px solid var(--amt);
-  outline-offset: 2px;
+  outline: 2px solid var(--fg);
+  outline-offset: 1px;
 }
 
-/* Der Feldblock. Die Legende sitzt als schwarzer Balken im oberen Rahmen, wie die
-   Abschnittsüberschrift eines Vordrucks. */
-fieldset {
-  counter-reset: feld;
-  margin: 0 0 1.5rem;
-  padding: 1.25rem 1.25rem 0.5rem;
-  border: 1px solid var(--fg);
-  background: var(--kasten);
+/* „Zur Beachtung“ steht im Muster als weißer Kasten mit fetter Anrede und dichtem
+   Fließtext; die Überschrift bleibt in der Zeile des ersten Absatzes. */
+.beachtung {
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--linie);
+  background: var(--feld);
+  font-size: 0.75rem;
 }
 
-legend {
-  margin-left: -0.25rem;
-  padding: 0.3rem 0.8rem;
-  background: var(--fg);
-  color: var(--bg);
-  font-size: 0.8rem;
+.beachtung h2 {
+  margin: 0 0 0.35rem;
+  font-size: 0.75rem;
+}
+
+.beachtung p {
+  margin: 0 0 0.5rem;
+}
+
+.beachtung p:last-child {
+  margin-bottom: 0;
+}
+
+.fehlt {
+  padding-left: 0.6rem;
+  border-left: 3px solid var(--warnung);
   font-weight: bold;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
 }
 
-/* Die Feldziffer entsteht aus dem Zähler und steht im Steg links, damit sie die
-   Beschriftung nicht verschiebt und in jedem Feld an derselben Stelle sitzt. */
-.field {
-  position: relative;
-  margin-bottom: 1.25rem;
-  padding: 0.9rem 1rem 0.9rem 3rem;
-  border: 1px solid var(--raster);
-  background: var(--bg);
-  counter-increment: feld;
-}
-
-.field::before {
-  content: counter(feld);
-  position: absolute;
-  top: 0.85rem;
-  left: 0.85rem;
-  width: 1.5rem;
-  height: 1.5rem;
-  border: 1px solid var(--amt);
-  color: var(--amt);
-  font-size: 0.8rem;
+/* Der Ausfüllhinweis ist im Muster ein eigener Streifen über dem Feldblock — er erklärt
+   genau die Regel, nach der dieses Blatt gesetzt ist. */
+.ausfuellhinweis {
+  margin: 0.9rem 0 0;
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--linie);
+  border-bottom: none;
+  background: var(--grund);
+  font-size: 0.75rem;
   font-weight: bold;
-  line-height: 1.4rem;
+}
+
+.kreuz {
+  display: inline-block;
+  width: 1.1em;
+  border: 1px solid var(--linie);
+  background: var(--feld);
+  font-weight: bold;
   text-align: center;
 }
 
+/* Der Feldblock. Die Rahmen sind halbiert — außen oben und links, an den Zellen unten und
+   rechts —, damit zwischen zwei Zellen nur eine einzige Haarlinie steht und nicht zwei. */
+.vordruck {
+  border-top: 1px solid var(--linie);
+  border-left: 1px solid var(--linie);
+  background: var(--grund);
+}
+
+.block {
+  display: grid;
+  grid-template-columns: 8.5rem 1fr;
+}
+
+/* Der Grund steht ausdrücklich an der Zelle und nicht nur am Block: Im Druck fällt sonst
+   die Fläche des Blocks weg und die Leitspalte käme weiß heraus. */
+.leitspalte {
+  padding: 0.4rem 0.5rem;
+  border-right: 1px solid var(--linie);
+  border-bottom: 1px solid var(--linie);
+  background: var(--grund);
+  font-size: 0.6875rem;
+  font-weight: bold;
+}
+
+/* Auf dem Telefon nähme die Leitspalte die halbe Zeile. Sie tritt dann über ihre Felder,
+   als voller Beschriftungsstreifen — eine Form, die das Muster ebenfalls kennt. */
+@media (max-width: 34rem) {
+  .block {
+    grid-template-columns: 1fr;
+  }
+
+  .leitspalte {
+    border-right: none;
+  }
+}
+
+.feld {
+  padding: 0.25rem 0.5rem 0.4rem;
+  border-right: 1px solid var(--linie);
+  border-bottom: 1px solid var(--linie);
+  background: var(--feld);
+}
+
+/* Die Beschriftung steht klein im Feld oben links, die Erläuterung noch kleiner dahinter;
+   darunter bleibt der Platz für die Eintragung. */
 label {
   display: block;
+  font-size: 0.6875rem;
   font-weight: bold;
-  letter-spacing: 0.04em;
-  margin-bottom: 0.4rem;
 }
 
-.field.checkbox label {
+.erl {
   font-weight: normal;
-  letter-spacing: normal;
-  margin-bottom: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.field.checkbox input {
-  accent-color: var(--amt);
-  width: 1rem;
-  height: 1rem;
-  flex: none;
-}
-
-.hint {
-  margin: 0.4rem 0 0;
-  font-size: 0.8125rem;
+  font-size: 0.6875rem;
   color: var(--muted);
 }
 
 input[type="file"] {
   width: 100%;
-  padding: 0.35rem;
-  border: 1px solid var(--border);
+  margin-top: 0.35rem;
+  padding: 0;
+  border: none;
   background: transparent;
   color: inherit;
   font: inherit;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
 }
 
-/* Der Dateiwähler ist der zweite Knopf des Vordrucks und trägt deshalb dessen Form,
-   nur in der Umkehrung, damit er dem Absenden nicht den Rang abläuft. */
+/* Der Dateiwähler ist der einzige Knopf im Feld und trägt deshalb die Form der übrigen
+   Eintragungsfelder: eckig, haarfein umrandet, weiß. */
 input[type="file"]::file-selector-button {
-  margin-right: 0.75rem;
-  padding: 0.3rem 0.9rem;
-  border: 1px solid var(--fg);
-  background: var(--bg);
+  margin-right: 0.6rem;
+  padding: 0.15rem 0.7rem;
+  border: 1px solid var(--linie);
+  background: var(--feld);
   color: var(--fg);
   font: inherit;
-  font-size: 0.8125rem;
-  font-weight: bold;
-  letter-spacing: 0.04em;
+  font-size: 0.6875rem;
   cursor: pointer;
 }
 
 input[type="file"]::file-selector-button:hover {
-  background: var(--fg);
-  color: var(--bg);
+  background: var(--grund);
+}
+
+/* Das Ankreuzfeld steht vor dem Text und wird angekreuzt, nicht angehakt. */
+.ankreuzfeld label {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-weight: normal;
+  font-size: 0.75rem;
+}
+
+.ankreuzfeld input {
+  appearance: none;
+  -webkit-appearance: none;
+  flex: none;
+  position: relative;
+  width: 0.95rem;
+  height: 0.95rem;
+  margin: 0;
+  border: 1px solid var(--linie);
+  background: var(--feld);
+  cursor: pointer;
+}
+
+.ankreuzfeld input:checked::before {
+  content: "\00D7";
+  position: absolute;
+  inset: 0;
+  font-size: 0.9rem;
+  font-weight: bold;
+  line-height: 0.85rem;
+  text-align: center;
+  color: var(--fg);
 }
 
 .absenden {
-  margin-bottom: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.9rem;
+  padding-top: 0.5rem;
 }
 
 button {
   font: inherit;
+  font-size: 0.8125rem;
   font-weight: bold;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 0.7rem 1.75rem;
-  border: 1px solid var(--fg);
-  background: var(--fg);
-  color: var(--bg);
-  box-shadow: 3px 3px 0 var(--raster);
+  padding: 0.4rem 1.1rem;
+  border: 2px solid var(--linie);
+  background: var(--feld);
+  color: var(--fg);
   cursor: pointer;
 }
 
-/* Umkehr statt brightness(): Ein schwarzer Knopf wird davon nicht heller. */
+/* Umkehr statt brightness(): An einem weißen Knopf richtet die nichts aus. */
 button:hover {
-  background: var(--bg);
-  color: var(--fg);
-}
-
-/* Gedrückt fährt der Knopf in seinen eigenen Schatten. */
-button:active {
-  transform: translate(3px, 3px);
-  box-shadow: none;
+  background: var(--fg);
+  color: var(--papier);
 }
 
 /* grayscale() ist an einem grauen Knopf wirkungslos. */
@@ -327,100 +296,52 @@ button[disabled] {
   cursor: progress;
 }
 
-/* Hinweiskästen und Meldungen teilen einen Zuschnitt, damit erkennbar bleibt, dass sie
-   dasselbe sind: Text am Rande des Vordrucks. Der Balken links zeigt den Zustand an. */
-.kasten,
-.einfuehrung,
-.meldung {
-  padding: 0.9rem 1.1rem;
-  border: 1px solid var(--raster);
-  border-left: 4px solid var(--raster);
-  background: var(--kasten);
-  font-size: 0.875rem;
+button[disabled]:hover {
+  background: var(--feld);
+  color: var(--fg);
 }
 
-.kasten {
-  margin: 0 0 1.75rem;
+/* Die Verfügung ist im Muster der Abschnitt, den die Stelle ausfüllt: grau umrandet,
+   mit zentrierter fetter Überschrift. Er steht auch dann schon da, wenn er noch leer ist —
+   ein Vordruck zeigt seine Abschnitte, bevor sie ausgefüllt sind. */
+.verfuegung {
+  margin-top: 1.25rem;
+  border: 1px solid var(--linie);
+  background: var(--grund);
 }
 
-.kasten.warnung {
-  border-left-color: var(--warnung);
-}
-
-.kasten h2 {
-  margin: 0 0 0.5rem;
-  font-size: 0.75rem;
-}
-
-.kasten p {
+.verfuegung h2 {
   margin: 0;
+  padding: 0.3rem 0.5rem;
+  border-bottom: 1px solid var(--linie);
+  font-size: 0.75rem;
+  text-align: center;
 }
 
-/* Zugeklappt eine Zeile, damit das Formular oben bleibt; aufgeklappt im Zuschnitt der
-   übrigen Kästen. Der eigene Marker steht vor dem Wort statt daneben, sonst hinge er
-   außerhalb des Kastenrahmens. */
-.einfuehrung {
-  margin: 0 0 1.75rem;
+.verfuegungsfeld {
+  padding: 0.5rem;
 }
 
-.einfuehrung summary {
-  font-weight: bold;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  list-style: none;
-}
-
-.einfuehrung summary::-webkit-details-marker {
-  display: none;
-}
-
-.einfuehrung summary::before {
-  content: "\25B8";
-  display: inline-block;
-  width: 1em;
-  color: var(--amt);
-}
-
-.einfuehrung[open] summary::before {
-  content: "\25BE";
-}
-
-.einfuehrung > :not(summary) {
-  margin: 0.75rem 0 0;
-}
-
-.einfuehrung ol {
-  padding-left: 1.25rem;
-}
-
-.einfuehrung dt {
-  font-weight: bold;
-  margin-top: 0.9rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--raster);
-}
-
-.einfuehrung dd {
-  margin: 0.25rem 0 0;
-}
-
-/* Der Erläuterungssatz unter einem Beispiel steht als span in der dd und braucht deshalb
-   eigene Absatzbildung. */
-.einfuehrung .hint {
-  display: block;
-}
-
-.disclaimer {
-  margin-top: 2rem;
+.platzhalter {
+  margin: 0;
+  font-size: 0.75rem;
   color: var(--muted);
 }
 
-/* Die Meldung führt ihr Zeichen im Balken mit: Wer die Farbe nicht sieht, liest ✓ oder !
-   Das Zeichen steht im Stilblatt und nicht im Text, weil app.js den Text ersetzt.
-   Während der Arbeit steht weder Balken noch Zeichen, weil noch nichts feststeht. */
+/* Steht eine Meldung, so tritt der Platzhalter zurück. */
+#meldung:not([hidden]) + .platzhalter {
+  display: none;
+}
+
+/* Die Meldung ist die Eintragung der Stelle und deshalb weiß. Ihr Zeichen im Steg — ✓ oder
+   ! — trägt den Zustand auch dort, wo die Farbe nicht ankommt. Während der Arbeit steht
+   weder Zeichen noch Farbe, weil noch nichts feststeht. */
 .meldung {
-  margin: 1.5rem 0 0;
-  font-size: 0.9375rem;
+  margin: 0;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--linie);
+  background: var(--feld);
+  font-size: 0.8125rem;
 }
 
 .meldung.arbeit {
@@ -430,13 +351,14 @@ button[disabled] {
 .meldung.fertig,
 .meldung.fehler {
   position: relative;
-  padding-left: 2.5rem;
+  padding-left: 2rem;
+  border-left-width: 4px;
 }
 
 .meldung.fertig::before,
 .meldung.fehler::before {
   position: absolute;
-  left: 1.1rem;
+  left: 0.7rem;
   font-weight: bold;
 }
 
@@ -459,72 +381,134 @@ button[disabled] {
   color: var(--warnung);
 }
 
-/* Der Fußsteg trägt die Pflichtangaben und die Herkunft — links das Verzeichnis, rechts
-   die Quelle, so wie ein Vordruck unten seine Herkunft nennt. */
+/* Die Ausfüllhilfe ist ein Merkblatt und liegt dem Vordruck bei, statt in ihm zu stehen. */
+.ausfuellhilfe {
+  margin-top: 1.25rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--linie);
+  background: var(--tint);
+  font-size: 0.75rem;
+}
+
+.ausfuellhilfe summary {
+  font-weight: bold;
+  cursor: pointer;
+  list-style: none;
+}
+
+.ausfuellhilfe summary::-webkit-details-marker {
+  display: none;
+}
+
+.ausfuellhilfe summary::before {
+  content: "\25B8\00A0";
+}
+
+.ausfuellhilfe[open] summary::before {
+  content: "\25BE\00A0";
+}
+
+.ausfuellhilfe > :not(summary) {
+  margin: 0.6rem 0 0;
+}
+
+.ausfuellhilfe dt {
+  margin-top: 0.7rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--linie);
+  font-weight: bold;
+}
+
+.ausfuellhilfe dd {
+  margin: 0.2rem 0 0;
+}
+
+.ausfuellhilfe .erl {
+  display: block;
+}
+
+/* Im Muster steht unten links die Vordrucknummer und unten rechts der Ausgabestand, beide
+   winzig und ohne Zierrat. Die Pflichtangaben stehen dazwischen. */
 footer {
   display: flex;
   flex-wrap: wrap;
+  align-items: baseline;
   justify-content: space-between;
-  gap: 0.5rem 1.5rem;
-  margin-top: 2.5rem;
-  padding-top: 0.9rem;
-  border-top: 1px solid var(--fg);
-  font-size: 0.8125rem;
-  color: var(--muted);
-}
-
-footer a {
+  gap: 0.4rem 1rem;
+  margin-top: 1.5rem;
+  padding: 0.4rem 0 0.6rem;
+  font-size: 0.625rem;
   color: var(--muted);
 }
 
 footer nav {
-  max-width: 32rem;
+  font-size: 0.6875rem;
 }
 
-.nebenquelle {
+.vordrucknummer,
+.ausgabe {
   white-space: nowrap;
 }
 
-/* Ein Formblatt gehört ausgedruckt: ohne Unterlage, ohne Bogenrand, mit Linien in
-   Schwarz. Der Knopf und das Merkblatt entfallen, weil auf Papier weder gedrückt noch
-   aufgeklappt wird. Gedruckt wird stets auf weißes Papier, auch aus einem dunkel
-   eingestellten Browser heraus — prefers-color-scheme gilt im Druck fort. Deshalb ist
-   das ganze Farbgerüst zurückzusetzen und nicht nur ein Teil davon. */
+/* Impressum und Datenschutz: dieselbe Anmutung, aber Fließtext statt Feldblock. */
+.bogen > main {
+  padding-bottom: 0.5rem;
+  font-size: 0.8125rem;
+}
+
+main h1 {
+  font-size: 1rem;
+}
+
+main h2 {
+  margin: 1.1rem 0 0.3rem;
+  padding: 0.2rem 0.4rem;
+  border: 1px solid var(--linie);
+  background: var(--grund);
+  font-size: 0.6875rem;
+}
+
+main p,
+main address {
+  margin: 0.4rem 0;
+  max-width: 42rem;
+}
+
+address {
+  font-style: normal;
+}
+
+code {
+  font-size: 0.9375em;
+}
+
+/* Ein Vordruck gehört ausgedruckt: ohne Unterlage, ohne Ränder. Gedruckt wird stets auf
+   weißes Papier, auch aus einem dunkel eingestellten Browser heraus — prefers-color-scheme
+   gilt im Druck fort. Deshalb ist das ganze Farbgerüst zurückzusetzen und nicht nur ein
+   Teil davon. Das Grau selbst muss mitgedruckt werden: Es sagt, welche Felder auszufüllen
+   sind, und ist damit keine Zier. */
 @media print {
   :root {
     --fg: #000;
-    --bg: #fff;
     --papier: #fff;
+    --feld: #fff;
+    --grund: #d5d5d5;
+    --tint: #e4e4e4;
+    --linie: #000;
     --muted: #333;
-    --border: #666;
-    --raster: #999;
-    --kasten: #fff;
-    --amt: #000;
+    --tisch: #fff;
     --warnung: #8b0000;
     --bestaetigung: #005f00;
   }
 
-  body {
-    margin: 0;
-    padding: 0;
-    max-width: none;
-    border: none;
-    font-size: 10pt;
-  }
+  body { padding: 0; font-size: 9pt; }
+  .bogen { max-width: none; padding: 0; }
+  .ausfuellhilfe { display: none; }
+  a { text-decoration: none; }
+  .block, .beachtung, .verfuegung { break-inside: avoid; }
 
-  .einfuehrung,
-  .absenden,
-  .meldung[hidden] {
-    display: none;
-  }
-
-  a {
-    text-decoration: none;
-  }
-
-  fieldset,
-  .field,
-  .kasten {
-    break-inside: avoid;
+  .leitspalte, .ausfuellhinweis, .verfuegung, .verfuegung h2, .kreuz, .ausfuellhilfe {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }

@@ -282,6 +282,77 @@ Drei Mängel, die dabei zutage traten
     darunter zwei neue für Kennung, Fußsteg und Entwurfsausweis.
 
 
+Artikel 11
+Berichtigung der Gestaltung nach dem Vorbild eines wirklichen Vordrucks
+
+Die Artikel 7 und 9 hatten sich am Begriff des amtlichen Formulars orientiert,
+nicht an einem solchen. Der Abgleich mit einem wirklichen Bundesvordruck — dem
+„Antrag auf Erteilung einer Bescheinigung für den Lohnsteuerabzug bei erweiterter
+unbeschränkter Einkommensteuerpflicht“ — hat ergeben, dass die bisherige Fassung
+in fast jedem Merkmal danebenlag. Sie wird berichtigt.
+
+(1) Maßgeblich ist eine einzige Regel, die im Muster sogar ausgeschrieben steht:
+    „Weiße Felder bitte ausfüllen“. Grau ist, was die Stelle gedruckt hat —
+    Beschriftungen, Leitspalten, Abschnittsköpfe, die Verfügung am Ende; weiß
+    ist, was der Antragsteller beiträgt. Bisher war es umgekehrt: weißer Bogen
+    mit blass getönten Kästen. Diese Regel trägt fortan die gesamte Gestaltung
+    und ist im Vordruck selbst benannt.
+
+(2) Schmuckfarbe entfällt ersatzlos. Das Amtsrot der Artikel 7 und 9 war
+    erfunden; wirkliche Bundesvordrucke führen keine. Rot und Grün treten allein
+    dort auf, wo sie etwas bedeuten: Fehler und Bestätigung in der Verfügung,
+    gestrichener und eingefügter Wortlaut in der Synopse.
+
+(3) Die Zellen stoßen aneinander, ohne Abstand und ohne Rundung, verbunden durch
+    schwarze Haarlinien. Die Rahmen sind halbiert — außen oben und links, an den
+    Zellen unten und rechts —, damit zwischen zwei Zellen eine einzige Linie
+    steht und nicht zwei.
+
+(4) Die Beschriftung steht klein im Feld oben links, die Erläuterung in noch
+    kleinerer Schrift in Klammern dahinter; darunter bleibt der Platz für die
+    Eintragung. Die fette Zeile über einem Eingabefeld nebst gesondertem
+    Hinweisabsatz entfällt.
+
+(5) Links läuft die Leitspalte mit den Abschnittsbezeichnungen („Angaben zum
+    Stammgesetz“, „Angaben zu den Änderungen“, „Antragstellung“). Auf schmalen
+    Geräten tritt sie über ihre Felder, als voller Beschriftungsstreifen — eine
+    Form, die das Muster ebenfalls kennt.
+
+(6) Das Ankreuzfeld ist ein Kästchen vor dem Text und wird angekreuzt, nicht
+    angehakt.
+
+(7) Der Abschnitt „Zur Beachtung:“ nimmt auf, was bisher über Tagline,
+    Haftungsabsatz und noscript-Kasten verstreut war.
+
+(8) Die Verfügung der Zentralstelle tritt an die Stelle der bloßen Meldung: ein
+    grau umrandeter Abschnitt mit zentrierter Überschrift, wie im Muster die
+    „Verfügung des Finanzamts“. Er steht auch dann schon da, wenn er noch leer
+    ist, und trägt dann den Vermerk, dass er nach Absenden ausgefüllt wird; ein
+    Vordruck zeigt seine Abschnitte, bevor sie ausgefüllt sind.
+
+(9) Die Kennung wandert aus dem gerahmten Verzeichnis oben rechts in die
+    Fußecken: links die Vordrucknummer, rechts der Ausgabestand, beide winzig
+    und ohne Zierrat. Impressum und Datenschutz führen ÄG-1/A und ÄG-1/B.
+
+(10) Die Schrift ist Arial in dreizehn Achteln eines Gevierts, die Beschriftungen
+    in elf; Sperrung und Versalien entfallen bis auf die Kästchen der Synopse.
+
+(11) Die Synopse folgt demselben Gerüst: Der Vorspann ist ein
+    Beschriftungsstreifen aus grauen Bezeichnungen und weißen Eintragungen, die
+    Spaltenköpfe und die Abschnittsüberschriften sind graue Streifen statt
+    schwarzer Balken, die Randziffer sitzt in einem Kästchen, und der Fußsteg
+    trägt Vordrucknummer und Ausgabestand in den Ecken.
+
+(12) Dabei ist ein weiterer Mangel behoben worden: Der Grund der Leitspalte hing
+    am Block und nicht an der Zelle; im Druck fällt die Fläche des Blocks weg,
+    sodass die Leitspalte weiß herausgekommen wäre. Das Grau ist keine Zier — es
+    sagt, welche Felder auszufüllen sind — und wird deshalb ausdrücklich
+    mitgedruckt.
+
+(13) Dreihundertsiebenundzwanzig Testfälle bestehen; die beiden Prüffälle des
+    Artikels 9 sind auf den neuen Vorspann umgestellt.
+
+
 ════════════════════════════════════════════════════════════════════════════════
  Fassung vom 22. August 2026,
  zuletzt geändert durch die am 22. August 2026 vorgenommenen Änderungen

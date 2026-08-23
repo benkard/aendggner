@@ -15,152 +15,165 @@
   <script src="app.js" defer></script>
 </head>
 <body>
-  <header class="briefkopf">
-    <div class="dienststelle">
-      <p class="langname">
-        Nichtamtliche Zentralstelle für die maschinelle Fortschreibung von Stammgesetzen
-        anhand von Änderungsvorschriften des Bundes und der Länder
-      </p>
-      <h1>ÄndGgner</h1>
-    </div>
+<div class="bogen">
 
-    <dl class="kennung">
-      <dt>Formblatt</dt><dd>ÄG&#8209;1</dd>
-      <dt>Vorgang</dt><dd>Synopse</dd>
-      <dt>Geltung</dt><dd>nichtamtlich</dd>
-    </dl>
+  <header>
+    <h1>Antrag auf Erstellung einer Synopse<br>
+      zu einem Stammgesetz nach Maßgabe eines oder mehrerer Änderungsdokumente</h1>
+    <p class="stelle">
+      ÄndGgner — nichtamtliche Zentralstelle für die maschinelle Fortschreibung von Stammgesetzen
+      anhand von Änderungsvorschriften des Bundes und der Länder
+    </p>
   </header>
 
-  <main>
-    <p class="betreff">
-      Änderungsgesetze automatisch auf ein Stammgesetz anwenden und als Synopse darstellen.
+  <section class="beachtung">
+    <h2>Zur Beachtung:</h2>
+    <p>
+      Dieser Vordruck wendet ein oder mehrere Änderungsdokumente — verkündete Änderungsgesetze,
+      Gesetzentwürfe, Änderungsanträge und Beschlussempfehlungen — selbsttätig auf ein Stammgesetz
+      an und stellt das Ergebnis als zweispaltige Synopse gegenüber. Die Dokumentart wird aus dem
+      Text erkannt; eine Angabe darüber ist nicht zu machen.
+    </p>
+    <p>
+      Die gewählten Dateien <strong>verlassen Ihren Rechner nicht</strong>. Die gesamte Auswertung
+      läuft als WebAssembly-Programm in Ihrem Browser; es wird nichts hochgeladen und nichts
+      gespeichert.
+    </p>
+    <p>
+      Die Synopse wird automatisch erstellt und ist <strong>ohne Gewähr</strong> für Vollständigkeit
+      und Richtigkeit; sie ersetzt keine Rechtsberatung. Maßgeblich ist allein die amtliche
+      Verkündung im jeweiligen Gesetz- oder Verordnungsblatt. Uneindeutige Änderungsbefehle werden
+      zur manuellen Prüfung markiert statt stillschweigend verworfen.
+    </p>
+    <noscript>
+      <p class="fehlt">
+        Dieser Vordruck rechnet im Browser statt auf dem Server und braucht dafür JavaScript und
+        WebAssembly. Ohne sie bleibt er wirkungslos. Wer beides nicht einschalten möchte, verwende
+        die Befehlszeilenfassung — sie liegt dem <a href="aendggner-quelltext.tar.gz">Quelltext</a>
+        bei und leistet dasselbe.
+      </p>
+    </noscript>
+  </section>
+
+  <p class="ausfuellhinweis">
+    Weiße Felder bitte ausfüllen oder <span class="kreuz">X</span> ankreuzen
+  </p>
+
+  <form id="synopse-formular">
+    <div class="vordruck">
+
+      <div class="block">
+        <div class="leitspalte">Angaben zum Stammgesetz</div>
+        <div class="felder">
+          <div class="feld">
+            <label for="stamm">Stammgesetz in der geltenden Fassung
+              <span class="erl">(gii-Norm-XML von gesetze-im-internet.de — auch als
+                heruntergeladenes xml.zip, ohne Entpacken —, oder für Landesrecht die
+                konsolidierte Fassung aus dem Landesportal als PDF oder Klartext)</span></label>
+            <input type="file" id="stamm" name="stamm" required>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="leitspalte">Angaben zu den Änderungen</div>
+        <div class="felder">
+          <div class="feld">
+            <label for="aenderung">Änderungsdokument(e)
+              <span class="erl">(ein oder mehrere PDFs oder Klartextdateien: Änderungsgesetze aus
+                BGBl und GVBl, Gesetzentwürfe, Drucksachen sowie Änderungsanträge — letztere
+                zusammen mit dem Entwurf, den sie ändern. Bei Mehrfachauswahl wird in der
+                gewählten Reihenfolge nacheinander angewendet)</span></label>
+            <input type="file" id="aenderung" name="aenderung" multiple required>
+          </div>
+          <div class="feld ankreuzfeld">
+            <label>
+              <input type="checkbox" id="vollstaendig" name="vollstaendig">
+              Unveränderte Vorschriften mit in die Synopse aufnehmen
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="leitspalte">Antragstellung</div>
+        <div class="felder">
+          <div class="feld absenden">
+            <button type="submit">Synopse erstellen</button>
+            <span class="erl">Die Auswertung läuft in diesem Browser; je nach Umfang der
+              Dokumente dauert sie einige Sekunden.</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </form>
+
+  <section class="verfuegung">
+    <h2>Verfügung der Zentralstelle</h2>
+    <div class="verfuegungsfeld">
+      <p id="meldung" class="meldung" hidden aria-live="polite" aria-atomic="true"></p>
+      <p class="platzhalter">Wird nach Absenden des Antrags ausgefüllt.</p>
+    </div>
+  </section>
+
+  <details class="ausfuellhilfe">
+    <summary>Ausfüllhilfe — zwei Beispiele zum Ausprobieren</summary>
+
+    <p>
+      Der Vordruck braucht zweierlei: das <strong>Stammgesetz</strong> in seiner geltenden Fassung
+      und das <strong>Änderungsdokument</strong>, das es ändert. Beides liegt bei den amtlichen
+      Stellen bereit. Die beiden Dateien eines Beispiels herunterladen, in die Felder oben
+      eintragen — das xml.zip so, wie es kommt, ohne Entpacken — und „Synopse erstellen“ drücken.
     </p>
 
-    <noscript>
-      <aside class="kasten warnung">
-        <h2>Hinweis</h2>
-        <p>
-          Dieses Werkzeug rechnet im Browser statt auf dem Server: Es braucht JavaScript und
-          WebAssembly. Ohne sie bleibt das nachstehende Formular wirkungslos. Wer beides nicht
-          einschalten möchte, verwende die Befehlszeilenfassung — sie liegt dem
-          <a href="aendggner-quelltext.tar.gz">Quelltext</a> bei und leistet dasselbe.
-        </p>
-      </aside>
-    </noscript>
+    <dl class="beispiele">
+      <dt>Verkündetes Änderungsgesetz — Gesetz gegen den unlauteren Wettbewerb</dt>
+      <dd>
+        Stammgesetz:
+        <a href="https://www.gesetze-im-internet.de/uwg_2004/xml.zip"
+           target="_blank" rel="noopener noreferrer">UWG (xml.zip, 22 KB)</a><br>
+        Änderung:
+        <a href="https://www.recht.bund.de/bgbl/1/2026/43/regelungstext.pdf?__blob=publicationFile&amp;v=1"
+           target="_blank" rel="noopener noreferrer">Drittes Gesetz zur Änderung des UWG,
+          BGBl. 2026 I Nr. 43 (PDF, 0,3 MB)</a><br>
+        <span class="erl">19 Befehle an 6 Normen, nichts manuell zu prüfen.</span>
+      </dd>
 
-    <details class="einfuehrung">
-      <summary>Noch keine Dateien? Zwei Beispiele zum Ausprobieren</summary>
+      <dt>Gesetzentwurf — Allgemeines Gleichbehandlungsgesetz</dt>
+      <dd>
+        Stammgesetz:
+        <a href="https://www.gesetze-im-internet.de/agg/xml.zip"
+           target="_blank" rel="noopener noreferrer">AGG (xml.zip, 14 KB)</a><br>
+        Änderung:
+        <a href="https://dserver.bundestag.de/btd/21/061/2106178.pdf"
+           target="_blank" rel="noopener noreferrer">Zweites Gesetz zur Änderung des AGG,
+          BT-Drs. 21/6178 (PDF, 0,5 MB)</a><br>
+        <span class="erl">
+          23 Befehle an 14 Normen, einer zur manuellen Prüfung markiert. Zeigt zugleich, was gälte,
+          wenn der Entwurf so beschlossen würde — der Begründungsteil dahinter erzeugt keine
+          Befehle.
+        </span>
+      </dd>
+    </dl>
 
-      <p>
-        Das Werkzeug braucht zweierlei: das <strong>Stammgesetz</strong> in seiner geltenden
-        Fassung und das <strong>Änderungsdokument</strong>, das es ändert. Beides liegt bei den
-        amtlichen Stellen bereit.
-      </p>
-
-      <ol>
-        <li>Die beiden Dateien eines Beispiels herunterladen.</li>
-        <li>Sie in die Felder darunter eintragen — das xml.zip so, wie es kommt, ohne Entpacken.</li>
-        <li>„Synopse erzeugen“ drücken.</li>
-      </ol>
-
-      <dl class="beispiele">
-        <dt>Verkündetes Änderungsgesetz — Gesetz gegen den unlauteren Wettbewerb</dt>
-        <dd>
-          Stammgesetz:
-          <a href="https://www.gesetze-im-internet.de/uwg_2004/xml.zip"
-             target="_blank" rel="noopener noreferrer">UWG (xml.zip, 22 KB)</a><br>
-          Änderung:
-          <a href="https://www.recht.bund.de/bgbl/1/2026/43/regelungstext.pdf?__blob=publicationFile&amp;v=1"
-             target="_blank" rel="noopener noreferrer">Drittes Gesetz zur Änderung des UWG,
-            BGBl. 2026 I Nr. 43 (PDF, 0,3 MB)</a><br>
-          <span class="hint">19 Befehle an 6 Normen, nichts manuell zu prüfen.</span>
-        </dd>
-
-        <dt>Gesetzentwurf — Allgemeines Gleichbehandlungsgesetz</dt>
-        <dd>
-          Stammgesetz:
-          <a href="https://www.gesetze-im-internet.de/agg/xml.zip"
-             target="_blank" rel="noopener noreferrer">AGG (xml.zip, 14 KB)</a><br>
-          Änderung:
-          <a href="https://dserver.bundestag.de/btd/21/061/2106178.pdf"
-             target="_blank" rel="noopener noreferrer">Zweites Gesetz zur Änderung des AGG,
-            BT-Drs. 21/6178 (PDF, 0,5 MB)</a><br>
-          <span class="hint">
-            23 Befehle an 14 Normen, einer zur manuellen Prüfung markiert. Zeigt zugleich, was
-            gälte, wenn der Entwurf so beschlossen würde — der Begründungsteil dahinter erzeugt
-            keine Befehle.
-          </span>
-        </dd>
-      </dl>
-
-      <p class="hint">
-        Die Verweise führen zu gesetze-im-internet.de, recht.bund.de und dserver.bundestag.de. Das
-        Werkzeug ruft dort nichts von sich aus ab: Es sieht nur die Dateien, die Sie ihm im Formular
-        übergeben.
-      </p>
-    </details>
-
-    <form id="synopse-formular">
-      <fieldset>
-        <legend>Antrag auf Erstellung einer Synopse</legend>
-
-        <div class="field">
-          <label for="stamm">Stammgesetz</label>
-          <input type="file" id="stamm" name="stamm" required aria-describedby="stamm-hinweis">
-          <p class="hint" id="stamm-hinweis">
-            gii-Norm-XML von gesetze-im-internet.de — auch als heruntergeladenes xml.zip, ohne
-            Entpacken —, oder für Landesrecht die konsolidierte Fassung aus dem Landesportal (PDF
-            oder Klartext).
-          </p>
-        </div>
-
-        <div class="field">
-          <label for="aenderung">Änderungsdokument(e)</label>
-          <input type="file" id="aenderung" name="aenderung" multiple required
-                 aria-describedby="aenderung-hinweis">
-          <p class="hint" id="aenderung-hinweis">
-            Ein oder mehrere PDFs oder Klartextdateien: Änderungsgesetze aus BGBl und GVBl,
-            Gesetzentwürfe (Referenten-, Regierungs- und Fraktionsentwürfe, Drucksachen) sowie
-            Änderungsanträge — letztere zusammen mit dem Entwurf hochladen, den sie ändern. Die
-            Dokumentart wird aus dem Text erkannt. Bei Mehrfachauswahl wird in der gewählten
-            Reihenfolge nacheinander angewendet.
-          </p>
-        </div>
-
-        <div class="field checkbox">
-          <label>
-            <input type="checkbox" id="vollstaendig" name="vollstaendig">
-            Unveränderte Vorschriften mit in die Synopse aufnehmen
-          </label>
-        </div>
-      </fieldset>
-
-      <div class="absenden">
-        <button type="submit">Synopse erzeugen</button>
-      </div>
-    </form>
-
-    <p id="meldung" class="meldung" hidden aria-live="polite" aria-atomic="true"></p>
-
-    <aside class="kasten disclaimer">
-      <h2>Haftungsausschluss</h2>
-      <p>
-        Die Synopse wird automatisch erstellt und ist <strong>ohne Gewähr</strong> für Vollständigkeit
-        und Richtigkeit; sie ersetzt keine Rechtsberatung. Uneindeutige Änderungsbefehle werden zur
-        manuellen Prüfung markiert statt stillschweigend verworfen. Die gewählten Dateien
-        <strong>verlassen Ihren Rechner nicht</strong>: Die Auswertung läuft vollständig im Browser,
-        es wird nichts hochgeladen und nichts gespeichert.
-      </p>
-    </aside>
-  </main>
+    <p class="erl">
+      Die Verweise führen zu gesetze-im-internet.de, recht.bund.de und dserver.bundestag.de. Der
+      Vordruck ruft dort nichts von sich aus ab: Er sieht nur die Dateien, die Sie ihm übergeben.
+    </p>
+  </details>
 
   <footer>
+    <span class="vordrucknummer">ÄG&#8209;1</span>
     <nav>
       <a href="impressum.html">Impressum</a> ·
       <a href="datenschutz.html">Datenschutz</a> ·
-      <a href="aendggner-quelltext.tar.gz">Quelltext dieser Fassung (AGPLv3 oder später)</a>
+      <a href="aendggner-quelltext.tar.gz">Quelltext dieser Fassung (AGPLv3 oder später)</a> ·
+      <a href="https://gerrit.benkard.de/plugins/gitiles/aendggner">Git</a>
     </nav>
-    <span class="nebenquelle">(<a href="https://gerrit.benkard.de/plugins/gitiles/aendggner">Git</a>)</span>
+    <span class="ausgabe">08.26</span>
   </footer>
+
+</div>
 </body>
 </html>

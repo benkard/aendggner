@@ -33,7 +33,7 @@ public final class HtmlRenderer {
         .append(esc(synopse.alt().jurabk()))
         .append("</title>\n<style>\n")
         .append(CSS)
-        .append("</style>\n</head>\n<body>\n");
+        .append("</style>\n</head>\n<body>\n<div class=\"bogen\">\n");
 
     rendereKopf(sb, synopse, quelleBeschreibung, entwurfsfassung);
 
@@ -55,71 +55,76 @@ public final class HtmlRenderer {
 
     rendereFuss(sb);
 
-    sb.append("</body>\n</html>\n");
+    sb.append("</div>\n</body>\n</html>\n");
     return sb.toString();
   }
 
   /**
-   * Der Briefkopf des Vordrucks ÄG-2, im Aufbau derselbe wie auf der Aufgabeseite: links die
-   * ausstellende Stelle, rechts die Kennung; darunter der Vorspann mit Herkunft und Statistik.
+   * Der Kopf des Vordrucks ÄG-2: Titel, ausstellende Stelle, darunter der Vorspann als
+   * Beschriftungsstreifen — grau, was die Stelle gedruckt hat, weiß die Eintragung daneben.
    */
   private static void rendereKopf(
       StringBuilder sb, Synopse synopse, String quelle, boolean entwurfsfassung) {
-    sb.append("<header class=\"briefkopf\">\n<div class=\"dienststelle\">\n");
-    sb.append("<p class=\"langname\">").append(LANGNAME).append("</p>\n");
-    sb.append("<h1>Synopse: ").append(esc(synopse.alt().jurabk())).append("</h1>\n");
-    if (synopse.alt().langue() != null) {
-      sb.append("<p class=\"langue\">").append(esc(synopse.alt().langue())).append("</p>\n");
-    }
-    sb.append("</div>\n<dl class=\"kennung\">\n");
-    sb.append("<dt>Formblatt</dt><dd>ÄG&#8209;2</dd>\n");
-    sb.append("<dt>Stammgesetz</dt><dd>")
+    sb.append("<header>\n<h1>Synopse zum Stammgesetz ")
         .append(esc(synopse.alt().jurabk()))
-        .append("</dd>\n<dt>Erstellt</dt><dd>")
-        .append(LocalDate.now())
-        .append("</dd>\n");
-    if (entwurfsfassung) {
-      sb.append("<dt>Stand</dt><dd>Entwurfsfassung</dd>\n");
-    }
-    sb.append("<dt>Geltung</dt><dd>nichtamtlich</dd>\n");
-    sb.append("</dl>\n</header>\n");
+        .append("</h1>\n<p class=\"stelle\">")
+        .append(LANGNAME)
+        .append("</p>\n</header>\n");
 
-    sb.append("<div class=\"vorgang\">\n");
     if (entwurfsfassung) {
       sb.append(
-          "<p class=\"entwurfshinweis\">Entwurfsfassung — nicht geltendes Recht. Die neue Fassung"
-              + " gibt den Stand des Gesetzgebungsverfahrens wieder.</p>\n");
+          "<p class=\"entwurfshinweis\"><strong>Entwurfsfassung — nicht geltendes Recht.</strong>"
+              + " Die neue Fassung gibt den Stand des Gesetzgebungsverfahrens wieder.</p>\n");
     }
-    sb.append("<p class=\"quelle\">Grundlage: ").append(esc(quelle)).append("</p>\n");
+
     long geaendert =
         synopse.eintraege().stream()
             .filter(e -> e.art() != Synopse.Aenderungsart.UNVERAENDERT)
             .count();
-    sb.append("<p class=\"statistik\">")
-        .append(geaendert)
-        .append(" geänderte Normen, ")
-        .append(synopse.manuellZuPruefen().size())
-        .append(" manuell zu prüfende Befehle</p>\n");
-    sb.append("</div>\n");
+    sb.append("<dl class=\"vorspann\">\n");
+    vorspannZeile(sb, "Stammgesetz", synopse.alt().jurabk());
+    if (synopse.alt().langue() != null) {
+      vorspannZeile(sb, "Langbezeichnung", synopse.alt().langue());
+    }
+    vorspannZeile(sb, "Grundlage", quelle);
+    vorspannZeile(sb, "Erstellt am", LocalDate.now().toString());
+    vorspannZeile(
+        sb,
+        "Umfang",
+        geaendert
+            + " geänderte Normen, "
+            + synopse.manuellZuPruefen().size()
+            + " manuell zu prüfende Befehle");
+    vorspannZeile(sb, "Geltung", entwurfsfassung ? "nichtamtlich, Entwurfsstand" : "nichtamtlich");
+    sb.append("</dl>\n");
+  }
+
+  private static void vorspannZeile(StringBuilder sb, String bezeichnung, String wert) {
+    sb.append("<dt>")
+        .append(esc(bezeichnung))
+        .append("</dt><dd>")
+        .append(esc(wert))
+        .append("</dd>\n");
   }
 
   /**
-   * Der Fußsteg. Der Vorbehalt gehört gerade hierher und nicht bloß auf die Aufgabeseite: Die
-   * Synopse wird ausgedruckt und weitergereicht, das Formular nicht.
+   * Der Fußsteg trägt wie im Muster die Vordrucknummer links und den Ausgabestand rechts. Der
+   * Vorbehalt gehört gerade hierher und nicht bloß auf die Aufgabeseite: Die Synopse wird
+   * ausgedruckt und weitergereicht, das Formular nicht.
    */
   private static void rendereFuss(StringBuilder sb) {
-    sb.append("<footer>\n<span>Erstellt am ")
-        .append(LocalDate.now())
-        .append(" mit ÄndGgner</span>\n")
+    sb.append("<footer>\n<span class=\"vordrucknummer\">ÄG&#8209;2</span>\n")
         .append(
-            "<span class=\"nebenquelle\">Ohne Gewähr; maßgeblich ist allein die amtliche"
+            "<span>Erstellt mit ÄndGgner. Ohne Gewähr; maßgeblich ist allein die amtliche"
                 + " Verkündung im jeweiligen Gesetz- oder Verordnungsblatt.</span>\n")
-        .append("</footer>\n");
+        .append("<span class=\"ausgabe\">")
+        .append(LocalDate.now())
+        .append("</span>\n</footer>\n");
   }
 
   private static final String LANGNAME =
-      "Nichtamtliche Zentralstelle für die maschinelle Fortschreibung von Stammgesetzen anhand"
-          + " von Änderungsvorschriften des Bundes und der Länder";
+      "ÄndGgner — nichtamtliche Zentralstelle für die maschinelle Fortschreibung von Stammgesetzen"
+          + " anhand von Änderungsvorschriften des Bundes und der Länder";
 
   private static void rendereGliederungsAenderungen(StringBuilder sb, Synopse synopse) {
     if (synopse.gliederungsAenderungen().isEmpty()) {
@@ -251,45 +256,50 @@ public final class HtmlRenderer {
 
   private static final String CSS =
       """
-      /* Der Vordruck ÄG-2. Das Farbgerüst ist dasselbe wie in
-         src/main/resources/eu/mulk/aendggner/web/style.css und wird hier ein zweites Mal
-         geführt: Diese Datei wird aus einem blob:-Verweis geöffnet und im Befehlszeilen-
-         betrieb als einzelne Datei abgelegt; sie kann kein fremdes Stilblatt einbinden.
-         Wer dort etwas ändert, ändere es hier mit.
+      /* Der Vordruck ÄG-2, gesetzt nach demselben Muster wie die Aufgabeseite (siehe
+         src/main/resources/eu/mulk/aendggner/web/style.css): weißes Papier, schwarze
+         Haarlinien, grauer Raster für alles, was die Stelle gedruckt hat. Das Farbgerüst
+         wird hier ein zweites Mal geführt, weil diese Datei aus einem blob:-Verweis
+         geöffnet und im Befehlszeilenbetrieb als einzelne Datei abgelegt wird; sie kann
+         kein fremdes Stilblatt einbinden. Wer dort etwas ändert, ändere es hier mit.
 
-         Die Schrift ist geteilt: Der Vordruck — Briefkopf, Kennung, Überschriften,
-         Spaltenköpfe, Kästchen, Fußsteg — steht in der Groteske, der Wortlaut der Normen
-         in der Antiqua. Amtskopf und Vorschrift sind zweierlei, im Gesetzblatt wie hier.
+         Die Schrift ist geteilt: Der Vordruck steht in der Groteske, der Wortlaut der
+         Normen in der Antiqua. Amtskopf und Vorschrift sind zweierlei, im Gesetzblatt wie
+         hier.
 
-         Farbe trägt allein die Änderung: rot heißt weg, grün heißt hinzu. Damit die
-         Aussage auch im Schwarzweiß-Ausdruck und bei Farbfehlsichtigkeit erhalten bleibt,
-         tritt zur Farbe stets die Form — durchgestrichen gegen unterstrichen — sowie die
-         Spalte, in der sie steht. */
+         Schmuckfarbe gibt es nicht. Farbe trägt allein die Änderung: rot heißt weg, grün
+         heißt hinzu. Damit die Aussage auch im Schwarzweiß-Ausdruck und bei
+         Farbfehlsichtigkeit erhalten bleibt, tritt zur Farbe stets die Form —
+         durchgestrichen gegen unterstrichen — sowie die Spalte, in der sie steht. */
       :root {
         color-scheme: light dark;
-        --fg: #111;
-        --bg: #fff;
-        --papier: #f3f1ea;
-        --muted: #595959;
-        --raster: #d6d2c6;
-        --kasten: #f0ede4;
-        --amt: #8b0f21;
+        --fg: #000;
+        --papier: #fff;
+        --feld: #fff;
+        --grund: #d5d5d5;
+        --tint: #e4e4e4;
+        --linie: #000;
+        --muted: #444;
+        --tisch: #9a9a9a;
         --del-bg: #ffd7d7;
         --del-fg: #8b0000;
         --ins-bg: #d7f5d7;
         --ins-fg: #005f00;
-        --grotesk: system-ui, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        --grotesk: Arial, "Helvetica Neue", Helvetica, system-ui, sans-serif;
         --antiqua: Georgia, "Times New Roman", serif;
       }
+      /* Im Dunkeln kehrt sich nicht die Farbe um, sondern das Verhältnis: Der Grund der
+         Stelle bleibt heller als das Feld. */
       @media (prefers-color-scheme: dark) {
         :root {
-          --fg: #e6e6e6;
-          --bg: #1c1c1c;
-          --papier: #0f0f0f;
-          --muted: #a0a0a0;
-          --raster: #3c3c3c;
-          --kasten: #242424;
-          --amt: #e79aa4;
+          --fg: #e8e8e8;
+          --papier: #1a1a1a;
+          --feld: #101010;
+          --grund: #333333;
+          --tint: #242424;
+          --linie: #7a7a7a;
+          --muted: #a8a8a8;
+          --tisch: #000;
           --del-bg: #5a1f1f;
           --del-fg: #ffb3b3;
           --ins-bg: #1f4a1f;
@@ -297,153 +307,136 @@ public final class HtmlRenderer {
         }
       }
       * { box-sizing: border-box; }
-      /* Die Unterlage endet nie, auch wenn der Bogen kürzer ist als das Fenster. */
-      html { background: var(--papier); }
+      html { background: var(--tisch); }
       body {
         counter-reset: norm;
+        margin: 0;
+        padding: 1.5rem 1rem;
         font-family: var(--grotesk);
-        line-height: 1.5;
-        max-width: 90rem;
-        margin: 2rem auto 3rem;
-        padding: 2rem 2.25rem 2.5rem;
-        border: 1px solid var(--fg);
+        font-size: 0.8125rem;
+        line-height: 1.4;
         color: var(--fg);
-        background: var(--bg);
       }
-      /* Auf schmalen Geräten wäre der Bogenrand nur ein Verlust an Satzbreite. */
-      @media (max-width: 48rem) {
-        body { margin: 0; padding: 1.25rem 1rem 2rem; border: none; }
+      /* Ein Blatt Papier hat keinen Rahmen; die Kante entsteht aus dem Farbunterschied zur
+         Unterlage. Die Breite ist größer als beim Antrag, weil zwei Spalten sie brauchen. */
+      .bogen {
+        max-width: 88rem;
+        margin: 0 auto;
+        padding: 1.75rem 1.75rem 0.75rem;
+        background: var(--papier);
       }
-
-      /* Briefkopf und Doppellinie wie auf der Aufgabeseite: kräftig in Amtsrot, dünn in
-         Rasterfarbe, wobei die zweite Linie der Oberrand des Vorspanns ist. */
-      .briefkopf {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 1rem 2rem;
-        align-items: end;
-        padding-bottom: 0.7rem;
-        border-bottom: 3px solid var(--amt);
-      }
-      .langname {
-        margin: 0 0 0.3rem;
-        max-width: 30rem;
-        font-size: 0.75rem;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-        line-height: 1.35;
-        color: var(--muted);
-      }
-      .dienststelle h1 {
-        margin: 0;
-        font-size: 1.9rem;
-        letter-spacing: 0.06em;
-        line-height: 1.1;
-      }
-      .langue { margin: 0.35rem 0 0; font-style: italic; color: var(--muted); }
-      .kennung {
-        display: grid;
-        grid-template-columns: auto auto;
-        gap: 0 0.6rem;
-        margin: 0;
-        padding: 0.4rem 0.6rem;
-        border: 1px solid var(--raster);
-        font-size: 0.75rem;
-        line-height: 1.5;
-      }
-      .kennung dt { letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-      .kennung dd { margin: 0; font-weight: bold; color: var(--amt); white-space: nowrap; }
-      /* Gestapelt zöge die Kennung sonst über die ganze Breite und sähe aus wie ein Kasten
-         des Satzspiegels statt wie ein Stempel am Kopfrand. */
-      @media (max-width: 34rem) {
-        .briefkopf { grid-template-columns: 1fr; align-items: start; }
-        .kennung { justify-self: start; }
+      @media (max-width: 40rem) {
+        body { padding: 0; }
+        .bogen { padding: 1rem 0.75rem 0.5rem; }
       }
 
-      .vorgang { margin-top: 3px; padding-top: 1rem; border-top: 1px solid var(--raster); }
-      .quelle, .statistik, .gliederung, .ursachen {
-        color: var(--muted);
-        font-size: 0.85rem;
-        margin: 0.2rem 0;
-      }
+      h1 { margin: 0 0 0.5rem; font-size: 1rem; line-height: 1.35; }
+      .stelle { margin: 0 0 0.9rem; font-size: 0.6875rem; color: var(--muted); }
+
       .entwurfshinweis {
         margin: 0 0 0.9rem;
-        padding: 0.9rem 1.1rem;
-        border: 1px solid var(--raster);
+        padding: 0.45rem 0.6rem;
+        border: 1px solid var(--linie);
         border-left: 4px solid var(--del-fg);
-        background: var(--kasten);
-        font-size: 0.9rem;
+        background: var(--feld);
+        font-size: 0.75rem;
       }
 
-      /* Der Spaltenkopf steht mit der Gegenüberstellung in einem Block und nicht mehr im
-         Kopfblock: Nur so reicht sein Klebebereich über alle Normen und nicht bloß über den
-         Vorspann. Seine beiden Felder tragen die Form der Legende des Antragsvordrucks. */
+      /* Der Vorspann ist der Beschriftungsstreifen des Musters: links grau die Bezeichnung,
+         rechts weiß die Eintragung, Zelle an Zelle ohne Abstand. */
+      .vorspann {
+        display: grid;
+        grid-template-columns: 10rem 1fr;
+        margin: 0;
+        border-top: 1px solid var(--linie);
+        border-left: 1px solid var(--linie);
+        font-size: 0.6875rem;
+      }
+      .vorspann dt {
+        padding: 0.2rem 0.5rem;
+        border-right: 1px solid var(--linie);
+        border-bottom: 1px solid var(--linie);
+        background: var(--grund);
+        font-weight: bold;
+      }
+      .vorspann dd {
+        margin: 0;
+        padding: 0.2rem 0.5rem;
+        border-right: 1px solid var(--linie);
+        border-bottom: 1px solid var(--linie);
+        background: var(--feld);
+        overflow-wrap: anywhere;
+      }
+
+      /* Der Spaltenkopf steht mit der Gegenüberstellung in einem Block: Sein Klebebereich
+         reicht damit über alle Normen und endet vor dem Abschnitt „Manuell prüfen“. Seine
+         beiden Felder sind Beschriftungsstreifen wie im Vordruck, also grau. */
       .spaltenkopf {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 1rem;
+        gap: 0.75rem;
         position: sticky;
         top: 0;
         z-index: 1;
         margin-top: 1.25rem;
-        padding: 0.6rem 0 0.6rem 3rem;
-        background: var(--bg);
+        padding: 0.5rem 0 0.5rem 2.5rem;
+        background: var(--papier);
       }
       .spaltenkopf div {
-        padding: 0.3rem 0.8rem;
-        background: var(--fg);
-        color: var(--bg);
-        font-size: 0.8rem;
+        padding: 0.25rem 0.5rem;
+        border: 1px solid var(--linie);
+        background: var(--grund);
+        font-size: 0.6875rem;
         font-weight: bold;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
       }
 
-      /* Der Steg links trägt die Randziffer, wie im Vordruck die Feldziffer; sie macht die
-         Abschnitte überdies zitierbar. */
-      section { position: relative; padding-left: 3rem; }
+      /* Der Steg links trägt die Randziffer in einem Kästchen, wie der Antrag das
+         Ankreuzfeld; sie macht die Abschnitte überdies zitierbar. */
+      section { position: relative; padding-left: 2.5rem; }
       section.norm {
         counter-increment: norm;
-        padding-top: 1rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid var(--raster);
+        padding-top: 0.9rem;
+        padding-bottom: 0.9rem;
+        border-bottom: 1px solid var(--linie);
       }
       section.norm::before {
         content: counter(norm);
         position: absolute;
-        top: 1.15rem;
+        top: 1rem;
         left: 0;
         width: 1.5rem;
-        height: 1.5rem;
-        border: 1px solid var(--amt);
-        color: var(--amt);
-        font-size: 0.8rem;
+        height: 1.2rem;
+        border: 1px solid var(--linie);
+        background: var(--grund);
+        font-size: 0.6875rem;
         font-weight: bold;
-        line-height: 1.4rem;
+        line-height: 1.1rem;
         text-align: center;
       }
-      section.norm h2 { font-size: 1.05rem; margin: 0 0 0.5rem; letter-spacing: 0.02em; }
+      section.norm h2 { font-size: 0.8125rem; margin: 0 0 0.15rem; }
+      .gliederung, .ursachen { color: var(--muted); font-size: 0.6875rem; margin: 0.1rem 0; }
 
       .vergleich {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 1rem;
+        gap: 0.75rem;
         align-items: start;
+        margin-top: 0.5rem;
       }
-      /* Die alte Fassung liegt auf dem Kastenton wie ein Durchschlag, die neue auf
-         Bogenweiß; beim Springen zwischen den Spalten ist damit ohne Hinsehen klar, wo man
+      /* Die alte Fassung liegt auf dem hellen Raster wie ein Durchschlag, die neue auf dem
+         weißen Feld; beim Springen zwischen den Spalten ist damit ohne Hinsehen klar, wo man
          steht. Die Hinterlegungen der Änderungen heben sich von beiden Gründen ab. */
       .vergleich > div {
-        padding: 0.75rem 0.9rem;
-        border: 1px solid var(--raster);
+        padding: 0.5rem 0.6rem;
+        border: 1px solid var(--linie);
         white-space: pre-wrap;
         overflow-wrap: anywhere;
         font-family: var(--antiqua);
-        font-size: 0.95rem;
+        font-size: 0.875rem;
         line-height: 1.45;
       }
-      .vergleich > .alt { background: var(--kasten); }
-      .vergleich > .neu { background: var(--bg); }
+      .vergleich > .alt { background: var(--tint); }
+      .vergleich > .neu { background: var(--feld); }
 
       del, .alt del {
         background: var(--del-bg);
@@ -455,111 +448,104 @@ public final class HtmlRenderer {
         color: var(--ins-fg);
         text-decoration: underline;
       }
-      .leer { color: var(--muted); font-style: italic; }
+      .leer { font-family: var(--grotesk); font-size: 0.75rem; color: var(--muted); }
 
-      /* Kästchen in Versalien; die Farbe folgt derselben Regel wie im Diff. Beschriftet
-         sind sie ohnehin, sodass die Farbe hier nur bestätigt, was dasteht. Der Rahmen
-         steht auch dort, wo die Hinterlegung schwach wirkt. */
+      /* Kästchen wie die Ankreuzfelder des Antrags: eckig, haarfein umrandet. Beschriftet
+         sind sie ohnehin, sodass die Farbe nur bestätigt, was dasteht. */
       .badge {
         font-family: var(--grotesk);
-        font-size: 0.7rem;
+        font-size: 0.625rem;
         font-weight: normal;
         text-transform: uppercase;
-        letter-spacing: 0.06em;
-        border: 1px solid var(--raster);
-        padding: 0.1rem 0.55rem;
+        border: 1px solid var(--linie);
+        padding: 0 0.4rem;
         vertical-align: middle;
         white-space: nowrap;
       }
-      .neu-badge { background: var(--ins-bg); color: var(--ins-fg); border-color: var(--ins-fg); }
-      .aufgehoben-badge {
-        background: var(--del-bg);
-        color: var(--del-fg);
-        border-color: var(--del-fg);
-      }
-      .geaendert-badge { border-color: var(--raster); color: var(--muted); }
+      .neu-badge { background: var(--ins-bg); color: var(--ins-fg); }
+      .aufgehoben-badge { background: var(--del-bg); color: var(--del-fg); }
+      .geaendert-badge { background: var(--grund); color: var(--fg); }
 
-      /* Die Abschnittsüberschriften treten als Balken auf wie die Legende des Feldblocks. */
+      /* Die Abschnittsüberschriften sind Beschriftungsstreifen über die volle Breite, wie im
+         Muster die Zeile „Verfügung des Finanzamts“. */
       section.gliederung-aenderungen > h2, section.manuell > h2 {
-        display: inline-block;
-        margin: 0 0 0.9rem;
-        padding: 0.3rem 0.8rem;
-        background: var(--fg);
-        color: var(--bg);
-        font-size: 0.8rem;
-        font-weight: bold;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
+        margin: 0 0 0.6rem;
+        padding: 0.25rem 0.5rem;
+        border: 1px solid var(--linie);
+        background: var(--grund);
+        font-size: 0.75rem;
+        text-align: center;
       }
       section.gliederung-aenderungen { padding-top: 1.25rem; }
-      section.manuell { margin-top: 2rem; padding-top: 1.5rem; border-top: 3px solid var(--amt); }
-      section.manuell h3 {
-        margin: 1.25rem 0 0.5rem;
-        font-size: 0.8rem;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-      }
-      section.manuell li { margin-bottom: 0.7rem; }
-      .originaltext { font-family: var(--antiqua); color: var(--muted); font-size: 0.85rem; }
+      section.manuell { margin-top: 1.5rem; padding-top: 1.25rem; }
+      section.manuell h3 { margin: 1rem 0 0.4rem; font-size: 0.6875rem; }
+      section.manuell li { margin-bottom: 0.6rem; font-size: 0.75rem; }
+      .originaltext { font-family: var(--antiqua); color: var(--muted); font-size: 0.8125rem; }
 
+      /* Vordrucknummer links, Ausgabestand rechts, beide winzig und ohne Zierrat. */
       footer {
         display: flex;
         flex-wrap: wrap;
+        align-items: baseline;
         justify-content: space-between;
-        gap: 0.5rem 1.5rem;
-        margin-top: 2.5rem;
-        padding-top: 0.9rem;
-        border-top: 1px solid var(--fg);
-        font-size: 0.8125rem;
+        gap: 0.4rem 1rem;
+        margin-top: 1.5rem;
+        padding: 0.4rem 0 0.6rem;
+        font-size: 0.625rem;
         color: var(--muted);
       }
+      .vordrucknummer, .ausgabe { white-space: nowrap; }
 
       /* Zwei Spalten Gesetzestext nebeneinander sind auf dem Telefon nicht zu lesen. Gestapelt
          trägt der Spaltenkopf nichts mehr; deshalb beschriftet sich dort jede Spalte selbst. */
       @media (max-width: 60rem) {
         .spaltenkopf { display: none; }
         .vergleich { grid-template-columns: 1fr; }
-        section { padding-left: 2.25rem; }
+        .vorspann { grid-template-columns: 7rem 1fr; }
+        section { padding-left: 2rem; }
         .vergleich > div::before {
           display: block;
-          margin-bottom: 0.4rem;
+          margin: -0.5rem -0.6rem 0.4rem;
+          padding: 0.15rem 0.6rem;
+          border-bottom: 1px solid var(--linie);
+          background: var(--grund);
           font-family: var(--grotesk);
-          font-size: 0.7rem;
+          font-size: 0.625rem;
           font-weight: bold;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          color: var(--muted);
         }
         .vergleich > .alt::before { content: "Alte Fassung"; }
         .vergleich > .neu::before { content: "Neue Fassung"; }
       }
 
       /* Gedruckt wird stets auf weißes Papier, auch aus einem dunkel eingestellten Browser
-         heraus: prefers-color-scheme gilt im Druck fort. Deshalb ist hier das ganze
-         Farbgerüst zurückzusetzen und nicht nur ein Teil davon — sonst käme die alte Spalte
-         als schwarzer Block aus dem Drucker. */
+         heraus: prefers-color-scheme gilt im Druck fort. Deshalb ist das ganze Farbgerüst
+         zurückzusetzen und nicht nur ein Teil davon — sonst käme die alte Spalte als
+         schwarzer Block aus dem Drucker. */
       @media print {
         :root {
           --fg: #000;
-          --bg: #fff;
           --papier: #fff;
+          --feld: #fff;
+          --grund: #d5d5d5;
+          --tint: #e4e4e4;
+          --linie: #000;
           --muted: #333;
-          --raster: #999;
-          --kasten: #f2f0ea;
-          --amt: #000;
+          --tisch: #fff;
           --del-bg: #ffd7d7;
           --del-fg: #8b0000;
           --ins-bg: #d7f5d7;
           --ins-fg: #005f00;
         }
-        body { margin: 0; padding: 0; max-width: none; border: none; font-size: 10pt; }
+        body { padding: 0; font-size: 9pt; }
+        .bogen { max-width: none; padding: 0; }
         .spaltenkopf { position: static; }
         .vergleich, section.norm { break-inside: avoid; }
-        /* Ohne diese Festlegung wirft der Druck die Hinterlegung weg. Durchstreichung
-           und Unterstreichung überstehen ihn ohnehin und tragen die Aussage auch dort,
-           wo schwarzweiß gedruckt wird; der Spaltenbalken und der Durchschlagston der
-           alten Fassung aber haben keine solche zweite Gestalt. */
+        /* Ohne diese Festlegung wirft der Druck die Hinterlegung weg. Durchstreichung und
+           Unterstreichung überstehen ihn ohnehin und tragen die Aussage auch dort, wo
+           schwarzweiß gedruckt wird; der Raster der Stelle aber hat keine solche zweite
+           Gestalt — er sagt, was gedruckt und was eingetragen ist. */
         del, ins, .badge, .entwurfshinweis, .spaltenkopf div, .vergleich > .alt,
+        .vorspann dt, section.norm::before,
         section.gliederung-aenderungen > h2, section.manuell > h2 {
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
