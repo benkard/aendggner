@@ -15,25 +15,37 @@
   <script src="app.js" defer></script>
 </head>
 <body>
-  <header>
-    <h1>ÄndGgner</h1>
-    <p class="langname">
-      Nichtamtliche Zentralstelle für die maschinelle Fortschreibung von Stammgesetzen
-      anhand von Änderungsvorschriften des Bundes und der Länder
-    </p>
-    <p class="tagline">
-      Änderungsgesetze automatisch auf ein Stammgesetz anwenden und als Synopse darstellen.
-    </p>
+  <header class="briefkopf">
+    <div class="dienststelle">
+      <p class="langname">
+        Nichtamtliche Zentralstelle für die maschinelle Fortschreibung von Stammgesetzen
+        anhand von Änderungsvorschriften des Bundes und der Länder
+      </p>
+      <h1>ÄndGgner</h1>
+    </div>
+
+    <dl class="kennung">
+      <dt>Formblatt</dt><dd>ÄG&#8209;1</dd>
+      <dt>Vorgang</dt><dd>Synopse</dd>
+      <dt>Geltung</dt><dd>nichtamtlich</dd>
+    </dl>
   </header>
 
   <main>
+    <p class="betreff">
+      Änderungsgesetze automatisch auf ein Stammgesetz anwenden und als Synopse darstellen.
+    </p>
+
     <noscript>
-      <p class="noscript">
-        Dieses Werkzeug rechnet im Browser statt auf dem Server: Es braucht JavaScript und
-        WebAssembly. Ohne sie bleibt das nachstehende Formular wirkungslos. Wer beides nicht
-        einschalten möchte, verwende die Befehlszeilenfassung — sie liegt dem
-        <a href="aendggner-quelltext.tar.gz">Quelltext</a> bei und leistet dasselbe.
-      </p>
+      <aside class="kasten warnung">
+        <h2>Hinweis</h2>
+        <p>
+          Dieses Werkzeug rechnet im Browser statt auf dem Server: Es braucht JavaScript und
+          WebAssembly. Ohne sie bleibt das nachstehende Formular wirkungslos. Wer beides nicht
+          einschalten möchte, verwende die Befehlszeilenfassung — sie liegt dem
+          <a href="aendggner-quelltext.tar.gz">Quelltext</a> bei und leistet dasselbe.
+        </p>
+      </aside>
     </noscript>
 
     <details class="einfuehrung">
@@ -89,53 +101,65 @@
     </details>
 
     <form id="synopse-formular">
-      <div class="field">
-        <label for="stamm">Stammgesetz</label>
-        <input type="file" id="stamm" name="stamm" required>
-        <p class="hint">
-          gii-Norm-XML von gesetze-im-internet.de — auch als heruntergeladenes xml.zip, ohne
-          Entpacken —, oder für Landesrecht die konsolidierte Fassung aus dem Landesportal (PDF
-          oder Klartext).
-        </p>
-      </div>
+      <fieldset>
+        <legend>Antrag auf Erstellung einer Synopse</legend>
 
-      <div class="field">
-        <label for="aenderung">Änderungsdokument(e)</label>
-        <input type="file" id="aenderung" name="aenderung" multiple required>
-        <p class="hint">
-          Ein oder mehrere PDFs oder Klartextdateien: Änderungsgesetze aus BGBl und GVBl,
-          Gesetzentwürfe (Referenten-, Regierungs- und Fraktionsentwürfe, Drucksachen) sowie
-          Änderungsanträge — letztere zusammen mit dem Entwurf hochladen, den sie ändern. Die
-          Dokumentart wird aus dem Text erkannt. Bei Mehrfachauswahl wird in der gewählten
-          Reihenfolge nacheinander angewendet.
-        </p>
-      </div>
+        <div class="field">
+          <label for="stamm">Stammgesetz</label>
+          <input type="file" id="stamm" name="stamm" required aria-describedby="stamm-hinweis">
+          <p class="hint" id="stamm-hinweis">
+            gii-Norm-XML von gesetze-im-internet.de — auch als heruntergeladenes xml.zip, ohne
+            Entpacken —, oder für Landesrecht die konsolidierte Fassung aus dem Landesportal (PDF
+            oder Klartext).
+          </p>
+        </div>
 
-      <div class="field checkbox">
-        <label>
-          <input type="checkbox" id="vollstaendig" name="vollstaendig">
-          Unveränderte Vorschriften mit in die Synopse aufnehmen
-        </label>
-      </div>
+        <div class="field">
+          <label for="aenderung">Änderungsdokument(e)</label>
+          <input type="file" id="aenderung" name="aenderung" multiple required
+                 aria-describedby="aenderung-hinweis">
+          <p class="hint" id="aenderung-hinweis">
+            Ein oder mehrere PDFs oder Klartextdateien: Änderungsgesetze aus BGBl und GVBl,
+            Gesetzentwürfe (Referenten-, Regierungs- und Fraktionsentwürfe, Drucksachen) sowie
+            Änderungsanträge — letztere zusammen mit dem Entwurf hochladen, den sie ändern. Die
+            Dokumentart wird aus dem Text erkannt. Bei Mehrfachauswahl wird in der gewählten
+            Reihenfolge nacheinander angewendet.
+          </p>
+        </div>
 
-      <button type="submit">Synopse erzeugen</button>
+        <div class="field checkbox">
+          <label>
+            <input type="checkbox" id="vollstaendig" name="vollstaendig">
+            Unveränderte Vorschriften mit in die Synopse aufnehmen
+          </label>
+        </div>
+      </fieldset>
+
+      <div class="absenden">
+        <button type="submit">Synopse erzeugen</button>
+      </div>
     </form>
 
-    <p id="meldung" class="meldung" hidden></p>
+    <p id="meldung" class="meldung" hidden aria-live="polite" aria-atomic="true"></p>
 
-    <p class="disclaimer">
-      Die Synopse wird automatisch erstellt und ist <strong>ohne Gewähr</strong> für Vollständigkeit
-      und Richtigkeit; sie ersetzt keine Rechtsberatung. Uneindeutige Änderungsbefehle werden zur
-      manuellen Prüfung markiert statt stillschweigend verworfen. Die gewählten Dateien
-      <strong>verlassen Ihren Rechner nicht</strong>: Die Auswertung läuft vollständig im Browser,
-      es wird nichts hochgeladen und nichts gespeichert.
-    </p>
+    <aside class="kasten disclaimer">
+      <h2>Haftungsausschluss</h2>
+      <p>
+        Die Synopse wird automatisch erstellt und ist <strong>ohne Gewähr</strong> für Vollständigkeit
+        und Richtigkeit; sie ersetzt keine Rechtsberatung. Uneindeutige Änderungsbefehle werden zur
+        manuellen Prüfung markiert statt stillschweigend verworfen. Die gewählten Dateien
+        <strong>verlassen Ihren Rechner nicht</strong>: Die Auswertung läuft vollständig im Browser,
+        es wird nichts hochgeladen und nichts gespeichert.
+      </p>
+    </aside>
   </main>
 
   <footer>
-    <a href="impressum.html">Impressum</a> ·
-    <a href="datenschutz.html">Datenschutz</a> ·
-    <a href="aendggner-quelltext.tar.gz">Quelltext dieser Fassung (AGPLv3 oder später)</a>
+    <nav>
+      <a href="impressum.html">Impressum</a> ·
+      <a href="datenschutz.html">Datenschutz</a> ·
+      <a href="aendggner-quelltext.tar.gz">Quelltext dieser Fassung (AGPLv3 oder später)</a>
+    </nav>
     <span class="nebenquelle">(<a href="https://gerrit.benkard.de/plugins/gitiles/aendggner">Git</a>)</span>
   </footer>
 </body>

@@ -1,16 +1,21 @@
 /* SPDX-FileCopyrightText: 2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
    SPDX-License-Identifier: AGPL-3.0-or-later */
 
-/* Schwarz auf Papier wie ein Gesetzblatt. Farbe tritt allein an den Balken der
-   Hinweiskästen auf und meint dort dasselbe wie in der Synopse: rot warnt, grün
-   bestätigt. Die Kästen bleiben auch ohne den Balken lesbar; er hebt sie hervor,
-   er trägt nicht allein. */
+/* Ein Vordruck, kein Aufsatz: Der Bogen liegt auf einer Unterlage, trägt oben einen
+   Briefkopf mit Formblattkennung und darunter einen Feldblock mit numerierten Feldern.
+   Farbe tritt an drei Stellen auf und meint dort jeweils dasselbe: Behördenrot führt
+   das Auge zu den Kennungen und Feldziffern, rot warnt, grün bestätigt. Kein Kasten
+   verlässt sich auf seine Farbe allein; Wort und Zeichen tragen die Aussage mit. */
 :root {
   color-scheme: light dark;
   --fg: #111;
   --bg: #fff;
+  --papier: #f3f1ea;
   --muted: #595959;
   --border: #bbb;
+  --raster: #d6d2c6;
+  --kasten: #f0ede4;
+  --amt: #8b0f21;
   --warnung: #8b0000;
   --bestaetigung: #005f00;
 }
@@ -18,9 +23,13 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --fg: #e6e6e6;
-    --bg: #141414;
+    --bg: #1c1c1c;
+    --papier: #0f0f0f;
     --muted: #a0a0a0;
     --border: #4a4a4a;
+    --raster: #3c3c3c;
+    --kasten: #242424;
+    --amt: #e79aa4;
     --warnung: #ffb3b3;
     --bestaetigung: #b3ffb3;
   }
@@ -30,45 +39,138 @@
   box-sizing: border-box;
 }
 
+/* Die Unterlage endet nie, auch wenn der Bogen kürzer ist als das Fenster. */
+html {
+  background: var(--papier);
+}
+
 body {
-  margin: 0 auto;
-  padding: 2rem 1.25rem 3rem;
-  max-width: 40rem;
-  font-family: "Georgia", "Times New Roman", serif;
+  margin: 2rem auto 3rem;
+  padding: 2rem 2.25rem 2.5rem;
+  max-width: 46rem;
+  border: 1px solid var(--fg);
+  font-family: system-ui, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-size: 1rem;
   color: var(--fg);
   background: var(--bg);
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
-header {
-  margin-bottom: 2rem;
+/* Auf schmalen Geräten wäre der Bogenrand nur ein Verlust an Satzbreite. */
+@media (max-width: 48rem) {
+  body {
+    margin: 0;
+    padding: 1.25rem 1rem 2rem;
+    border: none;
+  }
 }
 
-h1 {
-  margin: 0 0 0.25rem;
-  font-size: 1.75rem;
+/* Der Briefkopf: links die ausstellende Stelle, rechts die Kennung des Vordrucks.
+   Darunter die Doppellinie — kräftig in Amtsrot, dünn in Rasterfarbe —, deren zweite
+   Linie der Oberrand des Satzspiegels ist. */
+.briefkopf {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem 2rem;
+  align-items: end;
+  padding-bottom: 0.7rem;
+  border-bottom: 3px solid var(--amt);
+}
+
+/* Gestapelt zöge die Kennung sonst über die ganze Breite und sähe aus wie ein Kasten
+   des Satzspiegels statt wie ein Stempel am Kopfrand. */
+@media (max-width: 34rem) {
+  .briefkopf {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .kennung {
+    justify-self: start;
+  }
+}
+
+h1,
+.wortmarke {
+  margin: 0;
+  font-size: 1.9rem;
+  font-weight: bold;
+  letter-spacing: 0.06em;
+  line-height: 1.1;
+}
+
+.wortmarke a {
+  text-decoration: none;
 }
 
 .langname {
+  margin: 0 0 0.3rem;
+  max-width: 26rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.35;
   color: var(--muted);
-  margin: 0 0 0.35rem;
-  font-size: 0.9rem;
 }
 
-.tagline {
-  color: var(--muted);
+/* Die Kennung steht als Verzeichnis im Text und nicht als Zierrat im Stilblatt: Sie
+   lässt sich damit auswählen und vorlesen. „Nichtamtlich“ ist dabei keine Pointe,
+   sondern die Klarstellung, die die amtliche Anmutung nötig macht. */
+.kennung {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 0 0.6rem;
   margin: 0;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--raster);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.kennung dt {
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.kennung dd {
+  margin: 0;
+  font-weight: bold;
+  color: var(--amt);
+  white-space: nowrap;
+}
+
+main {
+  margin-top: 3px;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--raster);
+}
+
+.betreff {
+  margin: 0 0 1.75rem;
+  font-size: 1.05rem;
 }
 
 /* Impressum und Datenschutz. */
+main > h1 {
+  margin-bottom: 1.25rem;
+  font-size: 1.4rem;
+}
+
 h2 {
   margin: 1.75rem 0 0.5rem;
-  font-size: 1.125rem;
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 address {
   font-style: normal;
   margin: 0.5rem 0;
+}
+
+code {
+  font-size: 0.9375em;
 }
 
 /* Ohne Schmuckfarbe trägt allein die Unterstreichung das Klick-Signal. */
@@ -77,44 +179,133 @@ a {
   text-decoration: underline;
 }
 
+/* Der Vorgabe-Umriss verschwindet auf dem hellen Bogen fast; im Amtsrot ist der Halt
+   der Tastatur überall zu sehen. */
+:focus-visible {
+  outline: 2px solid var(--amt);
+  outline-offset: 2px;
+}
+
+/* Der Feldblock. Die Legende sitzt als schwarzer Balken im oberen Rahmen, wie die
+   Abschnittsüberschrift eines Vordrucks. */
+fieldset {
+  counter-reset: feld;
+  margin: 0 0 1.5rem;
+  padding: 1.25rem 1.25rem 0.5rem;
+  border: 1px solid var(--fg);
+  background: var(--kasten);
+}
+
+legend {
+  margin-left: -0.25rem;
+  padding: 0.3rem 0.8rem;
+  background: var(--fg);
+  color: var(--bg);
+  font-size: 0.8rem;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Die Feldziffer entsteht aus dem Zähler und steht im Steg links, damit sie die
+   Beschriftung nicht verschiebt und in jedem Feld an derselben Stelle sitzt. */
 .field {
+  position: relative;
   margin-bottom: 1.25rem;
+  padding: 0.9rem 1rem 0.9rem 3rem;
+  border: 1px solid var(--raster);
+  background: var(--bg);
+  counter-increment: feld;
+}
+
+.field::before {
+  content: counter(feld);
+  position: absolute;
+  top: 0.85rem;
+  left: 0.85rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid var(--amt);
+  color: var(--amt);
+  font-size: 0.8rem;
+  font-weight: bold;
+  line-height: 1.4rem;
+  text-align: center;
 }
 
 label {
   display: block;
   font-weight: bold;
-  margin-bottom: 0.35rem;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.4rem;
 }
 
 .field.checkbox label {
   font-weight: normal;
+  letter-spacing: normal;
+  margin-bottom: 0;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
+.field.checkbox input {
+  accent-color: var(--amt);
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+}
+
 .hint {
-  margin: 0.35rem 0 0;
-  font-size: 0.875rem;
+  margin: 0.4rem 0 0;
+  font-size: 0.8125rem;
   color: var(--muted);
 }
 
 input[type="file"] {
   width: 100%;
-  padding: 0.4rem;
+  padding: 0.35rem;
   border: 1px solid var(--border);
   background: transparent;
   color: inherit;
+  font: inherit;
+  font-size: 0.875rem;
+}
+
+/* Der Dateiwähler ist der zweite Knopf des Vordrucks und trägt deshalb dessen Form,
+   nur in der Umkehrung, damit er dem Absenden nicht den Rang abläuft. */
+input[type="file"]::file-selector-button {
+  margin-right: 0.75rem;
+  padding: 0.3rem 0.9rem;
+  border: 1px solid var(--fg);
+  background: var(--bg);
+  color: var(--fg);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: bold;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+input[type="file"]::file-selector-button:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
+
+.absenden {
+  margin-bottom: 0.5rem;
 }
 
 button {
   font: inherit;
   font-weight: bold;
-  padding: 0.6rem 1.5rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.7rem 1.75rem;
   border: 1px solid var(--fg);
   background: var(--fg);
   color: var(--bg);
+  box-shadow: 3px 3px 0 var(--raster);
   cursor: pointer;
 }
 
@@ -124,27 +315,74 @@ button:hover {
   color: var(--fg);
 }
 
-.noscript {
-  margin: 0 0 2rem;
-  padding: 1rem;
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--warnung);
+/* Gedrückt fährt der Knopf in seinen eigenen Schatten. */
+button:active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+
+/* grayscale() ist an einem grauen Knopf wirkungslos. */
+button[disabled] {
+  opacity: 0.5;
+  cursor: progress;
+}
+
+/* Hinweiskästen und Meldungen teilen einen Zuschnitt, damit erkennbar bleibt, dass sie
+   dasselbe sind: Text am Rande des Vordrucks. Der Balken links zeigt den Zustand an. */
+.kasten,
+.einfuehrung,
+.meldung {
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--raster);
+  border-left: 4px solid var(--raster);
+  background: var(--kasten);
   font-size: 0.875rem;
 }
 
+.kasten {
+  margin: 0 0 1.75rem;
+}
+
+.kasten.warnung {
+  border-left-color: var(--warnung);
+}
+
+.kasten h2 {
+  margin: 0 0 0.5rem;
+  font-size: 0.75rem;
+}
+
+.kasten p {
+  margin: 0;
+}
+
 /* Zugeklappt eine Zeile, damit das Formular oben bleibt; aufgeklappt im Zuschnitt der
-   übrigen Kästen. */
+   übrigen Kästen. Der eigene Marker steht vor dem Wort statt daneben, sonst hinge er
+   außerhalb des Kastenrahmens. */
 .einfuehrung {
   margin: 0 0 1.75rem;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--border);
-  font-size: 0.875rem;
 }
 
 .einfuehrung summary {
   font-weight: bold;
-  text-decoration: underline;
+  letter-spacing: 0.04em;
   cursor: pointer;
+  list-style: none;
+}
+
+.einfuehrung summary::-webkit-details-marker {
+  display: none;
+}
+
+.einfuehrung summary::before {
+  content: "\25B8";
+  display: inline-block;
+  width: 1em;
+  color: var(--amt);
+}
+
+.einfuehrung[open] summary::before {
+  content: "\25BE";
 }
 
 .einfuehrung > :not(summary) {
@@ -157,7 +395,9 @@ button:hover {
 
 .einfuehrung dt {
   font-weight: bold;
-  margin-top: 0.75rem;
+  margin-top: 0.9rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--raster);
 }
 
 .einfuehrung dd {
@@ -172,37 +412,14 @@ button:hover {
 
 .disclaimer {
   margin-top: 2rem;
-  padding: 1rem;
-  border: 1px solid var(--border);
-  font-size: 0.875rem;
   color: var(--muted);
 }
 
-footer {
-  margin-top: 2.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--border);
-  font-size: 0.875rem;
-  color: var(--muted);
-}
-
-footer a {
-  color: var(--muted);
-}
-
-.nebenquelle {
-  font-size: 0.8125rem;
-}
-
-/* Der Balken links zeigt den Zustand an; der Text benennt ihn ohnehin, sodass die
-   Meldung auch ohne Farbe verständlich bleibt. Während der Arbeit steht kein Balken,
-   weil noch nichts feststeht. */
+/* Die Meldung führt ihr Zeichen im Balken mit: Wer die Farbe nicht sieht, liest ✓ oder !
+   Das Zeichen steht im Stilblatt und nicht im Text, weil app.js den Text ersetzt.
+   Während der Arbeit steht weder Balken noch Zeichen, weil noch nichts feststeht. */
 .meldung {
-  margin-top: 1.25rem;
-  padding: 0.75rem 1rem;
-  border: 1px solid var(--border);
-  border-left-width: 4px;
-  border-left-color: var(--border);
+  margin: 1.5rem 0 0;
   font-size: 0.9375rem;
 }
 
@@ -210,8 +427,26 @@ footer a {
   color: var(--muted);
 }
 
+.meldung.fertig,
+.meldung.fehler {
+  position: relative;
+  padding-left: 2.5rem;
+}
+
+.meldung.fertig::before,
+.meldung.fehler::before {
+  position: absolute;
+  left: 1.1rem;
+  font-weight: bold;
+}
+
 .meldung.fertig {
   border-left-color: var(--bestaetigung);
+}
+
+.meldung.fertig::before {
+  content: "\2713";
+  color: var(--bestaetigung);
 }
 
 .meldung.fehler {
@@ -219,8 +454,73 @@ footer a {
   font-weight: bold;
 }
 
-/* grayscale() ist an einem grauen Knopf wirkungslos. */
-button[disabled] {
-  opacity: 0.5;
-  cursor: progress;
+.meldung.fehler::before {
+  content: "!";
+  color: var(--warnung);
+}
+
+/* Der Fußsteg trägt die Pflichtangaben und die Herkunft — links das Verzeichnis, rechts
+   die Quelle, so wie ein Vordruck unten seine Herkunft nennt. */
+footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  margin-top: 2.5rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--fg);
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+footer a {
+  color: var(--muted);
+}
+
+footer nav {
+  max-width: 32rem;
+}
+
+.nebenquelle {
+  white-space: nowrap;
+}
+
+/* Ein Formblatt gehört ausgedruckt: ohne Unterlage, ohne Bogenrand, mit Linien in
+   Schwarz. Der Knopf und das Merkblatt entfallen, weil auf Papier weder gedrückt noch
+   aufgeklappt wird. */
+@media print {
+  :root {
+    --fg: #000;
+    --bg: #fff;
+    --papier: #fff;
+    --muted: #333;
+    --border: #666;
+    --raster: #999;
+    --kasten: #fff;
+    --amt: #000;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    max-width: none;
+    border: none;
+    font-size: 10pt;
+  }
+
+  .einfuehrung,
+  .absenden,
+  .meldung[hidden] {
+    display: none;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  fieldset,
+  .field,
+  .kasten {
+    break-inside: avoid;
+  }
 }

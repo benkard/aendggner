@@ -142,6 +142,77 @@ Nachweis
     „.gitattributes“ nimmt den Prüfbestand von ihm aus.
 
 
+Artikel 7
+Gestaltung der Browserfassung
+
+Die Startseite trug bislang ein schmuckloses Kleid: Antiqua auf Weiß, eine
+Spalte, drei dünn gerahmte Kästen. Das war sauber, aber austauschbar; es sah aus
+wie ein Aufsatz und nicht wie das, was das Erzeugnis ist — eine Stelle, die
+Änderungsbefehle abarbeitet und darüber Rechenschaft ablegt. Die Gestaltung folgt
+fortan dem Vorbild des amtlichen Formblatts.
+
+(1) Der Satzspiegel tritt als Bogen auf einer Unterlage auf: umrandet, auf
+    sechsundvierzig Halbgevierten Breite, auf schmalen Geräten ohne Rand. An die
+    Stelle der Antiqua tritt eine Systemgroteske; Kennungen und Feldbezeichner
+    stehen in gesperrten Versalien.
+
+(2) Das Farbgerüst wird um „Papier“ (Unterlage), „Raster“ (Formularlinien),
+    „Kasten“ (Feldgrund) und „Amt“ ergänzt. Das Amtsrot führt das Auge zu den
+    Kennungen, den Feldziffern und dem Tastaturhalt; die bisherige Bedeutung von
+    Rot und Grün — warnen und bestätigen — bleibt unberührt, und keine Aussage
+    ruht auf der Farbe allein.
+
+(3) Der Kopf der Seiten ist ein Briefkopf: links die ausstellende Stelle mit
+    ihrer Langbezeichnung, rechts die Kennung des Vordrucks als Verzeichnis
+    („Formblatt ÄG-1“, „Vorgang“ oder „Anlage“, „Geltung: nichtamtlich“). Die
+    Kennung steht im Text und nicht im Stilblatt, damit sie sich auswählen und
+    vorlesen lässt; der Zusatz „nichtamtlich“ hält fest, dass die amtliche
+    Anmutung keine amtliche Herkunft behauptet. Darunter läuft die Doppellinie,
+    kräftig in Amtsrot über dünn in Rasterfarbe.
+
+(4) Das Formular wird zum Feldblock: „fieldset“ mit der Legende „Antrag auf
+    Erstellung einer Synopse“ als schwarzem Balken im oberen Rahmen, darin drei
+    gerahmte Felder. Ihre Ziffern entstehen aus einem Zähler des Stilblattes und
+    stehen im Steg links, sodass die Auszeichnung der Felder unangetastet bleibt.
+    Der Dateiwähler trägt über „::file-selector-button“ die Form des Knopfes in
+    der Umkehrung; der Absendeknopf erhält eine Prägekante und fährt beim Drücken
+    in seinen eigenen Schatten.
+
+(5) Der Hinweis für abgeschaltetes JavaScript und der Haftungsausschluss treten
+    als „aside“ mit eigener Überschrift („Hinweis“, „Haftungsausschluss“) auf;
+    ihr Wortlaut bleibt unverändert. Die Meldung führt ihr Zeichen nunmehr im
+    Steg mit — ✓ für die fertige, ! für die fehlgeschlagene Auswertung —, damit
+    der Zustand auch ohne Farbe erkennbar ist. Das Zeichen setzt das Stilblatt,
+    nicht der Text, weil die Textverarbeitung den Text ersetzt.
+
+(6) Neu hinzu treten zwei Dinge, die bisher gänzlich fehlten: eine sichtbare
+    Fokusanzeige für den Tastaturgang und ein Druckbild. Gedruckt entfallen
+    Unterlage, Bogenrand, Merkblatt und Knopf; die Linien stehen in Schwarz.
+
+(7) Das Zeichen der Seite (favicon.svg) übernimmt Rahmen und Schrift des neuen
+    Gerüstes.
+
+
+Artikel 8
+Unberührte Bestandteile
+
+(1) Sämtliche Angriffspunkte der Textverarbeitung bleiben wörtlich erhalten:
+    „#synopse-formular“, „#stamm“, „#aenderung“, „#vollstaendig“, „#meldung“
+    nebst den Zustandsklassen sowie der eine Knopf des Formulars. „app.js“,
+    „worker.js“ und der Java-Teil sind nicht angetastet.
+
+(2) Die von „HtmlRenderer“ erzeugte Synopse behält ihr eigenes Aussehen; ihre
+    Angleichung bleibt einem späteren Zeitpunkt vorbehalten.
+
+(3) Aufgenommen sind ferner die Beschreibungsverweise „aria-describedby“ auf die
+    Erläuterungssätze der Felder und die Ansage „aria-live“ für die Meldung, die
+    ihren Text bislang stumm wechselte.
+
+(4) Die Prüfung nach der REUSE-Spezifikation meldet unverändert
+    einhundertvierundfünfzig von einhundertvierundfünfzig Dateien; dreihundert-
+    fünfundzwanzig Testfälle bestehen fort.
+
+
 ════════════════════════════════════════════════════════════════════════════════
  Fassung vom 22. August 2026,
  zuletzt geändert durch die am 22. August 2026 vorgenommenen Änderungen

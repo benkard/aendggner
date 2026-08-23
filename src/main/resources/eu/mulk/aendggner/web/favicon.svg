@@ -1,11 +1,13 @@
 <!-- SPDX-FileCopyrightText: 2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
      SPDX-License-Identifier: AGPL-3.0-or-later -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="ÄndGgner">
-  <!-- Farben wie in style.css: Papier, Haarlinie, schwarzes Zeichen. Ein Favicon erbt keine
-       CSS-Variablen, deshalb stehen die Werte hier ausgeschrieben. -->
+  <!-- Farben wie in style.css: Papier, Amtsrot als Rahmen des Vordrucks, schwarzes
+       Zeichen. Ein Favicon erbt keine CSS-Variablen, deshalb stehen die Werte hier
+       ausgeschrieben. -->
   <rect width="32" height="32" fill="#fff"/>
-  <rect x="0.75" y="0.75" width="30.5" height="30.5" fill="none" stroke="#bbb"
-        stroke-width="1.5"/>
-  <text x="16" y="17" fill="#111" font-family="Georgia, 'Times New Roman', serif"
-        font-size="22" text-anchor="middle" dominant-baseline="central">§</text>
+  <rect x="1" y="1" width="30" height="30" fill="none" stroke="#8b0f21" stroke-width="2"/>
+  <text x="16" y="17.5" fill="#111"
+        font-family="system-ui, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif"
+        font-size="21" font-weight="bold" text-anchor="middle"
+        dominant-baseline="central">§</text>
 </svg>
