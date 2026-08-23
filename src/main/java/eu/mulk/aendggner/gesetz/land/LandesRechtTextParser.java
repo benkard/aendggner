@@ -124,6 +124,17 @@ final class LandesRechtTextParser {
               // findet entsprechend Anwendung.“) nicht fälschlich als Normkopf „§ 7“ gelesen.
               + "((?:\\p{Lu}|\\().*[^.]))?\\s*$");
 
+  /**
+   * Der Kopf einer Nummer innerhalb einer Anlage („Nummer 6“). Die Nummern eines
+   * Zuständigkeitskatalogs sind keine Aufzählungsglieder, sondern eigene Einheiten mit eigener
+   * Absatzzählung — das Landesrechtsportal führt jede als eigene Einzelnorm, und die
+   * Änderungsbefehle sprechen sie so an („Nach Nummer 6 Absatz 2 wird folgender Absatz 2a
+   * eingefügt“). Sie werden deshalb als eigene Normen geführt, deren Bezeichnung die Anlage
+   * voranstellt: „Anlage Nummer 6“.
+   */
+  private static final Pattern ANLAGEN_NUMMER_KOPF =
+      Pattern.compile("^(?:Nummer|Nr\\.)\\s+(\\d+[a-z]?)\\s*$");
+
   private static final Pattern WEGGEFALLEN_TITEL =
       Pattern.compile("^\\((?:aufgehoben|weggefallen)\\)$");
 
@@ -177,6 +188,7 @@ final class LandesRechtTextParser {
     // Überschriften („Erster Abschnitt“, „Nummer 6“) gliedern nicht das Gesetz, und ein Paragraph,
     // der in ihnen zitiert wird, eröffnet keine Norm. Nur eine weitere Anlage tut das.
     boolean imAnlagenteil = false;
+    String anlagenEnbez = null;
 
     String normEnbez = null;
     String normTitel = null;
@@ -214,8 +226,16 @@ final class LandesRechtTextParser {
               && normKopf.matches()
               && istNeuerNormKopf(normKopf.group(2), letzteNormNummer);
       boolean neueAnlage = zeile != null && anlagenKopf.matches();
+      var anlagenNummer =
+          zeile != null && imAnlagenteil ? ANLAGEN_NUMMER_KOPF.matcher(zeile) : null;
+      boolean neueAnlagenNummer = anlagenNummer != null && anlagenNummer.matches();
 
-      if (zeile == null || uebersicht || gliederungsZeile || neueNorm || neueAnlage) {
+      if (zeile == null
+          || uebersicht
+          || gliederungsZeile
+          || neueNorm
+          || neueAnlage
+          || neueAnlagenNummer) {
         // Laufende Norm abschließen.
         if (normEnbez != null) {
           normen.add(baueNorm(normEnbez, normTitel, aktuelleGliederung, normZeilen));
@@ -261,12 +281,19 @@ final class LandesRechtTextParser {
           gliederungen.add(aktuelleGliederung);
         } else if (neueAnlage) {
           imAnlagenteil = true;
-          normEnbez =
+          anlagenEnbez =
               anlagenKopf.group(2) == null
                   ? anlagenKopf.group(1)
                   : anlagenKopf.group(1) + " " + anlagenKopf.group(2);
+          normEnbez = anlagenEnbez;
           normTitel = null;
           aktuelleGliederung = null;
+        } else if (neueAnlagenNummer) {
+          // „Anlage Nummer 6“ — die Anlage selbst bleibt als Norm vor ihnen stehen; trägt sie
+          // keinen eigenen Wortlaut, so ist sie eben leer.
+          normEnbez =
+              (anlagenEnbez != null ? anlagenEnbez + " " : "") + "Nummer " + anlagenNummer.group(1);
+          normTitel = null;
         } else if (neueNorm) {
           normEnbez = normKopf.group(1) + " " + normKopf.group(2);
           normTitel = normKopf.group(3) != null ? normKopf.group(3).strip() : null;

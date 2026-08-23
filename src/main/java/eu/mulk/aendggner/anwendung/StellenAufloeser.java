@@ -49,6 +49,20 @@ final class StellenAufloeser {
       enbez = stelle.paragraph().get().enbez();
     } else if (stelle.anlagenEnbez().isPresent()) {
       enbez = stelle.anlagenEnbez().get();
+      // Die Nummern einer Anlage können eigene Einheiten mit eigener Absatzzählung sein — so führt
+      // sie das Landesrechtsportal, und so sprechen die Befehle sie an („Nach Nummer 6 Absatz 2
+      // wird folgender Absatz 2a eingefügt“). Trägt das Gesetz eine solche Norm, ist sie gemeint;
+      // die Nummer ist damit verbraucht und wird nicht zusätzlich als Marke im Text gesucht.
+      // Fehlt sie, bleibt es beim bisherigen Weg (im gii-XML stehen die Nummern einer Anlage als
+      // Aufzählungsmarken in deren Wortlaut, etwa in Anlage 8 des Gebäudeenergiegesetzes).
+      var nummer = stelle.nummer();
+      if (nummer.isPresent()) {
+        var alsNorm = enbez + " Nummer " + nummer.get().nummer();
+        if (normIndex(gesetz, alsNorm) >= 0) {
+          enbez = alsNorm;
+          stelle = stelle.ohne(nummer.get());
+        }
+      }
     } else {
       return new Ergebnis.NichtGefunden(
           "Stelle nennt keinen Paragraphen: " + stelle.anzeigeText(),

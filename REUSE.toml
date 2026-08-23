@@ -191,6 +191,8 @@ SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
 [[annotations]]
 path = [
   "src/test/resources/sampledata/BayJG/BayJG-alt.txt",
+  "src/test/resources/sampledata/Berlin/ASOG-Bln-alt.txt",
+  "src/test/resources/sampledata/Berlin/ASOG-Bln-neu.txt",
   "src/test/resources/sampledata/Berlin/LAF-ErrG-alt.txt",
   "src/test/resources/sampledata/Berlin/LAF-ErrG-neu.txt",
   "src/test/resources/sampledata/Hessen/StVRZustV-alt.txt",

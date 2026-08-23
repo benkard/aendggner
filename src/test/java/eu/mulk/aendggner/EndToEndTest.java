@@ -17,6 +17,7 @@ import eu.mulk.aendggner.aenderung.parse.SuperskriptModus;
 import eu.mulk.aendggner.aenderung.parse.TextBereiniger;
 import eu.mulk.aendggner.aenderung.parse.ZitatExtraktor;
 import eu.mulk.aendggner.anwendung.BefehlAnwender;
+import eu.mulk.aendggner.gesetz.Absatz;
 import eu.mulk.aendggner.gesetz.Gesetz;
 import eu.mulk.aendggner.gesetz.gii.GiiXmlLoader;
 import eu.mulk.aendggner.synopse.HtmlRenderer;
@@ -940,8 +941,13 @@ class EndToEndTest {
     // Artikel 1 ändert die unnummerierte, nach ihrer Vorschrift benannte Anlage („Die Anlage zu
     // § 2 Absatz 4 Satz 1 wird wie folgt geändert“). Der Zusatz benennt die Anlage nur — er darf
     // nicht als Ziel „§ 2“ gelesen werden; die Punkte erben „Anlage“ als Kontext.
-    var asog =
-        new Gesetz("ASOG Bln", "Allgemeines Sicherheits- und Ordnungsgesetz", null, List.of());
+    var altAsog = SAMPLEDATA.resolve("Berlin/ASOG-Bln-alt.txt");
+    assumeTrue(Files.exists(altAsog), "ASOG-Stammfassung fehlt");
+    var asog = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(altAsog);
+    // 129 Paragraphen, die Anlage und ihre 40 Nummern — letztere sind eigene Normen mit eigener
+    // Absatzzählung, wie das Landesrechtsportal sie führt.
+    assertThat(asog.normen()).hasSize(171);
+    assertThat(asog.norm("Anlage Nummer 23")).isPresent();
     var artikel1 = new AenderungsgesetzParser().parse(text, asog, null);
     assertThat(artikel1.artikel()).containsExactly("1");
     assertThat(artikel1.befehle())
@@ -976,6 +982,68 @@ class EndToEndTest {
 
     // Artikel 2 wird vollständig angewandt und gleicht danach der amtlichen Nachfassung.
     pruefeGegenNachfassung(laf, ergebnis, "Berlin/LAF-ErrG-neu.txt");
+
+    // Artikel 1: fünf der sechs Befehle werden angewandt.
+    var anwendung = BefehlAnwender.anwenden(asog, artikel1.befehle());
+    var manuellPfade =
+        anwendung.protokoll().stream()
+            .filter(x -> x.status() == BefehlAnwender.Status.MANUELL_PRUEFEN)
+            .map(x -> x.befehl().provenienz().gliederungsPfad())
+            .toList();
+    // Einziger Rest, und er benennt eine Grenze des Klartextformats: „In Absatz 4a wird der Punkt
+    // am Ende durch ein Semikolon ersetzt.“ Auf den Absatz 4a folgt der Zwischentitel „Aus dem
+    // Bereich Verkehr:“, der keine eigene Absatzbezeichnung trägt und deshalb dem vorangehenden
+    // Absatz zugeschlagen wird. Dessen Text endet damit nicht auf den Punkt, den der Befehl meint.
+    assertThat(manuellPfade).containsExactly("2. b) aa)");
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(5);
+
+    // Die Nummer 23 der Anlage trägt danach die Absatzfolge der amtlichen Nachfassung: Der neue
+    // Absatz 5 ist ein Absatz geworden (nicht eine Zeile im Absatz 4a), und die bisherigen
+    // Absätze 5 bis 9 sind zu 6 bis 10 aufgerückt.
+    var nummer23 = anwendung.neu().norm("Anlage Nummer 23").orElseThrow();
+    assertThat(nummer23.absaetze())
+        .extracting(Absatz::nummer)
+        .containsExactly(null, "1", "2", "3", "4", "4a", "5", "6", "7", "8", "9", "10");
+
+    // Norm für Norm gegen die amtliche Nachfassung vom 12. Juni 2026. Es bleiben genau zwei
+    // benannte Abweichungen — beide nicht in der Anwendung begründet:
+    var sollAsog = SAMPLEDATA.resolve("Berlin/ASOG-Bln-neu.txt");
+    assumeTrue(Files.exists(sollAsog), "ASOG-Nachfassung fehlt");
+    var soll = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(sollAsog);
+    var abweichend = new java.util.ArrayList<String>();
+    for (var normSoll : soll.normen()) {
+      var normIst = anwendung.neu().norm(normSoll.enbez()).orElseThrow();
+      if (!normIst
+          .gesamtText()
+          .replaceAll("\\s+", " ")
+          .strip()
+          .equals(normSoll.gesamtText().replaceAll("\\s+", " ").strip())) {
+        abweichend.add(normSoll.enbez());
+      }
+    }
+    // Drei benannte Abweichungen, keine davon in der Anwendung begründet:
+    //
+    // § 67 — Das Portal setzt in der neuen Fassung amtliche Satznummern („(2) ¹Gegen einen …“);
+    //   das Gesetzblatt, aus dem der Wortlaut stammt, setzt keine.
+    // Anlage Nummer 23 — der oben benannte Rest: dort steht der Punkt, wo die Nachfassung ein
+    //   Semikolon führt.
+    // Anlage Nummer 31 — das Zitat läuft im Gesetzblatt über einen Seitenwechsel, und der
+    //   ganzseitenbreite Titelblock des Änderungsgesetzes steht im Inhaltsstrom mitten darin
+    //   („… zur Sicherung des Be-“ / Titelblock / „triebs von Unterkünften …“). Das ist die
+    //   bekannte Berliner Layout-Frage, die erst eine geometrische Lesereihenfolge löst; sie
+    //   betrifft die Extraktion, nicht die Anwendung.
+    assertThat(abweichend).containsExactly("§ 67", "Anlage Nummer 23", "Anlage Nummer 31");
+    assertThat(
+            anwendung
+                .neu()
+                .norm("Anlage Nummer 31")
+                .orElseThrow()
+                .gesamtText()
+                .replaceAll("\\s+", " "))
+        .as("der Titelblock steht im Zitat — Beleg der offenen Layout-Frage")
+        .contains("Gesetz zur Änderung des Allgemeinen Sicherheits- und Ordnungsgesetzes");
+    assertThat(anwendung.neu().norm("§ 67").orElseThrow().gesamtText())
+        .contains("Gegen einen straßenverkehrsrechtlichen Verwaltungsakt");
   }
 
   /**

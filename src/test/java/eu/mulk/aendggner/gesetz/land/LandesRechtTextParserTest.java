@@ -4,6 +4,7 @@ package eu.mulk.aendggner.gesetz.land;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import eu.mulk.aendggner.gesetz.Absatz;
 import eu.mulk.aendggner.gesetz.Gliederung;
 import org.junit.jupiter.api.Test;
 
@@ -298,5 +299,41 @@ class LandesRechtTextParserTest {
         .contains("Erster Abschnitt  Aufgaben der Behörden")
         .contains("§ 1 bleibt unberührt");
     assertThat(gesetz.norm("Anlage 2").orElseThrow().gesamtText()).contains("Das Muster");
+  }
+
+  /**
+   * Trägt eine Anlage Nummern als eigene Einheiten — so der Zuständigkeitskatalog des Berliner ASOG
+   * —, so ist jede eine eigene Norm mit eigener Absatzzählung. Ihre Bezeichnung stellt die Anlage
+   * voran, damit sie im Gesetz eindeutig bleibt: „Anlage Nummer 6“.
+   */
+  @Test
+  void nummernEinerAnlageSindEigeneNormen() {
+    var gesetz =
+        LandesRechtTextParser.parse(
+            """
+            Beispielgesetz
+            (BeispG)
+            Vom 1. Januar 2020
+            § 1  Zweck
+            (1) Dieses Gesetz dient der Erprobung.
+            Anlage
+            (zu § 1 Absatz 1)
+            Nummer 6
+            Bezirksamt
+            (1) Die erste Aufgabe.
+            (2) Die zweite Aufgabe.
+            Nummer 23
+            Polizeipräsident
+            (1) Die dritte Aufgabe.
+            """);
+
+    assertThat(gesetz.normen())
+        .extracting(eu.mulk.aendggner.gesetz.Norm::enbez)
+        .containsExactly("§ 1", "Anlage", "Anlage Nummer 6", "Anlage Nummer 23");
+    var nummer6 = gesetz.norm("Anlage Nummer 6").orElseThrow();
+    assertThat(nummer6.absaetze()).extracting(Absatz::nummer).containsExactly(null, "1", "2");
+    // Der Vorspann der Anlage bleibt bei ihr; die Nummern nehmen ihn nicht mit.
+    assertThat(gesetz.norm("Anlage").orElseThrow().gesamtText()).contains("(zu § 1 Absatz 1)");
+    assertThat(nummer6.gesamtText()).contains("Bezirksamt").doesNotContain("zu § 1 Absatz 1");
   }
 }

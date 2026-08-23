@@ -12,6 +12,9 @@ Beispieldaten Berlin — Herkunft und Aufbereitung
    LAF-ErrG-alt.txt  Gesetz zur Errichtung eines Landesamtes für Flüchtlingsangelegenheiten
                      und Unterbringung vom 14. März 2016, Gültigkeit 16.04.2026–11.06.2026
    LAF-ErrG-neu.txt  dasselbe ab 12.06.2026, allein als Prüfmaßstab
+   ASOG-Bln-alt.txt  Allgemeines Sicherheits- und Ordnungsgesetz in der Fassung vom
+                     11. Oktober 2006, Gültigkeit 16.04.2026–11.06.2026 (171 Normen)
+   ASOG-Bln-neu.txt  dasselbe ab 12.06.2026, allein als Prüfmaßstab
 
 Bezugsweg
 ---------
@@ -24,27 +27,51 @@ Dokumentkennungen und Stichtage:
 
 Rechtsstellung: amtliche Werke nach § 5 UrhG; im Übrigen wie in `Hessen/SOURCES` dargelegt.
 
-Das ASOG ist nicht beigelegt — warum
-------------------------------------
+Die Nummern der Anlage — wie sie geführt werden
+----------------------------------------------
 Artikel 1 des Änderungsgesetzes ändert zu fünf Sechsteln die *Anlage* des ASOG
 (Zuständigkeitskatalog Ordnungsaufgaben), und deren Einheiten sind nicht wie sonst als
-Aufzählungsmarken gesetzt, sondern als *Überschriften*: „Nummer 6“, „Nummer 23“, „Nummer 31“,
-jede im Portal eine eigene Einzelnorm. Der Stellenauflöser sucht dagegen eine Marke „6.“ im
-Text der Anlage — und findet dort vielerlei, denn gewöhnliche Aufzählungen zählen ebenso.
-Belegt ist das: Werden die Überschriften versuchsweise in Marken umgeschrieben, steigt die
-Zahl der angewandten Befehle von zwei auf drei; mehrdeutig bleibt der Rest.
+Aufzählungsmarken gesetzt, sondern als Einheiten mit eigener Absatzzählung: „Nummer 6“,
+„Nummer 23“, „Nummer 31“, jede im Portal eine eigene Einzelnorm. Ebenso werden sie jetzt
+geführt — als eigene Normen, deren Bezeichnung die Anlage voranstellt: „Anlage Nummer 23“.
+Damit trägt die vorhandene Absatz-Maschinerie die Befehle unverändert („Nach Nummer 6
+Absatz 2 wird folgender Absatz 2a eingefügt“). Zuvor suchte der Stellenauflöser eine Marke
+„6.“ im Text der Anlage und fand dort vielerlei; von sechs Befehlen wurden zwei angewandt,
+heute sind es fünf.
 
-Das ist keine Extraktions-, sondern eine Modellfrage: Die Nummern einer Anlage brauchen einen
-eigenen Rang zwischen Norm und Absatz. Solange er fehlt, brächte die Beilage von zweimal
-380 kB Stammfassung keinen Prüfgewinn. Der Bezugsweg oben führt in zwei Abrufen wieder
-dorthin.
+Der eine Rest ist eine Grenze des Klartextformats, keine Schwäche der Anwendung: Auf den
+Absatz 4a der Nummer 23 folgt der Zwischentitel „Aus dem Bereich Verkehr:“, der keine eigene
+Absatzbezeichnung trägt und deshalb dem vorangehenden Absatz zugeschlagen wird. Der Befehl
+„In Absatz 4a wird der Punkt am Ende durch ein Semikolon ersetzt“ findet den Punkt daher
+nicht am Ende und bleibt liegen.
 
-Ein zweiter Befund für dieselbe Arbeit: Das Berliner Portal setzt die amtlichen Satznummern
-nicht als Superskripte, sondern als *angeklebte Ziffern* („(2) 1Gegen einen …“). Der
-kanonische Klartext verlangt Superskripte; die Umschrift gehört in die Aufbereitung, sonst
-weicht die angewandte Fassung von der amtlichen Nachfassung schon in der Zählung ab.
+Ein zweiter Befund, erledigt: Das Berliner Portal setzt die amtlichen Satznummern nicht als
+Superskripte, sondern als *angeklebte Ziffern* („(2) 1Gegen einen …“). Der kanonische
+Klartext verlangt Superskripte; die Umschrift geschieht in der Aufbereitung.
 
 Aufbereitung zum kanonischen Klartext
 -------------------------------------
 Maschinell wie in Hessen. Das LAF-Errichtungsgesetz führt kein Inhaltsverzeichnis als eigene
 Norm; der Wortlaut beginnt deshalb beim ersten Normkopf, der für sich auf einer Zeile steht.
+
+Für das ASOG im einzelnen (Skript nicht im Repo, `berlin2klartext.py` im Arbeitsverzeichnis):
+
+  1. Vorspann samt amtlicher Inhaltsübersicht bis einschließlich der Marke
+     „zur Einzelansicht Inhaltsverzeichnis“ abschneiden; die gleichlautenden Rücksprungmarken
+     jeder Norm entfallen.
+  2. Geschützte Leerzeichen zu gewöhnlichen; NFC.
+  3. Normkopf und Überschrift auf eine Zeile („§ 1  Aufgaben der …“), ebenso die Gliederung
+     („Erster Abschnitt  Aufgaben, Zuständigkeiten …“). Der Kopf einer Anlagen-Nummer bleibt
+     für sich; was ihm folgt, ist ihr Wortlaut.
+  4. Aufzählungsmarken, die im Portalsatz allein auf der Zeile stehen, mit dem Folgetext
+     vereinigen und einrücken.
+  5. Angeklebte Satznummern in Superskripte umschreiben.
+
+Der Klammerzusatz des Langtitels muss auf einer *eigenen* Zeile stehen — sonst bleiben
+Kurztitel und Abkürzung ungetrennt, der Einleitungssatz findet sein Ziel nicht und es wird
+kein Artikel gewählt.
+
+Beschaffung im Browser: Der Auszug über `get_page_text` ist bei 50000 Zeichen gekappt und
+verschluckt überdies einzelne Leerzeichen. Beides umgeht, wer den Text in Stücken von 33000
+Zeichen *base64-kodiert* in die Seite schreibt und wieder ausliest; so kam der Wortlaut
+zeichengenau herüber (380153 bzw. 381880 Zeichen).

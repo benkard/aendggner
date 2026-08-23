@@ -474,7 +474,19 @@ public final class BefehlAnwender {
           case BUCHSTABE -> new Stelle.BuchstabeNr(bezeichnung);
         };
     var komponenten = new ArrayList<>(s.stelle().komponenten());
+    // Die letzte Komponente weicht, wenn sie gleich fein oder feiner ist als die neue („In § 5
+    // Absatz 2 wird folgender Absatz 3 eingefügt“ meint § 5 Absatz 3, nicht § 5 Absatz 2 Absatz 3).
+    // Die Nummer einer Anlage weicht nicht: Sie gehört zur Bezeichnung der Norm und nicht zu ihrem
+    // Inneren, und ohne sie träfe der neue Absatz eine andere Norm als der Befehl.
+    boolean anlagenNummer =
+        s.stelle().anlagenEnbez().isPresent()
+            && !komponenten.isEmpty()
+            && s.stelle()
+                .nummer()
+                .filter(komponenten.get(komponenten.size() - 1)::equals)
+                .isPresent();
     if (!komponenten.isEmpty()
+        && !anlagenNummer
         && rang(komponenten.get(komponenten.size() - 1)) >= rang(komponente)) {
       komponenten.remove(komponenten.size() - 1);
     }
@@ -965,7 +977,7 @@ public final class BefehlAnwender {
       return angewandt(befehl, norm.enbez());
     }
 
-    if (nurNorm(stelle)) {
+    if (nurNorm(normen, stelle)) {
       var aufloesung = loeseNormAuf(normen, stelle);
       if (aufloesung.fehler() != null) {
         return manuell(befehl, aufloesung.grund(), aufloesung.fehler());
@@ -1338,8 +1350,95 @@ public final class BefehlAnwender {
    * der Befehl nennt, ist dabei ohne Belang (in einer Anlage stehen Absätze und Nummern als Zeilen
    * eines Textes).
    */
+  /**
+   * „Vor den Wörtern ‚Aus dem Bereich Verkehr:‘ wird folgender Absatz 5 eingefügt“ — ein
+   * <em>Absatz</em>, der an einem Wortlaut ausgerichtet ist. Er wird ein Absatz und keine Zeile im
+   * Nachbarabsatz: Der tragende Absatz wird an der Marke geteilt, und was hinter ihr stand, setzt
+   * den neuen Absatz fort — so steht es hernach auch in der amtlichen Nachfassung, denn ein
+   * Zwischentitel ohne eigene Absatzbezeichnung schließt sich stets dem vorangehenden an.
+   *
+   * <p>Steht die Marke am Anfang des Absatzes, so wird nicht geteilt: Der neue Absatz tritt dann
+   * schlicht vor ihn.
+   */
+  private static AngewandteAenderung wendeAbsatzWortankerEinfuegungAn(
+      List<Norm> normen, StrukturEinfuegung befehl, String woerter) {
+    var aufloesung = loeseNormAuf(normen, befehl.stelle());
+    if (aufloesung.fehler() != null) {
+      return manuell(befehl, aufloesung.grund(), aufloesung.fehler());
+    }
+    var norm = normen.get(aufloesung.normIndex());
+    var absaetze = new ArrayList<>(norm.absaetze());
+    int treffer = -1;
+    for (int i = 0; i < absaetze.size(); i++) {
+      int anzahl = zaehleVorkommen(absaetze.get(i).text(), woerter);
+      if (anzahl > 1) {
+        return manuell(
+            befehl, Grund.MEHRDEUTIG, "„" + woerter + "“ kommt mehrfach vor; mehrdeutig.");
+      }
+      if (anzahl == 1) {
+        if (treffer >= 0) {
+          return manuell(
+              befehl,
+              Grund.MEHRDEUTIG,
+              "„" + woerter + "“ kommt in mehreren Absätzen vor; mehrdeutig.");
+        }
+        treffer = i;
+      }
+    }
+    if (treffer < 0) {
+      return manuell(
+          befehl, Grund.ZIELTEXT_FEHLT, "„" + woerter + "“ kommt im Zieltext nicht vor.");
+    }
+    var alt = absaetze.get(treffer);
+    int marke = findeVorkommen(alt.text(), woerter, 0);
+    int schnitt =
+        befehl.vorher()
+            ? alt.text().lastIndexOf('\n', marke) + 1
+            : naechsterZeilenAnfang(alt.text(), marke);
+    var vorn = alt.text().substring(0, schnitt).stripTrailing();
+    var hinten = alt.text().substring(schnitt).strip();
+
+    var neue = parseAbsaetze(befehl.text());
+    if (neue.isEmpty()) {
+      return manuell(befehl, Grund.ZITAT_UNBRAUCHBAR, "Im Zitat wurde kein Absatz erkannt.");
+    }
+    var erster = neue.get(0);
+    var nummer = erster.nummer() != null ? erster.nummer() : befehl.bezeichnung();
+    var text = hinten.isEmpty() ? erster.text() : erster.text() + "\n" + hinten;
+
+    if (vorn.isEmpty()) {
+      // Die Marke eröffnet den Absatz: nichts zu teilen, der neue tritt davor.
+      absaetze.add(treffer, new Absatz(nummer, erster.text()));
+    } else {
+      absaetze.set(treffer, alt.mitText(vorn));
+      absaetze.add(treffer + 1, new Absatz(nummer, text));
+    }
+    for (int k = 1; k < neue.size(); k++) {
+      absaetze.add(treffer + 1 + k, neue.get(k));
+    }
+    normen.set(aufloesung.normIndex(), norm.mitAbsaetzen(absaetze));
+    return angewandt(befehl, norm.enbez());
+  }
+
+  private static int naechsterZeilenAnfang(String text, int position) {
+    int umbruch = text.indexOf('\n', position);
+    return umbruch < 0 ? text.length() : umbruch + 1;
+  }
+
   private static AngewandteAenderung wendeWortankerEinfuegungAn(
       List<Norm> normen, StrukturEinfuegung befehl, WortAnker anker) {
+    // Ein ganzer Absatz wird ein Absatz, keine Zeile in einem anderen.
+    if (befehl.ebene() == Ebene.ABSATZ) {
+      var woerter =
+          switch (anker) {
+            case WortAnker.NachWoertern nach -> nach.woerter();
+            case WortAnker.VorWoertern vor -> vor.woerter();
+            default -> null;
+          };
+      if (woerter != null) {
+        return wendeAbsatzWortankerEinfuegungAn(normen, befehl, woerter);
+      }
+    }
     return bearbeiteText(
         normen,
         befehl,
@@ -1505,7 +1604,7 @@ public final class BefehlAnwender {
           befehl, Grund.STELLE_NICHT_AUFLOESBAR, "Absatz (" + nummer + ") nicht gefunden.");
     }
 
-    if (nurNorm(stelle)) {
+    if (nurNorm(normen, stelle)) {
       var aufloesung = loeseNormAuf(normen, stelle);
       if (aufloesung.fehler() != null) {
         return manuell(befehl, aufloesung.grund(), aufloesung.fehler());
@@ -2114,6 +2213,14 @@ public final class BefehlAnwender {
       enbez = stelle.paragraph().get().enbez();
     } else if (stelle.anlagenEnbez().isPresent()) {
       enbez = stelle.anlagenEnbez().get();
+      // Wie im StellenAufloeser: Die Nummer einer Anlage kann eine eigene Norm sein.
+      var nummer = stelle.nummer();
+      if (nummer.isPresent()
+          && StellenAufloeser.normIndex(
+                  gesetzAus(normen), enbez + " Nummer " + nummer.get().nummer())
+              >= 0) {
+        enbez = enbez + " Nummer " + nummer.get().nummer();
+      }
     } else {
       return new NormAufloesung(
           -1,
@@ -2134,20 +2241,37 @@ public final class BefehlAnwender {
   }
 
   /** Wahr, wenn die Stelle als Ganzes eine Norm meint: ein einzelner § oder ein Anhang/Anlage. */
-  private static boolean nurNorm(Stelle stelle) {
-    return stelle.komponenten().size() == 1
+  private static boolean nurNorm(List<Norm> normen, Stelle stelle) {
+    if (stelle.komponenten().size() == 1
         && (stelle.komponenten().get(0) instanceof Stelle.Paragraph
-            || stelle.anlagenEnbez().isPresent());
+            || stelle.anlagenEnbez().isPresent())) {
+      return true;
+    }
+    // „Nummer 31 wird wie folgt gefasst“ innerhalb einer Anlage: Trägt das Gesetz die Nummer als
+    // eigene Norm, so bezeichnet die Stelle diese ganz und nicht einen Teil der Anlage.
+    return stelle.komponenten().size() == 2
+        && stelle.anlagenEnbez().isPresent()
+        && stelle.nummer().isPresent()
+        && StellenAufloeser.normIndex(
+                gesetzAus(normen),
+                stelle.anlagenEnbez().get() + " Nummer " + stelle.nummer().get().nummer())
+            >= 0;
   }
 
+  /**
+   * Die feinste Komponente der Stelle ist ein Absatz — es geht also um den Absatz selbst und nicht
+   * um einen Satz, eine Nummer oder einen Buchstaben in ihm.
+   *
+   * <p>Maßgeblich ist die <em>letzte</em> Komponente, nicht das bloße Vorkommen einer feineren: Die
+   * Nummer einer Anlage steht vor der Absatzangabe und gehört zur Bezeichnung der Norm („Anlage
+   * Nummer 23 Absatz 9“), nicht zu ihrem Inneren. Wer sie mitzählte, hielte die Umnummerierung
+   * eines solchen Absatzes für die einer Aufzählungseinheit und tauschte eine Marke „23.“ im Text —
+   * die dort nicht steht. Der Befehl galt dann als angewandt und bewirkte nichts.
+   */
   private static boolean feinsteIstAbsatz(Stelle stelle) {
-    return stelle.komponenten().stream()
-        .noneMatch(
-            k ->
-                k instanceof Stelle.SatzNr
-                    || k instanceof Stelle.HalbsatzNr
-                    || k instanceof Stelle.NummerNr
-                    || k instanceof Stelle.BuchstabeNr);
+    var komponenten = stelle.komponenten();
+    return !komponenten.isEmpty()
+        && komponenten.get(komponenten.size() - 1) instanceof Stelle.AbsatzNr;
   }
 
   /**
@@ -2334,6 +2458,17 @@ public final class BefehlAnwender {
   private static Norm parseNorm(String zitat, String enbez, Norm vorlage) {
     var text = zitat.strip();
     String titel = vorlage.titel();
+
+    // Das Zitat einer neugefassten Anlagen-Nummer wiederholt deren Bezeichnung als erste Zeile
+    // („Nummer 31“ / „Landesamt …“ / „Zu den Ordnungsaufgaben …“). Sie gehört nicht in den
+    // Wortlaut — ebenso wenig, wie die Bezeichnung eines Paragraphen in seinen Text gehört.
+    var eigeneBezeichnung = enbez.replaceFirst("^.*?\\b(Nummer \\d+[a-z]?)$", "$1");
+    if (!eigeneBezeichnung.equals(enbez)) {
+      var erste = text.lines().findFirst().orElse("").strip();
+      if (erste.equals(eigeneBezeichnung)) {
+        text = text.substring(text.indexOf('\n') + 1).strip();
+      }
+    }
 
     var absatzStart = ABSATZ_MARKER.matcher(text);
     int erster = absatzStart.find() ? absatzStart.start() : -1;

@@ -96,6 +96,19 @@ public record Stelle(List<Komponente> komponenten) {
         .findFirst();
   }
 
+  /** Die erste Nummernangabe („Nummer 6“), falls vorhanden. */
+  public Optional<NummerNr> nummer() {
+    return komponenten.stream()
+        .filter(NummerNr.class::isInstance)
+        .map(NummerNr.class::cast)
+        .findFirst();
+  }
+
+  /** Dieselbe Stelle ohne die genannte Komponente — für ein Glied, das anderswo aufging. */
+  public Stelle ohne(Komponente komponente) {
+    return new Stelle(komponenten.stream().filter(k -> !k.equals(komponente)).toList());
+  }
+
   public Optional<AbsatzNr> absatz() {
     return komponenten.stream()
         .filter(AbsatzNr.class::isInstance)

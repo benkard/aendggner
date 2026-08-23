@@ -819,6 +819,70 @@ des Anfügens ganzer Paragraphen samt der Begründung bei fehlendem Normkopf, di
 Prüfung der Bündelung im Abschnitt „Manuell prüfen“ und die Prüfung, dass die
 Altersrüge beim zeitrichtigen Stamm unterbleibt und beim heutigen einmal ergeht.
 
+
+Artikel 36
+Die Nummern einer Anlage
+
+(1) Trägt eine Anlage Nummern als eigene Einheiten — so der Zuständigkeitskatalog
+    des Berliner Allgemeinen Sicherheits- und Ordnungsgesetzes —, so ist jede eine
+    eigene Norm mit eigener Absatzzählung. Ihre Bezeichnung stellt die Anlage
+    voran: „Anlage Nummer 23“. Ebenso führt sie das Landesrechtsportal, und ebenso
+    sprechen die Änderungsbefehle sie an („Nach Nummer 6 Absatz 2 wird folgender
+    Absatz 2a eingefügt“).
+
+(2) Der Klartext-Parser eröffnet an einem solchen Nummernkopf eine Norm; der
+    Stellenauflöser und die Normauflösung des Befehlsanwenders setzen die
+    Bezeichnung zusammen und verbrauchen die Nummer damit. Trägt das Gesetz keine
+    solche Norm, bleibt es beim bisherigen Weg — im gii-XML des Bundes stehen die
+    Nummern einer Anlage als Aufzählungsmarken in deren Wortlaut.
+
+(3) Die Neufassung einer ganzen Anlagen-Nummer wird als Neufassung der Norm
+    behandelt; die im Zitat wiederholte Bezeichnung („Nummer 31“) gehört nicht in
+    den Wortlaut.
+
+
+Artikel 37
+Drei Mängel, die dabei ans Licht kamen
+
+(1) Ob die feinste Komponente einer Fundstelle ein Absatz ist, entscheidet fortan
+    die letzte Komponente und nicht das bloße Vorkommen einer feineren. Die Nummer
+    einer Anlage steht vor der Absatzangabe und gehört zur Bezeichnung der Norm;
+    wer sie mitzählte, hielt die Umnummerierung eines solchen Absatzes für die
+    einer Aufzählungseinheit und tauschte eine Marke, die dort nicht steht. Der
+    Befehl galt als angewandt und bewirkte nichts.
+
+(2) Ein Absatz, der an einem Wortlaut ausgerichtet eingefügt wird („Vor den
+    Wörtern … wird folgender Absatz 5 eingefügt“), wird ein Absatz und keine Zeile
+    im Nachbarabsatz. Der tragende Absatz wird an der Marke geteilt; was hinter ihr
+    stand, setzt den neuen Absatz fort. Steht die Marke am Anfang des Absatzes, so
+    tritt der neue schlicht vor ihn.
+
+(3) Die Bezeichnung eines so eingefügten Absatzes behält die Nummer der Anlage.
+    Ohne sie sah die Schritt-Ordnung nicht, dass eine Umnummerierung ihm die
+    Bezeichnung erst räumt, und die Einfügung lief zu früh.
+
+
+Artikel 38
+Der Berliner Belegfall, vollständig
+
+(1) Aufgenommen werden die konsolidierten Fassungen des Allgemeinen Sicherheits-
+    und Ordnungsgesetzes in der Gültigkeit vom 16. April bis 11. Juni 2026 nebst
+    der Nachfassung als Prüfmaßstab (je 171 Normen).
+
+(2) Von den sechs Befehlen des Artikels 1 werden fünf angewandt; zuvor waren es
+    zwei. Einhundertachtundsechzig der einhunderteinundsiebzig Normen gleichen
+    danach der amtlichen Nachfassung.
+
+(3) Die drei Abweichungen sind benannt und liegen nicht in der Anwendung: Das
+    Portal setzt amtliche Satznummern, wo das Gesetzblatt keine setzt (§ 67); der
+    eine liegengebliebene Befehl trifft eine Grenze des Klartextformats, weil ein
+    Zwischentitel ohne Absatzbezeichnung dem vorangehenden Absatz zugeschlagen wird
+    (Anlage Nummer 23); und der ganzseitenbreite Titelblock des Änderungsgesetzes
+    steht im Inhaltsstrom mitten in einem Zitat (Anlage Nummer 31). Die letzte
+    Abweichung belegt erstmals die offene Frage der geometrischen Lesereihenfolge.
+
+(4) Der Prüfbestand umfasst hiernach dreihundertdreiunddreißig Prüfungen.
+
 ════════════════════════════════════════════════════════════════════════════════
  Fassung vom 22. August 2026,
  zuletzt geändert durch die am 22. August 2026 vorgenommenen Änderungen
