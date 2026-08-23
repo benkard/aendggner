@@ -67,7 +67,8 @@ class EndToEndTest {
     // Warnung gemeldet werden, nicht als Abbruch.
     assertThat(parseErgebnis.warnungen()).isNotEmpty();
 
-    // 4. Anwenden: wirft nicht; jeder Befehl erhält einen Protokolleintrag.
+    // 4. Anwenden: wirft nicht; jeder Befehl erhält einen Protokolleintrag. Auch hier ist das XML
+    //    jünger als das Änderungsgesetz — die Sollzahlen stehen in ifsgGegenZeitrichtigenStamm().
     var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
     assertThat(anwendung.protokoll()).hasSameSizeAs(parseErgebnis.befehle());
     assertThat(anwendung.anzahlAngewandt()).isGreaterThan(0);
@@ -78,6 +79,49 @@ class EndToEndTest {
     assertThat(html).contains("Alte Fassung").contains("Neue Fassung");
     assertThat(html).contains("Manuell prüfen");
     assertThat(html).containsAnyOf("<del>", "<ins>");
+  }
+
+  /**
+   * Dasselbe Änderungsgesetz gegen den <em>zeitrichtigen</em> Stamm: das IfSG in der Fassung, die
+   * der Einleitungssatz nennt („zuletzt durch Artikel 5 des Gesetzes vom 19. Juni 2020 geändert“).
+   *
+   * <p>Der Fall daneben ({@link #gesamtePipelineAufIfSgBeispiel}) rechnet gegen die heutige
+   * konsolidierte Fassung und kann deshalb keine Sollzahl pinnen — dort blieben 27 von 75 Befehlen
+   * liegen, weil ihr Zieltext im Stamm längst anders lautet. Gegen den Stand vom 22. Juli 2020 geht
+   * die Rechnung vollständig auf: <b>75 von 75</b>, kein Rest. Das ist zugleich der Beleg, dass die
+   * 27 nie ein Mangel des Werkzeugs waren.
+   */
+  @Test
+  void ifsgGegenZeitrichtigenStamm() throws Exception {
+    var xml = SAMPLEDATA.resolve("IfSG/BJNR104510000-2020.xml");
+    assumeTrue(Files.exists(xml) && Files.exists(AENDERUNGSGESETZ), "IfSG-Beispieldaten fehlen");
+
+    var gesetz = new GiiXmlLoader().load(xml);
+    var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(AENDERUNGSGESETZ));
+    var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, null);
+
+    assertThat(parseErgebnis.artikel()).containsExactly("1", "2");
+    assertThat(parseErgebnis.befehle()).hasSize(75);
+
+    var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
+    var manuellPfade =
+        anwendung.protokoll().stream()
+            .filter(a -> a.status() == BefehlAnwender.Status.MANUELL_PRUEFEN)
+            .map(a -> a.befehl().provenienz().gliederungsPfad())
+            .toList();
+    assertThat(manuellPfade).isEmpty();
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(75);
+
+    // Der neu eingefügte § 28a steht an seiner Stelle und trägt seine Überschrift.
+    var neu = anwendung.neu();
+    assertThat(neu.norm("§ 28a")).isPresent();
+    assertThat(neu.norm("§ 28a").orElseThrow().titel())
+        .contains("Besondere Schutzmaßnahmen zur Verhinderung der Verbreitung");
+    // „In Absatz 6 wird jeweils das Wort ‚schwerwiegende‘ durch ‚bedrohliche‘ … ersetzt“ — die
+    // Ersetzung greift nur ganze Wörter, sonst verbrauchte das erste Wort das zweite mit.
+    assertThat(neu.norm("§ 36").orElseThrow().gesamtText())
+        .doesNotContain("schwerwiegend")
+        .contains("bedrohlicher übertragbarer Krankheiten");
   }
 
   /** Neues digitales BGBl-Format (recht.bund.de, ab 2023): 3. UWGÄndG 2026. */
@@ -150,14 +194,73 @@ class EndToEndTest {
         parseErgebnis.befehle().stream().filter(b -> b instanceof UnbekannterBefehl).count();
     assertThat(unbekannt).isZero();
 
-    // Das XML ist bereits konsolidiert; entscheidend ist, dass die Anwendung sauber terminiert
-    // und jeden Befehl protokolliert.
+    // Das XML ist die heutige konsolidierte Fassung und damit jünger als das Änderungsgesetz;
+    // deshalb wird hier keine Sollzahl gepinnt, sondern nur, dass die Anwendung sauber terminiert
+    // und jeden Befehl protokolliert. Die Sollzahlen stehen in gegGegenZeitrichtigenStamm().
     var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
     assertThat(anwendung.protokoll()).hasSameSizeAs(parseErgebnis.befehle());
     // Gliederungs-Überschriften (Teil/Abschnitt) werden als Befehle erkannt und angewandt.
     assertThat(anwendung.anzahlAngewandt()).isGreaterThanOrEqualTo(50);
     var synopse = SynopseBuilder.baue(gesetz, anwendung, parseErgebnis.warnungen(), false);
     assertThat(HtmlRenderer.rendere(synopse, "E2E-Test")).contains("Manuell prüfen");
+  }
+
+  /**
+   * Dasselbe Änderungsgesetz gegen den <em>zeitrichtigen</em> Stamm: das GEG in der Fassung, die
+   * der Einleitungssatz nennt („durch Artikel 18a des Gesetzes vom 20. Juli 2022 geändert“).
+   *
+   * <p>Gegen die heutige konsolidierte Fassung ({@link #gegGrossesAenderungsgesetz}) blieben 51 von
+   * 119 Befehlen liegen, und der Test konnte deshalb keine Sollzahl pinnen. Gegen den Stand vom 24.
+   * April 2023 sind es <b>116 angewandte und drei Reste</b> — und diese drei sind erstmals echte
+   * Befunde, die hier einzeln festgehalten sind:
+   *
+   * <ol>
+   *   <li>{@code 40. a) ff)} „Die bisherige Nummer 9 wird aufgehoben.“ — In derselben Kaskade macht
+   *       Punkt bb) aus den bisherigen Nummern 4 bis 6 die Nummern 8 bis 10. Damit tragen
+   *       vorübergehend zwei Einheiten die Bezeichnung 9, und die Aufhebung findet keine
+   *       eindeutige. Die Schritt-Ordnung kennt bislang nur Umnummerierungen als Räumende; ein
+   *       Schritt, dessen <em>Ziel</em> eine Bezeichnung ist, die ein anderer neu vergibt, müsste
+   *       ebenso vorgezogen werden.
+   *   <li>{@code 40. a) hh)} „Die bisherige Nummer 18 wird Nummer 29 und nach der Angabe ‚Absatz 1‘
+   *       werden die Wörter ‚oder Absatz 4‘ eingefügt.“ — Die Begleitklausel löst norm-weit auf
+   *       (bewusst so, siehe {@code BefehlErkenner}) und trifft dort 21 Vorkommen. Gemeint ist die
+   *       soeben umnummerierte Einheit.
+   *   <li>{@code 43. b) aa)} „In der Überschrift werden die Wörter … gestrichen.“ — Ziel ist die
+   *       Überschrift der <em>Nummer 1 der Anlage 8</em>. Das ist dieselbe offene Modellfrage wie
+   *       bei Berlins Anlage: Die Nummern einer Anlage brauchen einen eigenen Rang zwischen Norm
+   *       und Absatz.
+   * </ol>
+   */
+  @Test
+  void gegGegenZeitrichtigenStamm() throws Exception {
+    var xml = SAMPLEDATA.resolve("GEG/BJNR172810020-2023.xml");
+    var pdf = SAMPLEDATA.resolve("GEG/bgbl123s0280_regelungstext.pdf");
+    assumeTrue(Files.exists(xml) && Files.exists(pdf), "GEG-Beispieldaten fehlen");
+
+    var gesetz = new GiiXmlLoader().load(xml);
+    var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(pdf));
+    var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, "1");
+
+    assertThat(parseErgebnis.artikel()).containsExactly("1");
+    assertThat(parseErgebnis.befehle()).hasSize(119);
+    assertThat(parseErgebnis.befehle()).noneMatch(b -> b instanceof UnbekannterBefehl);
+
+    var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
+    var manuellPfade =
+        anwendung.protokoll().stream()
+            .filter(a -> a.status() == BefehlAnwender.Status.MANUELL_PRUEFEN)
+            .map(a -> a.befehl().provenienz().gliederungsPfad())
+            .toList();
+    assertThat(manuellPfade).containsExactly("40. a) ff)", "40. a) hh)", "43. b) aa)");
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(116);
+
+    var neu = anwendung.neu();
+    // Der neue § 9a steht im Gesetz und in der Inhaltsübersicht.
+    assertThat(neu.norm("§ 9a")).isPresent();
+    assertThat(neu.norm("Inhaltsübersicht").orElseThrow().gesamtText())
+        .contains("§ 9a")
+        // „Die Angabe zur Überschrift von Teil 2 Abschnitt 4 wird gestrichen“ — sie ist fort.
+        .doesNotContain("Abschnitt 4 | Nutzung");
   }
 
   /**
@@ -685,11 +788,15 @@ class EndToEndTest {
             .filter(a -> a.status() == BefehlAnwender.Status.MANUELL_PRUEFEN)
             .map(a -> a.befehl().provenienz().gliederungsPfad())
             .toList();
-    // Einziges Residuum: „In Satz 2 Nummer 1 wird … der Punkt am Ende des Satzes durch ein
-    // Semikolon ersetzt …“ — die adressierte Nummer 1 trägt zwei Sätze und endet selbst auf ein
-    // Komma; welchen Punkt der Befehl meint, ist dem Wortlaut nicht sicher zu entnehmen.
-    assertThat(manuellPfade).containsExactly("13. e) aa)");
-    assertThat(anwendung.anzahlAngewandt()).isEqualTo(parseErgebnis.befehle().size() - 1);
+    // Kein Rest mehr. Das frühere Residuum „13. e) aa)“ — „In Satz 2 Nummer 1 wird … der Punkt am
+    // Ende des Satzes durch ein Semikolon ersetzt …“ — trifft seit dieser Welle seine Stelle: Die
+    // benannte Nummer wird innerhalb des benannten Satzes gesucht (StellenAufloeser.satzRahmen),
+    // und § 16 Abs. 6 Nr. 1 liest sich danach wie die amtliche Nachfassung („… überschreitet; der
+    // WDR hat …“).
+    assertThat(manuellPfade).isEmpty();
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(parseErgebnis.befehle().size());
+    assertThat(anwendung.neu().norm("§ 16").orElseThrow().absaetze().get(5).text())
+        .contains("insgesamt drei Millionen Euro überschreitet; der WDR hat");
 
     var neu = anwendung.neu();
     // 1. Umnummerierungs-Kaskade in § 3: Absatz 2 wird durch zwei Absätze ersetzt, die bisherigen
@@ -1305,7 +1412,10 @@ class EndToEndTest {
     var ausEmpfehlung = Pipeline.erzeugeSynopse(xml, List.of(empfehlung), null, false);
     var ausEntwurf = Pipeline.erzeugeSynopse(xml, List.of(entwurf), null, false);
 
-    assertThat(ausEmpfehlung.anzahlAngewandt()).isEqualTo(68);
+    // 69 statt der früheren 68: Nennt der Rahmen dieselbe Gliederungseinheit wie der Befehl („…
+    // Teil 2 wird wie folgt geändert: … die Angabe zur Überschrift von Teil 2 Abschnitt 4 …“),
+    // so gilt sie jetzt einmal statt zweimal (InhaltsuebersichtAnwender.zielKette).
+    assertThat(ausEmpfehlung.anzahlAngewandt()).isEqualTo(69);
     assertThat(ausEmpfehlung.anzahlAngewandt() + ausEmpfehlung.anzahlManuell())
         .as("die Ausschussfassung trägt mehr Befehle als der Entwurf")
         .isGreaterThan(ausEntwurf.anzahlAngewandt() + ausEntwurf.anzahlManuell());
@@ -1329,7 +1439,11 @@ class EndToEndTest {
 
     var ergebnis = Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false);
 
-    assertThat(ergebnis.anzahlAngewandt()).isEqualTo(47);
+    // 51 statt der früheren 47: Die Satzzählung folgt jetzt der amtlichen — eine eingerückte
+    // Aufzählungsmarke beendet keinen Satz, und eine Ordnungszahl vor einem Gliederungswort („nach
+    // dem 5. Abschnitt“) auch nicht (SatzTeiler); dazu wird eine benannte Nummer innerhalb des
+    // benannten Satzes gesucht. Vier satzbezogene Befehle treffen dadurch ihre Stelle.
+    assertThat(ergebnis.anzahlAngewandt()).isEqualTo(51);
     assertThat(ergebnis.html()).contains(", Ausschussfassung]");
   }
 

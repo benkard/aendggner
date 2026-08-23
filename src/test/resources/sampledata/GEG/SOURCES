@@ -2,6 +2,24 @@ Stammgesetz:
 - Gebäudeenergiegesetz (GEG) vom 8. August 2020 (BGBl. I S. 1728)
 - https://www.gesetze-im-internet.de/geg/index.html
   (GEG.pdf, BJNR172810020.xml, BJNR172810020.epub)
+  Das ist die HEUTIGE konsolidierte Fassung; sie ist jünger als das
+  Änderungsgesetz von 2023 und bleibt als Belegfall dieser Lage liegen.
+
+Stammgesetz in der Fassung VOR dem Änderungsgesetz von 2023:
+- BJNR172810020-2023.xml -- Stand "Geändert durch Art. 18a G v. 20.7.2022
+  I 1237", also genau die Fassung, die der Einleitungssatz des
+  Änderungsgesetzes nennt ("das durch Artikel 18a des Gesetzes vom
+  20. Juli 2022 (BGBl. I S. 1237) geändert worden ist").
+- Herkunft: Wayback-Schnappschuss des amtlichen xml.zip,
+  http://web.archive.org/web/20230708085648id_/https://www.gesetze-im-internet.de/geg/xml.zip
+  (Schnappschuss vom 08.07.2023, Dateidatum im Archiv 24.04.2023;
+  abgerufen am 23.08.2026). Aus dem Archiv ausgepackt und unverändert
+  abgelegt.
+- Beschaffungsweg allgemein: Die CDX-Schnittstelle
+  http://web.archive.org/cdx/search/cdx?url=gesetze-im-internet.de/<kurz>/xml.zip
+  listet die vorhandenen Schnappschüsse; der zum Einleitungssatz passende
+  ist der jüngste VOR dem Verkündungstag. WebFetch erreicht
+  web.archive.org nicht -- nur curl.
 
 Änderungsgesetz (2023, in Kraft seit 1.1.2024, "Heizungsgesetz"):
 - Gesetz zur Änderung des Gebäudeenergiegesetzes, zur Änderung des

@@ -73,11 +73,25 @@ final class InhaltsuebersichtAnwender {
     };
   }
 
-  /** Die adressierte Angabe: die §-/Gliederungs-Komponenten hinter der Inhaltsübersichts-Marke. */
+  /**
+   * Die adressierte Angabe: die §-/Gliederungs-Komponenten hinter der Inhaltsübersichts-Marke.
+   *
+   * <p>Nennt der Rahmen dieselbe Einheit wie der Befehl selbst — „In der Inhaltsübersicht wird …
+   * Teil 2 wie folgt geändert: … Die Angabe zur Überschrift von Teil 2 Abschnitt 4 wird gestrichen“
+   * —, so steht sie zweimal hintereinander in der Stelle. Gemeint ist sie einmal: Das zweite Glied
+   * suchte sich sonst innerhalb seiner selbst und bliebe unauffindbar.
+   */
   private static List<Stelle.Komponente> zielKette(Stelle stelle) {
-    return stelle.komponenten().stream()
-        .filter(k -> k instanceof Stelle.Paragraph || k instanceof Stelle.Gliederungseinheit)
-        .toList();
+    var kette = new ArrayList<Stelle.Komponente>();
+    for (var k : stelle.komponenten()) {
+      if (!(k instanceof Stelle.Paragraph || k instanceof Stelle.Gliederungseinheit)) {
+        continue;
+      }
+      if (kette.isEmpty() || !kette.get(kette.size() - 1).equals(k)) {
+        kette.add(k);
+      }
+    }
+    return List.copyOf(kette);
   }
 
   /**

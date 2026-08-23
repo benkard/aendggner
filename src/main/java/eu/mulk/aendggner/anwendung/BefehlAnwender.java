@@ -792,7 +792,7 @@ public final class BefehlAnwender {
               if (brauchtFuge(befehl.alt(), befehl.neu())) {
                 return TextErgebnis.ok(ersetzeMitFuge(text, befehl.alt(), befehl.neu()));
               }
-              return TextErgebnis.ok(text.replace(befehl.alt(), befehl.neu()));
+              return TextErgebnis.ok(ersetzeWortweise(text, befehl.alt(), befehl.neu()));
             }));
   }
 
@@ -809,6 +809,17 @@ public final class BefehlAnwender {
     return NUR_SATZZEICHEN.matcher(alt).matches()
         && !neu.isEmpty()
         && (Character.isLetter(neu.codePointAt(0)) || neu.charAt(0) == '(');
+  }
+
+  /** Ersetzt jedes Vorkommen, das als Wort steht (siehe {@link #findeVorkommen}). */
+  private static String ersetzeWortweise(String text, String alt, String neu) {
+    var sb = new StringBuilder();
+    int von = 0;
+    for (int idx = findeVorkommen(text, alt, 0); idx >= 0; idx = findeVorkommen(text, alt, von)) {
+      sb.append(text, von, idx).append(neu);
+      von = idx + alt.length();
+    }
+    return sb.append(text, von, text.length()).toString();
   }
 
   private static String ersetzeMitFuge(String text, String alt, String neu) {
@@ -840,7 +851,7 @@ public final class BefehlAnwender {
                 return TextErgebnis.fehler(
                     "„" + befehl.woerter() + "“ kommt " + anzahl + "-mal vor.");
               }
-              int naht = text.indexOf(befehl.woerter());
+              int naht = findeVorkommen(text, befehl.woerter(), 0);
               return TextErgebnis.ok(
                   heileNaht(
                       text.substring(0, naht) + text.substring(naht + befehl.woerter().length()),
@@ -2104,7 +2115,7 @@ public final class BefehlAnwender {
     if (anzahl > 1) {
       return new Fundpruefung(-1, "„" + woerter + "“ kommt " + anzahl + "-mal vor; mehrdeutig.");
     }
-    return new Fundpruefung(text.indexOf(woerter), null);
+    return new Fundpruefung(findeVorkommen(text, woerter, 0), null);
   }
 
   private static int zaehleVorkommen(String text, String suchtext) {
@@ -2113,11 +2124,48 @@ public final class BefehlAnwender {
     }
     int anzahl = 0;
     int index = 0;
-    while ((index = text.indexOf(suchtext, index)) >= 0) {
+    while ((index = findeVorkommen(text, suchtext, index)) >= 0) {
       anzahl++;
       index += suchtext.length();
     }
     return anzahl;
+  }
+
+  /**
+   * Das nächste Vorkommen des Suchtextes ab {@code von} — als <em>Wort</em>, nicht als beliebige
+   * Zeichenfolge. Ein Befehl, der „das Wort ‚schwerwiegende‘“ nennt, meint dieses Wort und nicht
+   * die ersten dreizehn Buchstaben von „schwerwiegender“; ohne diese Grenze ersetzte die
+   * Doppelanweisung des § 36 IfSG ihr zweites Wort mit, um es danach nicht mehr zu finden. Die
+   * Grenze wird nur dort verlangt, wo der Suchtext selbst mit einem Buchstaben oder einer Ziffer
+   * anfängt bzw. endet: Ein Satzzeichen, eine Klammer oder ein Bindestrich am Rand bringt seine
+   * Grenze schon mit.
+   */
+  private static int findeVorkommen(String text, String suchtext, int von) {
+    if (suchtext.isEmpty()) {
+      return -1;
+    }
+    for (int index = text.indexOf(suchtext, von);
+        index >= 0;
+        index = text.indexOf(suchtext, index + 1)) {
+      if (stehtAlsWort(text, index, suchtext)) {
+        return index;
+      }
+    }
+    return -1;
+  }
+
+  private static boolean stehtAlsWort(String text, int index, String suchtext) {
+    int ende = index + suchtext.length();
+    if (istWortzeichen(suchtext.charAt(0)) && index > 0 && istWortzeichen(text.charAt(index - 1))) {
+      return false;
+    }
+    return !istWortzeichen(suchtext.charAt(suchtext.length() - 1))
+        || ende >= text.length()
+        || !istWortzeichen(text.charAt(ende));
+  }
+
+  private static boolean istWortzeichen(char c) {
+    return Character.isLetterOrDigit(c);
   }
 
   // Eine §-Überschrift beginnt mit „§ N“, gefolgt von einem großgeschriebenen Titelwort — im

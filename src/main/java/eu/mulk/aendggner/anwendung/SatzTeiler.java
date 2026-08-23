@@ -79,6 +79,30 @@ public final class SatzTeiler {
           "Dezember");
 
   /**
+   * Gliederungswörter, vor denen eine Zahl mit Punkt eine Ordnungszahl ist und kein Satzende: „…
+   * nach dem 5. Abschnitt des Elften Buches …“. Sie stehen groß und rissen den Satz sonst genau
+   * dort auseinander, wo er auf eine andere Vorschrift verweist.
+   */
+  private static final Set<String> GLIEDERUNGSWOERTER =
+      Set.of(
+          "Abschnitt",
+          "Abschnitts",
+          "Abschnitte",
+          "Abschnitten",
+          "Teil",
+          "Teils",
+          "Teile",
+          "Teilen",
+          "Kapitel",
+          "Kapitels",
+          "Buch",
+          "Buches",
+          "Titel",
+          "Titels",
+          "Unterabschnitt",
+          "Unterabschnitts");
+
+  /**
    * Kandidat für ein Satzende: Punkt (ggf. gefolgt von schließendem Zitat oder Klammer), dann
    * Leerraum, dann Großbuchstabe, Zitat, Klammer oder Paragraphenzeichen — Rechtssätze beginnen
    * häufig mit einem Verweis („… zusammengefasst werden. § 27 Absatz 2 … bleibt unberührt.“).
@@ -99,6 +123,7 @@ public final class SatzTeiler {
       int punkt = matcher.start();
       if (istAbkuerzung(text, punkt)
           || istDatum(text, punkt, matcher.end())
+          || istOrdinalzahl(text, punkt, matcher.end())
           || istAufzaehlungsMarke(text, punkt)) {
         continue;
       }
@@ -181,11 +206,25 @@ public final class SatzTeiler {
     return MONATE.contains(naechstesWort);
   }
 
+  /** „nach dem 5. Abschnitt“ — Ziffern vor dem Punkt, ein Gliederungswort dahinter. */
+  private static boolean istOrdinalzahl(String text, int punktPosition, int naechstesWortPosition) {
+    if (!wortVor(text, punktPosition).matches("\\d{1,2}")) {
+      return false;
+    }
+    var rest = text.substring(naechstesWortPosition);
+    return GLIEDERUNGSWOERTER.contains(rest.split("[\\s,.;]", 2)[0]);
+  }
+
   /**
    * Punkt einer Aufzählungsmarke am Zeilenanfang („… folgende Aufgaben ⏎ 1. Erlaß von Satzungen
    * …“). Er beendet keinen Satz: die Glieder einer Aufzählung gehören zum tragenden Satz. Die
    * Beschränkung auf den Zeilenanfang unterscheidet die Marke von einer Zahl am Satzende („…
    * beträgt 30. Die Frist …“).
+   *
+   * <p>Die Einrückung, die die Marke trägt, gehört zum Zeilenanfang: Der Klartext- wie der
+   * XML-Zweig rücken die Glieder ein („⏎␣␣1.␣Personen, die …“), und ohne diese Nachsicht zählte
+   * jedes Glied als eigener Satz — § 20 Abs. 12 IfSG käme so auf neun Sätze statt der amtlichen
+   * fünf, und ein Befehl auf „Satz 5“ träfe den falschen.
    */
   private static boolean istAufzaehlungsMarke(String text, int punktPosition) {
     var wort = wortVor(text, punktPosition);
@@ -193,6 +232,9 @@ public final class SatzTeiler {
       return false;
     }
     int anfang = punktPosition - wort.length();
+    while (anfang > 0 && (text.charAt(anfang - 1) == ' ' || text.charAt(anfang - 1) == '\t')) {
+      anfang--;
+    }
     return anfang == 0 || text.charAt(anfang - 1) == '\n';
   }
 

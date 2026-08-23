@@ -644,6 +644,100 @@ Der Berliner Belegfall, zur Hälfte
     setzt die amtlichen Satznummern nicht als Superskripte, sondern als
     angeklebte Ziffern („(2) 1Gegen einen …“).
 
+
+Artikel 24
+Zeitrichtige Stammfassungen des Bundesrechts
+
+(1) Aufgenommen werden die konsolidierten Fassungen des Gebäudeenergiegesetzes
+    und des Infektionsschutzgesetzes in dem Stand, den der Einleitungssatz des
+    jeweiligen Änderungsgesetzes bezeichnet („BJNR172810020-2023.xml“,
+    „BJNR104510000-2020.xml“). Herkunft ist der Wayback-Schnappschuss des
+    amtlichen Archivs „xml.zip“; Fundstelle, Schnappschusstag und Abrufweg sind
+    in den Dateien „SOURCES“ der beiden Verzeichnisse niedergelegt.
+
+(2) Die bisherigen, heute gültigen Fassungen bleiben unberührt. Sie bezeugen den
+    Fall, dass das Stammgesetz jünger ist als das Änderungsgesetz, und dienen
+    weiterhin als Belegfall dieser Lage.
+
+(3) Damit sind die beiden größten Restzahlen des Prüfbestands erstmals gegen ein
+    Sollergebnis gehalten. Sie beruhten fast ausschließlich auf dem Altersunter-
+    schied der Fassungen: beim Gebäudeenergiegesetz einundfünfzig Reste bei
+    achtundsechzig angewandten Befehlen, beim Infektionsschutzgesetz sieben-
+    undzwanzig bei achtundvierzig. Gegen den zeitrichtigen Stamm sind es
+    hundertsechzehn angewandte Befehle und drei Reste beziehungsweise fünf-
+    undsiebzig angewandte Befehle und kein Rest.
+
+
+Artikel 25
+Wortersetzung nur an Wortgrenzen
+
+(1) Nennt ein Befehl ein Wort, so ist dieses Wort gemeint und nicht der gleich-
+    lautende Anfang eines längeren. Die Ersetzung, die Streichung und die
+    Fundstellenprüfung (BefehlAnwender) suchen ihren Zieltext daher nur noch
+    dort, wo er als Wort steht.
+
+(2) Die Grenze wird nur verlangt, soweit der Zieltext selbst mit einem Buchstaben
+    oder einer Ziffer beginnt oder endet; ein Satzzeichen, eine Klammer oder ein
+    Bindestrich am Rand bringt seine Grenze schon mit.
+
+(3) Anlass war § 36 des Infektionsschutzgesetzes: Die Anweisung, „jeweils das
+    Wort ‚schwerwiegende‘ durch das Wort ‚bedrohliche‘ und das Wort
+    ‚schwerwiegender‘ durch das Wort ‚bedrohlicher‘“ zu ersetzen, verbrauchte mit
+    dem ersten Wort das zweite mit und meldete dieses hernach als unauffindbar.
+
+
+Artikel 26
+Satzzählung wie im Gesetzblatt
+
+Die Zerlegung eines Absatzes in Sätze (SatzTeiler) wird wie folgt geändert:
+
+1.  Die Marke eines Aufzählungsglieds beendet auch dann keinen Satz, wenn ihr
+    eine Einrückung vorausgeht. Bislang galt das nur für die Marke am äußersten
+    Zeilenanfang; da beide Zweige der Aufbereitung die Glieder einrücken, zählte
+    jedes Glied als eigener Satz. § 20 Abs. 12 des Infektionsschutzgesetzes kam
+    so auf neun Sätze statt der amtlichen fünf.
+
+2.  Eine Ordnungszahl vor einem Gliederungswort („nach dem 5. Abschnitt“)
+    beendet gleichfalls keinen Satz.
+
+
+Artikel 27
+Die Nummer im benannten Satz
+
+Nennt eine Fundstelle einen Satz und darin eine Nummer („§ 5 Absatz 2 Satz 1
+Nummer 3“), so ist der Satz der Suchbereich der Nummer (StellenAufloeser).
+Bislang wurde die Marke im ganzen Absatz gesucht und auch in der Aufzählung eines
+anderen Satzes gefunden; die Fundstelle galt dann als mehrdeutig, und der Befehl
+blieb liegen.
+
+
+Artikel 28
+Die doppelt genannte Gliederungseinheit
+
+Nennt der Rahmen dieselbe Gliederungseinheit wie der Befehl selbst — „In der
+Inhaltsübersicht wird … Teil 2 wie folgt geändert: … Die Angabe zur Überschrift
+von Teil 2 Abschnitt 4 wird gestrichen“ —, so wird sie fortan einmal statt
+zweimal gezählt (InhaltsuebersichtAnwender). Das zweite Glied suchte sich sonst
+innerhalb seiner selbst und blieb unauffindbar.
+
+
+Artikel 29
+Fortschreibung der Prüfung
+
+(1) Neu sind die Belegfälle „gegGegenZeitrichtigenStamm“ und
+    „ifsgGegenZeitrichtigenStamm“ mit gepinnten Zahlen für die angewandten wie
+    für die manuell zu prüfenden Befehle; die drei verbleibenden Reste des
+    Gebäudeenergiegesetzes sind einzeln über ihren Gliederungspfad festgehalten
+    und im Test begründet.
+
+(2) Vier gepinnte Zahlen sind gestiegen, weil die Artikel 25 bis 28 mehr Befehle
+    ihre Stelle finden lassen: das WDR-Gesetz trägt keinen Rest mehr (zuvor
+    einen), die Beschlussempfehlung zum Bevölkerungsschutzgesetz einundfünfzig
+    statt siebenundvierzig angewandte Befehle, die zum Gebäudeenergiegesetz
+    neunundsechzig statt achtundsechzig. Der Grund steht jeweils im Test.
+
+(3) Der Prüfbestand umfasst hiernach dreihundertdreißig Prüfungen.
+
 ════════════════════════════════════════════════════════════════════════════════
  Fassung vom 22. August 2026,
  zuletzt geändert durch die am 22. August 2026 vorgenommenen Änderungen

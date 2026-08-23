@@ -152,7 +152,15 @@ final class StellenAufloeser {
    */
   private static SatzTeiler.@Nullable SatzBereich loeseFeinKomponentenAuf(
       Stelle stelle, String text) {
-    SatzTeiler.SatzBereich bereich = null;
+    // Nennt die Stelle einen Satz und darin eine Nummer („§ 5 Absatz 2 Satz 1 Nummer 3“), so ist
+    // der Satz der Suchbereich der Nummer. Ohne diese Verengung suchte die Marke „3.“ im ganzen
+    // Absatz und fand sie auch in der Aufzählung eines anderen Satzes — die Stelle galt dann als
+    // mehrdeutig und der Befehl blieb liegen.
+    var satzRahmen = satzRahmen(stelle, text);
+    if (satzRahmen != null && satzRahmen.bis() == satzRahmen.von()) {
+      return null;
+    }
+    SatzTeiler.SatzBereich bereich = satzRahmen;
     boolean zeilenKette = false;
     for (var komponente : stelle.komponenten()) {
       String labelRegex =
@@ -177,17 +185,27 @@ final class StellenAufloeser {
     if (zeilenKette) {
       return bereich;
     }
-    for (var komponente : stelle.komponenten()) {
-      if (komponente instanceof Stelle.SatzNr satz) {
-        int nummer = Integer.parseInt(satz.nummer().replaceAll("[a-z]$", ""));
-        var saetze = SatzTeiler.teile(text);
-        var satzBereich = satzBereich(text, nummer, saetze);
-        return satzBereich == null ? null : halbsatzBereich(text, stelle, satzBereich);
-      }
+    if (satzRahmen != null) {
+      return halbsatzBereich(text, stelle, satzRahmen);
     }
     // Halbsatz ohne Satzangabe („in Halbsatz 1“ im Rahmen eines Satzes bzw. Absatzes).
     if (stelle.komponenten().stream().anyMatch(k -> k instanceof Stelle.HalbsatzNr)) {
       return halbsatzBereich(text, stelle, new SatzTeiler.SatzBereich(0, text.length()));
+    }
+    return null;
+  }
+
+  /**
+   * Der Bereich des von der Stelle benannten Satzes; {@code null}, wenn sie keinen nennt. Ein
+   * leerer Bereich ({@code von == bis}) bedeutet: Der Satz ist benannt, aber nicht auffindbar.
+   */
+  private static SatzTeiler.@Nullable SatzBereich satzRahmen(Stelle stelle, String text) {
+    for (var komponente : stelle.komponenten()) {
+      if (komponente instanceof Stelle.SatzNr satz) {
+        int nummer = Integer.parseInt(satz.nummer().replaceAll("[a-z]$", ""));
+        var bereich = satzBereich(text, nummer, SatzTeiler.teile(text));
+        return bereich == null ? new SatzTeiler.SatzBereich(0, 0) : bereich;
+      }
     }
     return null;
   }
