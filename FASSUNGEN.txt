@@ -407,6 +407,34 @@ und dazu genügt das bisherige Paar nicht.
     bestehen fort.
 
 
+
+Artikel 13
+Das Handbuch auch in Markdown
+
+Das Handbuch lag allein als AsciiDoc vor („README.adoc“). Wer den Quelltext über
+ein Verzeichnis betrachtet, das nur Markdown darstellt, sah es als Rohtext.
+
+(1) Die Übersetzung liegt fortan als „README.md“ bei. Sie gibt den Wortlaut des
+    Handbuchs unverändert wieder; übersetzt sind allein die Auszeichnungen:
+    Abschnittsüberschriften, Quelltextblöcke, Verweise, Aufzählungen und die
+    Begriffsverzeichnisse des § 2, des § 6 Abs. 2, des § 10, des § 16 Abs. 2 und
+    des Lizenzabschnitts.
+
+(2) Der Attributkopf des AsciiDoc entfällt, denn Markdown kennt ihn nicht; an
+    seine Stelle tritt ein Inhaltsverzeichnis aus Verweisen auf die siebzehn
+    Paragraphen und den Lizenzabschnitt.
+
+(3) Die Angaben nach der REUSE-Spezifikation stehen als HTML-Kommentar im Kopf
+    der Datei. Die Prüfung meldet unverändert Konformität mit der Fassung 3.3:
+    einhundertfünfundfünfzig von einhundertfünfundfünfzig Dateien tragen Urheber-
+    und Lizenzangabe.
+
+(4) Die Folge der Absatzziffern ist Zeile für Zeile gegen die AsciiDoc-Fassung
+    abgeglichen worden und stimmt überein; das schließt die im § 14 vorgefundene
+    doppelte Zählung der Absätze 6 und 7 ein, die bewusst unangetastet bleibt,
+    weil das Handbuch selbst sie führt.
+
+
 ════════════════════════════════════════════════════════════════════════════════
  Fassung vom 22. August 2026,
  zuletzt geändert durch die am 22. August 2026 vorgenommenen Änderungen
