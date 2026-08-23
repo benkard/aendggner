@@ -92,6 +92,15 @@ final class LandesRechtTextParser {
    */
   private static final String INHALTSUEBERSICHT = "Inhaltsübersicht";
 
+  /**
+   * Normkopf einer Anlage oder eines Anhangs, nummeriert („Anlage 2“) wie unnummeriert-benannt
+   * („Anlage“). Die enbez lautet genau so, wie das gii-XML sie führt, damit {@link
+   * eu.mulk.aendggner.aenderung.Stelle#anlagenEnbez()} sie unverändert trifft. Ein etwaiger Titel
+   * folgt auf eigenen Zeilen und geht in den Normtitel ein.
+   */
+  private static final Pattern ANLAGEN_KOPF =
+      Pattern.compile("^(Anlage|Anhang)(?:\\s+(\\d+[a-z]?))?\\s*$");
+
   // Normkopf: „§ N“ bzw. „Art. N“ plus Titel auf derselben Zeile. Das Sigel steht in Gruppe 1, die
   // Nummer in Gruppe 2, der Titel in Gruppe 3. Die Negativliste schließt Querverweise am
   // Zeilenanfang aus („Art. 4 Abs. 3 …“, „§ 5 Absatz 2 …“).
@@ -164,6 +173,11 @@ final class LandesRechtTextParser {
     String elternKennzahl = null;
     int gliederungsZaehler = 0;
 
+    // Ab dem ersten Anlagen-Normkopf ist alles Folgende Inhalt der Anlagen: Ihre inneren
+    // Überschriften („Erster Abschnitt“, „Nummer 6“) gliedern nicht das Gesetz, und ein Paragraph,
+    // der in ihnen zitiert wird, eröffnet keine Norm. Nur eine weitere Anlage tut das.
+    boolean imAnlagenteil = false;
+
     String normEnbez = null;
     String normTitel = null;
     var normZeilen = new ArrayList<String>();
@@ -178,6 +192,7 @@ final class LandesRechtTextParser {
       var roemisch = zeile != null ? GLIEDERUNG_ROEMISCH.matcher(zeile) : null;
       var unterGliederung = zeile != null ? UNTER_GLIEDERUNG.matcher(zeile) : null;
       var normKopf = zeile != null ? NORM_KOPF.matcher(zeile) : null;
+      var anlagenKopf = zeile != null ? ANLAGEN_KOPF.matcher(zeile) : null;
       var uebersicht = INHALTSUEBERSICHT.equals(zeile);
       // Die Inhaltsübersicht führt die Gliederungs-Überschriften des Gesetzes als eigene Zeilen mit
       // („Abschnitt 1 Allgemeine Vorschriften“). Innerhalb ihrer beendet eine solche Zeile die Norm
@@ -185,6 +200,7 @@ final class LandesRechtTextParser {
       // verloren.
       var gliederungsZeile =
           zeile != null
+              && !imAnlagenteil
               && (gliederung.matches()
                   || arabisch.matches()
                   || ordinalwort.matches()
@@ -192,10 +208,14 @@ final class LandesRechtTextParser {
                   || (unterGliederung.matches() && istUnterGliederung(unterGliederung, zeilen, i)))
               && (!INHALTSUEBERSICHT.equals(normEnbez) || folgtNormkopf(zeilen, i));
 
-      if (zeile == null
-          || uebersicht
-          || gliederungsZeile
-          || (normKopf.matches() && istNeuerNormKopf(normKopf.group(2), letzteNormNummer))) {
+      boolean neueNorm =
+          zeile != null
+              && !imAnlagenteil
+              && normKopf.matches()
+              && istNeuerNormKopf(normKopf.group(2), letzteNormNummer);
+      boolean neueAnlage = zeile != null && anlagenKopf.matches();
+
+      if (zeile == null || uebersicht || gliederungsZeile || neueNorm || neueAnlage) {
         // Laufende Norm abschließen.
         if (normEnbez != null) {
           normen.add(baueNorm(normEnbez, normTitel, aktuelleGliederung, normZeilen));
@@ -239,7 +259,15 @@ final class LandesRechtTextParser {
                   ordinalwort.group(1) + " " + ordinalwort.group(2),
                   titel.isEmpty() ? null : titel);
           gliederungen.add(aktuelleGliederung);
-        } else if (normKopf.matches() && istNeuerNormKopf(normKopf.group(2), letzteNormNummer)) {
+        } else if (neueAnlage) {
+          imAnlagenteil = true;
+          normEnbez =
+              anlagenKopf.group(2) == null
+                  ? anlagenKopf.group(1)
+                  : anlagenKopf.group(1) + " " + anlagenKopf.group(2);
+          normTitel = null;
+          aktuelleGliederung = null;
+        } else if (neueNorm) {
           normEnbez = normKopf.group(1) + " " + normKopf.group(2);
           normTitel = normKopf.group(3) != null ? normKopf.group(3).strip() : null;
           letzteNormNummer = numerisch(normKopf.group(2));

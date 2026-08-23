@@ -782,12 +782,12 @@ class EndToEndTest {
    * Spaltenspikes fest — die Spaltenreihenfolge des Inhaltsstroms ist bereits die Lesereihenfolge,
    * eine koordinatenbasierte Spaltenerkennung ist dafür nicht nötig.
    *
-   * <p>Kein voller Akzeptanztest: gesetze.berlin.de ist wie das schleswig-holsteinische Portal eine
-   * anmeldepflichtige juris-Anwendung, die Stammfassungen sind daraus nicht zu beschaffen. Artikel
-   * 1 ändert zudem eine *Anlage*; anlagenbezogene Befehle wendet ÄndGgner an (siehe GEG), doch der
-   * {@link eu.mulk.aendggner.gesetz.land.LandesRechtTextParser} kennt nur „§“- und „Art.“-Normköpfe
-   * — eine handgepflegte Stammfassung könnte diese Anlage nicht tragen (dieselbe Grenze, an der
-   * Baden-Württemberg zurückgestellt wurde).
+   * <p>Artikel 2 (LAF-Errichtungsgesetz) ist ein voller Akzeptanzfall: beide Befehle angewandt,
+   * alle fünf Normen gleich der amtlichen Nachfassung. Für Artikel 1 (ASOG) reicht die Prüfung bis
+   * zur Befehlserkennung. Fünf seiner sechs Befehle zielen auf die <em>Anlage</em>, deren Einheiten
+   * dort nicht als Aufzählungsmarken, sondern als Überschriften gesetzt sind („Nummer 6“, „Nummer
+   * 23“); sie brauchen einen eigenen Rang zwischen Norm und Absatz, den das Datenmodell noch nicht
+   * führt. Die Begründung im einzelnen steht in {@code Berlin/SOURCES}.
    */
   @Test
   void asogLafAendGBerlin() throws Exception {
@@ -807,13 +807,11 @@ class EndToEndTest {
 
     // Artikel 2 trägt sein Ziel in der Änderungsformel („§ 2 Satz 1 des Gesetzes zur Errichtung
     // …“); beide Punkte erben es als Kontext.
-    var laf =
-        new Gesetz(
-            "LAF-ErrichtungsG",
-            "Gesetz zur Errichtung eines Landesamtes für Flüchtlingsangelegenheiten und"
-                + " Unterbringung",
-            null,
-            List.of());
+    var altLaf = SAMPLEDATA.resolve("Berlin/LAF-ErrG-alt.txt");
+    assumeTrue(Files.exists(altLaf), "Berliner Stammfassung fehlt");
+    var laf = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(altLaf);
+    // Dieses Gesetz führt kein Inhaltsverzeichnis; der Wortlaut beginnt beim ersten Normkopf.
+    assertThat(laf.normen()).hasSize(5);
     var ergebnis = new AenderungsgesetzParser().parse(text, laf, null);
     assertThat(ergebnis.artikel()).containsExactly("2");
     assertThat(ergebnis.befehle()).hasSize(2);
@@ -858,6 +856,9 @@ class EndToEndTest {
     // am nächsten Aufzählungspunkt verschlänge das offene Zitat die Punkte cc) und c).
     assertThat(ZitatExtraktor.extrahiere(text).warnungen())
         .anyMatch(w -> w.startsWith("Zitat vor dem Aufzählungspunkt „cc)“ nicht geschlossen"));
+
+    // Artikel 2 wird vollständig angewandt und gleicht danach der amtlichen Nachfassung.
+    pruefeGegenNachfassung(laf, ergebnis, "Berlin/LAF-ErrG-neu.txt");
   }
 
   /**

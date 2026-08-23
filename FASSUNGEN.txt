@@ -601,6 +601,49 @@ Leerraum umgeben ist — innerhalb eines Namens steht ein Bindestrich stets ohne
 Ohne diese Ergänzung blieb der Kurztitel ungetrennt, der Einleitungssatz des
 Änderungsgesetzes fand sein Ziel nicht, und es wurde kein Artikel gewählt.
 
+
+Artikel 22
+Anlagen als eigene Normen
+
+Der Klartext-Parser des Landesrechts (LandesRechtTextParser) wird wie folgt
+geändert:
+
+1.  Es wird der Normkopf einer Anlage oder eines Anhangs aufgenommen, nummeriert
+    („Anlage 2“) wie unnummeriert-benannt („Anlage“, „Anhang“). Die
+    Einzelnormbezeichnung lautet genau so, wie das gii-XML sie führt, damit die
+    Auflösung nach „Stelle.anlagenEnbez“ sie unverändert trifft.
+
+2.  Vom ersten Anlagen-Normkopf an ist alles Folgende Inhalt der Anlagen. Ihre
+    inneren Überschriften gliedern nicht das Gesetz, und ein Paragraph, den sie
+    zitieren, eröffnet keine Norm; nur eine weitere Anlage tut das.
+
+
+Artikel 23
+Der Berliner Belegfall, zur Hälfte
+
+(1) Aufgenommen wird die konsolidierte Fassung des Gesetzes zur Errichtung eines
+    Landesamtes für Flüchtlingsangelegenheiten und Unterbringung in der
+    Gültigkeit vom 16. April bis zum 11. Juni 2026 nebst der Nachfassung als
+    Prüfmaßstab. Der Artikel 2 des Änderungsgesetzes wird vollständig angewandt;
+    alle fünf Normen gleichen danach der amtlichen Fassung.
+
+(2) Der Artikel 1 (Allgemeines Sicherheits- und Ordnungsgesetz) bleibt bei der
+    Erkennung. Fünf seiner sechs Befehle zielen auf Einheiten der Anlage, die
+    dort als Überschriften gesetzt sind („Nummer 6“, „Nummer 23“, „Nummer 31“),
+    während der Stellenauflöser eine Aufzählungsmarke „6.“ im Text der Anlage
+    sucht — die dort vielfach vorkommt. Belegt ist das durch die Gegenprobe:
+    Werden die Überschriften versuchsweise in Marken umgeschrieben, steigt die
+    Zahl der angewandten Befehle von zwei auf drei; mehrdeutig bleibt der Rest.
+
+(3) Die Nummern einer Anlage brauchen hiernach einen eigenen Rang zwischen Norm
+    und Absatz. Solange er fehlt, wird die Stammfassung nicht beigelegt; ihr
+    Bezugsweg ist in „Berlin/SOURCES“ verzeichnet und führt in zwei Abrufen
+    wieder dorthin.
+
+(4) Ein zweiter Befund ist dort gleichfalls festgehalten: Das Berliner Portal
+    setzt die amtlichen Satznummern nicht als Superskripte, sondern als
+    angeklebte Ziffern („(2) 1Gegen einen …“).
+
 ════════════════════════════════════════════════════════════════════════════════
  Fassung vom 22. August 2026,
  zuletzt geändert durch die am 22. August 2026 vorgenommenen Änderungen

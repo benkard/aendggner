@@ -441,12 +441,14 @@ Telemedienzuständigkeitsgesetz, Landesmediengesetz, Ausführungsgesetz zum
 Fall des Heftes, das WDR-Gesetz —, jeweils mit Akzeptanztests gegen die amtlichen
 Nachfassungen.
 
-(3) Für Berlin reicht die Prüfung bis zur Befehlserkennung — dort
-vollständig, aber ohne Anwendung —, weil dessen Stammfassungen noch nicht
-beschafft sind. Die Landesportale geben sie einer Skriptabfrage nicht aus,
+(3) Die Landesportale geben ihre Stammfassungen einer Skriptabfrage nicht aus,
 sondern nur ihre leere Anwendungshülle; einem Browser dagegen schon, und auf
-diesem Wege sind die hessische und die beiden schleswig-holsteinischen
-Stammfassungen beschafft worden. Thüringens Portal gibt sie ebensowenig aus; dort ist die konsolidierte
+diesem Wege sind die hessische, die beiden schleswig-holsteinischen und die
+Berliner Stammfassung beschafft worden. Für Berlin reicht die Prüfung gleichwohl
+nur beim Artikel 2 bis zur Anwendung; Artikel 1 ändert zu fünf Sechsteln eine
+Anlage, deren Einheiten als Überschriften gesetzt sind („Nummer 6“) und einen
+eigenen Rang zwischen Norm und Absatz verlangen, den das Datenmodell noch nicht
+führt. Thüringens Portal gibt sie ebensowenig aus; dort ist die konsolidierte
 Fassung aus dem Stammheft und den drei Änderungsheften des Gesetzblattes
 zusammengesetzt, die die Parlamentsdatenbank des Landtags frei ausgibt.
 

@@ -258,4 +258,45 @@ class LandesRechtTextParserTest {
             org.assertj.core.groups.Tuple.tuple("1.", "Der Rundfunkrat"));
     assertThat(gesetz.norm("§ 15").orElseThrow().gliederung().titel()).isEqualTo("Der Rundfunkrat");
   }
+
+  /**
+   * Eine Anlage ist eine eigene Norm; ihre enbez lautet genau wie im gii-XML („Anlage“, „Anlage 2“,
+   * „Anhang“), damit {@code Stelle.anlagenEnbez()} sie unverändert trifft. Alles hinter ihrem Kopf
+   * gehört zu ihr: Ihre inneren Überschriften gliedern nicht das Gesetz, und ein Paragraph, den sie
+   * zitiert, eröffnet keine Norm. Nur eine weitere Anlage beendet sie.
+   */
+  @Test
+  void erkenntAnlagenAlsEigeneNormen() {
+    var gesetz =
+        LandesRechtTextParser.parse(
+            """
+            Beispielgesetz
+            (BeispG)
+            Vom 1. Januar 2020
+            Erster Abschnitt  Allgemeines
+            § 1  Zweck
+            (1) Dieses Gesetz dient der Erprobung.
+            Anlage
+            Zuständigkeitskatalog
+            (zu § 1 Absatz 1)
+            Erster Abschnitt  Aufgaben der Behörden
+            (1) Die erste Aufgabe.
+            (2) Die zweite Aufgabe; § 1 bleibt unberührt.
+            Anlage 2
+            Muster
+            (1) Das Muster.
+            """);
+
+    assertThat(gesetz.normen())
+        .extracting(eu.mulk.aendggner.gesetz.Norm::enbez)
+        .containsExactly("§ 1", "Anlage", "Anlage 2");
+    // Die Überschrift innerhalb der Anlage ist Inhalt, keine Gliederung des Gesetzes.
+    assertThat(gesetz.gliederungen())
+        .extracting(Gliederung::bezeichnung)
+        .containsExactly("Erster Abschnitt");
+    assertThat(gesetz.norm("Anlage").orElseThrow().gesamtText())
+        .contains("Erster Abschnitt  Aufgaben der Behörden")
+        .contains("§ 1 bleibt unberührt");
+    assertThat(gesetz.norm("Anlage 2").orElseThrow().gesamtText()).contains("Das Muster");
+  }
 }

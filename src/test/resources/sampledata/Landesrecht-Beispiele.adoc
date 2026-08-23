@@ -31,7 +31,9 @@ Reihenfolge des Inhaltsstroms *ist* bereits die Lesereihenfolge, eine koordinate
 Spaltenerkennung ist nicht nötig. Verbleibende Layout-Eigenheit sind ganzseitenbreite Rahmen
 (Titelblock, laufender Seitenkopf), die an falscher Stelle im Strom stehen — der Seitenkopf wird
 herausgeschnitten, der Titelblock landet weiterhin mitten im Text. Tiefe Verschachtelung
-a)/aa)/bb)/cc); Artikel 1 ändert eine *Anlage* mit eigener Nummern-Gliederung.
+a)/aa)/bb)/cc); Artikel 1 ändert eine *Anlage*, deren Einheiten als *Überschriften* („Nummer 6")
+statt als Aufzählungsmarken gesetzt sind. Artikel 2 (LAF-Errichtungsgesetz) ist ein voller
+Akzeptanzfall; das Portal setzt die amtlichen *Satznummern als angeklebte Ziffern* („(2) 1Gegen …").
 
 |Schleswig-Holstein
 |`SchleswigHolstein/GVOBl-2026-27_Kommunalrecht-AendG.pdf` — GVOBl. Schl.-H. 2026/27 vom
@@ -115,6 +117,51 @@ aufgehobenen Platzhalter hinweg. Voller Akzeptanzfall, Stammfassung
   (167 bzw. 86 Normen). Artikel 3 ändert ein anderes Änderungsgesetz und wird zu Recht nicht
   gewählt. Beide Stammfassungen sind über die Browsersteuerung beschafft.
 
+* *Nordrhein-Westfalen* ist der Massentest-Fall: aus demselben Heft sind alle vier ändernden
+  Artikel als Akzeptanzfälle hinterlegt.
++
+--
+`EndToEndTest.tmzGesetzAcceptance`:: Artikel 3 (Telemedienzuständigkeitsgesetz), vier Befehle,
+kein Rest. Stamm `NRW/TMZ-Gesetz-alt.txt`.
+`EndToEndTest.wdrGesetzAcceptance`:: Artikel 1 (WDR-Gesetz), 101 Befehle an 31 Normen, davon 100
+angewandt. Stamm `NRW/WDR-Gesetz-alt.txt` (Fassung vom 01.01.2025). Der Fall trägt die
+Umnummerierungs-Kaskaden (§ 3: Absatz 2 → zwei Absätze, die Absätze 3 bis 11 rücken auf, ein neuer
+Absatz 13 kommt hinzu; § 15 Absatz 3: Nummer 22 entfällt, 23 bis 37 rücken auf), den Sammelrahmen
+„Es werden ersetzt:“ und die Angabe-Befehle auf die Inhaltsübersicht. Einziges Residuum ist
+Nr. 13 e) aa): „der Punkt am Ende des Satzes“ ist in einer zweisätzigen Nummer nicht eindeutig.
+`EndToEndTest.lmgNrwAcceptance`:: Artikel 2 (Landesmediengesetz), 18 Befehle, kein Rest. Stamm
+`NRW/LMG-NRW-alt.txt` (Fassung vom 01.01.2025).
+`EndToEndTest.rundfunkAusfuehrungsgesetzAcceptance`:: Artikel 4 (17. RÄStV-AusfG), ein Befehl,
+kein Rest. Stamm `NRW/17-RAEStV-AusfG-alt.txt` (Erstfassung vom 17.12.2015, bis 2026 unverändert).
+Der Artikel führt seinen Befehl *ohne* Gliederungspunkt — der Text nach der Änderungsformel ist
+der Befehl —, und das Zitat der neuen Fassung trägt verschachtelte Anführungszeichen (ein
+vollständiges „durch Artikel 3 …“ innerhalb einer eckigen Klammer). Beides trägt die vorhandene
+Maschinerie.
+--
++
+Alle vier Ergebnisse sind normweise gegen die amtliche Fassung vom 01.04.2026 abgeglichen. Es
+bleiben nur Abweichungen, in denen die amtliche Nachfassung selbst vom Befehlswortlaut abweicht
+(§ 15 WDR-Gesetz: „des“ vor „Bundesreisekostengesetzes“ entfallen; § 7 und § 21 WDR-Gesetz: ein
+überzähliges Anführungszeichen aus dem Änderungsgesetz; § 93 LMG NRW: zusätzlich die Wörter
+„Film (“ gestrichen) — ÄndGgner wendet dort den Wortlaut an. Damit ist das Heft GV. NRW. 7/2026
+vollständig belegt.
+* *Berlin* ist zur Hälfte umgesetzt (`EndToEndTest.asogLafAendGBerlin`). Artikel 2
+  (LAF-Errichtungsgesetz) ist ein *voller* Akzeptanzfall: beide Befehle angewandt, alle fünf
+  Normen gleich der amtlichen Nachfassung vom 12. Juni 2026; die Stammfassung ist über die
+  Browsersteuerung beschafft. Artikel 1 (ASOG) wird *vollständig erkannt* — alle sechs Befehle,
+  einschließlich der Änderungen an der unnummerierten Anlage —, aber nicht angewandt: Fünf der
+  sechs zielen auf Einheiten der Anlage, die dort als Überschriften stehen („Nummer 6“,
+  „Nummer 23“, „Nummer 31“) und nicht als Aufzählungsmarken. Sie brauchen einen eigenen Rang
+  zwischen Norm und Absatz; Begründung und Bezugsweg in `Berlin/SOURCES`.
+* *Hessen* ist *vollständig* umgesetzt (`EndToEndTest.verkehrsZustVAendVOHessen`): alle
+  21 Befehle des Artikels 1 werden erkannt und angewandt, und alle 52 Normen gleichen danach
+  zeichengenau der amtlichen Nachfassung vom 4. Februar 2026. Die Stammfassung ist über eine
+  *Browsersteuerung* aus dem Landesrechtsportal beschafft; damit ist die juris-Sackgasse
+  aufgebrochen (siehe „Beschaffung der Stammfassungen“).
+
+* Baden-Württemberg (GBl 2026 Nr. 26): großes Anlage-lastiges Änderungsgesetz (§§ 4–57a + Anlagen
+  1/3b/4b); Stammfassung/Akzeptanztest noch offen.
+
 == Beschaffung der Stammfassungen
 
 Für einen vollen Akzeptanztest wird die Fassung *vor* dem Änderungsgesetz gebraucht. Welcher Weg
@@ -182,11 +229,19 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
 == Noch offen
 
 
-* *Berlin — Stammfassung noch nicht beschafft* (desgleichen): `gesetze.berlin.de` ist trotz des Eigennamens dieselbe
+* *Berlin, ASOG — Stammfassung bewusst nicht beigelegt*, weil sie ohne den Rang der
+  Anlagen-Einheiten keinen Prüfgewinn brächte; der Bezugsweg steht in `Berlin/SOURCES` und führt
+  in zwei Abrufen wieder dorthin. Zur Geschichte: `gesetze.berlin.de` ist trotz des Eigennamens dieselbe
   juris-Anwendung wie das schleswig-holsteinische Portal (Kennung `bsbe`) und ebenso
   anmeldepflichtig. In der Wayback Machine gibt es keine serverseitig gerenderten Volltexte des
   ASOG oder des LAF-Errichtungsgesetzes.
-* *Anlagen im kanonischen Klartext*: Anlagen sind als Änderungsziel unterstützt — im gii-XML sind
+* *Anlagen im kanonischen Klartext* — der Normkopf ist erledigt, der Rang der Nummern nicht:
+  Der `LandesRechtTextParser` kennt seit dieser Welle Anlagen-Normköpfe („Anlage“, „Anlage 2“,
+  „Anhang“), und alles hinter ihnen gehört zur Anlage — ihre inneren Überschriften gliedern nicht
+  das Gesetz, und ein Paragraph, den sie zitieren, eröffnet keine Norm. Offen bleibt die
+  *Adressierung ihrer Einheiten*: Berlins Anlage überschreibt sie mit „Nummer 6“, während der
+  Stellenauflöser eine Marke „6.“ im Text sucht, die dort vielfach vorkommt. Nötig ist ein eigener
+  Rang zwischen Norm und Absatz. Die ältere Fassung dieses Punktes, zur Einordnung: Anlagen sind als Änderungsziel unterstützt — im gii-XML sind
   sie eigene Normen („Anlage 8“, „Anhang“), und `Stelle.anlagenEnbez()` löst sie auf; im GEG werden
   anlagenbezogene Befehle angewandt. Der `LandesRechtTextParser` kennt jedoch nur „§“- und
   „Art.“-Normköpfe: Eine handgepflegte Stammfassung kann *keine* Anlage tragen. Das ist die
@@ -206,13 +261,20 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
 Kein Land scheitert noch an reiner Extraktionsschwäche; offen sind Modell- und Beschaffungsfragen.
 Nach absteigendem Nutzen:
 
-. *Die beiden übrigen Stammfassungen über die Browsersteuerung holen* — Berlin (ASOG,
-  LAF-Errichtungsgesetz) und Baden-Württemberg (Kommunalwahlordnung). Der Weg ist unter
-  „Beschaffung der Stammfassungen“ beschrieben; Hessen und Schleswig-Holstein sind ihn gegangen.
-. *Anlagen-Normköpfe im `LandesRechtTextParser`* ergänzen (er kennt neben „§“/„Art.“ inzwischen
-  auch die Inhaltsübersicht als Norm). Berlins Artikel 1 und Baden-Württembergs Verordnung ändern
-  Anlagen; mit deren Stammfassungen aus Schritt 1 wird die Ergänzung end-to-end prüfbar.
+. *Den Rang der Anlagen-Einheiten einführen* — die Nummern einer Anlage stehen zwischen Norm und
+  Absatz. Daran hängen Berlins Artikel 1 (fünf von sechs Befehlen) und Baden-Württembergs
+  Anlagen 1, 3b und 4b. Der Belegfall ist unmittelbar zur Hand: Berlins ASOG ist in zwei Abrufen
+  wiederbeschafft (`Berlin/SOURCES`). Mitzuerledigen ist die Umschrift der Berliner Satznummern
+  (angeklebte Ziffern statt Superskripte).
+. *Baden-Württembergs Kommunalwahlordnung über die Browsersteuerung holen* — der Weg ist unter
+  „Beschaffung der Stammfassungen“ beschrieben; Hessen, Schleswig-Holstein und Berlin sind ihn
+  gegangen.
 . *Berlin, ganzseitenbreite Rahmen* (XY-Cut) — die letzte offene Layout-Frage, siehe „Noch offen“.
+
+*Erledigt:* _Berlins Artikel 2_ ist ein voller Akzeptanzfall, und der Klartext-Parser trägt
+nunmehr *Anlagen als eigene Normen*. Zwei Berliner Befunde stehen für die nächste Arbeit fest: Die
+Einheiten einer Anlage können als Überschriften gesetzt sein statt als Marken, und das Portal
+schreibt die amtlichen Satznummern als angeklebte Ziffern statt als Superskripte.
 
 *Erledigt:* _Schleswig-Holstein_ ist vollständig umgesetzt — der erste Fall mit *zwei*
 Stammgesetzen in einem Änderungsgesetz. Zwei Eigenheiten des Portalsatzes waren zu beheben: Er
@@ -255,5 +317,6 @@ hängt; für Sachsen,
 Niedersachsen und die vier NRW-Artikel die vollständige Anwendung bis auf das eine benannte
 Residuum im WDR-Gesetz; für Hessen die vollständige Anwendung und den Gleichlauf
 aller 52 Normen mit der amtlichen Nachfassung; für Schleswig-Holstein die vollständige Anwendung auf beide
-Stammgesetze; für Berlin die vollständige *Erkennung*. Wer eine dieser Zahlen
+Stammgesetze; für Berlin die vollständige Anwendung des Artikels 2 und die
+vollständige *Erkennung* des Artikels 1. Wer eine dieser Zahlen
 ändern muss, sollte den Grund im Test vermerken.
