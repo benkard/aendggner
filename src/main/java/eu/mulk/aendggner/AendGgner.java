@@ -7,10 +7,12 @@ import eu.mulk.aendggner.aenderung.parse.DokumentErkenner;
 import eu.mulk.aendggner.aenderung.parse.PatchTextExtraktor;
 import eu.mulk.aendggner.aenderung.parse.TextBereiniger;
 import eu.mulk.aendggner.anwendung.BefehlAnwender;
+import eu.mulk.aendggner.anwendung.Grund;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.LogManager;
@@ -182,6 +184,7 @@ public class AendGgner implements Callable<Integer> {
         System.out.printf(
             "Angewandt: %d, manuell prüfen: %d%n",
             anwendung.anzahlAngewandt(), anwendung.anzahlManuell());
+        haeufigkeitDerGruende(anwendung);
         gesetz = anwendung.neu();
       }
       return 0;
@@ -210,6 +213,27 @@ public class AendGgner implements Callable<Integer> {
         ergebnis.anzahlAngewandt(), ergebnis.anzahlManuell(), ergebnis.anzahlGeaenderteNormen());
 
     return ergebnis.anzahlAngewandt() == 0 && ergebnis.anzahlProtokollEintraege() > 0 ? 2 : 0;
+  }
+
+  /**
+   * „Gründe nach Häufigkeit“ — die Auszählung der liegengebliebenen Befehle nach Art des Grundes.
+   * Bei fünfzig Resten sagt sie mit einem Blick, woran es liegt; der ausformulierte Grund steht bei
+   * jedem Befehl darüber.
+   */
+  private static void haeufigkeitDerGruende(BefehlAnwender.AnwendungsErgebnis anwendung) {
+    var haeufigkeit = new EnumMap<Grund, Integer>(Grund.class);
+    for (var eintrag : anwendung.protokoll()) {
+      if (eintrag.status() == BefehlAnwender.Status.MANUELL_PRUEFEN && eintrag.grund() != null) {
+        haeufigkeit.merge(eintrag.grund(), 1, Integer::sum);
+      }
+    }
+    if (haeufigkeit.isEmpty()) {
+      return;
+    }
+    System.out.println("Gründe nach Häufigkeit:");
+    haeufigkeit.entrySet().stream()
+        .sorted(java.util.Map.Entry.<Grund, Integer>comparingByValue().reversed())
+        .forEach(e -> System.out.printf("  %4d  %s%n", e.getValue(), e.getKey().bezeichnung()));
   }
 
   private static String kuerze(String text) {

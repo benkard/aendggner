@@ -3,8 +3,11 @@
 package eu.mulk.aendggner.synopse;
 
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.UnbekannterBefehl;
+import eu.mulk.aendggner.anwendung.BefehlAnwender;
+import eu.mulk.aendggner.anwendung.Grund;
 import eu.mulk.aendggner.gesetz.Norm;
 import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 /**
@@ -228,20 +231,38 @@ public final class HtmlRenderer {
       sb.append("</ul>\n");
     }
     if (!synopse.manuellZuPruefen().isEmpty()) {
-      sb.append("<h3>Nicht automatisch angewandte Befehle</h3>\n<ol>\n");
-      for (var eintrag : synopse.manuellZuPruefen()) {
-        var befehl = eintrag.befehl();
-        sb.append("<li><strong>")
-            .append(esc(befehl.provenienz().anzeigeText()))
-            .append("</strong>");
-        if (!(befehl instanceof UnbekannterBefehl) || !eintrag.begruendung().isEmpty()) {
-          sb.append(" — ").append(esc(eintrag.begruendung()));
+      sb.append("<h3>Nicht automatisch angewandte Befehle</h3>\n");
+      // Nach Art des Grundes gebündelt und ausgezählt. Der ausformulierte Grund bleibt bei jedem
+      // Befehl stehen — gebündelt ist nur, was ohne Ordnung eine bloße Liste wäre. Innerhalb der
+      // Gruppe bleibt die Reihenfolge des Dokuments.
+      var gruppen = new LinkedHashMap<Grund, List<BefehlAnwender.AngewandteAenderung>>();
+      for (var grund : Grund.values()) {
+        var eintraege =
+            synopse.manuellZuPruefen().stream().filter(e -> e.grund() == grund).toList();
+        if (!eintraege.isEmpty()) {
+          gruppen.put(grund, eintraege);
         }
-        sb.append("<br><span class=\"originaltext\">")
-            .append(esc(befehl.provenienz().originalText()))
-            .append("</span></li>\n");
       }
-      sb.append("</ol>\n");
+      for (var gruppe : gruppen.entrySet()) {
+        sb.append("<h4>")
+            .append(esc(gruppe.getKey().bezeichnung()))
+            .append(" <span class=\"anzahl\">")
+            .append(gruppe.getValue().size())
+            .append("</span></h4>\n<ol>\n");
+        for (var eintrag : gruppe.getValue()) {
+          var befehl = eintrag.befehl();
+          sb.append("<li><strong>")
+              .append(esc(befehl.provenienz().anzeigeText()))
+              .append("</strong>");
+          if (!(befehl instanceof UnbekannterBefehl) || !eintrag.begruendung().isEmpty()) {
+            sb.append(" — ").append(esc(eintrag.begruendung()));
+          }
+          sb.append("<br><span class=\"originaltext\">")
+              .append(esc(befehl.provenienz().originalText()))
+              .append("</span></li>\n");
+        }
+        sb.append("</ol>\n");
+      }
     }
     sb.append("</section>\n");
   }
@@ -485,6 +506,24 @@ public final class HtmlRenderer {
       section.gliederung-aenderungen { padding-top: 1.25rem; }
       section.manuell { margin-top: 1.5rem; padding-top: 1.25rem; }
       section.manuell h3 { margin: 1rem 0 0.4rem; font-size: 0.6875rem; }
+      /* Die Gruppenaufschrift trägt ihre Häufigkeit in einem Kästchen wie die Randziffer der
+         Normen — sie ist eine Zahl und keine Zierde. */
+      section.manuell h4 {
+        margin: 0.9rem 0 0.3rem;
+        font-size: 0.6875rem;
+        font-weight: bold;
+        color: var(--muted);
+      }
+      section.manuell h4 .anzahl {
+        display: inline-block;
+        min-width: 1.5rem;
+        margin-left: 0.35rem;
+        padding: 0 0.25rem;
+        border: 1px solid var(--linie);
+        background: var(--grund);
+        color: var(--fg);
+        text-align: center;
+      }
       section.manuell li { margin-bottom: 0.6rem; font-size: 0.75rem; }
       .originaltext { font-family: var(--antiqua); color: var(--muted); font-size: 0.8125rem; }
 

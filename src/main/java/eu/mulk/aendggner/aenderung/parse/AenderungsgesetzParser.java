@@ -7,8 +7,12 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.UnbekannterBefehl;
 import eu.mulk.aendggner.aenderung.Provenienz;
 import eu.mulk.aendggner.aenderung.Stelle;
 import eu.mulk.aendggner.gesetz.Gesetz;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import org.jboss.logging.Logger;
 import org.jspecify.annotations.Nullable;
@@ -77,6 +81,11 @@ public final class AenderungsgesetzParser {
         continue;
       }
       log.infof("Artikel %s betrifft %s.", artikel.label, ziel.jurabk());
+      // Nur einmal je Dokument: Ein Gesetzblatt kann mehrere Artikel auf dasselbe Stammgesetz
+      // richten, die Auskunft über dessen Stand gilt aber für alle zusammen.
+      standWarnung(GliederungsScanner.scanne(artikel.zeilen).vorspann(), ziel)
+          .filter(w -> !warnungen.contains(w))
+          .ifPresent(warnungen::add);
       if (paragraphenModus && artikelFilter != null && betroffeneArtikel.contains(artikel.label)) {
         // Ein GVBl-Heft enthält mehrere Gesetze mit je eigener §-Zählung.
         warnungen.add(
@@ -336,6 +345,90 @@ public final class AenderungsgesetzParser {
     return (ziel.kurzue() != null && vorspannStamm.contains(stammForm(ziel.kurzue())))
         || (ziel.langue() != null && vorspannStamm.contains(stammForm(ziel.langue())))
         || vorspann.matches(".*\\b" + Pattern.quote(ziel.jurabk()) + "\\b.*");
+  }
+
+  /**
+   * Der Einleitungssatz eines Änderungsgesetzes nennt die Fassung, die es fortschreibt („das
+   * zuletzt durch Artikel 5 des Gesetzes vom 19. Juni 2020 (BGBl. I S. 1385) geändert worden ist“),
+   * und die Quelle des Stammgesetzes nennt ihren eigenen Stand („Zuletzt geändert durch Art. 5 G v.
+   * 19.6.2020 I 1385“). Weichen beide voneinander ab, so rechnet das Werkzeug auf der falschen
+   * Fassung — und zwar meist auf einer <em>jüngeren</em>, weil die Portale die heute geltende
+   * ausliefern.
+   *
+   * <p>Das ist die häufigste Ursache liegengebliebener Befehle überhaupt und aus der Meldung „kommt
+   * im Zieltext nicht vor“ allein nicht zu erkennen. Verglichen werden die beiden Daten; ist das
+   * des Stammes das spätere, ergeht eine Warnung. Bei gleichem oder früherem Datum, bei fehlender
+   * Standangabe (handgepflegter Klartext) und bei unlesbarem Einleitungssatz schweigt die Prüfung —
+   * geraten wird nicht.
+   */
+  private static Optional<String> standWarnung(String vorspann, Gesetz ziel) {
+    var stand = ziel.stand();
+    if (stand == null || stand.juengsteAenderung() == null) {
+      return Optional.empty();
+    }
+    var satzDatum = EINLEITUNGS_DATUM.matcher(vorspann.replaceAll("\\s+", " "));
+    if (!satzDatum.find()) {
+      return Optional.empty();
+    }
+    var genannt =
+        datum(satzDatum.group(3), MONATSNAMEN.indexOf(satzDatum.group(2)) + 1, satzDatum.group(1));
+    if (genannt == null || !stand.juengsteAenderung().isAfter(genannt)) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        "Das Stammgesetz ist jünger als das Änderungsgesetz: Sein Wortlaut ist bis zum "
+            + stand.juengsteAenderung().format(DATUM)
+            + " fortgeschrieben („"
+            + stand.kommentar()
+            + "“), während der Einleitungssatz die Fassung vom "
+            + satzDatum.group(1)
+            + ". "
+            + satzDatum.group(2)
+            + " "
+            + satzDatum.group(3)
+            + " fortschreibt. Befehle, deren Zieltext „im Zieltext nicht vorkommt“, beruhen"
+            + " wahrscheinlich hierauf und nicht auf einem Mangel des Werkzeugs; abzuhelfen ist"
+            + " ihnen nur mit der zeitrichtigen Fassung des Stammgesetzes.");
+  }
+
+  private static final DateTimeFormatter DATUM =
+      DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.GERMAN);
+
+  /**
+   * „… zuletzt durch Artikel 5 des Gesetzes vom 19. Juni 2020 (BGBl. I S. 1385) geändert worden
+   * ist“ — das Datum der <em>letzten Änderung</em>, nicht das der Ausfertigung. Deshalb muss ihm
+   * die Änderungsklausel vorausgehen: Der Einleitungssatz nennt zuerst das Ausfertigungsdatum („Das
+   * Infektionsschutzgesetz vom 20. Juli 2000“), und dieses zu vergleichen ergäbe bei jedem je
+   * geänderten Gesetz eine Warnung.
+   */
+  private static final Pattern EINLEITUNGS_DATUM =
+      Pattern.compile(
+          "durch (?:Artikel|Art\\.)[^.]{0,80}?vom (\\d{1,2})\\. (\\p{Lu}\\p{L}+) (\\d{4})");
+
+  private static final List<String> MONATSNAMEN =
+      List.of(
+          "Januar",
+          "Februar",
+          "März",
+          "April",
+          "Mai",
+          "Juni",
+          "Juli",
+          "August",
+          "September",
+          "Oktober",
+          "November",
+          "Dezember");
+
+  private static @Nullable LocalDate datum(String jahr, int monat, String tag) {
+    if (monat < 1 || monat > 12) {
+      return null;
+    }
+    try {
+      return LocalDate.of(Integer.parseInt(jahr), monat, Integer.parseInt(tag));
+    } catch (RuntimeException e) {
+      return null;
+    }
   }
 
   private static final List<String> STAMM_SUFFIXE = List.of("es", "er", "en", "em", "e", "s", "n");

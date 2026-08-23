@@ -76,6 +76,19 @@ gerichtet ist, deren Zieltext nicht mehr besteht —, wird mitsamt der Begründu
 seines Scheiterns in den Abschnitt **Manuell prüfen** der Synopse aufgenommen. Er
 wird niemals stillschweigend übergangen.
 
+(5) Die Begründungen sind dort nach der Art des Grundes gebündelt und ausgezählt
+(Befehl nicht erkannt, Stelle nicht auffindbar, Zieltext nicht vorhanden,
+Fundstelle mehrdeutig, Bereich unbrauchbar, Zitat unbrauchbar, Bestand
+widerspricht dem Befehl, nicht unterstützt, Anwendung fehlgeschlagen). Der
+ausformulierte Grund bleibt daneben stehen; gebündelt ist nur, was ohne Ordnung
+eine bloße Liste wäre. Dieselbe Auszählung gibt `--dump-befehle` unter der
+Aufschrift „Gründe nach Häufigkeit“ aus.
+
+(6) Gibt die Quelle des Stammgesetzes ihren Stand an und ist ihr Wortlaut jünger
+als die Fassung, die der Einleitungssatz des Änderungsgesetzes fortschreibt, so
+wird das eigens gerügt. Das ist die häufigste Ursache liegengebliebener Befehle
+und aus der Begründung „kommt im Zieltext nicht vor“ allein nicht zu erkennen.
+
 ## § 2 Begriffsbestimmungen
 
 Im Sinne dieses Handbuchs ist

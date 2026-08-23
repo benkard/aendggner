@@ -47,21 +47,28 @@ final class InhaltsuebersichtAnwender {
         var von = zielKette(s.stelle());
         var bis = s.bisStelle() != null ? zielKette(s.bisStelle()) : von;
         if (von.isEmpty() || bis.isEmpty()) {
-          yield manuell(befehl, "Angabe-Bereich nennt kein auflösbares Ziel.");
+          yield manuell(
+              befehl, Grund.STELLE_NICHT_AUFLOESBAR, "Angabe-Bereich nennt kein auflösbares Ziel.");
         }
         yield ersetzeZeilen(normen, befehl, von, bis, s.text());
       }
       case Aufhebung a -> {
         var ziel = zielKette(a.stelle());
         if (ziel.isEmpty()) {
-          yield manuell(befehl, "Zu streichende Angabe nennt kein auflösbares Ziel.");
+          yield manuell(
+              befehl,
+              Grund.STELLE_NICHT_AUFLOESBAR,
+              "Zu streichende Angabe nennt kein auflösbares Ziel.");
         }
         yield ersetzeZeilen(normen, befehl, ziel, ziel, null);
       }
       case StrukturEinfuegung e -> {
         var anker = zielKette(e.stelle());
         if (anker.isEmpty()) {
-          yield manuell(befehl, "Einfügeanker in der Inhaltsübersicht nennt kein Ziel.");
+          yield manuell(
+              befehl,
+              Grund.STELLE_NICHT_AUFLOESBAR,
+              "Einfügeanker in der Inhaltsübersicht nennt kein Ziel.");
         }
         yield fuegeZeilenEin(normen, befehl, anker, e.vorher(), e.text());
       }
@@ -69,7 +76,10 @@ final class InhaltsuebersichtAnwender {
       case Aenderungsbefehl.Streichung ignoriert -> null;
       case Aenderungsbefehl.WoerterEinfuegung ignoriert -> null;
       default ->
-          manuell(befehl, "Änderungen an der Inhaltsübersicht werden nicht automatisch angewandt.");
+          manuell(
+              befehl,
+              Grund.NICHT_UNTERSTUETZT,
+              "Änderungen an der Inhaltsübersicht werden nicht automatisch angewandt.");
     };
   }
 
@@ -105,19 +115,23 @@ final class InhaltsuebersichtAnwender {
       @Nullable String zitat) {
     int normIndex = StellenAufloeser.normIndex(gesetzAus(normen), ENBEZ);
     if (normIndex < 0) {
-      return manuell(befehl, "Das Gesetz enthält keine Inhaltsübersicht.");
+      return manuell(
+          befehl, Grund.BESTAND_WIDERSPRICHT, "Das Gesetz enthält keine Inhaltsübersicht.");
     }
     var norm = normen.get(normIndex);
     var vonFund = findeZeile(norm, von);
     if (vonFund.fehler() != null) {
-      return manuell(befehl, vonFund.fehler());
+      return manuell(befehl, vonFund.grund(), vonFund.fehler());
     }
     var bisFund = von.equals(bis) ? vonFund : findeZeile(norm, bis);
     if (bisFund.fehler() != null) {
-      return manuell(befehl, bisFund.fehler());
+      return manuell(befehl, bisFund.grund(), bisFund.fehler());
     }
     if (vonFund.absatzIndex() != bisFund.absatzIndex() || bisFund.bisZeile() < vonFund.vonZeile()) {
-      return manuell(befehl, "Angabe-Bereich liegt nicht zusammenhängend in der Inhaltsübersicht.");
+      return manuell(
+          befehl,
+          Grund.BEREICH_UNGUELTIG,
+          "Angabe-Bereich liegt nicht zusammenhängend in der Inhaltsübersicht.");
     }
     var zeilen = new ArrayList<>(zeilenVon(norm, vonFund.absatzIndex()));
     var einrueckung = einrueckungVon(zeilen.get(vonFund.vonZeile()));
@@ -139,12 +153,13 @@ final class InhaltsuebersichtAnwender {
       String zitat) {
     int normIndex = StellenAufloeser.normIndex(gesetzAus(normen), ENBEZ);
     if (normIndex < 0) {
-      return manuell(befehl, "Das Gesetz enthält keine Inhaltsübersicht.");
+      return manuell(
+          befehl, Grund.BESTAND_WIDERSPRICHT, "Das Gesetz enthält keine Inhaltsübersicht.");
     }
     var norm = normen.get(normIndex);
     var fund = findeZeile(norm, anker);
     if (fund.fehler() != null) {
-      return manuell(befehl, fund.fehler());
+      return manuell(befehl, fund.grund(), fund.fehler());
     }
     var zeilen = new ArrayList<>(zeilenVon(norm, fund.absatzIndex()));
     var einrueckung = einrueckungVon(zeilen.get(fund.vonZeile()));
@@ -156,9 +171,10 @@ final class InhaltsuebersichtAnwender {
 
   // --- Zeilenmodell ----------------------------------------------------------------------------
 
-  private record Zeilenfund(int absatzIndex, int vonZeile, int bisZeile, @Nullable String fehler) {
-    static Zeilenfund fehlgeschlagen(String begruendung) {
-      return new Zeilenfund(-1, -1, -1, begruendung);
+  private record Zeilenfund(
+      int absatzIndex, int vonZeile, int bisZeile, @Nullable String fehler, @Nullable Grund grund) {
+    static Zeilenfund fehlgeschlagen(String begruendung, Grund grund) {
+      return new Zeilenfund(-1, -1, -1, begruendung, grund);
     }
   }
 
@@ -190,19 +206,22 @@ final class InhaltsuebersichtAnwender {
       int treffer = eindeutigeZeile(zeilen, zeilenMuster(ziel), von, bis);
       if (treffer == -2) {
         return Zeilenfund.fehlgeschlagen(
-            "Die Angabe zu „" + anzeige(ziel) + "“ ist in der Inhaltsübersicht mehrdeutig.");
+            "Die Angabe zu „" + anzeige(ziel) + "“ ist in der Inhaltsübersicht mehrdeutig.",
+            Grund.MEHRDEUTIG);
       }
       if (treffer >= 0) {
         if (gefunden != null) {
           return Zeilenfund.fehlgeschlagen(
-              "Die Angabe zu „" + anzeige(ziel) + "“ ist in der Inhaltsübersicht mehrdeutig.");
+              "Die Angabe zu „" + anzeige(ziel) + "“ ist in der Inhaltsübersicht mehrdeutig.",
+              Grund.MEHRDEUTIG);
         }
-        gefunden = new Zeilenfund(a, treffer, treffer, null);
+        gefunden = new Zeilenfund(a, treffer, treffer, null, null);
       }
     }
     if (gefunden == null) {
       return Zeilenfund.fehlgeschlagen(
-          "Die Angabe zu „" + anzeige(ziel) + "“ ist in der Inhaltsübersicht nicht auffindbar.");
+          "Die Angabe zu „" + anzeige(ziel) + "“ ist in der Inhaltsübersicht nicht auffindbar.",
+          Grund.STELLE_NICHT_AUFLOESBAR);
     }
     return gefunden;
   }
@@ -275,7 +294,8 @@ final class InhaltsuebersichtAnwender {
       List<Norm> normen, Neufassung befehl) {
     int normIndex = StellenAufloeser.normIndex(gesetzAus(normen), ENBEZ);
     if (normIndex < 0) {
-      return manuell(befehl, "Das Gesetz enthält keine Inhaltsübersicht.");
+      return manuell(
+          befehl, Grund.BESTAND_WIDERSPRICHT, "Das Gesetz enthält keine Inhaltsübersicht.");
     }
     var flach = befehl.neuerText().replaceAll("\\s+", " ").strip();
     flach = flach.replaceFirst("^Inhaltsübersicht\\s*", "");
@@ -284,6 +304,7 @@ final class InhaltsuebersichtAnwender {
     if (flach.contains("wie folgt geändert") || flach.contains(" wird wie folgt gefasst")) {
       return manuell(
           befehl,
+          Grund.ZITAT_UNBRAUCHBAR,
           "Das Zitat der neuen Inhaltsübersicht enthält Befehlstext — vermutlich ist ein"
               + " Anführungszeichen unbalanciert; bitte manuell prüfen.");
     }
@@ -305,7 +326,8 @@ final class InhaltsuebersichtAnwender {
       }
     }
     if (zeilen.size() < 2) {
-      return manuell(befehl, "Das Zitat enthält keine erkennbare Inhaltsübersicht.");
+      return manuell(
+          befehl, Grund.ZITAT_UNBRAUCHBAR, "Das Zitat enthält keine erkennbare Inhaltsübersicht.");
     }
     var norm = normen.get(normIndex);
     normen.set(
@@ -387,11 +409,17 @@ final class InhaltsuebersichtAnwender {
 
   private static AngewandteAenderung angewandt(Aenderungsbefehl befehl) {
     return new AngewandteAenderung(
-        befehl, Status.ANGEWANDT, "", new LinkedHashSet<>(List.of(ENBEZ)));
+        befehl, Status.ANGEWANDT, "", new LinkedHashSet<>(List.of(ENBEZ)), null);
   }
 
-  private static AngewandteAenderung manuell(Aenderungsbefehl befehl, String begruendung) {
-    return new AngewandteAenderung(befehl, Status.MANUELL_PRUEFEN, begruendung, Set.of());
+  private static AngewandteAenderung manuell(
+      Aenderungsbefehl befehl, @Nullable Grund grund, String begruendung) {
+    return new AngewandteAenderung(
+        befehl,
+        Status.MANUELL_PRUEFEN,
+        begruendung,
+        Set.of(),
+        grund == null ? Grund.STELLE_NICHT_AUFLOESBAR : grund);
   }
 
   private static eu.mulk.aendggner.gesetz.Gesetz gesetzAus(List<Norm> normen) {

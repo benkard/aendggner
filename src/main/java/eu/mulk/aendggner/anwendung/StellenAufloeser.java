@@ -26,14 +26,19 @@ final class StellenAufloeser {
   sealed interface Ergebnis {
     record Gefunden(Fundstelle fundstelle) implements Ergebnis {}
 
-    record NichtGefunden(String begruendung) implements Ergebnis {}
+    /**
+     * @param grund die Art des Grundes; der ausformulierte Grund steht daneben und bleibt
+     *     maßgeblich (siehe {@link Grund}).
+     */
+    record NichtGefunden(String begruendung, Grund grund) implements Ergebnis {}
   }
 
   private StellenAufloeser() {}
 
   static Ergebnis aufloese(Gesetz gesetz, Stelle stelle) {
     if (stelle.istLeer()) {
-      return new Ergebnis.NichtGefunden("Stelle nennt keine Fundstelle im Gesetz.");
+      return new Ergebnis.NichtGefunden(
+          "Stelle nennt keine Fundstelle im Gesetz.", Grund.STELLE_NICHT_AUFLOESBAR);
     }
 
     // 1. Norm bestimmen.
@@ -45,11 +50,14 @@ final class StellenAufloeser {
     } else if (stelle.anlagenEnbez().isPresent()) {
       enbez = stelle.anlagenEnbez().get();
     } else {
-      return new Ergebnis.NichtGefunden("Stelle nennt keinen Paragraphen: " + stelle.anzeigeText());
+      return new Ergebnis.NichtGefunden(
+          "Stelle nennt keinen Paragraphen: " + stelle.anzeigeText(),
+          Grund.STELLE_NICHT_AUFLOESBAR);
     }
     int normIndex = normIndex(gesetz, enbez);
     if (normIndex < 0) {
-      return new Ergebnis.NichtGefunden(enbez + " existiert nicht im Gesetz.");
+      return new Ergebnis.NichtGefunden(
+          enbez + " existiert nicht im Gesetz.", Grund.BESTAND_WIDERSPRICHT);
     }
     var norm = gesetz.normen().get(normIndex);
 
@@ -59,7 +67,8 @@ final class StellenAufloeser {
       var nummer = stelle.absatz().get().nummer();
       absatzIndex = absatzIndex(norm, nummer);
       if (absatzIndex < 0) {
-        return new Ergebnis.NichtGefunden(enbez + " hat keinen Absatz " + nummer + ".");
+        return new Ergebnis.NichtGefunden(
+            enbez + " hat keinen Absatz " + nummer + ".", Grund.STELLE_NICHT_AUFLOESBAR);
       }
     }
 
@@ -86,7 +95,8 @@ final class StellenAufloeser {
                       + norm.absaetze().size()
                       + " Absätze; „"
                       + stelle.anzeigeText()
-                      + "“ ist ohne Absatzangabe nicht eindeutig.");
+                      + "“ ist ohne Absatzangabe nicht eindeutig.",
+                  Grund.MEHRDEUTIG);
             }
             trefferAbsatz = i;
             trefferBereich = kandidat;
@@ -94,7 +104,8 @@ final class StellenAufloeser {
         }
         if (trefferAbsatz == null) {
           return new Ergebnis.NichtGefunden(
-              "„" + stelle.anzeigeText() + "“ ist im Text von " + enbez + " nicht auffindbar.");
+              "„" + stelle.anzeigeText() + "“ ist im Text von " + enbez + " nicht auffindbar.",
+              Grund.STELLE_NICHT_AUFLOESBAR);
         }
         return new Ergebnis.Gefunden(new Fundstelle(normIndex, trefferAbsatz, trefferBereich));
       }
@@ -104,7 +115,8 @@ final class StellenAufloeser {
     var bereich = loeseFeinKomponentenAuf(stelle, text);
     if (bereich == null) {
       return new Ergebnis.NichtGefunden(
-          "„" + stelle.anzeigeText() + "“ ist im Text von " + enbez + " nicht auffindbar.");
+          "„" + stelle.anzeigeText() + "“ ist im Text von " + enbez + " nicht auffindbar.",
+          Grund.STELLE_NICHT_AUFLOESBAR);
     }
     return new Ergebnis.Gefunden(new Fundstelle(normIndex, absatzIndex, bereich));
   }

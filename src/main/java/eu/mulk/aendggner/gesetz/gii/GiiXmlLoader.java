@@ -7,10 +7,12 @@ import eu.mulk.aendggner.gesetz.Absatz;
 import eu.mulk.aendggner.gesetz.Gesetz;
 import eu.mulk.aendggner.gesetz.Gliederung;
 import eu.mulk.aendggner.gesetz.Norm;
+import eu.mulk.aendggner.gesetz.Stand;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 import javax.xml.XMLConstants;
@@ -47,6 +49,7 @@ public final class GiiXmlLoader {
     String jurabk = null;
     String langue = null;
     String kurzue = null;
+    Stand stand = null;
     var normen = new ArrayList<Norm>();
     var gliederungen = new ArrayList<Gliederung>();
     Gliederung aktuelleGliederung = null;
@@ -61,6 +64,7 @@ public final class GiiXmlLoader {
         jurabk = kindText(metadaten, "jurabk");
         langue = kindText(metadaten, "langue");
         kurzue = kindText(metadaten, "kurzue");
+        stand = standangabe(metadaten);
       }
 
       var gliederungselement = erstesKind(metadaten, "gliederungseinheit");
@@ -91,7 +95,7 @@ public final class GiiXmlLoader {
     if (jurabk == null) {
       throw new SAXException("Keine <norm>-Elemente mit Metadaten gefunden: " + quelle.name());
     }
-    return new Gesetz(jurabk, langue, kurzue, normen, gliederungen);
+    return new Gesetz(jurabk, langue, kurzue, normen, gliederungen, stand);
   }
 
   private static ArrayList<Absatz> leseAbsaetze(Element normElement) {
@@ -159,6 +163,46 @@ public final class GiiXmlLoader {
       }
     }
     return null;
+  }
+
+  /** „… v. 19.6.2020 I 1385“ — das Datum, das eine Standangabe nennt. */
+  private static final Pattern STANDDATUM =
+      Pattern.compile("v\\. (\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})");
+
+  /**
+   * Der Stand des Gesetzes: die Standzeile im Wortlaut und das späteste Datum, das
+   * <em>irgendeine</em> Standangabe nennt. Die Hinweise („Änderung durch Art. 1 G v. 18.11.2020 …
+   * textlich nachgewiesen“) gehören dazu — sie bezeugen, dass der Wortlaut die Änderung bereits
+   * trägt, während die Standzeile noch die vorige nennt (siehe {@link Stand}).
+   */
+  private static @Nullable Stand standangabe(Element metadaten) {
+    String zeile = null;
+    LocalDate juengste = null;
+    for (var angabe : kindElemente(metadaten, "standangabe")) {
+      var kommentar = kindText(angabe, "standkommentar");
+      if (kommentar == null) {
+        continue;
+      }
+      if (zeile == null && "Stand".equals(kindText(angabe, "standtyp"))) {
+        zeile = kommentar;
+      }
+      var m = STANDDATUM.matcher(kommentar);
+      while (m.find()) {
+        try {
+          var datum =
+              LocalDate.of(
+                  Integer.parseInt(m.group(3)),
+                  Integer.parseInt(m.group(2)),
+                  Integer.parseInt(m.group(1)));
+          if (juengste == null || datum.isAfter(juengste)) {
+            juengste = datum;
+          }
+        } catch (RuntimeException ignoriert) {
+          // Ein verschriebenes Datum („19.5..2020“) kommt vor; es bleibt außer Betracht.
+        }
+      }
+    }
+    return zeile == null ? null : new Stand(zeile, juengste);
   }
 
   private static @Nullable String kindText(Element parent, String name) {

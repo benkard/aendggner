@@ -738,6 +738,87 @@ Fortschreibung der Prüfung
 
 (3) Der Prüfbestand umfasst hiernach dreihundertdreißig Prüfungen.
 
+
+Artikel 30
+Arten der Gründe
+
+(1) Neben den ausformulierten Grund tritt seine Art (Klasse „Grund“): Befehl
+    nicht erkannt, Stelle nicht auffindbar, Zieltext nicht vorhanden, Fundstelle
+    mehrdeutig, Bereich unbrauchbar, Zitat unbrauchbar, Bestand widerspricht dem
+    Befehl, nicht unterstützt, Anwendung fehlgeschlagen.
+
+(2) Die Art wird dort vergeben, wo der Grund entsteht. Die Hilfsergebnisse der
+    Stellenauflösung, der Textoperation und der Zeilensuche in der Inhalts-
+    übersicht führen sie mit ihrem Wortlaut, weil allein die erzeugende Stelle
+    sie kennt. Bleibt ein Verbund liegen, gilt die Art seines ersten
+    gescheiterten Teiles.
+
+(3) Der ausformulierte Grund bleibt unberührt und maßgeblich. Der Grundsatz der
+    Nichtverwerfung erfordert die genaue Auskunft im Einzelfall; die Art ordnet
+    sie nur.
+
+
+Artikel 31
+Darstellung und Auszählung
+
+(1) Der Abschnitt „Manuell prüfen“ der Synopse bündelt die Befehle nach der Art
+    des Grundes und stellt jeder Gruppe ihre Häufigkeit voran. Innerhalb der
+    Gruppe bleibt die Reihenfolge des Dokuments.
+
+(2) Der Schalter „--dump-befehle“ schließt mit der Tabelle „Gründe nach
+    Häufigkeit“.
+
+
+Artikel 32
+Rüge des jüngeren Stammgesetzes
+
+(1) Das Stammgesetz führt fortan den Stand, den seine Quelle angibt (Klasse
+    „Stand“). Maßgeblich ist nicht die Standzeile allein, sondern das späteste
+    Datum, das irgendeine Standangabe nennt: Die Hinweise der Form „Änderung
+    durch … textlich nachgewiesen, dokumentarisch noch nicht abschließend
+    bearbeitet“ bezeugen, dass der Wortlaut die Änderung bereits trägt, während
+    die Standzeile noch die vorige nennt.
+
+(2) Ist der Wortlaut des Stammgesetzes jünger als die Fassung, die der
+    Einleitungssatz des Änderungsgesetzes fortschreibt, so ergeht eine Warnung.
+    Sie nennt beide Daten und weist darauf hin, dass Befehle, deren Zieltext
+    „im Zieltext nicht vorkommt“, wahrscheinlich hierauf beruhen.
+
+(3) Die Warnung ergeht einmal je Dokument, auch wenn mehrere Artikel dasselbe
+    Stammgesetz betreffen. Bei fehlender Standangabe, bei unlesbarem
+    Einleitungssatz und bei gleichem oder früherem Datum schweigt die Prüfung;
+    geraten wird nicht.
+
+
+Artikel 33
+Anfügen ganzer Paragraphen
+
+Die ankerlose Anfügung ganzer Paragraphen wird angewandt, statt als nicht
+unterstützt gemeldet zu werden. Angefügt wird ans Ende des Gesetzes, bei
+benannter Gliederungseinheit ans Ende ihres Blocks; trägt das Zitat keinen
+Normkopf, bleibt der Befehl liegen. Die verankerte Form („Nach § 114 wird
+folgender § 115 angefügt“) war schon bisher eine Struktureinfügung und bleibt es.
+
+
+Artikel 34
+Einfügung am Ende einer Einheit
+
+Die Zurückweisung des Einfügeankers „am Ende“ für ganze Einheiten wird als
+bewusst gezogene Grenze kenntlich gemacht und ihre Meldung neu gefasst: Wo eine
+Einheit ans Ende tritt, sagt das Gesetzblatt „angefügt“. Die Verbindung kommt im
+gesamten Prüfbestand kein einziges Mal vor; Vorschriften auf Verdacht werden
+nicht geschrieben.
+
+
+Artikel 35
+Fortschreibung der Prüfung
+
+Der Prüfbestand umfasst hiernach zweiunddreißig Prüfungen mehr als vor dem
+Artikel 24, nämlich dreihundertzweiunddreißig. Neu sind namentlich die Prüfung
+des Anfügens ganzer Paragraphen samt der Begründung bei fehlendem Normkopf, die
+Prüfung der Bündelung im Abschnitt „Manuell prüfen“ und die Prüfung, dass die
+Altersrüge beim zeitrichtigen Stamm unterbleibt und beim heutigen einmal ergeht.
+
 ════════════════════════════════════════════════════════════════════════════════
  Fassung vom 22. August 2026,
  zuletzt geändert durch die am 22. August 2026 vorgenommenen Änderungen

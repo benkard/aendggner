@@ -72,6 +72,8 @@ class HtmlRendererTest {
 
     assertThat(html).contains("Manuell prüfen");
     assertThat(html).contains("Die Nummern 1 bis 3 werden aufgehoben.");
+    // Nach Art des Grundes gebündelt, mit vorangestellter Häufigkeit.
+    assertThat(html).contains("Befehl nicht erkannt").contains("<span class=\"anzahl\">1</span>");
   }
 
   @Test

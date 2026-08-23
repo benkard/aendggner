@@ -49,8 +49,16 @@ public final class BefehlAnwender {
     MANUELL_PRUEFEN
   }
 
+  /**
+   * Ein Protokolleintrag: was mit dem Befehl geschehen ist. Der ausformulierte Grund bleibt
+   * maßgeblich; {@code grund} ordnet ihn nur einer Art zu und ist bei angewandten Befehlen leer.
+   */
   public record AngewandteAenderung(
-      Aenderungsbefehl befehl, Status status, String begruendung, Set<String> betroffeneEnbez) {}
+      Aenderungsbefehl befehl,
+      Status status,
+      String begruendung,
+      Set<String> betroffeneEnbez,
+      @Nullable Grund grund) {}
 
   public record AnwendungsErgebnis(Gesetz neu, List<AngewandteAenderung> protokoll) {
 
@@ -303,7 +311,7 @@ public final class BefehlAnwender {
       }
       if (von == schritt) {
         // Ein Verbund ohne Teilbefehle — nichts anzuwenden, aber auch nichts zu verschweigen.
-        protokoll.add(manuell(befehle.get(i), "Verbund ohne Teilbefehle."));
+        protokoll.add(manuell(befehle.get(i), Grund.NICHT_ERKANNT, "Verbund ohne Teilbefehle."));
         continue;
       }
       if (schritte.get(von).ganzerBefehl()) {
@@ -323,10 +331,14 @@ public final class BefehlAnwender {
       int von) {
     var betroffene = new LinkedHashSet<String>();
     var fehler = new ArrayList<String>();
+    Grund ersterGrund = null;
     for (int k = 0; k < teilErgebnisse.size(); k++) {
       var ergebnis = teilErgebnisse.get(k);
       betroffene.addAll(ergebnis.betroffeneEnbez());
       if (ergebnis.status() != Status.ANGEWANDT) {
+        if (ersterGrund == null) {
+          ersterGrund = ergebnis.grund();
+        }
         fehler.add(
             "Teil "
                 + (k + 1)
@@ -337,10 +349,12 @@ public final class BefehlAnwender {
       }
     }
     if (fehler.isEmpty()) {
-      return new AngewandteAenderung(befehl, Status.ANGEWANDT, "", betroffene);
+      return new AngewandteAenderung(befehl, Status.ANGEWANDT, "", betroffene, null);
     }
+    // Ein Verbund kann aus mehreren Gründen liegenbleiben; maßgeblich für die Bündelung ist der
+    // erste, der aufgetreten ist. Die Wortlaute stehen ohnehin alle nebeneinander.
     return new AngewandteAenderung(
-        befehl, Status.MANUELL_PRUEFEN, String.join(" ", fehler), betroffene);
+        befehl, Status.MANUELL_PRUEFEN, String.join(" ", fehler), betroffene, ersterGrund);
   }
 
   /** Bezeichnungen, die ein Befehl freigibt — die Ausgangsstellen seiner Umnummerierungen. */
@@ -517,7 +531,7 @@ public final class BefehlAnwender {
   private static AngewandteAenderung wendeAn(
       List<Norm> normen, List<Gliederung> gliederungen, Aenderungsbefehl befehl) {
     if (befehl instanceof UnbekannterBefehl) {
-      return manuell(befehl, "Befehl nicht erkannt.");
+      return manuell(befehl, Grund.NICHT_ERKANNT, "Befehl nicht erkannt.");
     }
     // Sammelbefehle vor den Spezialweichen dispatchen (jeder Teil wird einzeln geroutet).
     if (befehl instanceof Sammelbefehl s) {
@@ -539,7 +553,11 @@ public final class BefehlAnwender {
           case Neufassung n -> wendeGliederungNeufassungAn(gliederungen, n);
           case Aufhebung a -> wendeGliederungStreichungAn(gliederungen, a);
           case Umnummerierung u -> wendeGliederungUmnummerierungAn(gliederungen, u);
-          default -> manuell(befehl, "Strukturänderung wird nicht automatisch angewandt.");
+          default ->
+              manuell(
+                  befehl,
+                  Grund.NICHT_UNTERSTUETZT,
+                  "Strukturänderung wird nicht automatisch angewandt.");
         };
       }
       return switch (befehl) {
@@ -557,6 +575,7 @@ public final class BefehlAnwender {
         case BereichsUmnummerierung b ->
             manuell(
                 befehl,
+                Grund.BEREICH_UNGUELTIG,
                 "Der Bereich "
                     + b.stelle().anzeigeText()
                     + " bis "
@@ -570,10 +589,10 @@ public final class BefehlAnwender {
         case GliederungsUeberschriften g ->
             wendeGliederungsUeberschriftenAn(normen, gliederungen, g);
         case Sammelbefehl s -> wendeSammelAn(normen, gliederungen, s);
-        case UnbekannterBefehl u -> manuell(befehl, "Befehl nicht erkannt.");
+        case UnbekannterBefehl u -> manuell(befehl, Grund.NICHT_ERKANNT, "Befehl nicht erkannt.");
       };
     } catch (RuntimeException e) {
-      return manuell(befehl, "Anwendung fehlgeschlagen: " + e);
+      return manuell(befehl, Grund.FEHLGESCHLAGEN, "Anwendung fehlgeschlagen: " + e);
     }
   }
 
@@ -583,7 +602,7 @@ public final class BefehlAnwender {
       List<Gliederung> gliederungen, Neufassung befehl) {
     int idx = findeGliederung(gliederungen, befehl.stelle().gliederungsPfad());
     if (idx < 0) {
-      return manuell(befehl, "Gliederungseinheit nicht gefunden.");
+      return manuell(befehl, Grund.STELLE_NICHT_AUFLOESBAR, "Gliederungseinheit nicht gefunden.");
     }
     var alt = gliederungen.get(idx);
     var titel = befehl.neuerText().replaceAll("\\s+", " ").strip();
@@ -603,7 +622,7 @@ public final class BefehlAnwender {
       List<Gliederung> gliederungen, Aufhebung befehl) {
     int idx = findeGliederung(gliederungen, befehl.stelle().gliederungsPfad());
     if (idx < 0) {
-      return manuell(befehl, "Gliederungseinheit nicht gefunden.");
+      return manuell(befehl, Grund.STELLE_NICHT_AUFLOESBAR, "Gliederungseinheit nicht gefunden.");
     }
     var alt = gliederungen.get(idx);
     gliederungen.set(idx, alt.mitTitel("(weggefallen)"));
@@ -617,11 +636,14 @@ public final class BefehlAnwender {
       List<Gliederung> gliederungen, Umnummerierung befehl) {
     int idx = findeGliederung(gliederungen, befehl.stelle().gliederungsPfad());
     if (idx < 0) {
-      return manuell(befehl, "Gliederungseinheit nicht gefunden: " + befehl.stelle().anzeigeText());
+      return manuell(
+          befehl,
+          Grund.STELLE_NICHT_AUFLOESBAR,
+          "Gliederungseinheit nicht gefunden: " + befehl.stelle().anzeigeText());
     }
     var neuPfad = befehl.neu().gliederungsPfad();
     if (neuPfad.isEmpty()) {
-      return manuell(befehl, "Neue Gliederungsbezeichnung fehlt.");
+      return manuell(befehl, Grund.NICHT_ERKANNT, "Neue Gliederungsbezeichnung fehlt.");
     }
     var neueBezeichnung = neuPfad.get(neuPfad.size() - 1).bezeichnung();
     var alt = gliederungen.get(idx);
@@ -646,7 +668,10 @@ public final class BefehlAnwender {
       var bezeichnung = befehl.neue().get(i).bezeichnung();
       starts[i] = flach.indexOf(bezeichnung, suchAb);
       if (starts[i] < 0) {
-        return manuell(befehl, "Die Überschrift zu „" + bezeichnung + "“ fehlt im Zitat.");
+        return manuell(
+            befehl,
+            Grund.ZITAT_UNBRAUCHBAR,
+            "Die Überschrift zu „" + bezeichnung + "“ fehlt im Zitat.");
       }
       suchAb = starts[i] + bezeichnung.length();
     }
@@ -668,6 +693,7 @@ public final class BefehlAnwender {
         if (idx < 0) {
           return manuell(
               befehl,
+              Grund.STELLE_NICHT_AUFLOESBAR,
               "Gliederungseinheit nicht gefunden: " + pfad.get(pfad.size() - 1).bezeichnung());
         }
         indizes.add(idx);
@@ -692,7 +718,7 @@ public final class BefehlAnwender {
     // Einfügeform: hinter dem Anker-§.
     var aufloesung = loeseNormAuf(normen, befehl.stelle());
     if (aufloesung.fehler() != null) {
-      return manuell(befehl, aufloesung.fehler());
+      return manuell(befehl, aufloesung.grund(), aufloesung.fehler());
     }
     var anker = normen.get(aufloesung.normIndex());
     int gliederungsPos =
@@ -766,7 +792,8 @@ public final class BefehlAnwender {
               if (befehl.amEnde()) {
                 var gestutzt = text.stripTrailing();
                 if (!gestutzt.endsWith(befehl.alt())) {
-                  return TextErgebnis.fehler("Der Text endet nicht mit „" + befehl.alt() + "“.");
+                  return TextErgebnis.fehler(
+                      "Der Text endet nicht mit „" + befehl.alt() + "“.", Grund.ZIELTEXT_FEHLT);
                 }
                 var rumpf = gestutzt.substring(0, gestutzt.length() - befehl.alt().length());
                 var fuge =
@@ -779,7 +806,8 @@ public final class BefehlAnwender {
               }
               int anzahl = zaehleVorkommen(text, befehl.alt());
               if (anzahl == 0) {
-                return TextErgebnis.fehler("„" + befehl.alt() + "“ kommt im Zieltext nicht vor.");
+                return TextErgebnis.fehler(
+                    "„" + befehl.alt() + "“ kommt im Zieltext nicht vor.", Grund.ZIELTEXT_FEHLT);
               }
               if (anzahl > 1 && !befehl.jeweils()) {
                 return TextErgebnis.fehler(
@@ -787,7 +815,8 @@ public final class BefehlAnwender {
                         + befehl.alt()
                         + "“ kommt "
                         + anzahl
-                        + "-mal vor (ohne „jeweils“ mehrdeutig).");
+                        + "-mal vor (ohne „jeweils“ mehrdeutig).",
+                    Grund.MEHRDEUTIG);
               }
               if (brauchtFuge(befehl.alt(), befehl.neu())) {
                 return TextErgebnis.ok(ersetzeMitFuge(text, befehl.alt(), befehl.neu()));
@@ -845,11 +874,12 @@ public final class BefehlAnwender {
               int anzahl = zaehleVorkommen(text, befehl.woerter());
               if (anzahl == 0) {
                 return TextErgebnis.fehler(
-                    "„" + befehl.woerter() + "“ kommt im Zieltext nicht vor.");
+                    "„" + befehl.woerter() + "“ kommt im Zieltext nicht vor.",
+                    Grund.ZIELTEXT_FEHLT);
               }
               if (anzahl > 1) {
                 return TextErgebnis.fehler(
-                    "„" + befehl.woerter() + "“ kommt " + anzahl + "-mal vor.");
+                    "„" + befehl.woerter() + "“ kommt " + anzahl + "-mal vor.", Grund.MEHRDEUTIG);
               }
               int naht = findeVorkommen(text, befehl.woerter(), 0);
               return TextErgebnis.ok(
@@ -870,7 +900,7 @@ public final class BefehlAnwender {
                   case WortAnker.NachWoertern nach -> {
                     var pruefung = eindeutigeFundstelle(text, nach.woerter());
                     if (pruefung.fehler() != null) {
-                      yield TextErgebnis.fehler(pruefung.fehler());
+                      yield TextErgebnis.fehler(pruefung.fehler(), pruefung.grund());
                     }
                     int ende = pruefung.index() + nach.woerter().length();
                     yield TextErgebnis.ok(
@@ -882,7 +912,7 @@ public final class BefehlAnwender {
                   case WortAnker.VorWoertern vor -> {
                     var pruefung = eindeutigeFundstelle(text, vor.woerter());
                     if (pruefung.fehler() != null) {
-                      yield TextErgebnis.fehler(pruefung.fehler());
+                      yield TextErgebnis.fehler(pruefung.fehler(), pruefung.grund());
                     }
                     yield TextErgebnis.ok(
                         text.substring(0, pruefung.index())
@@ -893,7 +923,8 @@ public final class BefehlAnwender {
                   case WortAnker.VorKommaAmEnde ignoriert -> {
                     var gestutzt = text.stripTrailing();
                     if (!gestutzt.endsWith(",")) {
-                      yield TextErgebnis.fehler("Der Zieltext endet nicht mit einem Komma.");
+                      yield TextErgebnis.fehler(
+                          "Der Zieltext endet nicht mit einem Komma.", Grund.ZIELTEXT_FEHLT);
                     }
                     yield TextErgebnis.ok(
                         gestutzt.substring(0, gestutzt.length() - 1)
@@ -926,7 +957,7 @@ public final class BefehlAnwender {
     if (stelle.betrifftUeberschrift()) {
       var aufloesung = loeseNormAuf(normen, stelle);
       if (aufloesung.fehler() != null) {
-        return manuell(befehl, aufloesung.fehler());
+        return manuell(befehl, aufloesung.grund(), aufloesung.fehler());
       }
       var norm = normen.get(aufloesung.normIndex());
       var titel = befehl.neuerText().replaceFirst("^(?:§|Art\\.)\\s*\\S+\\s+", "").strip();
@@ -937,7 +968,7 @@ public final class BefehlAnwender {
     if (nurNorm(stelle)) {
       var aufloesung = loeseNormAuf(normen, stelle);
       if (aufloesung.fehler() != null) {
-        return manuell(befehl, aufloesung.fehler());
+        return manuell(befehl, aufloesung.grund(), aufloesung.fehler());
       }
       var alteNorm = normen.get(aufloesung.normIndex());
       var neueNorm = parseNorm(befehl.neuerText(), alteNorm.enbez(), alteNorm);
@@ -948,7 +979,7 @@ public final class BefehlAnwender {
     if (stelle.absatz().isPresent() && feinsteIstAbsatz(stelle)) {
       var ergebnis = StellenAufloeser.aufloese(gesetzAus(normen), stelle);
       if (ergebnis instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
-        return manuell(befehl, nicht.begruendung());
+        return manuell(befehl, nicht.grund(), nicht.begruendung());
       }
       var fundstelle = ((StellenAufloeser.Ergebnis.Gefunden) ergebnis).fundstelle();
       var norm = normen.get(fundstelle.normIndex());
@@ -1001,11 +1032,14 @@ public final class BefehlAnwender {
       case ABSATZ -> {
         var stelle = befehl.stelle();
         if (stelle.absatz().isEmpty()) {
-          yield manuell(befehl, "Ersetzungsziel nennt keinen Absatz: " + stelle.anzeigeText());
+          yield manuell(
+              befehl,
+              Grund.STELLE_NICHT_AUFLOESBAR,
+              "Ersetzungsziel nennt keinen Absatz: " + stelle.anzeigeText());
         }
         var ergebnis = StellenAufloeser.aufloese(gesetzAus(normen), stelle);
         if (ergebnis instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
-          yield manuell(befehl, nicht.begruendung());
+          yield manuell(befehl, nicht.grund(), nicht.begruendung());
         }
         var fundstelle = ((StellenAufloeser.Ergebnis.Gefunden) ergebnis).fundstelle();
         var norm = normen.get(fundstelle.normIndex());
@@ -1015,16 +1049,20 @@ public final class BefehlAnwender {
         if (befehl.bisStelle() != null) {
           var e2 = StellenAufloeser.aufloese(gesetzAus(normen), befehl.bisStelle());
           if (e2 instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
-            yield manuell(befehl, nicht.begruendung());
+            yield manuell(befehl, nicht.grund(), nicht.begruendung());
           }
           var f2 = ((StellenAufloeser.Ergebnis.Gefunden) e2).fundstelle();
           if (f2.normIndex() != fundstelle.normIndex() || f2.absatzIndex() == null) {
-            yield manuell(befehl, "Ersetzungsbereich liegt nicht in einer einzigen Norm.");
+            yield manuell(
+                befehl,
+                Grund.BEREICH_UNGUELTIG,
+                "Ersetzungsbereich liegt nicht in einer einzigen Norm.");
           }
           bisIndex = f2.absatzIndex();
         }
         if (bisIndex < vonIndex) {
-          yield manuell(befehl, "Ersetzungsbereich ist leer oder absteigend.");
+          yield manuell(
+              befehl, Grund.BEREICH_UNGUELTIG, "Ersetzungsbereich ist leer oder absteigend.");
         }
         var absaetze = new ArrayList<>(norm.absaetze());
         for (int k = bisIndex; k >= vonIndex; k--) {
@@ -1066,23 +1104,25 @@ public final class BefehlAnwender {
         // wird entfernt und durch die Paragraphen des Blocks ersetzt.
         var aufloesung = loeseNormAuf(normen, befehl.stelle());
         if (aufloesung.fehler() != null) {
-          yield manuell(befehl, aufloesung.fehler());
+          yield manuell(befehl, aufloesung.grund(), aufloesung.fehler());
         }
         int vonIndex = aufloesung.normIndex();
         int bisIndex = vonIndex;
         if (befehl.bisStelle() != null) {
           var a2 = loeseNormAuf(normen, befehl.bisStelle());
           if (a2.fehler() != null) {
-            yield manuell(befehl, a2.fehler());
+            yield manuell(befehl, a2.grund(), a2.fehler());
           }
           bisIndex = a2.normIndex();
         }
         if (bisIndex < vonIndex) {
-          yield manuell(befehl, "Ersetzungsbereich ist leer oder absteigend.");
+          yield manuell(
+              befehl, Grund.BEREICH_UNGUELTIG, "Ersetzungsbereich ist leer oder absteigend.");
         }
         var neue = parseNormenBlock(befehl.text(), normen.get(vonIndex).gliederung());
         if (neue.isEmpty()) {
-          yield manuell(befehl, "Im Ersetzungsblock wurde kein Paragraph erkannt.");
+          yield manuell(
+              befehl, Grund.ZITAT_UNBRAUCHBAR, "Im Ersetzungsblock wurde kein Paragraph erkannt.");
         }
         for (int k = bisIndex; k >= vonIndex; k--) {
           normen.remove(k);
@@ -1102,11 +1142,11 @@ public final class BefehlAnwender {
       List<Norm> normen, StrukturErsetzung befehl) {
     var e1 = StellenAufloeser.aufloese(gesetzAus(normen), befehl.stelle());
     if (e1 instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
-      return manuell(befehl, nicht.begruendung());
+      return manuell(befehl, nicht.grund(), nicht.begruendung());
     }
     var e2 = StellenAufloeser.aufloese(gesetzAus(normen), befehl.bisStelle());
     if (e2 instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
-      return manuell(befehl, nicht.begruendung());
+      return manuell(befehl, nicht.grund(), nicht.begruendung());
     }
     var f1 = ((StellenAufloeser.Ergebnis.Gefunden) e1).fundstelle();
     var f2 = ((StellenAufloeser.Ergebnis.Gefunden) e2).fundstelle();
@@ -1115,12 +1155,13 @@ public final class BefehlAnwender {
         || !f1.absatzIndex().equals(f2.absatzIndex())
         || f1.bereich() == null
         || f2.bereich() == null) {
-      return manuell(befehl, "Satz-Bereich liegt nicht in einem einzigen Absatz.");
+      return manuell(
+          befehl, Grund.BEREICH_UNGUELTIG, "Satz-Bereich liegt nicht in einem einzigen Absatz.");
     }
     int von = f1.bereich().von();
     int bis = f2.bereich().bis();
     if (bis < von) {
-      return manuell(befehl, "Satz-Bereich ist leer oder absteigend.");
+      return manuell(befehl, Grund.BEREICH_UNGUELTIG, "Satz-Bereich ist leer oder absteigend.");
     }
     var norm = normen.get(f1.normIndex());
     var absaetze = new ArrayList<>(norm.absaetze());
@@ -1144,11 +1185,11 @@ public final class BefehlAnwender {
       List<Norm> normen, StrukturErsetzung befehl) {
     var e1 = StellenAufloeser.aufloese(gesetzAus(normen), befehl.stelle());
     if (e1 instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
-      return manuell(befehl, nicht.begruendung());
+      return manuell(befehl, nicht.grund(), nicht.begruendung());
     }
     var e2 = StellenAufloeser.aufloese(gesetzAus(normen), befehl.bisStelle());
     if (e2 instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
-      return manuell(befehl, nicht.begruendung());
+      return manuell(befehl, nicht.grund(), nicht.begruendung());
     }
     var f1 = ((StellenAufloeser.Ergebnis.Gefunden) e1).fundstelle();
     var f2 = ((StellenAufloeser.Ergebnis.Gefunden) e2).fundstelle();
@@ -1157,12 +1198,16 @@ public final class BefehlAnwender {
         || !f1.absatzIndex().equals(f2.absatzIndex())
         || f1.bereich() == null
         || f2.bereich() == null) {
-      return manuell(befehl, "Ersetzungsbereich liegt nicht in einem einzigen Absatz.");
+      return manuell(
+          befehl,
+          Grund.BEREICH_UNGUELTIG,
+          "Ersetzungsbereich liegt nicht in einem einzigen Absatz.");
     }
     int von = f1.bereich().von();
     int bis = f2.bereich().bis();
     if (bis < von) {
-      return manuell(befehl, "Ersetzungsbereich ist leer oder absteigend.");
+      return manuell(
+          befehl, Grund.BEREICH_UNGUELTIG, "Ersetzungsbereich ist leer oder absteigend.");
     }
     var norm = normen.get(f1.normIndex());
     var absaetze = new ArrayList<>(norm.absaetze());
@@ -1186,7 +1231,7 @@ public final class BefehlAnwender {
       case PARAGRAPH -> {
         var aufloesung = loeseNormAuf(normen, befehl.stelle());
         if (aufloesung.fehler() != null) {
-          yield manuell(befehl, aufloesung.fehler());
+          yield manuell(befehl, aufloesung.grund(), aufloesung.fehler());
         }
         var anker = normen.get(aufloesung.normIndex());
         int position = aufloesung.normIndex() + (befehl.vorher() ? 0 : 1);
@@ -1195,11 +1240,15 @@ public final class BefehlAnwender {
         if (befehl.bezeichnung() == null) {
           var neue = parseNormenBlock(befehl.text(), anker.gliederung());
           if (neue.isEmpty()) {
-            yield manuell(befehl, "Im Einfügeblock wurde kein Paragraph erkannt.");
+            yield manuell(
+                befehl, Grund.ZITAT_UNBRAUCHBAR, "Im Einfügeblock wurde kein Paragraph erkannt.");
           }
           for (var n : neue) {
             if (StellenAufloeser.normIndex(gesetzAus(normen), n.enbez()) >= 0) {
-              yield manuell(befehl, n.enbez() + " existiert bereits im Stammgesetz.");
+              yield manuell(
+                  befehl,
+                  Grund.BESTAND_WIDERSPRICHT,
+                  n.enbez() + " existiert bereits im Stammgesetz.");
             }
           }
           normen.addAll(position, neue);
@@ -1209,7 +1258,8 @@ public final class BefehlAnwender {
         var sigelNeu = befehl.stelle().paragraph().map(Stelle.Paragraph::sigel).orElse("§");
         var enbezNeu = sigelNeu + " " + befehl.bezeichnung();
         if (StellenAufloeser.normIndex(gesetzAus(normen), enbezNeu) >= 0) {
-          yield manuell(befehl, enbezNeu + " existiert bereits im Stammgesetz.");
+          yield manuell(
+              befehl, Grund.BESTAND_WIDERSPRICHT, enbezNeu + " existiert bereits im Stammgesetz.");
         }
         var neueNorm =
             parseNorm(
@@ -1222,11 +1272,14 @@ public final class BefehlAnwender {
       case ABSATZ -> {
         var stelle = befehl.stelle();
         if (stelle.absatz().isEmpty()) {
-          yield manuell(befehl, "Einfügeanker nennt keinen Absatz: " + stelle.anzeigeText());
+          yield manuell(
+              befehl,
+              Grund.STELLE_NICHT_AUFLOESBAR,
+              "Einfügeanker nennt keinen Absatz: " + stelle.anzeigeText());
         }
         var ergebnis = StellenAufloeser.aufloese(gesetzAus(normen), stelle);
         if (ergebnis instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
-          yield manuell(befehl, nicht.begruendung());
+          yield manuell(befehl, nicht.grund(), nicht.begruendung());
         }
         var fundstelle = ((StellenAufloeser.Ergebnis.Gefunden) ergebnis).fundstelle();
         var norm = normen.get(fundstelle.normIndex());
@@ -1296,18 +1349,23 @@ public final class BefehlAnwender {
                   switch (anker) {
                     case WortAnker.NachWoertern nach -> nach.woerter();
                     case WortAnker.VorWoertern vor -> vor.woerter();
-                    // „am Ende“ ist kein Einfügeanker für ganze Einheiten — dafür gibt es die
-                    // Anfügung.
+                    // „am Ende“ und „vor dem Komma am Ende“ sind keine Einfügeanker für ganze
+                    // Einheiten: Wo eine Einheit ans Ende tritt, sagt das Gesetzblatt „angefügt“,
+                    // und dafür gibt es die Anfügung. Die Grenze ist bewusst gezogen und nicht
+                    // etwa eine offene Lücke — im gesamten Prüfbestand (elf Änderungsdokumente aus
+                    // Bund und sieben Ländern) kommt die Verbindung kein einziges Mal vor.
                     case WortAnker.AmEnde ignoriert -> null;
                     case WortAnker.VorKommaAmEnde ignoriert -> null;
                   };
               if (woerter == null) {
                 return TextErgebnis.fehler(
-                    "Einfügeanker ohne Wortlaut wird für Struktureinfügungen nicht unterstützt.");
+                    "Eine ganze Einheit wird nicht „am Ende“ eingefügt, sondern angefügt;"
+                        + " so bezeichnet es auch das Gesetzblatt.",
+                    Grund.NICHT_UNTERSTUETZT);
               }
               var pruefung = eindeutigeFundstelle(text, woerter);
               if (pruefung.fehler() != null) {
-                return TextErgebnis.fehler(pruefung.fehler());
+                return TextErgebnis.fehler(pruefung.fehler(), pruefung.grund());
               }
               int zeilenAnfang = text.lastIndexOf('\n', pruefung.index()) + 1;
               int zeilenEnde = text.indexOf('\n', pruefung.index());
@@ -1332,7 +1390,7 @@ public final class BefehlAnwender {
       case ABSATZ -> {
         var aufloesung = loeseNormAuf(normen, befehl.stelle());
         if (aufloesung.fehler() != null) {
-          yield manuell(befehl, aufloesung.fehler());
+          yield manuell(befehl, aufloesung.grund(), aufloesung.fehler());
         }
         var norm = normen.get(aufloesung.normIndex());
         var absaetze = new ArrayList<>(norm.absaetze());
@@ -1360,8 +1418,62 @@ public final class BefehlAnwender {
                         .orElse("");
                 return TextErgebnis.ok(text.stripTrailing() + "\n" + block);
               });
-      case PARAGRAPH -> manuell(befehl, "Anfügen ganzer Paragraphen wird nicht unterstützt.");
+      case PARAGRAPH -> haengeParagraphenAn(normen, befehl);
     };
+  }
+
+  /**
+   * „Dem Gesetz werden die folgenden §§ … angefügt“ — ohne Anker. Die verankerte Form („Nach § 114
+   * wird folgender § 115 angefügt“) ist eine Struktureinfügung und läuft dort; hier geht es um den
+   * Fall, dass der Befehl nur das Ende bezeichnet.
+   *
+   * <p>Angehängt wird ans Ende des Gesetzes, bei benannter Gliederungseinheit ans Ende ihres
+   * Blocks. Trägt das Zitat keinen Normkopf, bleibt der Befehl liegen — ein Wortlaut ohne
+   * Bezeichnung ließe sich nur raten.
+   */
+  private static AngewandteAenderung haengeParagraphenAn(List<Norm> normen, Anfuegung befehl) {
+    var pfad = befehl.stelle().gliederungsPfad();
+    var gliederung = pfad.isEmpty() ? null : gliederungVon(normen, pfad);
+    var neue = parseNormenBlock(befehl.text(), gliederung);
+    if (neue.isEmpty()) {
+      return manuell(
+          befehl, Grund.ZITAT_UNBRAUCHBAR, "Im angefügten Block wurde kein Paragraph erkannt.");
+    }
+    for (var n : neue) {
+      if (StellenAufloeser.normIndex(gesetzAus(normen), n.enbez()) >= 0) {
+        return manuell(
+            befehl, Grund.BESTAND_WIDERSPRICHT, n.enbez() + " existiert bereits im Stammgesetz.");
+      }
+    }
+    normen.addAll(endeDesBlocks(normen, gliederung), neue);
+    return angewandt(befehl, neue.stream().map(Norm::enbez).toList());
+  }
+
+  /** Die Gliederung, die der Pfad benennt; {@code null}, wenn keine Norm ihr angehört. */
+  private static @Nullable Gliederung gliederungVon(
+      List<Norm> normen, List<Stelle.Gliederungseinheit> pfad) {
+    var bezeichnung = pfad.get(pfad.size() - 1).bezeichnung();
+    for (var norm : normen) {
+      var g = norm.gliederung();
+      if (g != null && g.bezeichnung().equals(bezeichnung)) {
+        return g;
+      }
+    }
+    return null;
+  }
+
+  /** Hinter die letzte Norm der Gliederung — ohne Gliederung ans Ende des Gesetzes. */
+  private static int endeDesBlocks(List<Norm> normen, @Nullable Gliederung gliederung) {
+    if (gliederung == null) {
+      return normen.size();
+    }
+    int ende = normen.size();
+    for (int i = 0; i < normen.size(); i++) {
+      if (gliederung.equals(normen.get(i).gliederung())) {
+        ende = i + 1;
+      }
+    }
+    return ende;
   }
 
   private static AngewandteAenderung wendeAufhebungAn(List<Norm> normen, Aufhebung befehl) {
@@ -1370,7 +1482,7 @@ public final class BefehlAnwender {
     if (stelle.absatzbezeichnung().isPresent()) {
       var aufloesung = loeseNormAuf(normen, stelle);
       if (aufloesung.fehler() != null) {
-        return manuell(befehl, aufloesung.fehler());
+        return manuell(befehl, aufloesung.grund(), aufloesung.fehler());
       }
       var norm = normen.get(aufloesung.normIndex());
       var nummer = stelle.absatzbezeichnung().get().nummer();
@@ -1389,13 +1501,14 @@ public final class BefehlAnwender {
           return angewandt(befehl, norm.enbez());
         }
       }
-      return manuell(befehl, "Absatz (" + nummer + ") nicht gefunden.");
+      return manuell(
+          befehl, Grund.STELLE_NICHT_AUFLOESBAR, "Absatz (" + nummer + ") nicht gefunden.");
     }
 
     if (nurNorm(stelle)) {
       var aufloesung = loeseNormAuf(normen, stelle);
       if (aufloesung.fehler() != null) {
-        return manuell(befehl, aufloesung.fehler());
+        return manuell(befehl, aufloesung.grund(), aufloesung.fehler());
       }
       var norm = normen.get(aufloesung.normIndex());
       if (norm.weggefallen()) {
@@ -1409,7 +1522,7 @@ public final class BefehlAnwender {
     if (stelle.absatz().isPresent() && feinsteIstAbsatz(stelle)) {
       var ergebnis = StellenAufloeser.aufloese(gesetzAus(normen), stelle);
       if (ergebnis instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
-        return manuell(befehl, nicht.begruendung());
+        return manuell(befehl, nicht.grund(), nicht.begruendung());
       }
       var fundstelle = ((StellenAufloeser.Ergebnis.Gefunden) ergebnis).fundstelle();
       var norm = normen.get(fundstelle.normIndex());
@@ -1458,12 +1571,14 @@ public final class BefehlAnwender {
       var enbezNeu = befehl.neu().paragraph().get().enbez();
       int idx = StellenAufloeser.normIndex(gesetzAus(normen), enbezAlt);
       if (idx < 0) {
-        return manuell(befehl, enbezAlt + " existiert nicht im Gesetz.");
+        return manuell(
+            befehl, Grund.BESTAND_WIDERSPRICHT, enbezAlt + " existiert nicht im Gesetz.");
       }
       if (!enbezNeu.equals(enbezAlt)) {
         int zielIdx = StellenAufloeser.normIndex(gesetzAus(normen), enbezNeu);
         if (zielIdx >= 0 && !normen.get(zielIdx).weggefallen()) {
-          return manuell(befehl, enbezNeu + " existiert bereits im Gesetz.");
+          return manuell(
+              befehl, Grund.BESTAND_WIDERSPRICHT, enbezNeu + " existiert bereits im Gesetz.");
         }
         // Eine bereits weggefallene Zielnorm wird durch die Umnummerierung überschrieben.
         if (zielIdx >= 0) {
@@ -1487,7 +1602,7 @@ public final class BefehlAnwender {
         && feinsteIstAbsatz(befehl.neu())) {
       var ergebnis = StellenAufloeser.aufloese(gesetzAus(normen), befehl.stelle());
       if (ergebnis instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
-        return manuell(befehl, nicht.begruendung());
+        return manuell(befehl, nicht.grund(), nicht.begruendung());
       }
       var fundstelle = ((StellenAufloeser.Ergebnis.Gefunden) ergebnis).fundstelle();
       var norm = normen.get(fundstelle.normIndex());
@@ -1532,7 +1647,8 @@ public final class BefehlAnwender {
                       + alteMarke
                       + "“ steht nicht am Anfang von "
                       + befehl.stelle().anzeigeText()
-                      + ".");
+                      + ".",
+                  Grund.ZIELTEXT_FEHLT);
             }
             var umbenannt =
                 text.substring(0, bereich.von())
@@ -1550,7 +1666,7 @@ public final class BefehlAnwender {
     if (altSatz != null && neuSatz != null) {
       var ergebnis = StellenAufloeser.aufloese(gesetzAus(normen), befehl.stelle());
       if (ergebnis instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
-        return manuell(befehl, nicht.begruendung());
+        return manuell(befehl, nicht.grund(), nicht.begruendung());
       }
       var fundstelle = ((StellenAufloeser.Ergebnis.Gefunden) ergebnis).fundstelle();
       if (fundstelle.bereich() != null && fundstelle.absatzIndex() != null) {
@@ -1661,7 +1777,7 @@ public final class BefehlAnwender {
       List<Norm> normen, WortlautZuAbsatz befehl) {
     var aufloesung = loeseNormAuf(normen, befehl.stelle());
     if (aufloesung.fehler() != null) {
-      return manuell(befehl, aufloesung.fehler());
+      return manuell(befehl, aufloesung.grund(), aufloesung.fehler());
     }
     var norm = normen.get(aufloesung.normIndex());
     // Steht genau ein unnummerierter Absatz zwischen nummerierten (bayerische Folge „Dem Wortlaut
@@ -1693,7 +1809,7 @@ public final class BefehlAnwender {
       List<Norm> normen, WortlautZuSatz befehl) {
     var ergebnis = StellenAufloeser.aufloese(gesetzAus(normen), befehl.stelle());
     if (ergebnis instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
-      return manuell(befehl, nicht.begruendung());
+      return manuell(befehl, nicht.grund(), nicht.begruendung());
     }
     var fundstelle = ((StellenAufloeser.Ergebnis.Gefunden) ergebnis).fundstelle();
     var norm = normen.get(fundstelle.normIndex());
@@ -1701,7 +1817,9 @@ public final class BefehlAnwender {
     if (absatzIndex == null) {
       if (norm.absaetze().size() != 1) {
         return manuell(
-            befehl, norm.enbez() + " hat " + norm.absaetze().size() + " Absätze; Ziel unklar.");
+            befehl,
+            Grund.MEHRDEUTIG,
+            norm.enbez() + " hat " + norm.absaetze().size() + " Absätze; Ziel unklar.");
       }
       absatzIndex = 0;
     }
@@ -1720,7 +1838,7 @@ public final class BefehlAnwender {
       List<Norm> normen, WortlautVoranstellung befehl) {
     var aufloesung = loeseNormAuf(normen, befehl.stelle());
     if (aufloesung.fehler() != null) {
-      return manuell(befehl, aufloesung.fehler());
+      return manuell(befehl, aufloesung.grund(), aufloesung.fehler());
     }
     var norm = normen.get(aufloesung.normIndex());
 
@@ -1729,7 +1847,7 @@ public final class BefehlAnwender {
     if (befehl.stelle().absatz().isPresent()) {
       var ergebnis = StellenAufloeser.aufloese(gesetzAus(normen), befehl.stelle());
       if (ergebnis instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
-        return manuell(befehl, nicht.begruendung());
+        return manuell(befehl, nicht.grund(), nicht.begruendung());
       }
       var fundstelle = ((StellenAufloeser.Ergebnis.Gefunden) ergebnis).fundstelle();
       var absaetze = new ArrayList<>(norm.absaetze());
@@ -1744,7 +1862,7 @@ public final class BefehlAnwender {
 
     var neue = parseAbsaetze(befehl.text());
     if (neue.isEmpty()) {
-      return manuell(befehl, "Im Zitat wurde kein Absatz erkannt.");
+      return manuell(befehl, Grund.ZITAT_UNBRAUCHBAR, "Im Zitat wurde kein Absatz erkannt.");
     }
     var absaetze = new ArrayList<>(neue);
     absaetze.addAll(norm.absaetze());
@@ -1757,7 +1875,7 @@ public final class BefehlAnwender {
       List<Norm> normen, FussnotenAufhebung befehl) {
     var aufloesung = loeseNormAuf(normen, befehl.stelle());
     if (aufloesung.fehler() != null) {
-      return manuell(befehl, aufloesung.fehler());
+      return manuell(befehl, aufloesung.grund(), aufloesung.fehler());
     }
     var norm = normen.get(aufloesung.normIndex());
     var absaetze = new ArrayList<>(norm.absaetze());
@@ -1783,6 +1901,7 @@ public final class BefehlAnwender {
     if (!fehlend.isEmpty()) {
       return manuell(
           befehl,
+          Grund.ZIELTEXT_FEHLT,
           "Fußnote " + String.join(", ", fehlend) + " kommt in " + norm.enbez() + " nicht vor.");
     }
     normen.set(aufloesung.normIndex(), norm.mitAbsaetzen(absaetze));
@@ -1799,7 +1918,8 @@ public final class BefehlAnwender {
           var marke = Superskript.zuSuperskript(befehl.nummer());
           if (!text.startsWith(marke, bereich.von())) {
             return TextErgebnis.fehler(
-                "Die Satznummerierung „" + befehl.nummer() + "“ steht nicht am Anfang des Ziels.");
+                "Die Satznummerierung „" + befehl.nummer() + "“ steht nicht am Anfang des Ziels.",
+                Grund.ZIELTEXT_FEHLT);
           }
           return TextErgebnis.ok(
               text.substring(0, bereich.von()) + text.substring(bereich.von() + marke.length()));
@@ -1830,13 +1950,14 @@ public final class BefehlAnwender {
 
   // --- Gemeinsame Helfer ---------------------------------------------------------------------
 
-  private record TextErgebnis(@Nullable String text, @Nullable String fehler) {
+  private record TextErgebnis(
+      @Nullable String text, @Nullable String fehler, @Nullable Grund grund) {
     static TextErgebnis ok(String text) {
-      return new TextErgebnis(text, null);
+      return new TextErgebnis(text, null, null);
     }
 
-    static TextErgebnis fehler(String begruendung) {
-      return new TextErgebnis(null, begruendung);
+    static TextErgebnis fehler(String begruendung, Grund grund) {
+      return new TextErgebnis(null, begruendung, grund);
     }
   }
 
@@ -1881,15 +2002,16 @@ public final class BefehlAnwender {
     if (befehl.stelle().betrifftUeberschrift()) {
       var aufloesung = loeseNormAuf(normen, befehl.stelle());
       if (aufloesung.fehler() != null) {
-        return manuell(befehl, aufloesung.fehler());
+        return manuell(befehl, aufloesung.grund(), aufloesung.fehler());
       }
       var norm = normen.get(aufloesung.normIndex());
       if (norm.titel() == null) {
-        return manuell(befehl, norm.enbez() + " hat keine Überschrift.");
+        return manuell(
+            befehl, Grund.BESTAND_WIDERSPRICHT, norm.enbez() + " hat keine Überschrift.");
       }
       var titelErgebnis = operation.wende(norm.titel());
       if (titelErgebnis.fehler() != null) {
-        return manuell(befehl, titelErgebnis.fehler());
+        return manuell(befehl, titelErgebnis.grund(), titelErgebnis.fehler());
       }
       normen.set(aufloesung.normIndex(), norm.mitTitel(titelErgebnis.text()));
       return angewandt(befehl, norm.enbez());
@@ -1897,7 +2019,7 @@ public final class BefehlAnwender {
 
     var ergebnis = StellenAufloeser.aufloese(gesetzAus(normen), befehl.stelle());
     if (ergebnis instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
-      return manuell(befehl, nicht.begruendung());
+      return manuell(befehl, nicht.grund(), nicht.begruendung());
     }
     var fundstelle = ((StellenAufloeser.Ergebnis.Gefunden) ergebnis).fundstelle();
     var norm = normen.get(fundstelle.normIndex());
@@ -1907,7 +2029,7 @@ public final class BefehlAnwender {
       var absatz = absaetze.get(fundstelle.absatzIndex());
       var neuerText = wendeAufBereichAn(absatz.text(), fundstelle.bereich(), operation);
       if (neuerText.fehler() != null) {
-        return manuell(befehl, neuerText.fehler());
+        return manuell(befehl, neuerText.grund(), neuerText.fehler());
       }
       absaetze.set(fundstelle.absatzIndex(), absatz.mitText(neuerText.text()));
       normen.set(fundstelle.normIndex(), norm.mitAbsaetzen(absaetze));
@@ -1919,21 +2041,25 @@ public final class BefehlAnwender {
     Integer trefferIndex = null;
     TextErgebnis treffer = null;
     String letzterFehler = "Norm hat keine Absätze.";
+    Grund letzterGrund = Grund.BESTAND_WIDERSPRICHT;
     for (int i = 0; i < absaetze.size(); i++) {
       var versuch = operation.wende(absaetze.get(i).text());
       if (versuch.fehler() == null) {
         if (trefferIndex != null) {
           return manuell(
-              befehl, "Mehrere Absätze von " + norm.enbez() + " kommen infrage; mehrdeutig.");
+              befehl,
+              Grund.MEHRDEUTIG,
+              "Mehrere Absätze von " + norm.enbez() + " kommen infrage; mehrdeutig.");
         }
         trefferIndex = i;
         treffer = versuch;
       } else {
         letzterFehler = versuch.fehler();
+        letzterGrund = versuch.grund();
       }
     }
     if (trefferIndex == null) {
-      return manuell(befehl, letzterFehler);
+      return manuell(befehl, letzterGrund, letzterFehler);
     }
     absaetze.set(trefferIndex, absaetze.get(trefferIndex).mitText(treffer.text()));
     normen.set(fundstelle.normIndex(), norm.mitAbsaetzen(absaetze));
@@ -1945,12 +2071,13 @@ public final class BefehlAnwender {
       List<Norm> normen, Aenderungsbefehl befehl, BereichsOperation operation) {
     var ergebnis = StellenAufloeser.aufloese(gesetzAus(normen), befehl.stelle());
     if (ergebnis instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
-      return manuell(befehl, nicht.begruendung());
+      return manuell(befehl, nicht.grund(), nicht.begruendung());
     }
     var fundstelle = ((StellenAufloeser.Ergebnis.Gefunden) ergebnis).fundstelle();
     if (fundstelle.absatzIndex() == null || fundstelle.bereich() == null) {
       return manuell(
           befehl,
+          Grund.STELLE_NICHT_AUFLOESBAR,
           "„" + befehl.stelle().anzeigeText() + "“ bezeichnet keinen konkreten Textbereich.");
     }
     var norm = normen.get(fundstelle.normIndex());
@@ -1958,7 +2085,7 @@ public final class BefehlAnwender {
     var absatz = absaetze.get(fundstelle.absatzIndex());
     var neuerText = operation.wende(absatz.text(), fundstelle.bereich());
     if (neuerText.fehler() != null) {
-      return manuell(befehl, neuerText.fehler());
+      return manuell(befehl, neuerText.grund(), neuerText.fehler());
     }
     absaetze.set(fundstelle.absatzIndex(), absatz.mitText(neuerText.text()));
     normen.set(fundstelle.normIndex(), norm.mitAbsaetzen(absaetze));
@@ -1979,7 +2106,7 @@ public final class BefehlAnwender {
         text.substring(0, bereich.von()) + ergebnis.text() + text.substring(bereich.bis()));
   }
 
-  private record NormAufloesung(int normIndex, @Nullable String fehler) {}
+  private record NormAufloesung(int normIndex, @Nullable String fehler, @Nullable Grund grund) {}
 
   private static NormAufloesung loeseNormAuf(List<Norm> normen, Stelle stelle) {
     String enbez;
@@ -1988,13 +2115,17 @@ public final class BefehlAnwender {
     } else if (stelle.anlagenEnbez().isPresent()) {
       enbez = stelle.anlagenEnbez().get();
     } else {
-      return new NormAufloesung(-1, "Stelle nennt keinen Paragraphen: " + stelle.anzeigeText());
+      return new NormAufloesung(
+          -1,
+          "Stelle nennt keinen Paragraphen: " + stelle.anzeigeText(),
+          Grund.STELLE_NICHT_AUFLOESBAR);
     }
     int index = StellenAufloeser.normIndex(gesetzAus(normen), enbez);
     if (index < 0) {
-      return new NormAufloesung(-1, enbez + " existiert nicht im Gesetz.");
+      return new NormAufloesung(
+          -1, enbez + " existiert nicht im Gesetz.", Grund.BESTAND_WIDERSPRICHT);
     }
-    return new NormAufloesung(index, null);
+    return new NormAufloesung(index, null, null);
   }
 
   private static boolean nurParagraph(Stelle stelle) {
@@ -2105,17 +2236,19 @@ public final class BefehlAnwender {
     return sb.toString();
   }
 
-  private record Fundpruefung(int index, @Nullable String fehler) {}
+  private record Fundpruefung(int index, @Nullable String fehler, @Nullable Grund grund) {}
 
   private static Fundpruefung eindeutigeFundstelle(String text, String woerter) {
     int anzahl = zaehleVorkommen(text, woerter);
     if (anzahl == 0) {
-      return new Fundpruefung(-1, "„" + woerter + "“ kommt im Zieltext nicht vor.");
+      return new Fundpruefung(
+          -1, "„" + woerter + "“ kommt im Zieltext nicht vor.", Grund.ZIELTEXT_FEHLT);
     }
     if (anzahl > 1) {
-      return new Fundpruefung(-1, "„" + woerter + "“ kommt " + anzahl + "-mal vor; mehrdeutig.");
+      return new Fundpruefung(
+          -1, "„" + woerter + "“ kommt " + anzahl + "-mal vor; mehrdeutig.", Grund.MEHRDEUTIG);
     }
-    return new Fundpruefung(findeVorkommen(text, woerter, 0), null);
+    return new Fundpruefung(findeVorkommen(text, woerter, 0), null, null);
   }
 
   private static int zaehleVorkommen(String text, String suchtext) {
@@ -2382,15 +2515,27 @@ public final class BefehlAnwender {
 
   private static AngewandteAenderung angewandt(Aenderungsbefehl befehl, String enbez) {
     return new AngewandteAenderung(
-        befehl, Status.ANGEWANDT, "", new LinkedHashSet<>(List.of(enbez)));
+        befehl, Status.ANGEWANDT, "", new LinkedHashSet<>(List.of(enbez)), null);
   }
 
   private static AngewandteAenderung angewandt(Aenderungsbefehl befehl, List<String> enbezliste) {
-    return new AngewandteAenderung(befehl, Status.ANGEWANDT, "", new LinkedHashSet<>(enbezliste));
+    return new AngewandteAenderung(
+        befehl, Status.ANGEWANDT, "", new LinkedHashSet<>(enbezliste), null);
   }
 
-  private static AngewandteAenderung manuell(Aenderungsbefehl befehl, String begruendung) {
-    return new AngewandteAenderung(befehl, Status.MANUELL_PRUEFEN, begruendung, Set.of());
+  /**
+   * Der Befehl bleibt liegen. Die Art des Grundes darf durchgereicht sein ({@link NormAufloesung},
+   * {@link TextErgebnis}, {@link StellenAufloeser.Ergebnis.NichtGefunden} tragen sie mit ihrem
+   * Wortlaut, weil nur die erzeugende Stelle sie kennt); fehlt sie, gilt die unauffindbare Stelle.
+   */
+  private static AngewandteAenderung manuell(
+      Aenderungsbefehl befehl, @Nullable Grund grund, String begruendung) {
+    return new AngewandteAenderung(
+        befehl,
+        Status.MANUELL_PRUEFEN,
+        begruendung,
+        Set.of(),
+        grund == null ? Grund.STELLE_NICHT_AUFLOESBAR : grund);
   }
 
   private static Gesetz gesetzAus(List<Norm> normen) {

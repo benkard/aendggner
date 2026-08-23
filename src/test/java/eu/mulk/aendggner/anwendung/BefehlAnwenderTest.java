@@ -342,6 +342,37 @@ class BefehlAnwenderTest {
   }
 
   @Test
+  void haengtGanzeParagraphenAnsGesetzAn() {
+    var befehl =
+        new Anfuegung(
+            Stelle.LEER,
+            Ebene.PARAGRAPH,
+            null,
+            "§ 4\nÜbergang\nWer zuvor erprobt hat, erprobt weiter.\n\n"
+                + "§ 5\nSchluss\nDiese Vorschrift gilt zuletzt.",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(ergebnis.neu().normen().stream().map(Norm::enbez))
+        .containsExactly("§ 1", "§ 2", "§ 3", "§ 4", "§ 5");
+    assertThat(ergebnis.neu().norm("§ 4").orElseThrow().titel()).isEqualTo("Übergang");
+  }
+
+  @Test
+  void haengtNichtAnUndBegruendetEsWennDasZitatKeinenNormkopfTraegt() {
+    var befehl =
+        new Anfuegung(Stelle.LEER, Ebene.PARAGRAPH, null, "Wer zuvor erprobt hat, …", PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.MANUELL_PRUEFEN);
+    assertThat(ergebnis.protokoll().get(0).grund()).isEqualTo(Grund.ZITAT_UNBRAUCHBAR);
+    assertThat(ergebnis.neu().normen()).hasSize(3);
+  }
+
+  @Test
   void hebtParagraphenAuf() {
     var befehl = new Aufhebung(stelle(new Stelle.Paragraph("2")), PROV);
 

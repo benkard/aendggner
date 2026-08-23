@@ -66,6 +66,13 @@ class EndToEndTest {
     // Das Original-BGBl enthält ein überzähliges Anführungszeichen (Artikel 3) — muss als
     // Warnung gemeldet werden, nicht als Abbruch.
     assertThat(parseErgebnis.warnungen()).isNotEmpty();
+    // Und der Leser erfährt, woran die Reste liegen: Das XML trägt die Änderung dieses
+    // Gesetzes bereits als „textlich nachgewiesen“ und ist damit jünger als das Gesetz selbst.
+    assertThat(parseErgebnis.warnungen())
+        .anyMatch(w -> w.contains("Das Stammgesetz ist jünger als das Änderungsgesetz"))
+        // Die Rüge ergeht einmal, obwohl zwei Artikel dasselbe Stammgesetz betreffen.
+        .filteredOn(w -> w.contains("ist jünger als"))
+        .hasSize(1);
 
     // 4. Anwenden: wirft nicht; jeder Befehl erhält einen Protokolleintrag. Auch hier ist das XML
     //    jünger als das Änderungsgesetz — die Sollzahlen stehen in ifsgGegenZeitrichtigenStamm().
@@ -102,6 +109,9 @@ class EndToEndTest {
 
     assertThat(parseErgebnis.artikel()).containsExactly("1", "2");
     assertThat(parseErgebnis.befehle()).hasSize(75);
+    // Gegen den zeitrichtigen Stamm ergeht keine Altersrüge; gegen den heutigen schon (siehe
+    // gesamtePipelineAufIfSgBeispiel).
+    assertThat(parseErgebnis.warnungen()).noneMatch(w -> w.contains("ist jünger als"));
 
     var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
     var manuellPfade =
