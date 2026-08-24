@@ -28,13 +28,17 @@ SPDX-PackageDownloadLocation = "https://git.benkard.de/mulk/aendggner"
 # Auszeichnung unberührt bleiben.
 
 [[annotations]]
+path = [".mvn/maven.config"]
+SPDX-FileCopyrightText = "2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>"
+SPDX-License-Identifier = "AGPL-3.0-or-later"
+
+[[annotations]]
 path = [
   "FASSUNGEN.txt",
-  ".mvn/maven.config",
   "src/main/resources/META-INF/native-image/eu.mulk/aendggner/reachability-metadata.json",
   "src/test/resources/eu/mulk/aendggner/mini-gii.xml",
 ]
-SPDX-FileCopyrightText = "2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>"
+SPDX-FileCopyrightText = "2026 Matthias Andreas Benkard <code@mail.matthias.benkard.de>"
 SPDX-License-Identifier = "AGPL-3.0-or-later"
 
 
@@ -224,7 +228,7 @@ path = [
   "src/test/resources/sampledata/Sachsen/SaechsBeamtVG-alt.txt",
   "src/test/resources/sampledata/Thueringen/ThuerKigaFinVO-alt.txt",
 ]
-SPDX-FileCopyrightText = "2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>"
+SPDX-FileCopyrightText = "2026 Matthias Andreas Benkard <code@mail.matthias.benkard.de>"
 SPDX-License-Identifier = "AGPL-3.0-or-later AND LicenseRef-AmtlichesWerk"
 
 [[annotations]]
@@ -244,5 +248,5 @@ path = [
   "src/test/resources/sampledata/Thueringen/SOURCES",
   "src/test/resources/sampledata/UWG/SOURCES",
 ]
-SPDX-FileCopyrightText = "2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>"
+SPDX-FileCopyrightText = "2026 Matthias Andreas Benkard <code@mail.matthias.benkard.de>"
 SPDX-License-Identifier = "AGPL-3.0-or-later"

@@ -2743,3 +2743,33 @@ Paragraphenfolgen (§§), die Neufassung von Satzbereichen sowie die stellenlose
 Chapeau-Anweisungen; diese werden dem Abschnitt „Manuell prüfen“ zugewiesen. Die
 Unterstützung des bayerischen Landesrechts bleibt einem späteren Zeitpunkt
 vorbehalten.
+
+
+Artikel 9
+Berichtigung der Urheberrechtsvermerke
+
+Sämtliche eigenen Dateien wiesen als Jahr der Urheberschaft „2020“ aus, das Jahr
+der Anlegung des Verzeichnisses. Von neunundachtzig eigenen Dateien sind
+vierundachtzig erst im Jahre 2026 entstanden; der Vermerk war insoweit unrichtig.
+
+(1) Für jede Datei wird das Jahr aus ihrer Entstehungs- und ihrer letzten
+    Änderungsbuchung erhoben. Neunundsiebzig Dateien tragen fortan „2026“.
+
+(2) Fünf Dateien reichen tatsächlich in das Jahr 2020 zurück und in das Jahr 2026
+    hinein; sie tragen fortan „2020-2026“ (.gitignore, README.md, pom.xml,
+    AendGgner.java, logging.properties). Allein „.mvn/maven.config“ ist seit 2020
+    unberührt geblieben und behält seinen Vermerk.
+
+(3) Die Zuordnungsdatei (REUSE.toml) wird entsprechend geschieden: Der bisher
+    gemeinsame Block für „maven.config“ und die drei kommentarlosen eigenen
+    Dateien wird geteilt, weil deren Jahre auseinanderfallen. Die selbst
+    abgeleiteten Textfassungen und die Herkunftsnachweise (SOURCES) tragen
+    „2026“.
+
+(4) Der Kopfzeilenvordruck des Formatierers (Spotless) setzt an die Stelle des
+    festen Jahres den Platzhalter „$YEAR“. Andernfalls erzwänge der Bau auf jeder
+    Java-Datei wieder ein und dasselbe Jahr.
+
+(5) Die Prüfung geht auf: „reuse lint“ weist 188 von 188 Dateien als vollständig
+    ausgezeichnet aus, „spotless:check“ beanstandet nichts, und „spotless:apply“
+    ändert an den berichtigten Vermerken nichts mehr.

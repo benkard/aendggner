@@ -1,5 +1,5 @@
 <!--
-SPDX-FileCopyrightText: 2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
+SPDX-FileCopyrightText: 2020-2026 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
 SPDX-License-Identifier: AGPL-3.0-or-later
 -->
 

@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<!-- SPDX-FileCopyrightText: 2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
+<!-- SPDX-FileCopyrightText: 2020-2026 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
      SPDX-License-Identifier: AGPL-3.0-or-later -->
 <project
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
@@ -218,7 +218,7 @@
               <style>GOOGLE</style>
             </googleJavaFormat>
             <licenseHeader>
-              <content><![CDATA[// SPDX-FileCopyrightText: 2020 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
+              <content><![CDATA[// SPDX-FileCopyrightText: $YEAR Matthias Andreas Benkard <code@mail.matthias.benkard.de>
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
 ]]></content>
