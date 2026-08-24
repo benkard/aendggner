@@ -193,6 +193,35 @@ halten. Sie sind sämtlich allgemeiner Natur und nicht Eigenheiten ihrer Belegf�
     neunundsechzig auf siebzig angewandte Befehle.
 
 
+Artikel 7
+Aufnahme des brandenburgischen Landesrechts
+
+(1) Als Belegfall wird das Erste Gesetz zur Änderung des Fraktionsgesetzes
+    (GVBl. I 2026 Nr. 12) aufgenommen. Alle vier Befehle werden angewandt; alle
+    vierundzwanzig Normen gleichen danach der amtlichen Nachfassung.
+
+(2) Brandenburg ist das erste Land, dessen Portal keine Einseitenanwendung ist.
+    BRAVORS gibt seine Vorschriften als gewöhnliches HTML aus und führt unter
+    „Änderungshistorie“ jede Fassung einzeln; Vor- und Nachfassung entstammen
+    damit derselben Quelle. Die Hefte lassen sich am Dokumententitel des PDF
+    einordnen.
+
+(3) Beim Aufbereiten sind drei Eigenheiten zu beachten, die in
+    „Brandenburg/SOURCES“ niedergelegt sind: Die Abschnittsbezeichnung steht im
+    Kopfelement vor der Überschrift; die Aufzählungen sind Listen, deren Marken
+    erst das Stilblatt erzeugt und die deshalb auszuschreiben sind; und an
+    ehemaligen Trennstellen führt das Portal vereinzelt Steuerzeichen mit, die
+    kein Bestandteil des Wortlauts sind.
+
+(4) Ein allgemeiner Fund: Die Überschrift des Schlussartikels wird beim Lesen der
+    Inkrafttretens-Anordnung nicht mehr in deren Wortlaut aufgenommen. Ein Artikel
+    ohne Absatzbezeichnungen ist im ganzen ein Absatz, und auf das bloße Vorkommen
+    von „tritt“ ist dabei kein Verlass — die Überschrift „Inkrafttreten“ trägt es
+    selbst.
+
+(5) Der Prüfbestand umfasst dreihundertneunundvierzig Prüfungen.
+
+
 ════════════════════════════════════════════════════════════════════════════════
  Fassung vom 23. August 2026,
  zuletzt geändert durch die am 23. August 2026 vorgenommenen Änderungen

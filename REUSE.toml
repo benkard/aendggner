@@ -180,6 +180,11 @@ path = ["src/test/resources/sampledata/SchleswigHolstein/GVOBl-2026-27_Kommunalr
 SPDX-FileCopyrightText = "Land Schleswig-Holstein"
 SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
 
+[[annotations]]
+path = ["src/test/resources/sampledata/Brandenburg/GVBl-I-2026-12_FraktG-AendG.pdf"]
+SPDX-FileCopyrightText = "Land Brandenburg"
+SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
+
 
 # ── 5. Selbst abgeleitete Textfassungen und Herkunftsnachweise ───────────────
 #
@@ -194,6 +199,8 @@ path = [
   "src/test/resources/sampledata/BadenWuerttemberg/KomWO-BW-alt.txt",
   "src/test/resources/sampledata/BadenWuerttemberg/KomWO-BW-neu.txt",
   "src/test/resources/sampledata/Berlin/ASOG-Bln-alt.txt",
+  "src/test/resources/sampledata/Brandenburg/FraktG-alt.txt",
+  "src/test/resources/sampledata/Brandenburg/FraktG-neu.txt",
   "src/test/resources/sampledata/Berlin/ASOG-Bln-neu.txt",
   "src/test/resources/sampledata/Berlin/LAF-ErrG-alt.txt",
   "src/test/resources/sampledata/Berlin/LAF-ErrG-neu.txt",
@@ -221,6 +228,7 @@ path = [
   "src/test/resources/sampledata/BayJG/SOURCES",
   "src/test/resources/sampledata/GEG/SOURCES",
   "src/test/resources/sampledata/Berlin/SOURCES",
+  "src/test/resources/sampledata/Brandenburg/SOURCES",
   "src/test/resources/sampledata/Hessen/SOURCES",
   "src/test/resources/sampledata/SchleswigHolstein/SOURCES",
   "src/test/resources/sampledata/IfSG/SOURCES",

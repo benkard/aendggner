@@ -93,6 +93,17 @@ abrufbar; der Datumspräfix ist der Gültigkeitsbeginn der jeweiligen Fassung.
 ersetzt". Quelle: revosax-Gesamtansicht (nicht der Original-GVBl-Satz — recht-sachsen.de ist ein
 cookie-/kostenpflichtiger Shop).
 
+|Brandenburg
+|`Brandenburg/GVBl-I-2026-12_FraktG-AendG.pdf` — GVBl. I Brandenburg 2026 Nr. 12 vom 22.04.2026
+(Erstes Gesetz zur Änderung des Fraktionsgesetzes)
+|Erstes Land mit *offenem Portal* statt juris-Einseitenanwendung: BRAVORS gibt seine Vorschriften
+als gewöhnliches HTML und führt unter „Änderungshistorie" *jede Fassung einzeln* — Vor- und
+Nachfassung entstammen damit derselben Quelle. Die Hefte lassen sich am *Dokumententitel des PDF*
+einordnen (`/Title` = „FraktG-1AendG"). Beim Aufbereiten: Die Abschnittsbezeichnung steht im
+Kopfelement *vor* der Überschrift, die Aufzählungen sind echte `<ol>`-Listen, deren Marken erst das
+Stilblatt erzeugt, und an ehemaligen Trennstellen führt das Portal vereinzelt *Steuerzeichen*
+(U+0002) mit. Voller Akzeptanzfall (4/4 Befehle, alle 24 Normen).
+
 |Thüringen
 |`Thueringen/GVBl-TH-2026-02_KiGaFinanzVO-AendVO-ua.pdf` — GVBl. Freistaat Thüringen Nr. 2 vom
 13.02.2026 (u. a. Vierte Verordnung zur Änderung der Thüringer Kindergartenfinanzierungs-
@@ -257,8 +268,7 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
   findet seine Stelle nicht. Ob die Anlagen des Bundes ebenso zu zerlegen sind, ist offen.
 * *Rheinland-Pfalz*: Die Verkündungsplattform `verkuendung.rlp.de` verkündet erst seit dem
   01.07.2026 elektronisch; ältere GVBl-Hefte liegen nicht als freie Direkt-PDF vor.
-* Bremen, Hamburg, Mecklenburg-Vorpommern, Saarland, Brandenburg, Sachsen-Anhalt: noch nicht
-  erfasst.
+* Bremen, Hamburg, Mecklenburg-Vorpommern, Saarland, Sachsen-Anhalt: noch nicht erfasst.
 
 == Wo weitermachen
 
@@ -266,7 +276,13 @@ Kein Land scheitert noch an reiner Extraktionsschwäche, und jedes Land mit eine
 dokument trägt nunmehr einen Belegfall bis zur Anwendung. Nach absteigendem Nutzen:
 
 . *Weitere Länder erfassen* — Rheinland-Pfalz (Verkündungsplattform erst ab 01.07.2026), Bremen,
-  Hamburg, Mecklenburg-Vorpommern, Saarland, Brandenburg, Sachsen-Anhalt.
+  Hamburg, Mecklenburg-Vorpommern, Saarland, Sachsen-Anhalt.
+
+*Erledigt:* _Brandenburg_ ist umgesetzt (Fraktionsgesetz, 4/4 Befehle, alle 24 Normen gleich der
+amtlichen Nachfassung). Der Fall hat gezeigt, dass nicht jedes Landesportal eine juris-Einseiten-
+anwendung ist: BRAVORS gibt HTML und führt jede Fassung einzeln, sodass Vor- und Nachfassung
+derselben Quelle entstammen. Ein Fund fürs Aufbereiten: An ehemaligen Trennstellen führt das
+Portal vereinzelt Steuerzeichen (U+0002) mit, die kein Textbestand sind.
 
 *Erledigt:* _Baden-Württemberg_ ist umgesetzt. Der Fall hat vier allgemeine Funde gebracht: Der
 Seitenfuß eines Gesetzblatts kann mitten im Befehlstext stehen und dessen Zieltext von seinem Verb

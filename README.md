@@ -500,14 +500,16 @@ Telemedienzuständigkeitsgesetz, Landesmediengesetz, Ausführungsgesetz zum
 Fall des Heftes, das WDR-Gesetz —, jeweils mit Akzeptanztests gegen die amtlichen
 Nachfassungen.
 
-(3) Die Landesportale geben ihre Stammfassungen einer Skriptabfrage nicht aus,
-sondern nur ihre leere Anwendungshülle; einem Browser dagegen schon, und auf
+(3) Die meisten Landesportale geben ihre Stammfassungen einer Skriptabfrage nicht
+aus, sondern nur ihre leere Anwendungshülle; einem Browser dagegen schon, und auf
 diesem Wege sind die hessische, die beiden schleswig-holsteinischen und die
-Berliner Stammfassung beschafft worden. Für Berlin reicht die Prüfung gleichwohl
-nur beim Artikel 2 bis zur Anwendung; Artikel 1 ändert zu fünf Sechsteln eine
-Anlage, deren Einheiten als Überschriften gesetzt sind („Nummer 6“) und einen
-eigenen Rang zwischen Norm und Absatz verlangen, den das Datenmodell noch nicht
-führt. Thüringens Portal gibt sie ebensowenig aus; dort ist die konsolidierte
+Berliner Stammfassung beschafft worden — letztere einschließlich der Anlage, deren
+Nummern als eigene Normen geführt werden („Anlage Nummer 23“), sodass beide Artikel
+des Berliner Gesetzes volle Akzeptanzfälle sind. Brandenburg macht die Ausnahme:
+BRAVORS gibt seine Vorschriften als gewöhnliches HTML aus und führt unter
+„Änderungshistorie“ jede Fassung einzeln, sodass Vor- und Nachfassung derselben
+Quelle entstammen (Fraktionsgesetz, alle vier Befehle, alle 24 Normen).
+Thüringens Portal gibt sie ebensowenig aus; dort ist die konsolidierte
 Fassung aus dem Stammheft und den drei Änderungsheften des Gesetzblattes
 zusammengesetzt, die die Parlamentsdatenbank des Landtags frei ausgibt.
 

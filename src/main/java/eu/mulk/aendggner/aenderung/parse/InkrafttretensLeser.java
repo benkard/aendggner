@@ -45,6 +45,8 @@ public final class InkrafttretensLeser {
               + "(?:\\s+Buchstabe\\s+(\\p{Ll})\\b)?"
               + "(?:\\s+Doppelbuchstabe\\s+(\\p{Ll}{2})\\b)?");
 
+  private static final Pattern VERB = Pattern.compile("\\b(?:tritt|treten)\\b");
+
   private static final Pattern AENDERUNGSFORMEL = Pattern.compile("wird wie folgt geändert");
 
   private InkrafttretensLeser() {}
@@ -75,7 +77,7 @@ public final class InkrafttretensLeser {
 
   /** Liest die Anordnungen eines einzelnen Blocks; {@code null}, wenn er keine trägt. */
   public static @Nullable Inkrafttreten lies(String blockText) {
-    var text = blockText.replaceAll("\\s+", " ").strip();
+    var text = ohneUeberschrift(blockText).replaceAll("\\s+", " ").strip();
     var regeln = new ArrayList<Regel>();
     for (var absatz : teileInAbsaetze(text)) {
       var regel = liesAbsatz(absatz);
@@ -84,6 +86,31 @@ public final class InkrafttretensLeser {
       }
     }
     return regeln.isEmpty() ? null : new Inkrafttreten(List.copyOf(regeln));
+  }
+
+  /**
+   * Streicht die Überschrift des Artikels („Inkrafttreten“), die als eigene Zeile vor der Anordnung
+   * steht. Ohne das begänne der Wortlaut der Regel mit ihr, denn ein Artikel ohne Absatzmarken ist
+   * im ganzen ein Absatz.
+   */
+  private static String ohneUeberschrift(String blockText) {
+    var zeilen = blockText.lines().toList();
+    for (int i = 0; i < zeilen.size(); i++) {
+      var zeile = zeilen.get(i).strip();
+      if (zeile.isEmpty()) {
+        continue;
+      }
+      // Auf das bloße Vorkommen von „tritt“ ist kein Verlass: Die Überschrift „Inkrafttreten“
+      // trägt es selbst. Maßgeblich ist das Wort.
+      if (ABSATZ.matcher(zeile).lookingAt() || VERB.matcher(zeile).find()) {
+        return String.join("\n", zeilen.subList(i, zeilen.size()));
+      }
+      // Eine Überschrift steht für sich und endet nicht wie ein Satz.
+      if (zeile.endsWith(".") || zeile.length() > 60) {
+        return String.join("\n", zeilen.subList(i, zeilen.size()));
+      }
+    }
+    return blockText;
   }
 
   /**

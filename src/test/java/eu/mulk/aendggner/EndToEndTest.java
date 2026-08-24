@@ -1765,4 +1765,55 @@ class EndToEndTest {
     assertThat(aprilFassung.anzahlAngewandt()).isEqualTo(75);
     assertThat(aprilFassung.html()).doesNotContain("Am Stichtag noch nicht in Kraft");
   }
+
+  /**
+   * Brandenburg: das Erste Gesetz zur Änderung des Fraktionsgesetzes (GVBl. I 2026 Nr. 12).
+   *
+   * <p>Der erste Belegfall aus einem Portal, das kein juris-Portal ist: BRAVORS gibt seine
+   * Vorschriften als freies HTML aus und führt zu jedem Gesetz die einzelnen Fassungen, sodass Vor-
+   * und Nachfassung derselben Quelle entstammen. Zwei Eigenheiten des Satzes waren beim Aufbereiten
+   * zu beachten und sind in {@code Brandenburg/SOURCES} vermerkt: Die Abschnittsbezeichnung steht
+   * im Kopfelement vor der Überschrift, und die Aufzählungen sind echte Listen, deren Marken erst
+   * das Stilblatt erzeugt.
+   *
+   * <p>Zugleich die Gegenprobe zum Inkrafttreten: Artikel 2 ordnet es schlicht an („am Tag nach der
+   * Verkündung“). Es ist nicht gestaffelt — also darf die Synopse nicht davor warnen —, und ein
+   * Datum nennt der Wortlaut nicht, also wird keines gezeigt.
+   */
+  @Test
+  void fraktionsgesetzBrandenburg() throws Exception {
+    var alt = SAMPLEDATA.resolve("Brandenburg/FraktG-alt.txt");
+    var pdf = SAMPLEDATA.resolve("Brandenburg/GVBl-I-2026-12_FraktG-AendG.pdf");
+    assumeTrue(Files.exists(alt) && Files.exists(pdf), "Brandenburger Beispieldaten fehlen");
+
+    var gesetz = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(alt);
+    assertThat(gesetz.jurabk()).isEqualTo("FraktG");
+    assertThat(gesetz.normen()).hasSize(24);
+    // Die Abschnitte des Gesetzes sind als Gliederung erkannt, nicht als Normtext.
+    assertThat(gesetz.gliederungen())
+        .extracting(g -> g.titel())
+        .contains("Status und Organisation");
+
+    var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(pdf));
+    var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, null);
+    assertThat(parseErgebnis.artikel()).containsExactly("1");
+    assertThat(parseErgebnis.befehle()).hasSize(4);
+    assertThat(parseErgebnis.befehle()).noneMatch(b -> b instanceof UnbekannterBefehl);
+
+    // Vier Befehle, vier Normen der Nachfassung gleich — § 1, § 10 und § 21 geändert.
+    pruefeGegenNachfassung(gesetz, parseErgebnis, "Brandenburg/FraktG-neu.txt");
+
+    // Artikel 2 ordnet das Inkrafttreten ohne Staffelung und ohne bestimmtes Datum an.
+    var inkrafttreten = parseErgebnis.inkrafttreten();
+    assertThat(inkrafttreten).isNotNull();
+    assertThat(inkrafttreten.gestaffelt()).isFalse();
+    var grundregel = inkrafttreten.grundregel().orElseThrow();
+    assertThat(grundregel.datum()).isNull();
+    assertThat(grundregel.wortlaut())
+        .isEqualTo("Dieses Gesetz tritt am Tag nach der Verkündung in Kraft.");
+
+    var synopse = Pipeline.erzeugeSynopse(alt, List.of(pdf), null, false);
+    assertThat(synopse.anzahlAngewandt()).isEqualTo(4);
+    assertThat(synopse.html()).doesNotContain("tritt gestaffelt in Kraft");
+  }
 }

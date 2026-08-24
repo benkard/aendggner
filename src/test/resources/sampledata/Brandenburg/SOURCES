@@ -1,0 +1,65 @@
+Beispieldaten Brandenburg — Herkunft und Aufbereitung
+=====================================================
+
+1. Änderungsdokument
+   GVBl-I-2026-12_FraktG-AendG.pdf
+   Gesetz- und Verordnungsblatt für das Land Brandenburg, Teil I, Nr. 12 vom
+   22. April 2026: Erstes Gesetz zur Änderung des Fraktionsgesetzes vom
+   22. April 2026.
+   Bezogen über https://bravors.brandenburg.de/fm/76/GVBl_I_12_2026.pdf
+   (abgerufen am 24.08.2026).
+
+2. Stammfassung (vor der Änderung)
+   FraktG-alt.txt
+   Gesetz über die Rechtsstellung und die Finanzierung von Fraktionen und Gruppen
+   im Landtag Brandenburg (Fraktionsgesetz — FraktG) vom 19. Juni 2019, in der
+   Fassung nach der Änderung durch Artikel 2 des Gesetzes vom 15. Dezember 2022.
+   Bezogen über https://bravors.brandenburg.de/gesetze/fraktg/6
+
+3. Nachfassung (nach der Änderung), nur als Prüfmaßstab
+   FraktG-neu.txt
+   Dasselbe Gesetz in der geltenden Fassung („zuletzt geändert durch Gesetz vom
+   22. April 2026, GVBl.I/26, [Nr. 12]“).
+   Bezogen über https://bravors.brandenburg.de/gesetze/fraktg
+
+Bezugsweg
+---------
+BRAVORS (bravors.brandenburg.de) ist das erste hier verwendete Landesportal, das
+keine juris-Einseitenanwendung ist: Die Vorschriften stehen als gewöhnliches HTML,
+die Verkündungsblätter als PDF; beides ist ohne Anmeldung und ohne Umgehung einer
+Schranke abrufbar. Der Reiter „Änderungshistorie“ (/gesetze/<kennung>/list) führt
+jede Fassung einzeln unter /gesetze/<kennung>/<lfd. Nr.> — Vor- und Nachfassung
+entstammen damit derselben Quelle.
+
+Die Hefte lassen sich ohne Volltextsuche einordnen: Der Dokumententitel des PDFs
+(/Title) nennt das verkündete Gesetz („FraktG-1AendG“, „BbgBO4AendG“).
+
+Aufbereitung (Skript nicht im Repositorium; Vorgehen hier festgehalten)
+-----------------------------------------------------------------------
+Aus dem HTML wird die kanonische Klartextform gewonnen, wie sie der
+LandesRechtLoader liest:
+
+  - Kopf aus dem Dokumententitel; Langtitel und Klammerzusatz auf je eigener
+    Zeile. Stünden sie auf einer, so blieben Kurztitel und Abkürzung ungetrennt
+    und es würde kein Artikel des Änderungsgesetzes gewählt.
+  - Der Wortlaut beginnt beim ersten Normkopf (h4.paragraph_bez); die
+    Inhaltsübersicht der linken Spalte und der Hilfetext des Portals bleiben
+    draußen.
+  - Die Abschnittsbezeichnung steht im Kopfelement vor der Überschrift
+    („<h3>Abschnitt 2<br><span>Finanzen</span></h3>“) und wird zu einer Zeile
+    „Abschnitt 2  Finanzen“ vereinigt. Die Überschrift des ersten Abschnitts steht
+    vor dem ersten Normkopf; von den Kopfelementen des Vorspanns ist das letzte
+    das des Wortlauts, die davor gehören zur Inhaltsübersicht.
+  - Die Aufzählungen sind echte <ol>-Listen, deren Marken erst das Stilblatt
+    erzeugt. Sie werden ausgeschrieben: arabisch „1.“, bei lower-alpha „a)“.
+    Ohne das stünde der Wortlaut ohne jede Marke da.
+  - Das Portal führt an ehemaligen Trennstellen vereinzelt Steuerzeichen mit
+    (U+0002 in „Mitglie<STX>der“, viermal im Fraktionsgesetz). Sie gehören nicht
+    zum Wortlaut und werden samt weichen Trennstrichen entfernt. Zum Schluss NFC.
+
+Rechtsrahmen
+------------
+Gesetze und Verordnungen sind amtliche Werke und gemeinfrei (§ 5 Absatz 1 UrhG);
+das Verkündungsblatt ist ein amtliches Werk im Sinne des § 5 Absatz 1 UrhG.
+Bezogen wurden einzelne Werke zum Zweck der Prüfung dieses Erzeugnisses, nicht im
+Massenabzug; eine Anmeldeschranke besteht nicht und wurde nicht umgangen.
