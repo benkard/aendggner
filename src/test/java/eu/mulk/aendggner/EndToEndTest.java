@@ -1816,4 +1816,69 @@ class EndToEndTest {
     assertThat(synopse.anzahlAngewandt()).isEqualTo(4);
     assertThat(synopse.html()).doesNotContain("tritt gestaffelt in Kraft");
   }
+
+  /**
+   * Rheinland-Pfalz: die Erste Landesverordnung zur Änderung der Ausbildungs- und Prüfungsordnung
+   * für den Zugang zum dritten Einstiegsamt bei der Unfallkasse (GVBl. 2026 Nr. 21).
+   *
+   * <p>Die Prüfung reicht bis zur Befehlserkennung, nicht bis zur Anwendung, und zwar aus einem
+   * Grund, der in der Quelle liegt: Das rheinland-pfälzische Landesrechtsportal führt
+   * <em>keine</em> früheren Gesamtausgaben — anders als Hessen, Schleswig-Holstein, Berlin und
+   * Baden-Württemberg kennt es nur die aktuelle. Ebenso das saarländische und das
+   * sachsen-anhaltische Portal. Der Stamm ist deshalb die <em>Nachfassung</em>; die neun Meldungen
+   * „Zieltext nicht vorhanden“ sind gerade der Beleg dafür, dass die Befehle dort bereits vollzogen
+   * sind. Die Verkündungsplattform verkuendung.rlp.de gibt die Hefte seit dem 1. Juli 2026 als
+   * freie PDF aus, das Änderungsblatt ist also frei zugänglich — es fehlt allein die Vorfassung.
+   *
+   * <p>Zwei allgemeine Funde hat der Fall gleichwohl gebracht (beide behoben):
+   *
+   * <ol>
+   *   <li>Rheinland-Pfalz schreibt „die <b>Worte</b>“, wo das Handbuch der Rechtsförmlichkeit „die
+   *       Wörter“ setzt. Der Befehlserkenner nimmt die Nebenform nun überall an; ohne sie blieben
+   *       sieben der dreiundzwanzig Befehle unerkannt.
+   *   <li>Der Seitenfuß des GVBl. steht im Inhaltsstrom und zerschneidet das Zitat einer Neufassung
+   *       („§ 18 erhält folgende Fassung:“ / Fußzeile / „„§ 18 …““).
+   * </ol>
+   */
+  @Test
+  void unfallkassenAusbildungsVORheinlandPfalz() throws Exception {
+    var stamm = SAMPLEDATA.resolve("RheinlandPfalz/UKAPOGS-E3-neu.txt");
+    var pdf = SAMPLEDATA.resolve("RheinlandPfalz/GVBl-2026-21_UKAPOGS-E3-AendVO.pdf");
+    assumeTrue(Files.exists(stamm) && Files.exists(pdf), "RLP-Beispieldaten fehlen");
+
+    var gesetz = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(stamm);
+    assertThat(gesetz.jurabk()).isEqualTo("UKAPOGS-E3");
+    assertThat(gesetz.normen()).hasSize(22);
+
+    var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(pdf));
+    // Der Seitenfuß ist heraus; ohne ihn steht das Zitat der Neufassung wieder zusammenhängend da.
+    assertThat(text).doesNotContain("Gesetz- und Verordnungsblatt für das Land Rheinland-Pfalz -");
+    assertThat(text.replaceAll("\\s+", " "))
+        .contains("§ 18 erhält folgende Fassung: „§ 18 Bestehen der Laufbahnprüfung");
+
+    var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, null);
+    assertThat(parseErgebnis.artikel()).containsExactly("1");
+    assertThat(parseErgebnis.befehle()).hasSize(23);
+
+    // Die Nebenform „die Worte“ wird wie „die Wörter“ gelesen.
+    var wortbefehle =
+        parseErgebnis.befehle().stream()
+            .filter(b -> b.provenienz().originalText().contains("die Worte"))
+            .toList();
+    assertThat(wortbefehle).hasSizeGreaterThanOrEqualTo(7);
+    assertThat(wortbefehle).filteredOn(b -> b instanceof UnbekannterBefehl).hasSize(1);
+
+    // Drei benannte Idiom-Grenzen, alle im Wortlaut festgehalten:
+    //   5. a) aa) — Satzzeichen-Ersetzung im Verbund mit einer Halbsatz-Anfügung („wird der Punkt
+    //     durch einen Strichpunkt ersetzt und folgender Halbsatz angefügt“).
+    //   7. a) aa) — „In der Einleitung“ als Ziel, also der Chapeau eines Satzes mit Nummern.
+    //   12. — die Verweisung auf einen anderen Punkt desselben Artikels („Die Inhaltsübersicht wird
+    //     entsprechend der vorstehenden Nummer 8 Buchst. a geändert“).
+    var unerkannt =
+        parseErgebnis.befehle().stream()
+            .filter(b -> b instanceof UnbekannterBefehl)
+            .map(b -> b.provenienz().gliederungsPfad())
+            .toList();
+    assertThat(unerkannt).containsExactly("5. a) aa)", "7. a) aa)", "12.");
+  }
 }

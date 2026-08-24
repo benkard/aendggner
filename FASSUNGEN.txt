@@ -222,6 +222,45 @@ Aufnahme des brandenburgischen Landesrechts
 (5) Der Prüfbestand umfasst dreihundertneunundvierzig Prüfungen.
 
 
+Artikel 8
+Aufnahme des rheinland-pfälzischen Landesrechts
+
+(1) Als Belegfall wird die Erste Landesverordnung zur Änderung der Ausbildungs-
+    und Prüfungsordnung für den Zugang zum dritten Einstiegsamt bei der
+    Unfallkasse (GVBl. 2026 Nr. 21) aufgenommen. Die Prüfung reicht bis zur
+    Befehlserkennung.
+
+(2) Weiter reicht sie nicht, und der Grund liegt in der Quelle: Das
+    rheinland-pfälzische Landesrechtsportal führt keine früheren Gesamtausgaben.
+    Dasselbe gilt für das saarländische und das sachsen-anhaltische Portal. Ohne
+    Vorfassung lässt sich das Ergebnis nicht gegen die amtliche Nachfassung
+    halten. Das Änderungsblatt selbst ist frei zugänglich; die Verkündungs-
+    plattform des Landes verkündet seit dem 1. Juli 2026 elektronisch.
+
+(3) Zwei allgemeine Funde sind dabei behoben worden:
+    a)  Der Befehlserkenner nimmt fortan überall die Nebenform „die Worte“ neben
+        „die Wörter“ an. Ohne sie blieben sieben der dreiundzwanzig Befehle
+        unerkannt.
+    b)  Der Seitenfuß des dortigen Gesetzblattes steht im Inhaltsstrom und
+        zerschneidet das Zitat einer Neufassung; er wird nunmehr wie die
+        Seitenfüße der Gesetzblätter Berlins, Thüringens und Baden-Württembergs
+        herausgeschnitten.
+
+(4) Drei Idiome bleiben benannt offen: die Satzzeichen-Ersetzung im Verbund mit
+    einer Halbsatz-Anfügung („wird der Punkt durch einen Strichpunkt ersetzt und
+    folgender Halbsatz angefügt“), die Einleitung eines Satzes als Ziel („In der
+    Einleitung werden die Worte … ersetzt“) und die Verweisung auf einen anderen
+    Punkt desselben Artikels („Die Inhaltsübersicht wird entsprechend der
+    vorstehenden Nummer 8 Buchst. a geändert“).
+
+(5) Für die Beschaffung des Portaltextes ist ein einfacherer Weg gefunden: Der
+    Text wird im Browser als Blob zum Herunterladen angeboten und gelangt so
+    unmittelbar als Datei in das Dateisystem, statt stückweise durch die
+    Textausgabe der Browsersteuerung zu gehen.
+
+(6) Der Prüfbestand umfasst dreihundertfünfzig Prüfungen.
+
+
 ════════════════════════════════════════════════════════════════════════════════
  Fassung vom 23. August 2026,
  zuletzt geändert durch die am 23. August 2026 vorgenommenen Änderungen

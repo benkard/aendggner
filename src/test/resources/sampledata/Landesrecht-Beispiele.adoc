@@ -104,6 +104,19 @@ Kopfelement *vor* der Überschrift, die Aufzählungen sind echte `<ol>`-Listen, 
 Stilblatt erzeugt, und an ehemaligen Trennstellen führt das Portal vereinzelt *Steuerzeichen*
 (U+0002) mit. Voller Akzeptanzfall (4/4 Befehle, alle 24 Normen).
 
+|Rheinland-Pfalz
+|`RheinlandPfalz/GVBl-2026-21_UKAPOGS-E3-AendVO.pdf` — GVBl. RP 2026 Nr. 21 vom 10.08.2026
+(Erste Landesverordnung zur Änderung der Ausbildungs- und Prüfungsordnung … Unfallkasse)
+|Nur bis zur *Befehlserkennung* belegt: Das Portal führt *keine früheren Gesamtausgaben* (ebenso
+Saarland und Sachsen-Anhalt; geprüft 24.08.2026), sodass die Vorfassung fehlt — der Stamm ist hier
+die Nachfassung, und die neun „Zieltext nicht vorhanden" sind gerade der Beleg dafür. Zwei
+allgemeine Funde: Das Land schreibt „die *Worte*" statt „die Wörter" (ohne die Nebenform blieben
+sieben von 23 Befehlen unerkannt), und der *Seitenfuß* steht im Inhaltsstrom und zerschneidet das
+Zitat einer Neufassung. Offen bleiben drei Idiome: Satzzeichen-Ersetzung im Verbund mit einer
+Halbsatz-Anfügung („durch einen *Strichpunkt* ersetzt und folgender Halbsatz angefügt"), „In der
+*Einleitung*" als Ziel, und die Verweisung auf einen anderen Punkt („entsprechend der vorstehenden
+Nummer 8 Buchst. a").
+
 |Thüringen
 |`Thueringen/GVBl-TH-2026-02_KiGaFinanzVO-AendVO-ua.pdf` — GVBl. Freistaat Thüringen Nr. 2 vom
 13.02.2026 (u. a. Vierte Verordnung zur Änderung der Thüringer Kindergartenfinanzierungs-
@@ -266,8 +279,12 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
   dagegen als Aufzählungsmarken im Wortlaut der Anlage; dort bleibt es beim Markensuchen, und
   ein Befehl auf „die Überschrift der Nummer 1 der Anlage 8“ (GEG, Artikel 1 Nr. 43 b) aa))
   findet seine Stelle nicht. Ob die Anlagen des Bundes ebenso zu zerlegen sind, ist offen.
-* *Rheinland-Pfalz*: Die Verkündungsplattform `verkuendung.rlp.de` verkündet erst seit dem
-  01.07.2026 elektronisch; ältere GVBl-Hefte liegen nicht als freie Direkt-PDF vor.
+* *Vorfassungen bei knapp gehaltenen juris-Portalen* — Rheinland-Pfalz, Saarland und
+  Sachsen-Anhalt führen nur die aktuelle Gesamtausgabe nebst einer Aufzählung der Änderungen; die
+  Schaltfläche „Gesamtausgaben-Liste", über die Hessen, Schleswig-Holstein, Berlin und
+  Baden-Württemberg jede Fassung datierbar ausgeben, fehlt dort. Ohne Vorfassung ist kein
+  Akzeptanzfall möglich, sondern nur die Prüfung bis zur Befehlserkennung. Ein Ausweg wäre, die
+  Vorfassung aus den *Einzelnormen* mit ihren Stichtagen zusammenzusetzen.
 * Bremen, Hamburg, Mecklenburg-Vorpommern, Saarland, Sachsen-Anhalt: noch nicht erfasst.
 
 == Wo weitermachen
@@ -275,8 +292,7 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
 Kein Land scheitert noch an reiner Extraktionsschwäche, und jedes Land mit einem Änderungs-
 dokument trägt nunmehr einen Belegfall bis zur Anwendung. Nach absteigendem Nutzen:
 
-. *Weitere Länder erfassen* — Rheinland-Pfalz (Verkündungsplattform erst ab 01.07.2026), Bremen,
-  Hamburg, Mecklenburg-Vorpommern, Saarland, Sachsen-Anhalt.
+. *Weitere Länder erfassen* — Bremen, Hamburg, Mecklenburg-Vorpommern, Saarland, Sachsen-Anhalt.
 
 *Erledigt:* _Brandenburg_ ist umgesetzt (Fraktionsgesetz, 4/4 Befehle, alle 24 Normen gleich der
 amtlichen Nachfassung). Der Fall hat gezeigt, dass nicht jedes Landesportal eine juris-Einseiten-

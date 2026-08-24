@@ -46,7 +46,7 @@ final class BefehlErkenner {
 
   // Wiederkehrende Bausteine.
   private static final String WOERTER =
-      "(?:die Wörter|das Wort|die Angabe|die Zahl|die Verweisung)";
+      "(?:die (?:Wörter|Worte)|das Wort|die Angabe|die Zahl|die Verweisung)";
   private static final String Z = "«(\\d+)»";
 
   // Der Doppelpunkt fehlt gelegentlich (Seitenumbruch-Artefakt); für einen Punkt mit Unterpunkten
@@ -138,7 +138,7 @@ final class BefehlErkenner {
   // darf auch hier verkürzt sein („Die Angabe „X“ wird durch „Y“ ersetzt“, hessisches GVBl).
   private static final Pattern ERSETZUNG_OHNE_STELLE =
       Pattern.compile(
-          "^(?:Die Wörter|Das Wort|Die Angabe|Die Zahl|Die Verweisung) "
+          "^(?:Die (?:Wörter|Worte)|Das Wort|Die Angabe|Die Zahl|Die Verweisung) "
               + Z
               + " (?:wird|werden) (jeweils )?durch (?:"
               + WOERTER
@@ -152,7 +152,7 @@ final class BefehlErkenner {
   private static final Pattern ERSETZUNG_MIT_ANKER =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?nach "
-              + "(?:dem Wort|den Wörtern|der Angabe|der Zahl|der Verweisung) "
+              + "(?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl|der Verweisung) "
               + Z
               + " "
               + WOERTER
@@ -168,7 +168,7 @@ final class BefehlErkenner {
   private static final Pattern WORT_VORANSTELLUNG =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?"
-              + "(?:dem Wort|den Wörtern|der Angabe|der Zahl|der Verweisung) "
+              + "(?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl|der Verweisung) "
               + Z
               + " "
               + WOERTER
@@ -224,7 +224,7 @@ final class BefehlErkenner {
   private static final Pattern WOERTER_EINFUEGUNG =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?(nach|vor) "
-              + "(?:dem Wort|den Wörtern|der Angabe|der Zahl|der Verweisung) "
+              + "(?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl|der Verweisung) "
               + Z
               + " "
               + WOERTER
@@ -257,7 +257,7 @@ final class BefehlErkenner {
   // statt einer Stellenangabe; das Ziel selbst erbt der Befehl aus dem Kontextrahmen.
   private static final Pattern STRUKTUR_EINFUEGUNG_WORTANKER =
       Pattern.compile(
-          "^(Nach|Vor) (?:dem Wort|den Wörtern|der Angabe|der Zahl) "
+          "^(Nach|Vor) (?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl) "
               + Z
               + " (?:wird|werden) (?:der |die |das )?folgende[nrs]? (?:neue[nrs]? )?(.+?) "
               + "(?:ein|an)gefügt: "
@@ -402,7 +402,7 @@ final class BefehlErkenner {
   // allem als rechte Klausel eines Verbunds auf („… ersetzt und die Angabe „X“ wird gestrichen“).
   private static final Pattern STREICHUNG_OHNE_STELLE =
       Pattern.compile(
-          "^(?:Die Wörter|Das Wort|Die Angabe|Die Zahl|Die Verweisung) "
+          "^(?:Die (?:Wörter|Worte)|Das Wort|Die Angabe|Die Zahl|Die Verweisung) "
               + Z
               + " (?:wird|werden) "
               + "(?:jeweils )?gestrichen\\.$");
@@ -479,7 +479,7 @@ final class BefehlErkenner {
   private static final Pattern KOMMA_UND_WOERTER_EINFUEGUNG =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?(nach|vor) "
-              + "(?:dem Wort|den Wörtern|der Angabe|der Zahl|der Verweisung) "
+              + "(?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl|der Verweisung) "
               + Z
               // Das wiederholte Verb fehlt im amtlichen Satz oft („… ein Komma und die Angabe „…“
               // eingefügt“, GV. NRW.).
@@ -545,7 +545,8 @@ final class BefehlErkenner {
               + "$");
   // Paare trennen sich an „ und “/„ sowie “ sowie an Kommata vor dem nächsten Wörter-Objekt.
   private static final Pattern PAAR_SEP =
-      Pattern.compile(" und | sowie |,\\s+(?=(?:die Wörter|das Wort|die Angabe|die Zahl) )");
+      Pattern.compile(
+          " und | sowie |,\\s+(?=(?:die (?:Wörter|Worte)|das Wort|die Angabe|die Zahl) )");
 
   // „Die bisherigen Absätze 6 und 7 werden die Absätze 1 und 2.“ — koordinierte Umnummerierung.
   private static final Pattern UMNUMMERIERUNG_KOORDINIERT =
@@ -576,7 +577,7 @@ final class BefehlErkenner {
       Pattern.compile("(?: und | sowie |,\\s+)(?=nach |vor )");
   private static final Pattern EIN_EINFUEGUNGS_PAAR =
       Pattern.compile(
-          "^(nach|vor) (?:dem Wort|den Wörtern|der Angabe|der Zahl) "
+          "^(nach|vor) (?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl) "
               + Z
               + " (?:(ein Komma und )?(?:wird |werden )?"
               + WOERTER
@@ -593,7 +594,7 @@ final class BefehlErkenner {
               // Komma-Kette gleichrangiger Klauseln („… ersetzt, die Angabe «n» wird gestrichen
               // und …“) — nur vor einer Wortgruppen-Klausel mit maskiertem Zitat, damit echte
               // Relativsätze nicht getrennt werden.
-              + "|, (?=(?:die Wörter|das Wort|die Angabe|die Zahl) «)"
+              + "|, (?=(?:die (?:Wörter|Worte)|das Wort|die Angabe|die Zahl) «)"
               // Ebenso vor einer Satzzeichen-Klausel („… ersetzt, der Punkt am Ende durch ein
               // Semikolon ersetzt und …“).
               + "|, (?=(?:der Punkt|das Komma|das Semikolon) am Ende)");
@@ -619,7 +620,7 @@ final class BefehlErkenner {
   private static final Pattern KOMMA_EINFUEGUNG =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?(nach|vor) "
-              + "(?:dem Wort|den Wörtern|der Angabe|der Zahl|der Verweisung) "
+              + "(?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl|der Verweisung) "
               + Z
               + " (ein Komma|ein Semikolon|einen Punkt) eingefügt\\.$");
 
@@ -627,7 +628,7 @@ final class BefehlErkenner {
   // den Kontext). Tritt vor allem als rechte Klausel eines Verbundbefehls auf.
   private static final Pattern EINFUEGUNG_ANKER_ZUERST =
       Pattern.compile(
-          "^(Nach|Vor) (?:dem Wort|den Wörtern|der Angabe|der Zahl) "
+          "^(Nach|Vor) (?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl) "
               + Z
               + " (?:wird|werden) (?:"
               + WOERTER
@@ -675,7 +676,7 @@ final class BefehlErkenner {
   // „wird/werden“ ergänzt {@link #vervollstaendigeVerbRahmenPunkt}.
   private static final Pattern VERB_RAHMEN_PUNKT =
       Pattern.compile(
-          "^[Ii]n (.+?) (?=(?:die Wörter|das Wort|die Angabe|die Zahl) «)(.+?)[,.]?(?: und)?$");
+          "^[Ii]n (.+?) (?=(?:die (?:Wörter|Worte)|das Wort|die Angabe|die Zahl) «)(.+?)[,.]?(?: und)?$");
 
   /** Das Verb eines Verb-Rahmens („Es werden ersetzt:“), sonst leer. */
   static Optional<String> verbRahmen(String text) {
@@ -1640,8 +1641,8 @@ final class BefehlErkenner {
   // des zuvor gesetzten Skopus (Gapping): „… und die Angabe „X“ wird gestrichen/eingefügt“.
   private static final Pattern REINE_WORT_OPERATION =
       Pattern.compile(
-          "(?i)(?:die Angabe|nach der Angabe|vor der Angabe|die Wörter|die Worte|"
-              + "nach den Wörtern|vor den Wörtern|das Wort)\\b");
+          "(?i)(?:die Angabe|nach der Angabe|vor der Angabe|die (?:Wörter|Worte)|die Worte|"
+              + "nach den (?:Wörtern|Worten)|vor den (?:Wörtern|Worten)|das Wort)\\b");
 
   // Klausel, deren Subjekt ein Satzzeichen ist („das Komma wird durch … ersetzt“).
   private static final Pattern SATZZEICHEN_SUBJEKT =

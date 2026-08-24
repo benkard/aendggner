@@ -1,0 +1,69 @@
+Beispieldaten Rheinland-Pfalz — Herkunft und Aufbereitung
+=========================================================
+
+1. Änderungsdokument
+   GVBl-2026-21_UKAPOGS-E3-AendVO.pdf
+   Gesetz- und Verordnungsblatt für das Land Rheinland-Pfalz Nr. 21 vom
+   10. August 2026: Erste Landesverordnung zur Änderung der Ausbildungs- und
+   Prüfungsordnung für den Zugang zum dritten Einstiegsamt im Verwaltungsdienst
+   der Fachrichtung Gesundheit und Soziales bei der Unfallkasse Rheinland-Pfalz
+   vom 31. Juli 2026.
+   Bezogen über https://verkuendung.rlp.de/de/gesetz-und-verordnungsblatt
+   (Direktverweis auf upload.open.rlp.de/…/gvbl.-nr.-21-2026_sealed.pdf,
+   abgerufen am 24.08.2026).
+
+2. Stammfassung — hier die NACHfassung
+   UKAPOGS-E3-neu.txt
+   Dieselbe Verordnung vom 12. Juli 2023 in der Gesamtausgabe mit Gültigkeit ab
+   dem 11. August 2026, also nach der Änderung.
+   Bezogen über https://landesrecht.rlp.de/bsrp/document/aiz-jlr-NNLRP00005EEA@20260811
+
+   Die Vorfassung fehlt, und zwar aus einem Grund, der in der Quelle liegt: Das
+   rheinland-pfälzische Landesrechtsportal führt keine früheren Gesamtausgaben.
+   Es kennt allein die aktuelle („Aktuelle Gesamtausgabe“) nebst einer bloßen
+   Aufzählung der Änderungen; die Schaltfläche „Gesamtausgaben-Liste“, über die in
+   Hessen, Schleswig-Holstein, Berlin und Baden-Württemberg jede Fassung mit ihrem
+   Geltungszeitraum abrufbar ist, gibt es dort nicht. Ebenso wenig im
+   saarländischen (recht.saarland.de) und im sachsen-anhaltischen Portal
+   (landesrecht.sachsen-anhalt.de); geprüft am 24.08.2026. Deshalb reicht die
+   Prüfung dieses Falles nur bis zur Befehlserkennung.
+
+   Die Verkündungsplattform des Landes verkündet erst seit dem 1. Juli 2026
+   elektronisch; ältere Hefte — hier das Stammheft von 2023 (GVBl. S. 202) —
+   liegen dort nicht.
+
+Beschaffung des Portaltextes: der Blob-Weg
+------------------------------------------
+Der Text der juris-Portale ist nur im Browser vorhanden (die Skriptabfrage erhält
+die 5,4-kB-Hülle). Bisher wurde er stückweise über die Textausgabe der
+Browsersteuerung geholt. Einfacher und zeichengenau geht es so:
+
+    const txt = document.querySelector('div.docLayoutText').innerText;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([txt], {type: 'text/plain'}));
+    a.download = 'fassung.txt';
+    document.body.appendChild(a);
+    a.click();
+
+Die Datei landet im Download-Verzeichnis und geht damit gar nicht erst durch die
+Textausgabe. Der PDF-Verweis der Dokumentansicht
+(/jportal/recherche3doc/<Kurzname>.pdf?json=…) taugt dagegen nicht: Er ist an die
+Sitzung gebunden und antwortet einer Skriptabfrage mit „Ihre letzte Sitzung wurde
+bereits beendet“.
+
+Aufbereitung (Skript nicht im Repositorium; Vorgehen hier festgehalten)
+-----------------------------------------------------------------------
+  - Vorspann bis zur Marke „zur Einzelansicht Inhaltsverzeichnis“; Kopf aus der
+    Titelzeile, Langtitel und Klammerzusatz auf je eigener Zeile.
+  - Die Marken „zur Einzelansicht …“ stehen hinter jeder Norm und entfallen.
+  - Der Normkopf trägt ein geschütztes Leerzeichen („§<NBSP>1“); es wird zum
+    gewöhnlichen. Normkopf und Überschrift stehen auf zwei Zeilen und werden
+    vereinigt, ebenso Teil-Bezeichnung und Teil-Überschrift.
+  - Aufzählungsmarke und Gliedtext stehen getrennt und werden vereinigt.
+  - Zum Schluss NFC.
+
+Rechtsrahmen
+------------
+Gesetze und Verordnungen sind amtliche Werke und gemeinfrei (§ 5 Absatz 1 UrhG).
+Bezogen wurden einzelne Werke zum Zweck der Prüfung dieses Erzeugnisses, nicht im
+Massenabzug; eine Anmeldeschranke besteht nicht und wurde nicht umgangen.

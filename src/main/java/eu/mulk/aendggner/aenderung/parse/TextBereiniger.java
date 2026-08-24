@@ -295,6 +295,16 @@ public final class TextBereiniger {
               + "Nr\\.\\s*\\d+ vom \\d{1,2}\\. \\p{L}+ \\d{4}"
               + "(?:[ \\t\\n]*Seite \\d+ von \\d+)?[ \\t]*");
 
+  // GVBl. für Rheinland-Pfalz (elektronische Verkündung seit dem 1. Juli 2026): Der Seitenfuß
+  // („Gesetz- und Verordnungsblatt für das Land Rheinland-Pfalz - Nr. 21 vom 10. August 2026“)
+  // steht ebenso im Inhaltsstrom und zerschneidet dort das Zitat einer Neufassung („§ 18 erhält
+  // folgende Fassung:“ / Fußzeile / „„§ 18 …““). Die vorangehende Seitenzahl steht auf eigener
+  // Zeile und wird als Kolumnentitel erkannt.
+  private static final Pattern GVBL_RP_FUSS =
+      Pattern.compile(
+          "[ \\t]*Gesetz- und Verordnungsblatt für das Land Rheinland-Pfalz[ \\t\\n]*-[ \\t\\n]*"
+              + "Nr\\.\\s*\\d+ vom \\d{1,2}\\. \\p{L}+ \\d{4}[ \\t]*");
+
   // Die Blattzählung des GBl. BW („Seite 2 von 7“) steht im Inhaltsstrom mitunter für sich allein,
   // getrennt vom übrigen Seitenfuß, und zwar zwischen zwei Gliederungspunkten — sie hinge sonst dem
   // vorangehenden Befehl an und machte ihn unkenntlich.
@@ -339,6 +349,7 @@ public final class TextBereiniger {
     text = GVBL_TH_KOPF.matcher(text).replaceAll("\n");
     text = GVBL_TH_FUSS.matcher(text).replaceAll("\n");
     text = GBL_BW_FUSS.matcher(text).replaceAll("\n");
+    text = GVBL_RP_FUSS.matcher(text).replaceAll("\n");
     var zeilen = entferneKolumnentitel(zerlegeInZeilen(text));
     var verbunden = verbindeUmbrueche(zeilen);
     // Falsch-positive markerlose Zusammenzüge („durch“ + „die“ → „durchdie“) reparieren — die

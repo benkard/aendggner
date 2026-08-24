@@ -513,7 +513,18 @@ Thüringens Portal gibt sie ebensowenig aus; dort ist die konsolidierte
 Fassung aus dem Stammheft und den drei Änderungsheften des Gesetzblattes
 zusammengesetzt, die die Parlamentsdatenbank des Landtags frei ausgibt.
 
-(4) Welche Konvention welches Land beisteuert, welche Stammfassungen woher
+(4) Nicht jedes Portal gibt frühere Fassungen überhaupt her. Rheinland-Pfalz,
+das Saarland und Sachsen-Anhalt führen nur die aktuelle Gesamtausgabe nebst einer
+Aufzählung der Änderungen; die Fassungsliste, über die Hessen, Schleswig-Holstein,
+Berlin und Baden-Württemberg jede Fassung datierbar ausgeben, fehlt dort. Für
+Rheinland-Pfalz (Ausbildungs- und Prüfungsordnung der Unfallkasse) reicht die
+Prüfung deshalb nur bis zur Befehlserkennung — nicht weil das Werkzeug es nicht
+könnte, sondern weil die Vorfassung nicht zu beschaffen ist. Der Fall hat
+gleichwohl zwei allgemeine Funde gebracht: die Nebenform „die Worte“ für „die
+Wörter“ und den Seitenfuß des dortigen Gesetzblattes, der im Inhaltsstrom das
+Zitat einer Neufassung zerschneidet.
+
+(5) Welche Konvention welches Land beisteuert, welche Stammfassungen woher
 stammen und was noch offen ist, verzeichnet
 `src/test/resources/sampledata/Landesrecht-Beispiele.adoc`.
 
