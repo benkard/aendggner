@@ -411,6 +411,34 @@ final class LandesRechtTextParser {
     return false;
   }
 
+  /**
+   * Ein Zwischentitel gliedert einen Katalog, ohne selbst eine Vorschrift zu sein: „Aus dem Bereich
+   * Verkehr:“. Er steht für sich auf einer Zeile und endet auf einem Doppelpunkt.
+   */
+  private static boolean istZwischentitel(String zeile) {
+    return zeile.endsWith(":")
+        && !ABSATZ_MARKER.matcher(zeile).find()
+        && !AUFZAEHLUNGS_MARKE.matcher(zeile).find();
+  }
+
+  /**
+   * Wahr, wenn auf die Zeile {@code index} ein bezeichneter Absatz folgt. Nur dann ist ein
+   * Doppelpunkt am Zeilenende ein Zwischentitel und kein Chapeau, der seine Aufzählung einleitet.
+   */
+  private static boolean folgtAbsatz(List<String> zeilen, int index) {
+    for (int i = index + 1; i < zeilen.size(); i++) {
+      var naechste = zeilen.get(i).strip();
+      if (naechste.isEmpty()) {
+        continue;
+      }
+      return ABSATZ_MARKER.matcher(naechste).find();
+    }
+    return false;
+  }
+
+  private static final Pattern AUFZAEHLUNGS_MARKE =
+      Pattern.compile("^(?:\\d+[a-z]?\\.|[a-z]{1,2}\\))\\s");
+
   private static Norm baueNorm(
       String enbez, @Nullable String titel, @Nullable Gliederung gliederung, List<String> zeilen) {
     boolean weggefallen = titel != null && WEGGEFALLEN_TITEL.matcher(titel).matches();
@@ -418,9 +446,22 @@ final class LandesRechtTextParser {
     var absaetze = new ArrayList<Absatz>();
     String absatzNummer = null;
     var absatzZeilen = new ArrayList<String>();
-    for (var zeile : zeilen) {
+    for (int i = 0; i < zeilen.size(); i++) {
+      var zeile = zeilen.get(i);
       var gestutzt = zeile.strip();
       if (gestutzt.isEmpty()) {
+        continue;
+      }
+      if (istZwischentitel(gestutzt) && !absatzZeilen.isEmpty() && folgtAbsatz(zeilen, i)) {
+        // Ein Zwischentitel trägt keine Absatzbezeichnung und gehört doch nicht zum
+        // vorangehenden Absatz: Dessen Text endete sonst nicht dort, wo er endet — und ein
+        // Befehl wie „In Absatz 4a wird der Punkt am Ende durch ein Semikolon ersetzt“ fände
+        // seinen Punkt nicht. Er wird deshalb ein eigener, bezeichnungsloser Absatz, wie ihn
+        // der Vorspann einer Norm ohnehin bildet.
+        absaetze.add(new Absatz(absatzNummer, String.join("\n", absatzZeilen)));
+        absatzZeilen.clear();
+        absatzNummer = null;
+        absaetze.add(new Absatz(null, gestutzt));
         continue;
       }
       var fussnote = FUSSNOTE.matcher(gestutzt);

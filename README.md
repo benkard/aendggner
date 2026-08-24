@@ -275,9 +275,15 @@ sie neu besetzt.
 (2) Aus Absatz 1 folgt
 
 1. die absteigende Abarbeitung einer aufsteigenden Kaskade („Der bisherige
-   Absatz 3 wird Absatz 4“, „Der bisherige Absatz 4 wird Absatz 5“, …) sowie
+   Absatz 3 wird Absatz 4“, „Der bisherige Absatz 4 wird Absatz 5“, …),
 2. der Vorrang einer Umnummerierung vor derjenigen Einfügung, die deren
-   Bezeichnung neu vergibt.
+   Bezeichnung neu vergibt, sowie
+3. der Vorrang einer Aufhebung vor demjenigen Schritt, der die aufgehobene
+   Bezeichnung neu vergibt. Auch die Aufhebung räumt nämlich eine Bezeichnung;
+   dass sie mitunter einen Platzhalter hinterlässt („9. (weggefallen)“) und dann
+   gerade nichts freigibt, steht erst am Bestand fest und schadet nicht: Vorrang
+   erhält sie nur gegenüber Schritten, die dieselbe Bezeichnung neu vergeben, und
+   eine zugleich weggefallene und neu vergebene Bezeichnung gibt es nicht.
 
 Wer vorrückt, nimmt dabei seine eigenen Räumer mit: Auch eine über mehrere Punkte
 verschränkte Kaskade („Die bisherige Nr. 15 wird Nr. 16“, „Die bisherigen Nrn. 13

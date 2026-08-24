@@ -251,16 +251,15 @@ class EndToEndTest {
    *
    * <p>Gegen die heutige konsolidierte Fassung ({@link #gegGrossesAenderungsgesetz}) blieben 51 von
    * 119 Befehlen liegen, und der Test konnte deshalb keine Sollzahl pinnen. Gegen den Stand vom 24.
-   * April 2023 sind es <b>116 angewandte und drei Reste</b> — und diese drei sind erstmals echte
-   * Befunde, die hier einzeln festgehalten sind:
+   * April 2023 sind es <b>117 angewandte und zwei Reste</b>, und diese zwei sind echte Befunde:
+   *
+   * <p>Der dritte Rest ist keiner mehr: {@code 40. a) ff)} („Die bisherige Nummer 9 wird
+   * aufgehoben.“) scheiterte daran, dass Punkt bb) derselben Kaskade aus den bisherigen Nummern 4
+   * bis 6 die Nummern 8 bis 10 macht — vorübergehend trugen zwei Einheiten die Bezeichnung 9. Seit
+   * auch eine Aufhebung als Räumende zählt, läuft sie vor der Umnummerierung, und § 108 Absatz 1
+   * trägt danach die lückenlose Folge der Nummern 1 bis 32.
    *
    * <ol>
-   *   <li>{@code 40. a) ff)} „Die bisherige Nummer 9 wird aufgehoben.“ — In derselben Kaskade macht
-   *       Punkt bb) aus den bisherigen Nummern 4 bis 6 die Nummern 8 bis 10. Damit tragen
-   *       vorübergehend zwei Einheiten die Bezeichnung 9, und die Aufhebung findet keine
-   *       eindeutige. Die Schritt-Ordnung kennt bislang nur Umnummerierungen als Räumende; ein
-   *       Schritt, dessen <em>Ziel</em> eine Bezeichnung ist, die ein anderer neu vergibt, müsste
-   *       ebenso vorgezogen werden.
    *   <li>{@code 40. a) hh)} „Die bisherige Nummer 18 wird Nummer 29 und nach der Angabe ‚Absatz 1‘
    *       werden die Wörter ‚oder Absatz 4‘ eingefügt.“ — Die Begleitklausel löst norm-weit auf
    *       (bewusst so, siehe {@code BefehlErkenner}) und trifft dort 21 Vorkommen. Gemeint ist die
@@ -291,8 +290,23 @@ class EndToEndTest {
             .filter(a -> a.status() == BefehlAnwender.Status.MANUELL_PRUEFEN)
             .map(a -> a.befehl().provenienz().gliederungsPfad())
             .toList();
-    assertThat(manuellPfade).containsExactly("40. a) ff)", "40. a) hh)", "43. b) aa)");
-    assertThat(anwendung.anzahlAngewandt()).isEqualTo(116);
+    assertThat(manuellPfade).containsExactly("40. a) hh)", "43. b) aa)");
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(117);
+
+    // Die Kaskade des § 108 Absatz 1 geht lückenlos auf: 32 Nummern, keine doppelt, keine fehlend.
+    var nummern =
+        anwendung
+            .neu()
+            .norm("§ 108")
+            .orElseThrow()
+            .absaetze()
+            .get(0)
+            .text()
+            .lines()
+            .map(z -> z.strip().split("\\.")[0])
+            .filter(z -> z.matches("\\d+"))
+            .toList();
+    assertThat(nummern).hasSize(32).endsWith("32");
 
     var neu = anwendung.neu();
     // Der neue § 9a steht im Gesetz und in der Inhaltsübersicht.
@@ -929,12 +943,11 @@ class EndToEndTest {
    * Spaltenspikes fest — die Spaltenreihenfolge des Inhaltsstroms ist bereits die Lesereihenfolge,
    * eine koordinatenbasierte Spaltenerkennung ist dafür nicht nötig.
    *
-   * <p>Artikel 2 (LAF-Errichtungsgesetz) ist ein voller Akzeptanzfall: beide Befehle angewandt,
-   * alle fünf Normen gleich der amtlichen Nachfassung. Für Artikel 1 (ASOG) reicht die Prüfung bis
-   * zur Befehlserkennung. Fünf seiner sechs Befehle zielen auf die <em>Anlage</em>, deren Einheiten
-   * dort nicht als Aufzählungsmarken, sondern als Überschriften gesetzt sind („Nummer 6“, „Nummer
-   * 23“); sie brauchen einen eigenen Rang zwischen Norm und Absatz, den das Datenmodell noch nicht
-   * führt. Die Begründung im einzelnen steht in {@code Berlin/SOURCES}.
+   * <p>Beide Artikel sind volle Akzeptanzfälle: Artikel 2 (LAF-Errichtungsgesetz) mit beiden
+   * Befehlen und allen fünf Normen, Artikel 1 (ASOG) mit allen sechs Befehlen und allen 171 Normen
+   * gleich der amtlichen Nachfassung. Fünf der sechs Befehle zielen auf die <em>Anlage</em>, deren
+   * Einheiten dort nicht als Aufzählungsmarken, sondern als Überschriften gesetzt sind („Nummer 6“,
+   * „Nummer 23“) — sie werden als eigene Normen geführt.
    */
   @Test
   void asogLafAendGBerlin() throws Exception {
@@ -1019,20 +1032,23 @@ class EndToEndTest {
             .filter(x -> x.status() == BefehlAnwender.Status.MANUELL_PRUEFEN)
             .map(x -> x.befehl().provenienz().gliederungsPfad())
             .toList();
-    // Einziger Rest, und er benennt eine Grenze des Klartextformats: „In Absatz 4a wird der Punkt
-    // am Ende durch ein Semikolon ersetzt.“ Auf den Absatz 4a folgt der Zwischentitel „Aus dem
-    // Bereich Verkehr:“, der keine eigene Absatzbezeichnung trägt und deshalb dem vorangehenden
-    // Absatz zugeschlagen wird. Dessen Text endet damit nicht auf den Punkt, den der Befehl meint.
-    assertThat(manuellPfade).containsExactly("2. b) aa)");
-    assertThat(anwendung.anzahlAngewandt()).isEqualTo(5);
+    // Kein Rest mehr: Der Zwischentitel „Aus dem Bereich Verkehr:“ trägt keine Absatz-
+    // bezeichnung und wurde bislang dem vorangehenden Absatz zugeschlagen; dessen Text endete
+    // dann nicht auf den Punkt, den „In Absatz 4a wird der Punkt am Ende durch ein Semikolon
+    // ersetzt“ meint. Er ist jetzt ein eigener, bezeichnungsloser Absatz.
+    assertThat(manuellPfade).isEmpty();
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(6);
 
     // Die Nummer 23 der Anlage trägt danach die Absatzfolge der amtlichen Nachfassung: Der neue
     // Absatz 5 ist ein Absatz geworden (nicht eine Zeile im Absatz 4a), und die bisherigen
     // Absätze 5 bis 9 sind zu 6 bis 10 aufgerückt.
     var nummer23 = anwendung.neu().norm("Anlage Nummer 23").orElseThrow();
+    // Die bezeichnungslosen Einträge sind der Vorspann und die Zwischentitel des Katalogs („Aus
+    // dem Bereich Verkehr:“); sie tragen keine Absatzbezeichnung und stehen deshalb für sich.
     assertThat(nummer23.absaetze())
         .extracting(Absatz::nummer)
-        .containsExactly(null, "1", "2", "3", "4", "4a", "5", "6", "7", "8", "9", "10");
+        .containsExactly(
+            null, null, "1", "2", "3", "4", "4a", "5", null, "6", "7", null, "8", "9", null, "10");
 
     // Norm für Norm gegen die amtliche Nachfassung vom 12. Juni 2026. Es bleiben genau zwei
     // benannte Abweichungen — keine davon in der Anwendung begründet:
@@ -1050,13 +1066,14 @@ class EndToEndTest {
         abweichend.add(normSoll.enbez());
       }
     }
-    // Zwei benannte Abweichungen, keine davon in der Anwendung begründet:
+    // Keine Abweichung mehr: Alle 171 Normen gleichen der amtlichen Nachfassung.
     //
-    // § 67 — Das Portal setzt in der neuen Fassung amtliche Satznummern („(2) ¹Gegen einen …“);
-    //   das Gesetzblatt, aus dem der Wortlaut stammt, setzt keine.
-    // Anlage Nummer 23 — der oben benannte Rest: dort steht der Punkt, wo die Nachfassung ein
-    //   Semikolon führt.
-    assertThat(abweichend).containsExactly("§ 67", "Anlage Nummer 23");
+    // § 67 trug die beiden zuvor benannten Abweichungen: Das Portal setzt in der neuen Fassung
+    //   amtliche Satznummern („(2) ¹Gegen einen …“), das Gesetzblatt, aus dem der Wortlaut
+    //   stammt, setzt keine — die Zählung wird jetzt beim Einsetzen fortgeschrieben. Und in der
+    //   Anlage Nummer 23 steht das Semikolon, weil der Zwischentitel den Absatz nicht mehr
+    //   verlängert.
+    assertThat(abweichend).isEmpty();
     // Die Nummer 31 war die dritte: Ihr Zitat läuft über einen Seitenwechsel, und der
     // ganzseitenbreite Titelblock des Änderungsgesetzes steht im Inhaltsstrom mitten darin
     // („… zur Sicherung des Be-“ / Titelblock / „triebs von Unterkünften …“). Seit die
@@ -1596,7 +1613,7 @@ class EndToEndTest {
     // 69 statt der früheren 68: Nennt der Rahmen dieselbe Gliederungseinheit wie der Befehl („…
     // Teil 2 wird wie folgt geändert: … die Angabe zur Überschrift von Teil 2 Abschnitt 4 …“),
     // so gilt sie jetzt einmal statt zweimal (InhaltsuebersichtAnwender.zielKette).
-    assertThat(ausEmpfehlung.anzahlAngewandt()).isEqualTo(69);
+    assertThat(ausEmpfehlung.anzahlAngewandt()).isEqualTo(70);
     assertThat(ausEmpfehlung.anzahlAngewandt() + ausEmpfehlung.anzahlManuell())
         .as("die Ausschussfassung trägt mehr Befehle als der Entwurf")
         .isGreaterThan(ausEntwurf.anzahlAngewandt() + ausEntwurf.anzahlManuell());
@@ -1704,20 +1721,20 @@ class EndToEndTest {
     assumeTrue(Files.exists(xml) && Files.exists(pdf), "GEG-Beispieldaten fehlen");
 
     var vollstaendig = Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false);
-    assertThat(vollstaendig.anzahlAngewandt()).isEqualTo(116);
-    assertThat(vollstaendig.anzahlManuell()).isEqualTo(3);
+    assertThat(vollstaendig.anzahlAngewandt()).isEqualTo(117);
+    assertThat(vollstaendig.anzahlManuell()).isEqualTo(2);
 
     var anfang2024 =
         Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false, LocalDate.of(2024, 1, 1));
-    assertThat(anfang2024.anzahlAngewandt()).isEqualTo(115);
-    assertThat(anfang2024.anzahlManuell()).isEqualTo(3);
+    assertThat(anfang2024.anzahlAngewandt()).isEqualTo(116);
+    assertThat(anfang2024.anzahlManuell()).isEqualTo(2);
     assertThat(anfang2024.html())
         .contains("Am Stichtag noch nicht in Kraft")
         .contains("Tritt erst am 1. Oktober 2024 in Kraft");
 
     var oktober2024 =
         Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false, LocalDate.of(2024, 10, 1));
-    assertThat(oktober2024.anzahlAngewandt()).isEqualTo(116);
+    assertThat(oktober2024.anzahlAngewandt()).isEqualTo(117);
   }
 
   /**

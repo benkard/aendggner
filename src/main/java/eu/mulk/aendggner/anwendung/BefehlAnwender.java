@@ -111,7 +111,13 @@ public final class BefehlAnwender {
     }
     protokoll.addAll(verdichte(befehle, schritte, ergebnisse));
 
-    var neu = alt.mitNormen(normen).mitGliederungen(gliederungen);
+    // Führt das Gesetz amtliche Satznummern, so erbt sie auch der neu eingesetzte Wortlaut: Das
+    // Gesetzblatt zitiert ohne Zählung, die Fassung führt sie.
+    var fortgeschrieben =
+        Satznummerierung.fuehrtSatznummern(alt)
+            ? Satznummerierung.schreibeFort(alt, normen)
+            : normen;
+    var neu = alt.mitNormen(fortgeschrieben).mitGliederungen(gliederungen);
     if (neuerLangtitel != null) {
       neu = neu.mitLangue(neuerLangtitel);
     }
@@ -359,13 +365,39 @@ public final class BefehlAnwender {
         befehl, Status.MANUELL_PRUEFEN, String.join(" ", fehler), betroffene, ersterGrund);
   }
 
-  /** Bezeichnungen, die ein Befehl freigibt — die Ausgangsstellen seiner Umnummerierungen. */
+  /**
+   * Bezeichnungen, die ein Befehl freigibt — die Ausgangsstellen seiner Umnummerierungen und die
+   * Stellen seiner Aufhebungen.
+   *
+   * <p>Dass auch eine Aufhebung räumt, ist nicht selbstverständlich, denn sie hinterlässt vielfach
+   * einen Platzhalter („9. (weggefallen)“) und gibt die Bezeichnung dann gerade nicht frei. Ob das
+   * geschieht, steht erst am Bestand fest ({@code haeltPlatz}), also nach der Ordnung. Vorgezogen
+   * wird die Aufhebung gleichwohl: Sie rückt nur gegenüber Schritten vor, die dieselbe Bezeichnung
+   * neu vergeben — und wo eine Bezeichnung zugleich weggefallen und neu vergeben sein soll,
+   * widerspräche das Gesetz sich selbst. So ist es im GEG (§ 108 Absatz 1): Die Kaskade macht die
+   * bisherigen Nummern 4 bis 6 zu 8 bis 10, während die bisherige Nummer 9 aufgehoben wird. Läuft
+   * die Aufhebung nach der Umnummerierung, sucht sie eine Nummer 9, die inzwischen eine andere
+   * Einheit ist.
+   */
   private static Set<String> geraeumteBezeichnungen(Aenderungsbefehl befehl) {
     var raeumt = new LinkedHashSet<String>();
     for (var u : umnummerierungen(befehl)) {
       raeumt.add(u.stelle().anzeigeText());
     }
+    for (var a : aufhebungen(befehl)) {
+      raeumt.add(a.stelle().anzeigeText());
+    }
     return raeumt;
+  }
+
+  /** Die Aufhebungen eines Befehls — auch die in einem Verbund. */
+  private static List<Aufhebung> aufhebungen(Aenderungsbefehl befehl) {
+    return switch (befehl) {
+      case Aufhebung a -> List.of(a);
+      case Sammelbefehl s ->
+          s.teilbefehle().stream().flatMap(t -> aufhebungen(t).stream()).toList();
+      default -> List.of();
+    };
   }
 
   /** Bezeichnungen, die ein Befehl neu vergibt — Umnummerierungsziele und eingefügte Einheiten. */

@@ -154,6 +154,45 @@ Tage gegolten hat. Bislang tat das Erzeugnis eben dies, und zwar schweigend.
 (8) Der Prüfbestand umfasst dreihundertachtundvierzig Prüfungen.
 
 
+Artikel 6
+Beseitigung dreier benannter Mängel
+
+Die nachstehenden drei Mängel waren in den Prüfungen einzeln begründet festge-
+halten. Sie sind sämtlich allgemeiner Natur und nicht Eigenheiten ihrer Belegfälle.
+
+(1) Auch eine Aufhebung räumt eine Bezeichnung. Die Ordnung der Anwendungs-
+    schritte kannte bislang allein Umnummerierungen als Räumende. Im Gebäude-
+    energiegesetz (§ 108 Absatz 1) macht ein Punkt der Kaskade aus den bisherigen
+    Nummern 4 bis 6 die Nummern 8 bis 10, während ein anderer die bisherige
+    Nummer 9 aufhebt; die Aufhebung suchte danach eine Nummer 9, die inzwischen
+    eine andere Einheit war. Sie läuft fortan vor der Umnummerierung. Dass eine
+    Aufhebung mitunter einen Platzhalter hinterlässt und dann nichts freigibt,
+    steht erst am Bestand fest und schadet nicht: Vorrang erhält sie nur gegenüber
+    Schritten, die dieselbe Bezeichnung neu vergeben.
+
+(2) Ein Zwischentitel ist kein Teil des vorangehenden Absatzes. Eine Zeile, die
+    auf einen Doppelpunkt endet, keine Absatzbezeichnung trägt und der ein
+    bezeichneter Absatz folgt, bildet fortan einen eigenen, bezeichnungslosen
+    Absatz (LandesRechtTextParser). Bislang wurde sie dem vorangehenden Absatz
+    zugeschlagen; dessen Text endete dann nicht dort, wo er endet, und die
+    Anweisung „In Absatz 4a wird der Punkt am Ende durch ein Semikolon ersetzt“
+    fand ihren Punkt nicht.
+
+(3) Neu eingesetzter Wortlaut erbt die amtliche Satzzählung (Satznummerierung).
+    Führt das Stammgesetz sie, so trägt der aus dem Gesetzblatt zitierte Text sie
+    gleichwohl nicht — sie gehört zur Fassung, nicht zum Verkündungstext.
+    Angefasst wird nur, was angefasst werden muss: ein geänderter Absatz, der
+    keine Zählung trägt, aus mehr als einem Satz besteht und auf einer Zeile
+    steht; die Mehrzeiligkeit schließt Aufzählungen aus.
+
+(4) Damit sind das Gebäudeenergiegesetz mit einhundertsiebzehn angewandten
+    Befehlen und zwei Resten (zuvor einhundertsechzehn und drei) und das Berliner
+    Allgemeine Sicherheits- und Ordnungsgesetz mit sämtlichen sechs Befehlen und
+    allen einhunderteinundsiebzig Normen gleich der amtlichen Nachfassung
+    ausgewiesen; die Beschlussempfehlung zum Gebäudeenergiegesetz steigt von
+    neunundsechzig auf siebzig angewandte Befehle.
+
+
 ════════════════════════════════════════════════════════════════════════════════
  Fassung vom 23. August 2026,
  zuletzt geändert durch die am 23. August 2026 vorgenommenen Änderungen
