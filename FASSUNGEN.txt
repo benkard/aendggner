@@ -261,6 +261,44 @@ Aufnahme des rheinland-pfälzischen Landesrechts
 (6) Der Prüfbestand umfasst dreihundertfünfzig Prüfungen.
 
 
+Artikel 9
+Auslieferung als Phase des Baues
+
+Die Auslieferung der Browserfassung lag bislang außerhalb des Baues: Ein Skript
+(„deploy/cloudflare.sh“) rief nacheinander den Bau und das Hochladen. Die
+gleichnamige Phase des Baues selbst war unbesetzt und hätte, gerufen, den Bau zum
+Erliegen gebracht, weil das Erzeugnis kein Empfangsverzeichnis („distribution-
+Management“) benennt.
+
+(1) Das Ziel „deploy:deploy“ wird stillgelegt. Das Erzeugnis ist eine Anwendung,
+    keine Bibliothek; es geht in kein Maven-Verzeichnis, und seine Fassungs-
+    bezeichnung („${revision}“) ergäbe dort ohnehin kein brauchbares Erzeugnis-
+    modell. Das Ziel „install“ bleibt unberührt.
+
+(2) Die freigewordene Phase nimmt im Profil „wasm“ den Aufruf von „wrangler
+    deploy“ auf. Hochgeladen wird allein das Verzeichnis, das die Phase „package“
+    auslieferfertig hinterlassen hat; welches es ist, sagt „wrangler.toml“.
+    Fortan baut und liefert ein einziger Aufruf aus:
+
+        JAVA_HOME=/pfad/zu/oracle-graalvm ./mvnw -Pwasm deploy
+
+    Die Prüfungen aus „webpaket.sh“ — sauberer Arbeitsbaum für den beizulegenden
+    Quelltext (AGPLv3 § 13) und die Grenze von 25 MiB je Datei — liegen dabei vor
+    dem Hochladen und halten den Lauf an, ehe etwas hinausgeht.
+
+(3) Das Skript „deploy/cloudflare.sh“ entfällt; es wäre nach dem Vorstehenden nur
+    noch die Doppelung dreier Aufrufe. Der Handbuchtext (§ 15 Absatz 1) wird
+    entsprechend gefasst.
+
+(4) Ohne das Profil „wasm“ liefert die Phase nichts aus und bricht auch nicht ab.
+
+(5) Die Prüfung geht auf: „./mvnw deploy“ vermerkt „Skipping artifact deployment“
+    und läuft durch; „./mvnw -Pwasm deploy“ führt die Ausführung „cloudflare“ an
+    der Phase „deploy“ auf; „wrangler deploy --dry-run“ liest die dreizehn Dateien
+    des Auslieferungsverzeichnisses, ohne auszuliefern; „./mvnw verify“ besteht
+    mit dreihundertfünfzig Prüfungen.
+
+
 ════════════════════════════════════════════════════════════════════════════════
  Fassung vom 23. August 2026,
  zuletzt geändert durch die am 23. August 2026 vorgenommenen Änderungen

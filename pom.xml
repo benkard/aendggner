@@ -34,6 +34,7 @@
     <clean-plugin.version>3.3.2</clean-plugin.version>
     <compiler-plugin.version>3.15.0</compiler-plugin.version>
     <dependency-plugin.version>3.11.0</dependency-plugin.version>
+    <deploy-plugin.version>3.1.4</deploy-plugin.version>
     <enforcer-plugin.version>3.6.3</enforcer-plugin.version>
     <exec-plugin.version>3.6.3</exec-plugin.version>
     <jar-plugin.version>3.5.0</jar-plugin.version>
@@ -289,6 +290,22 @@
         </executions>
       </plugin>
 
+      <!--
+        Das Erzeugnis geht nicht in ein Maven-Repositorium: es ist eine Anwendung, keine
+        Bibliothek, und seine Fassungsbezeichnung ist die CI-freundliche ${revision}
+        (.mvn/maven.config), die ohne Flatten kein brauchbares POM ergäbe. Ausgeliefert
+        wird nach Cloudflare Workers. Das Ziel „deploy:deploy“ ist deshalb stillgelegt und
+        die Phase steht dem Profil „wasm“ offen (README § 15). „install“ bleibt unberührt.
+      -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>${deploy-plugin.version}</version>
+        <configuration>
+          <skip>true</skip>
+        </configuration>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
@@ -492,6 +509,29 @@
                   <executable>${project.basedir}/deploy/webpaket.sh</executable>
                   <arguments>
                     <argument>${wasm.output.directory}</argument>
+                  </arguments>
+                </configuration>
+              </execution>
+
+              <!--
+                Die Auslieferung. Hochgeladen wird allein das Verzeichnis, das „webpaket“
+                auslieferfertig hinterlassen hat; welches, sagt wrangler.toml im
+                Projektverzeichnis. Ein Lauf von `./mvnw -Pwasm deploy` baut und liefert
+                also in einem Zuge aus, und die Prüfungen aus webpaket.sh (sauberer
+                Arbeitsbaum für den Quelltext nach AGPLv3 §13, 25-MiB-Grenze) liegen vor
+                dem Hochladen. Vorausgesetzt wird ein angemeldetes „wrangler“ im Pfad.
+              -->
+              <execution>
+                <id>cloudflare</id>
+                <phase>deploy</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <executable>wrangler</executable>
+                  <workingDirectory>${project.basedir}</workingDirectory>
+                  <arguments>
+                    <argument>deploy</argument>
                   </arguments>
                 </configuration>
               </execution>

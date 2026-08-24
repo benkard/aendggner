@@ -624,11 +624,18 @@ Cloudflare Workers. Dort gilt eine Grenze von 25 MiB je Datei — unkomprimiert
 gemessen —, und komprimiert wird beim Ausliefern ohnehin. `webpaket.sh` legt
 deshalb keine `.gz`/`.br`-Beilagen mehr an und hält am Ende jede Datei gegen
 diese Grenze; überschreitet eine sie, so bricht der Bau ab, statt das Hochladen
-scheitern zu lassen.
+scheitern zu lassen. Die Phase `package` baut nur; `deploy` lädt das Gebaute
+überdies mit `wrangler` nach `wrangler.toml` hoch:
 
 ```shell
-JAVA_HOME=/pfad/zu/oracle-graalvm ./mvnw -Pwasm package
+JAVA_HOME=/pfad/zu/oracle-graalvm ./mvnw -Pwasm package   # nur bauen
+JAVA_HOME=/pfad/zu/oracle-graalvm ./mvnw -Pwasm deploy    # bauen und ausliefern
 ```
+
+Vorausgesetzt wird ein angemeldetes `wrangler` im Pfad. Ohne `-Pwasm` liefert
+`deploy` nichts aus: Das Erzeugnis geht in kein Maven-Repositorium, weshalb das
+Ziel `deploy:deploy` stillgelegt ist und die Phase allein der Auslieferung der
+Browserfassung dient.
 
 (2) Wer die Fassung stattdessen selbst ausliefert — unter einem Unterpfad einer
 bestehenden Domain, wie zuvor unter <https://aendggner.app.kellertomaten.de/> —,
