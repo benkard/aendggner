@@ -4,14 +4,12 @@ package eu.mulk.aendggner.aenderung.parse;
 
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.UnbekannterBefehl;
+import eu.mulk.aendggner.aenderung.Inkrafttreten;
 import eu.mulk.aendggner.aenderung.Provenienz;
 import eu.mulk.aendggner.aenderung.Stelle;
 import eu.mulk.aendggner.gesetz.Gesetz;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import org.jboss.logging.Logger;
@@ -37,8 +35,21 @@ public final class AenderungsgesetzParser {
   private static final Pattern PARAGRAPH_UEBERSCHRIFT_AUSSEN =
       Pattern.compile("^§\\s*(\\d+[a-z]?)$");
 
+  /**
+   * @param inkrafttreten was der Schlussartikel über das Inkrafttreten sagt; {@code null}, wenn das
+   *     Dokument keinen lesbaren trägt (Entwürfe ohne Schlussartikel, Auszüge).
+   */
   public record ParseErgebnis(
-      List<Aenderungsbefehl> befehle, List<String> artikel, List<String> warnungen) {}
+      List<Aenderungsbefehl> befehle,
+      List<String> artikel,
+      List<String> warnungen,
+      @Nullable Inkrafttreten inkrafttreten) {
+
+    public ParseErgebnis(
+        List<Aenderungsbefehl> befehle, List<String> artikel, List<String> warnungen) {
+      this(befehle, artikel, warnungen, null);
+    }
+  }
 
   /**
    * @param text der bereinigte Lineartext des Änderungsgesetzes.
@@ -70,8 +81,10 @@ public final class AenderungsgesetzParser {
     var befehle = new ArrayList<Aenderungsbefehl>();
     var betroffeneArtikel = new ArrayList<String>();
     var warnungen = new ArrayList<>(zitate.warnungen());
+    int letzterBetroffen = -1;
 
-    for (var artikel : artikelBloecke) {
+    for (int artikelIndex = 0; artikelIndex < artikelBloecke.size(); artikelIndex++) {
+      var artikel = artikelBloecke.get(artikelIndex);
       var relevant =
           artikelFilter != null
               ? artikel.label.equals(artikelFilter)
@@ -95,6 +108,7 @@ public final class AenderungsgesetzParser {
                 + " Namen des Stammgesetzes).");
       }
       betroffeneArtikel.add(artikel.label);
+      letzterBetroffen = artikelIndex;
 
       var scan = GliederungsScanner.scanne(artikel.zeilen);
       if (scan.punkte().isEmpty()) {
@@ -114,7 +128,14 @@ public final class AenderungsgesetzParser {
       }
     }
 
-    return new ParseErgebnis(befehle, betroffeneArtikel, warnungen);
+    // Der Schlussartikel steht hinter dem letzten ändernden Artikel desselben Gesetzes.
+    var inkrafttreten =
+        letzterBetroffen < 0
+            ? null
+            : InkrafttretensLeser.waehle(
+                artikelBloecke.stream().map(b -> String.join("\n", b.zeilen())).toList(),
+                letzterBetroffen + 1);
+    return new ParseErgebnis(befehle, betroffeneArtikel, warnungen, inkrafttreten);
   }
 
   private static final String AENDERUNGSFORMEL = "wird wie folgt geändert:";
@@ -370,14 +391,13 @@ public final class AenderungsgesetzParser {
     if (!satzDatum.find()) {
       return Optional.empty();
     }
-    var genannt =
-        datum(satzDatum.group(3), MONATSNAMEN.indexOf(satzDatum.group(2)) + 1, satzDatum.group(1));
+    var genannt = DeutschesDatum.lies(satzDatum.group(1), satzDatum.group(2), satzDatum.group(3));
     if (genannt == null || !stand.juengsteAenderung().isAfter(genannt)) {
       return Optional.empty();
     }
     return Optional.of(
         "Das Stammgesetz ist jünger als das Änderungsgesetz: Sein Wortlaut ist bis zum "
-            + stand.juengsteAenderung().format(DATUM)
+            + DeutschesDatum.schreibe(stand.juengsteAenderung())
             + " fortgeschrieben („"
             + stand.kommentar()
             + "“), während der Einleitungssatz die Fassung vom "
@@ -391,9 +411,6 @@ public final class AenderungsgesetzParser {
             + " ihnen nur mit der zeitrichtigen Fassung des Stammgesetzes.");
   }
 
-  private static final DateTimeFormatter DATUM =
-      DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.GERMAN);
-
   /**
    * „… zuletzt durch Artikel 5 des Gesetzes vom 19. Juni 2020 (BGBl. I S. 1385) geändert worden
    * ist“ — das Datum der <em>letzten Änderung</em>, nicht das der Ausfertigung. Deshalb muss ihm
@@ -402,34 +419,7 @@ public final class AenderungsgesetzParser {
    * geänderten Gesetz eine Warnung.
    */
   private static final Pattern EINLEITUNGS_DATUM =
-      Pattern.compile(
-          "durch (?:Artikel|Art\\.)[^.]{0,80}?vom (\\d{1,2})\\. (\\p{Lu}\\p{L}+) (\\d{4})");
-
-  private static final List<String> MONATSNAMEN =
-      List.of(
-          "Januar",
-          "Februar",
-          "März",
-          "April",
-          "Mai",
-          "Juni",
-          "Juli",
-          "August",
-          "September",
-          "Oktober",
-          "November",
-          "Dezember");
-
-  private static @Nullable LocalDate datum(String jahr, int monat, String tag) {
-    if (monat < 1 || monat > 12) {
-      return null;
-    }
-    try {
-      return LocalDate.of(Integer.parseInt(jahr), monat, Integer.parseInt(tag));
-    } catch (RuntimeException e) {
-      return null;
-    }
-  }
+      Pattern.compile("durch (?:Artikel|Art\\.)[^.]{0,80}?vom " + DeutschesDatum.MUSTER);
 
   private static final List<String> STAMM_SUFFIXE = List.of("es", "er", "en", "em", "e", "s", "n");
 

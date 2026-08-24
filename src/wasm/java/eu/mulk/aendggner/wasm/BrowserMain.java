@@ -4,6 +4,7 @@ package eu.mulk.aendggner.wasm;
 
 import eu.mulk.aendggner.Pipeline;
 import eu.mulk.aendggner.Quelle;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -22,10 +23,10 @@ import org.graalvm.webimage.api.JSValue;
  * damit dieselbe {@link Pipeline} auf wie Befehlszeile und Tests.
  *
  * <p>Erwartet ein JS-Objekt <code>{stamm: {name, base64}, patches: [{name, base64}], artikel,
- * vollstaendig, nurText}</code> und liefert <code>{html, angewandt, manuell, normen}</code> — bei
- * <code>nurText</code> stattdessen <code>{text}</code> — oder <code>{fehler}</code> zurück.
- * Geworfen wird nichts: Eine Ausnahme im Wasm hinterlässt auf der JS-Seite nur einen unlesbaren
- * Stapel, also wird jeder Fehler als Text zurückgereicht.
+ * stichtag, vollstaendig, nurText}</code> und liefert <code>{html, angewandt, manuell,
+ * normen}</code> — bei <code>nurText</code> stattdessen <code>{text}</code> — oder <code>{fehler}
+ * </code> zurück. Geworfen wird nichts: Eine Ausnahme im Wasm hinterlässt auf der JS-Seite nur
+ * einen unlesbaren Stapel, also wird jeder Fehler als Text zurückgereicht.
  *
  * <p>Der Dateiinhalt wandert als Base64-Text über die Grenze, nicht als {@code Uint8Array}: Die
  * Umsetzung typisierter Felder nach {@code byte[]} ist in Web Image derzeit defekt („byteArrayHub
@@ -70,6 +71,7 @@ public final class BrowserMain {
       }
 
       var artikel = text(eingabe.get("artikel"));
+      var stichtag = text(eingabe.get("stichtag"));
       var vollstaendig = Boolean.TRUE.equals(wahrheitswert(eingabe.get("vollstaendig")));
 
       if (Boolean.TRUE.equals(wahrheitswert(eingabe.get("nurText")))) {
@@ -85,7 +87,8 @@ public final class BrowserMain {
               stamm,
               List.copyOf(patches),
               artikel == null || artikel.isBlank() ? null : artikel,
-              vollstaendig);
+              vollstaendig,
+              stichtag == null || stichtag.isBlank() ? null : LocalDate.parse(stichtag.strip()));
 
       // Java-Werte kämen auf der JS-Seite als undurchsichtige Proxys an; JSString/JSNumber
       // erzeugen echte JS-Werte.

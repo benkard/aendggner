@@ -24,6 +24,7 @@ import eu.mulk.aendggner.synopse.HtmlRenderer;
 import eu.mulk.aendggner.synopse.SynopseBuilder;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 
@@ -1649,5 +1650,102 @@ class EndToEndTest {
         .filter(b -> b.provenienz().gliederungsPfad().equals(gliederungsPfad))
         .findFirst()
         .orElseThrow();
+  }
+
+  /**
+   * Die Fassung eines bestimmten Tages. Das 3. UWGÄndG tritt gestaffelt in Kraft: Artikel 1 Nummer
+   * 2 Buchstabe c am 19. Juni 2026, alles Übrige erst am 27. September 2026. Wer alle Befehle auf
+   * einen Schlag anwendet, erhält eine Fassung, die an keinem einzigen Tag gegolten hat — deshalb
+   * warnt die Synopse davor, und mit einem Stichtag ergibt sich die wirklich geltende Fassung.
+   */
+  @Test
+  void uwgTrittGestaffeltInKraft() throws Exception {
+    var xml = SAMPLEDATA.resolve("UWG/BJNR141400004.xml");
+    var pdf = SAMPLEDATA.resolve("UWG/bgbl126s0043_regelungstext.pdf");
+    assumeTrue(Files.exists(xml) && Files.exists(pdf), "UWG-Beispieldaten fehlen");
+
+    // Ohne Stichtag bleibt es beim vollen Bestand — aber nicht stillschweigend.
+    var ohne = Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false);
+    assertThat(ohne.anzahlAngewandt()).isEqualTo(19);
+    assertThat(ohne.html())
+        .contains("Das Änderungsgesetz tritt gestaffelt in Kraft")
+        .contains("Artikel 1 Nummer 2 Buchstabe c tritt am 19. Juni 2026 in Kraft.")
+        .contains("<dt>Inkrafttreten</dt><dd>27. September 2026 (gestaffelt, siehe unten)</dd>");
+
+    // Am 19. Juni 2026 galt genau ein Befehl: der Buchstabe c der Nummer 2.
+    var frueh = Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false, LocalDate.of(2026, 6, 19));
+    assertThat(frueh.anzahlAngewandt()).isEqualTo(1);
+    assertThat(frueh.anzahlManuell()).isZero();
+    assertThat(frueh.html())
+        .contains("<dt>Stichtag</dt><dd>19. Juni 2026</dd>")
+        .contains("Am Stichtag noch nicht in Kraft")
+        .contains("Tritt erst am 27. September 2026 in Kraft");
+    // Der Tag davor ändert noch gar nichts.
+    var davor = Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false, LocalDate.of(2026, 6, 18));
+    assertThat(davor.anzahlAngewandt()).isZero();
+
+    // Am 27. September 2026 ist das Gesetz vollständig in Kraft; dann deckt sich die Fassung mit
+    // der ungefilterten, und der Abschnitt „noch nicht in Kraft“ entfällt.
+    var spaet = Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false, LocalDate.of(2026, 9, 27));
+    assertThat(spaet.anzahlAngewandt()).isEqualTo(19);
+    assertThat(spaet.html()).doesNotContain("Am Stichtag noch nicht in Kraft");
+  }
+
+  /**
+   * Dasselbe am großen Fall, und zugleich die Probe auf die Schritt-Ordnung: Im GEG bleibt am 1.
+   * Januar 2024 allein der Befehl der Nummer 22 zurück. Er steht in keiner Umnummerierungs-Kaskade,
+   * sodass die übrigen 115 unverändert durchlaufen — die drei liegengebliebenen Befehle sind
+   * dieselben wie ohne Stichtag und werden von der Auswahl nicht vermehrt.
+   */
+  @Test
+  void gegStichtagLaesstDieUebrigenBefehleUnberuehrt() throws Exception {
+    var xml = SAMPLEDATA.resolve("GEG/BJNR172810020-2023.xml");
+    var pdf = SAMPLEDATA.resolve("GEG/bgbl123s0280_regelungstext.pdf");
+    assumeTrue(Files.exists(xml) && Files.exists(pdf), "GEG-Beispieldaten fehlen");
+
+    var vollstaendig = Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false);
+    assertThat(vollstaendig.anzahlAngewandt()).isEqualTo(116);
+    assertThat(vollstaendig.anzahlManuell()).isEqualTo(3);
+
+    var anfang2024 =
+        Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false, LocalDate.of(2024, 1, 1));
+    assertThat(anfang2024.anzahlAngewandt()).isEqualTo(115);
+    assertThat(anfang2024.anzahlManuell()).isEqualTo(3);
+    assertThat(anfang2024.html())
+        .contains("Am Stichtag noch nicht in Kraft")
+        .contains("Tritt erst am 1. Oktober 2024 in Kraft");
+
+    var oktober2024 =
+        Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false, LocalDate.of(2024, 10, 1));
+    assertThat(oktober2024.anzahlAngewandt()).isEqualTo(116);
+  }
+
+  /**
+   * Das IfSG-Gesetz von 2020 ändert dasselbe Stammgesetz in zwei Artikeln zu zwei Zeitpunkten:
+   * Artikel 1 sogleich, Artikel 2 erst am 1. April 2021. Genau dort ist die auf einen Schlag
+   * gerechnete Fassung eine, die es nie gab.
+   *
+   * <p>Zugleich der Fall der unbestimmten Grundregel: „am Tag nach der Verkündung“ nennt kein
+   * Datum, das im Gesetzestext stünde. Erfunden wird keines; die betroffenen Befehle gelten als am
+   * Stichtag bereits wirksam, und das wird gesagt.
+   */
+  @Test
+  void ifsgZweiArtikelZuZweiZeitpunkten() throws Exception {
+    var xml = SAMPLEDATA.resolve("IfSG/BJNR104510000-2020.xml");
+    var pdf = SAMPLEDATA.resolve("IfSG/bgbl120s2397_78991.pdf");
+    assumeTrue(Files.exists(xml) && Files.exists(pdf), "IfSG-Beispieldaten fehlen");
+
+    var novemberFassung =
+        Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false, LocalDate.of(2020, 11, 19));
+    assertThat(novemberFassung.anzahlAngewandt()).isEqualTo(65);
+    assertThat(novemberFassung.html())
+        .contains("Am Stichtag noch nicht in Kraft")
+        .contains("Eine Inkrafttretens-Anordnung nennt kein bestimmtes Datum");
+
+    // Am 1. April 2021 kommen die zehn Befehle des Artikels 2 und der Doppelbuchstabe hinzu.
+    var aprilFassung =
+        Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false, LocalDate.of(2021, 4, 1));
+    assertThat(aprilFassung.anzahlAngewandt()).isEqualTo(75);
+    assertThat(aprilFassung.html()).doesNotContain("Am Stichtag noch nicht in Kraft");
   }
 }

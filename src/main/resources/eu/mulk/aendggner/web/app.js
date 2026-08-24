@@ -50,6 +50,7 @@ formular.addEventListener("submit", async (ereignis) => {
   }
 
   const artikel = document.querySelector("#artikel").value.trim();
+  const stichtag = document.querySelector("#stichtag").value.trim();
   const nurText = document.querySelector("#nurtext").checked;
 
   knopf.disabled = true;
@@ -73,6 +74,7 @@ formular.addEventListener("submit", async (ereignis) => {
         patches,
         vollstaendig: document.querySelector("#vollstaendig").checked,
         artikel: artikel === "" ? null : artikel,
+        stichtag: stichtag === "" ? null : stichtag,
         nurText,
       });
     });

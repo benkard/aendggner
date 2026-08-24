@@ -3,6 +3,7 @@
 package eu.mulk.aendggner.synopse;
 
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.UnbekannterBefehl;
+import eu.mulk.aendggner.aenderung.parse.DeutschesDatum;
 import eu.mulk.aendggner.anwendung.BefehlAnwender;
 import eu.mulk.aendggner.anwendung.Grund;
 import eu.mulk.aendggner.gesetz.Norm;
@@ -98,6 +99,19 @@ public final class HtmlRenderer {
             + " geänderte Normen, "
             + synopse.manuellZuPruefen().size()
             + " manuell zu prüfende Befehle");
+    if (synopse.inkrafttreten() != null) {
+      var grundregel = synopse.inkrafttreten().grundregel();
+      if (grundregel.isPresent()) {
+        vorspannZeile(
+            sb,
+            "Inkrafttreten",
+            grundregel.get().anzeige()
+                + (synopse.inkrafttreten().gestaffelt() ? " (gestaffelt, siehe unten)" : ""));
+      }
+    }
+    if (synopse.stichtag() != null) {
+      vorspannZeile(sb, "Stichtag", DeutschesDatum.schreibe(synopse.stichtag()));
+    }
     vorspannZeile(sb, "Geltung", entwurfsfassung ? "nichtamtlich, Entwurfsstand" : "nichtamtlich");
     sb.append("</dl>\n");
   }
@@ -219,7 +233,9 @@ public final class HtmlRenderer {
   }
 
   private static void rendereManuellZuPruefen(StringBuilder sb, Synopse synopse) {
-    if (synopse.manuellZuPruefen().isEmpty() && synopse.warnungen().isEmpty()) {
+    if (synopse.manuellZuPruefen().isEmpty()
+        && synopse.warnungen().isEmpty()
+        && synopse.nichtInKraft().isEmpty()) {
       return;
     }
     sb.append("<section class=\"manuell\">\n<h2>Manuell prüfen</h2>\n");
@@ -263,6 +279,23 @@ public final class HtmlRenderer {
         }
         sb.append("</ol>\n");
       }
+    }
+    if (!synopse.nichtInKraft().isEmpty()) {
+      // Nicht angewandt, aber auch nicht zu beanstanden: Diese Befehle galten am Stichtag noch
+      // nicht. Sie stehen deshalb für sich und nicht unter den Gründen des Scheiterns.
+      sb.append("<h3>Am Stichtag noch nicht in Kraft <span class=\"anzahl\">")
+          .append(synopse.nichtInKraft().size())
+          .append("</span></h3>\n<ol>\n");
+      for (var eintrag : synopse.nichtInKraft()) {
+        sb.append("<li><strong>")
+            .append(esc(eintrag.befehl().provenienz().anzeigeText()))
+            .append("</strong> — ")
+            .append(esc(eintrag.begruendung()))
+            .append("<br><span class=\"originaltext\">")
+            .append(esc(eintrag.befehl().provenienz().originalText()))
+            .append("</span></li>\n");
+      }
+      sb.append("</ol>\n");
     }
     sb.append("</section>\n");
   }

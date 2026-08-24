@@ -2,11 +2,14 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 package eu.mulk.aendggner.synopse;
 
+import eu.mulk.aendggner.aenderung.Inkrafttreten;
 import eu.mulk.aendggner.anwendung.BefehlAnwender.AnwendungsErgebnis;
 import eu.mulk.aendggner.anwendung.BefehlAnwender.Status;
 import eu.mulk.aendggner.gesetz.Gesetz;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import org.jspecify.annotations.Nullable;
 
 /** Paart die Normen alter und neuer Fassung zu Synopse-Einträgen. */
 public final class SynopseBuilder {
@@ -21,6 +24,20 @@ public final class SynopseBuilder {
    */
   public static Synopse baue(
       Gesetz alt, AnwendungsErgebnis anwendung, List<String> parseWarnungen, boolean vollstaendig) {
+    return baue(alt, anwendung, parseWarnungen, vollstaendig, null, null);
+  }
+
+  /**
+   * @param inkrafttreten was der Schlussartikel des Änderungsgesetzes anordnet, sofern gelesen.
+   * @param stichtag der Tag, dessen Fassung gezeigt wird; {@code null} = ohne Rücksicht darauf.
+   */
+  public static Synopse baue(
+      Gesetz alt,
+      AnwendungsErgebnis anwendung,
+      List<String> parseWarnungen,
+      boolean vollstaendig,
+      @Nullable Inkrafttreten inkrafttreten,
+      @Nullable LocalDate stichtag) {
     var neu = anwendung.neu();
     var eintraege = new ArrayList<Synopse.Eintrag>();
 
@@ -51,9 +68,19 @@ public final class SynopseBuilder {
 
     var manuell =
         anwendung.protokoll().stream().filter(a -> a.status() == Status.MANUELL_PRUEFEN).toList();
+    var nichtInKraft =
+        anwendung.protokoll().stream().filter(a -> a.status() == Status.NICHT_IN_KRAFT).toList();
 
     return new Synopse(
-        alt, neu, eintraege, gliederungsAenderungen(alt, neu), manuell, parseWarnungen);
+        alt,
+        neu,
+        eintraege,
+        gliederungsAenderungen(alt, neu),
+        manuell,
+        parseWarnungen,
+        inkrafttreten,
+        stichtag,
+        nichtInKraft);
   }
 
   /**

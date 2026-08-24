@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
@@ -102,6 +104,14 @@ public class AendGgner implements Callable<Integer> {
           "Only apply this article of the amendment act "
               + "(default: all articles whose introduction names the base law).")
   private String artikel;
+
+  @Option(
+      names = "--stichtag",
+      paramLabel = "<JJJJ-MM-TT>",
+      description =
+          "Produce the version in force on this date. Commands of the amendment act that had not "
+              + "yet entered into force are listed separately instead of being applied.")
+  private String stichtag;
 
   public static void main(String... args) {
     int exitCode = new CommandLine(new AendGgner()).execute(args);
@@ -199,7 +209,18 @@ public class AendGgner implements Callable<Integer> {
       return 1;
     }
 
-    var ergebnis = Pipeline.erzeugeSynopse(baseFile, patches, artikel, vollstaendig);
+    LocalDate tag = null;
+    if (stichtag != null) {
+      try {
+        tag = LocalDate.parse(stichtag);
+      } catch (DateTimeParseException e) {
+        System.err.println(
+            "Fehler: „" + stichtag + "“ ist kein Datum in der Form JJJJ-MM-TT (z.B. 2024-01-01).");
+        return 1;
+      }
+    }
+
+    var ergebnis = Pipeline.erzeugeSynopse(baseFile, patches, artikel, vollstaendig, tag);
 
     if (output.equals("-")) {
       System.out.println(ergebnis.html());

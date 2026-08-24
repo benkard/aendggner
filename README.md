@@ -207,6 +207,12 @@ java -jar target/aendggner-0.1.0-SNAPSHOT.jar \
 : Nur den bezeichneten Artikel des Änderungsgesetzes anwenden. Ohne diese Angabe
   werden alle Artikel angewandt, deren Einleitung das Stammgesetz nennt.
 
+**`--stichtag <JJJJ-MM-TT>`**
+: Die an diesem Tage geltende Fassung erzeugen. Tritt das Änderungsgesetz
+  gestaffelt in Kraft, so bleiben die an jenem Tage noch nicht geltenden Befehle
+  unangewandt und werden gesondert ausgewiesen (§ 8 Absatz 5). Ohne diese Angabe
+  werden alle Befehle angewandt.
+
 **`--extract-only`**
 : Nur den bereinigten Lineartext des Änderungsdokuments ausgeben. Dies ist
   angezeigt, wenn die PDF-Aufbereitung (§ 9) fehlerhaft bleibt: Der Text ist zu
@@ -290,6 +296,18 @@ Verschoben wird stets nur nach vorn.
 (4) Das Protokoll bleibt gleichwohl befehlsweise: Ein Verbund gilt nur dann als
 angewandt, wenn jeder seiner Teile gegriffen hat; sonst nennt die Meldung den
 Teil und den Grund.
+
+(5) Ein Änderungsgesetz tritt nicht notwendig auf einen Schlag in Kraft. Der
+Schlussartikel wird deshalb gelesen und jeder Befehl der besondersten Anordnung
+zugeordnet, die ihn erfasst („Artikel 1 Nummer 2 Buchstabe c tritt am 19. Juni
+2026 in Kraft“); im Übrigen gilt die Grundregel. Mit dem Schalter `--stichtag`
+(§ 6 Absatz 2) ergibt sich die an einem bestimmten Tage geltende Fassung; die
+noch nicht in Kraft getretenen Befehle bleiben dann unangewandt und werden
+gesondert ausgewiesen. Ohne diese Angabe werden alle Befehle angewandt; tritt das
+Gesetz gestaffelt in Kraft, so rügt die Synopse, dass die gezeigte Fassung an
+keinem einzigen Tage so gegolten hat. Nennt eine Anordnung kein bestimmtes Datum,
+sondern knüpft an die Verkündung an, so wird keines erfunden — der Verkündungstag
+steht nicht im Gesetzestext.
 
 ## § 9 Aufbereitung der Druckwerke
 
@@ -500,8 +518,9 @@ wählen, Synopse erhalten.
 
 (2) Der Vordruck stellt außer den beiden Dateifeldern dieselben Angaben zur
 Verfügung wie die Befehlszeile nach § 6 Absatz 2, nämlich das Feld
-„Anzuwendender Artikel“ (`--artikel`), das Ankreuzfeld „Unveränderte
-Vorschriften mit in die Synopse aufnehmen“ (`--vollstaendig`) und das
+„Anzuwendender Artikel“ (`--artikel`), das Feld „Stichtag“ (`--stichtag`), das
+Ankreuzfeld „Unveränderte Vorschriften mit in die Synopse aufnehmen“
+(`--vollstaendig`) und das
 Ankreuzfeld „Statt der Synopse nur den maschinell gelesenen Text der
 Änderungsdokumente ausgeben“ (`--extract-only`). Das letztgenannte ist kein
 Zierat: Ohne es hätte, wer im Browser arbeitet, keine Möglichkeit, einem

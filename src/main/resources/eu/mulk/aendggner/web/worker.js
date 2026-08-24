@@ -19,7 +19,7 @@ const gestartet = GraalVM.run([], Object.assign(new GraalVM.Config(), {
 }));
 
 self.onmessage = async (nachricht) => {
-  const { stamm, patches, vollstaendig, artikel, nurText } = nachricht.data;
+  const { stamm, patches, vollstaendig, artikel, stichtag, nurText } = nachricht.data;
   try {
     await gestartet;
     await bereit;
@@ -27,6 +27,7 @@ self.onmessage = async (nachricht) => {
       stamm,
       patches,
       artikel: artikel ?? null,
+      stichtag: stichtag ?? null,
       vollstaendig: Boolean(vollstaendig),
       nurText: Boolean(nurText),
     });

@@ -4,14 +4,17 @@ package eu.mulk.aendggner;
 
 import eu.mulk.aendggner.aenderung.DokumentArt;
 import eu.mulk.aendggner.aenderung.DokumentKopf;
+import eu.mulk.aendggner.aenderung.Inkrafttreten;
 import eu.mulk.aendggner.aenderung.parse.AenderungsantragParser;
 import eu.mulk.aendggner.aenderung.parse.AenderungsgesetzParser;
+import eu.mulk.aendggner.aenderung.parse.DeutschesDatum;
 import eu.mulk.aendggner.aenderung.parse.DokumentErkenner;
 import eu.mulk.aendggner.aenderung.parse.EntwurfsPatcher;
 import eu.mulk.aendggner.aenderung.parse.PatchTextExtraktor;
 import eu.mulk.aendggner.aenderung.parse.SuperskriptModus;
 import eu.mulk.aendggner.aenderung.parse.TextBereiniger;
 import eu.mulk.aendggner.anwendung.BefehlAnwender;
+import eu.mulk.aendggner.anwendung.Grund;
 import eu.mulk.aendggner.gesetz.Gesetz;
 import eu.mulk.aendggner.gesetz.Superskript;
 import eu.mulk.aendggner.gesetz.gii.GiiXmlLoader;
@@ -19,8 +22,10 @@ import eu.mulk.aendggner.gesetz.land.LandesRechtLoader;
 import eu.mulk.aendggner.synopse.HtmlRenderer;
 import eu.mulk.aendggner.synopse.SynopseBuilder;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -85,15 +90,40 @@ public final class Pipeline {
   /** Bequemlichkeit für Befehlszeile und Tests; im Browser gibt es keine {@link Path}e. */
   public static Ergebnis erzeugeSynopse(
       Path baseFile, List<Path> patches, String artikel, boolean vollstaendig) throws Exception {
+    return erzeugeSynopse(baseFile, patches, artikel, vollstaendig, null);
+  }
+
+  public static Ergebnis erzeugeSynopse(
+      Path baseFile,
+      List<Path> patches,
+      String artikel,
+      boolean vollstaendig,
+      @Nullable LocalDate stichtag)
+      throws Exception {
     var patchQuellen = new ArrayList<Quelle>();
     for (var patch : patches) {
       patchQuellen.add(Quelle.lies(patch));
     }
-    return erzeugeSynopse(Quelle.lies(baseFile), patchQuellen, artikel, vollstaendig);
+    return erzeugeSynopse(Quelle.lies(baseFile), patchQuellen, artikel, vollstaendig, stichtag);
   }
 
   public static Ergebnis erzeugeSynopse(
       Quelle baseFile, List<Quelle> patches, String artikel, boolean vollstaendig)
+      throws Exception {
+    return erzeugeSynopse(baseFile, patches, artikel, vollstaendig, null);
+  }
+
+  /**
+   * @param stichtag die Fassung dieses Tages erzeugen: Befehle, die an ihm noch nicht in Kraft
+   *     waren, bleiben unangewandt und werden gesondert ausgewiesen. {@code null} = alle Befehle
+   *     anwenden (dann warnt die Synopse, wenn das Gesetz gestaffelt in Kraft tritt).
+   */
+  public static Ergebnis erzeugeSynopse(
+      Quelle baseFile,
+      List<Quelle> patches,
+      String artikel,
+      boolean vollstaendig,
+      @Nullable LocalDate stichtag)
       throws Exception {
     var altesGesetz = ladeStammgesetz(baseFile);
     var extraktor = new PatchTextExtraktor(superskriptModus(altesGesetz));
@@ -106,6 +136,7 @@ public final class Pipeline {
     var protokoll = new ArrayList<BefehlAnwender.AngewandteAenderung>();
     var quellen = new ArrayList<String>();
     boolean entwurfsfassung = false;
+    Inkrafttreten inkrafttreten = null;
 
     for (var dokument : dokumente) {
       var parseErgebnis = parser.parse(dokument.text(), gesetz, artikel, entwurfsGrenzen(dokument));
@@ -115,16 +146,26 @@ public final class Pipeline {
                 .formatted(
                     dokument.quelle().name(), dokument.kopf().anzeigeName(), gesetz.jurabk()));
       }
-      var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
+      if (parseErgebnis.inkrafttreten() != null) {
+        inkrafttreten = parseErgebnis.inkrafttreten();
+      }
+      var geteilt = teileNachStichtag(parseErgebnis, stichtag, warnungen);
+      var anwendung = BefehlAnwender.anwenden(gesetz, geteilt.anzuwenden());
       gesetz = anwendung.neu();
       protokoll.addAll(anwendung.protokoll());
+      protokoll.addAll(geteilt.zurueckgestellt());
       warnungen.addAll(parseErgebnis.warnungen());
       entwurfsfassung |= dokument.kopf().art().istEntwurfsfassung();
       quellen.add(dokument.quellenAngabe(parseErgebnis.artikel()));
     }
 
+    if (stichtag == null && inkrafttreten != null && inkrafttreten.gestaffelt()) {
+      warnungen.add(staffelungsWarnung(inkrafttreten));
+    }
     var gesamtErgebnis = new BefehlAnwender.AnwendungsErgebnis(gesetz, protokoll);
-    var synopse = SynopseBuilder.baue(altesGesetz, gesamtErgebnis, warnungen, vollstaendig);
+    var synopse =
+        SynopseBuilder.baue(
+            altesGesetz, gesamtErgebnis, warnungen, vollstaendig, inkrafttreten, stichtag);
     var quellenZeile = baseFile.name() + " + " + String.join(" + ", quellen);
     var html = HtmlRenderer.rendere(synopse, quellenZeile, entwurfsfassung);
 
@@ -134,6 +175,88 @@ public final class Pipeline {
         gesamtErgebnis.anzahlManuell(),
         synopse.eintraege().size(),
         protokoll.size());
+  }
+
+  /** Die Befehle eines Dokuments, geschieden nach dem, was am Stichtag schon galt. */
+  private record Geteilt(
+      List<eu.mulk.aendggner.aenderung.Aenderungsbefehl> anzuwenden,
+      List<BefehlAnwender.AngewandteAenderung> zurueckgestellt) {}
+
+  /**
+   * Scheidet die Befehle nach dem Stichtag. Ohne Stichtag bleibt alles beisammen — dann ist die
+   * Fassung die des vollständigen Inkrafttretens, worauf die Staffelungswarnung hinweist.
+   *
+   * <p>Eine Anordnung ohne bestimmbares Datum („am Tag nach der Verkündung“ — der Verkündungstag
+   * steht nicht im Gesetzestext) gilt als am Stichtag bereits wirksam; geraten wird nicht, aber es
+   * wird gesagt.
+   */
+  private static Geteilt teileNachStichtag(
+      AenderungsgesetzParser.ParseErgebnis parseErgebnis,
+      @Nullable LocalDate stichtag,
+      List<String> warnungen) {
+    var befehle = parseErgebnis.befehle();
+    var inkrafttreten = parseErgebnis.inkrafttreten();
+    if (stichtag == null || befehle.isEmpty()) {
+      return new Geteilt(befehle, List.of());
+    }
+    if (inkrafttreten == null) {
+      warnungen.add(
+          "Es wurde ein Stichtag gewählt, das Änderungsdokument trägt aber keine lesbare"
+              + " Inkrafttretens-Vorschrift; angewandt wurden deshalb alle Befehle.");
+      return new Geteilt(befehle, List.of());
+    }
+    var anzuwenden = new ArrayList<eu.mulk.aendggner.aenderung.Aenderungsbefehl>();
+    var zurueckgestellt = new ArrayList<BefehlAnwender.AngewandteAenderung>();
+    boolean unbestimmt = false;
+    for (var befehl : befehle) {
+      var regel = inkrafttreten.fuer(befehl.provenienz()).orElse(null);
+      if (regel == null || regel.datum() == null) {
+        unbestimmt |= regel != null;
+        anzuwenden.add(befehl);
+        continue;
+      }
+      if (regel.datum().isAfter(stichtag)) {
+        zurueckgestellt.add(
+            new BefehlAnwender.AngewandteAenderung(
+                befehl,
+                BefehlAnwender.Status.NICHT_IN_KRAFT,
+                "Tritt erst am "
+                    + DeutschesDatum.schreibe(regel.datum())
+                    + " in Kraft („"
+                    + regel.wortlaut()
+                    + "“).",
+                Set.of(),
+                Grund.NOCH_NICHT_IN_KRAFT));
+        continue;
+      }
+      anzuwenden.add(befehl);
+    }
+    if (unbestimmt) {
+      warnungen.add(
+          "Eine Inkrafttretens-Anordnung nennt kein bestimmtes Datum, sondern knüpft an die"
+              + " Verkündung an; der Verkündungstag steht nicht im Gesetzestext. Die betroffenen"
+              + " Befehle wurden als am Stichtag bereits geltend behandelt.");
+    }
+    return new Geteilt(List.copyOf(anzuwenden), List.copyOf(zurueckgestellt));
+  }
+
+  /**
+   * Wird ein Änderungsgesetz gestaffelt wirksam, so ist die auf einen Schlag gerechnete Fassung
+   * eine, die an keinem Tag gegolten hat. Das darf nicht unausgesprochen bleiben.
+   */
+  private static String staffelungsWarnung(Inkrafttreten inkrafttreten) {
+    var sb = new StringBuilder("Das Änderungsgesetz tritt gestaffelt in Kraft");
+    inkrafttreten
+        .grundregel()
+        .ifPresent(r -> sb.append(" — im Grundsatz: „").append(r.wortlaut()).append("“"));
+    for (var sonder : inkrafttreten.sonderregeln()) {
+      sb.append("; abweichend: „").append(sonder.wortlaut()).append("“");
+    }
+    return sb.append(
+            ". Die gezeigte Fassung wendet alle Befehle an und gilt daher erst, wenn das Gesetz"
+                + " vollständig in Kraft getreten ist; die Fassung eines bestimmten Tages ergibt"
+                + " sich nur mit einem Stichtag.")
+        .toString();
   }
 
   /**

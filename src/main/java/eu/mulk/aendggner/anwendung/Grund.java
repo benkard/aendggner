@@ -41,7 +41,10 @@ public enum Grund {
   NICHT_UNTERSTUETZT("Nicht unterstützt"),
 
   /** Die Anwendung ist mit einem Fehler abgebrochen. */
-  FEHLGESCHLAGEN("Anwendung fehlgeschlagen");
+  FEHLGESCHLAGEN("Anwendung fehlgeschlagen"),
+
+  /** Der Befehl war am gewählten Stichtag noch nicht in Kraft; angewandt wurde er deshalb nicht. */
+  NOCH_NICHT_IN_KRAFT("Noch nicht in Kraft");
 
   private final String bezeichnung;
 

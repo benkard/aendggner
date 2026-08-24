@@ -107,6 +107,53 @@ Lesereihenfolge nach dem Satzbild
 (5) Der Prüfbestand umfasst dreihundertneununddreißig Prüfungen.
 
 
+Artikel 5
+Zeitliche Geltung der Änderungen
+
+Ein Änderungsgesetz tritt nicht notwendig auf einen Schlag in Kraft. Das Dritte
+Gesetz zur Änderung des Gesetzes gegen den unlauteren Wettbewerb lässt seinen
+Artikel 1 Nummer 2 Buchstabe c am 19. Juni 2026 wirksam werden, alles Übrige
+erst am 27. September 2026; das Infektionsschutz-Änderungsgesetz von 2020 ändert
+dasselbe Stammgesetz in zwei Artikeln zu zwei Zeitpunkten. Wer alle Befehle
+zugleich anwendet, erhält in solchen Fällen eine Fassung, die an keinem einzigen
+Tage gegolten hat. Bislang tat das Erzeugnis eben dies, und zwar schweigend.
+
+(1) Der Schlussartikel des Änderungsgesetzes wird gelesen (Inkrafttreten,
+    InkrafttretensLeser). Er ist von der Artikelwahl nicht erfaßt, weil er weder
+    eine Änderungsformel noch ein Stammgesetz nennt; maßgeblich ist der erste
+    Artikel hinter dem letzten ändernden, damit in einem Gesetzblatt mit mehreren
+    Gesetzen jedes seine eigene Schlussvorschrift erhält.
+
+(2) Erkannt werden die Grundregel, der Vorbehalt zugunsten späterer Absätze, die
+    abweichende Anordnung für einzelne Artikel, Nummern, Buchstaben und Doppel-
+    buchstaben sowie das rückwirkende Inkrafttreten („mit Wirkung vom“). Das
+    Außerkrafttreten bleibt außer Betracht.
+
+(3) Nennt der Wortlaut kein bestimmtes Datum, sondern knüpft an die Verkündung an,
+    so wird keines erfunden: Es bleibt beim Wortlaut, und die betroffenen Befehle
+    gelten als am Stichtag bereits wirksam. Der Umstand wird ausgewiesen.
+
+(4) Jeder Befehl wird der besondersten Anordnung zugeordnet, die ihn erfaßt; im
+    übrigen gilt die Grundregel. Zugeordnet wird über die Herkunft des Befehls
+    (Artikel und Gliederungspfad).
+
+(5) Es wird der Schalter „--stichtag“ eingeführt, dem im Vordruck der Browser-
+    fassung das Feld „Stichtag“ entspricht. Mit ihm ergibt sich die an jenem Tage
+    geltende Fassung; die noch nicht in Kraft getretenen Befehle bleiben unange-
+    wandt und werden gesondert ausgewiesen (Status NICHT_IN_KRAFT, Grund
+    NOCH_NICHT_IN_KRAFT).
+
+(6) Ohne Stichtag bleibt es bei der Anwendung aller Befehle. Tritt das Gesetz
+    jedoch gestaffelt in Kraft, so wird dies unter Angabe der Wortlaute gerügt;
+    ferner weist der Vorspann der Synopse das Inkrafttreten und den etwa gewählten
+    Stichtag aus.
+
+(7) Die Ausdrucksweise der ausgeschriebenen Daten wird in einer gemeinsamen Klasse
+    (DeutschesDatum) zusammengefaßt; die Altersrüge bedient sich fortan derselben.
+
+(8) Der Prüfbestand umfasst dreihundertachtundvierzig Prüfungen.
+
+
 ════════════════════════════════════════════════════════════════════════════════
  Fassung vom 23. August 2026,
  zuletzt geändert durch die am 23. August 2026 vorgenommenen Änderungen

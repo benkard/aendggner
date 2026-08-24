@@ -46,7 +46,9 @@ public final class BefehlAnwender {
 
   public enum Status {
     ANGEWANDT,
-    MANUELL_PRUEFEN
+    MANUELL_PRUEFEN,
+    /** Der Befehl gehört zu einem Teil des Änderungsgesetzes, der am Stichtag noch nicht galt. */
+    NICHT_IN_KRAFT
   }
 
   /**
