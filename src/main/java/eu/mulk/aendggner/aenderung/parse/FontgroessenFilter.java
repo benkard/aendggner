@@ -146,9 +146,11 @@ final class FontgroessenFilter {
    *
    * @param seite 1-basierte Seitennummer.
    * @param grundlinie Grundlinie (pt von oben); {@link Float#NaN}, wenn unbekannt.
+   * @param startX linker Anfang der Zeile, an den sichtbaren Zeichen gemessen (pt); {@link
+   *     Float#NaN}, wenn unbekannt.
    * @param endX rechtes Ende der Zeile (pt); {@link Float#NaN}, wenn unbekannt.
    */
-  record Zeile(int seite, float grundlinie, float endX, String text) {}
+  record Zeile(int seite, float grundlinie, float startX, float endX, String text) {}
 
   /**
    * Die Zeilen des Dokuments mit ihrer Geometrie. Hat keine Seite eine dominante Brotschrift,
@@ -164,7 +166,7 @@ final class FontgroessenFilter {
     var schwellen = zaehler.schwellenProSeite();
     if (schwellen.isEmpty()) {
       log.debugf("Keine dominanten Fontgrößen; Kleingedrucktes wird nicht gefiltert.");
-      return zerlege(wegwerf.toString());
+      return inLesereihenfolge(zerlege(wegwerf.toString()), spalte);
     }
     log.debugf("Brotschriftgrößen (je Seite): %s", schwellen);
 
@@ -174,7 +176,17 @@ final class FontgroessenFilter {
     filter.setLineSeparator("\n");
     var ausgabe = new StringWriter();
     filter.writeText(dokument, ausgabe);
-    return zerlege(ausgabe.toString());
+    return inLesereihenfolge(zerlege(ausgabe.toString()), spalte);
+  }
+
+  /**
+   * Der XY-Schnitt gilt nur dem ungeteilten Auszug. Wer ohnehin eine Spalte für sich anfordert (die
+   * Zusammenstellung einer Beschlussempfehlung), hat die Lesereihenfolge schon hergestellt — und
+   * zwar über die Grundlinien, die er hernach noch braucht, um die Spalten zeilensynchron
+   * gegeneinanderzuhalten.
+   */
+  private static List<Zeile> inLesereihenfolge(List<Zeile> zeilen, Spalte spalte) {
+    return spalte == Spalte.GANZ ? Lesereihenfolge.ordne(zeilen) : zeilen;
   }
 
   /** Trennt die {@link #ZEILEN_MARKE}-Metadaten wieder vom Text ab. */
@@ -184,6 +196,7 @@ final class FontgroessenFilter {
     for (var zeile : roh) {
       int seite = 0;
       float grundlinie = Float.NaN;
+      float startX = Float.NaN;
       float endX = Float.NaN;
       if (!zeile.isEmpty() && zeile.charAt(zeile.length() - 1) == ZEILEN_MARKE) {
         int start = zeile.lastIndexOf(ZEILEN_MARKE, zeile.length() - 2);
@@ -193,10 +206,12 @@ final class FontgroessenFilter {
             seite = Integer.parseInt(felder[0]);
             grundlinie = Integer.parseInt(felder[1]) / 10f;
             endX = Integer.parseInt(felder[2]);
+            startX = Integer.parseInt(felder[3]);
             zeile = zeile.substring(0, start);
           } catch (NumberFormatException | ArrayIndexOutOfBoundsException e) {
             seite = 0;
             grundlinie = Float.NaN;
+            startX = Float.NaN;
             endX = Float.NaN;
           }
         }
@@ -205,7 +220,7 @@ final class FontgroessenFilter {
       if (zeile.indexOf(ZEILEN_MARKE) >= 0) {
         zeile = MARKEN_REST.matcher(zeile).replaceAll("");
       }
-      zeilen.add(new Zeile(seite, grundlinie, endX, zeile));
+      zeilen.add(new Zeile(seite, grundlinie, startX, endX, zeile));
     }
     return zeilen;
   }
@@ -275,7 +290,8 @@ final class FontgroessenFilter {
     var ergebnis = new ArrayList<Zeile>(zeilen.size());
     for (int i = 0; i < zeilen.size(); i++) {
       var zeile = zeilen.get(i);
-      ergebnis.add(new Zeile(zeile.seite(), zeile.grundlinie(), zeile.endX(), text[i]));
+      ergebnis.add(
+          new Zeile(zeile.seite(), zeile.grundlinie(), zeile.startX(), zeile.endX(), text[i]));
     }
     return ergebnis;
   }
@@ -433,6 +449,14 @@ final class FontgroessenFilter {
     /** End-X (pt) des breitesten behaltenen Laufs der laufenden Zeile; NaN vor dem ersten. */
     private float zeilenEndX = Float.NaN;
 
+    /**
+     * Anfangs-X (pt) der laufenden Zeile, am ersten <em>sichtbaren</em> Zeichen gemessen. Anders
+     * als beim Zeilenende zählen Leerzeichen hier nicht mit: Der linke Rand einer Spalte bestimmt
+     * mit über die Rinne, an der die {@link Lesereihenfolge} schneidet, und ein Lauf beginnt
+     * regelmäßig mit dem Steg der Spalte davor.
+     */
+    private float zeilenStartX = Float.NaN;
+
     /** Grundlinie (pt von oben) der laufenden Zeile: die tiefste ihrer behaltenen Läufe. */
     private float zeilenGrundlinie = Float.NaN;
 
@@ -556,6 +580,10 @@ final class FontgroessenFilter {
       for (var position : positionen) {
         float endX = position.getXDirAdj() + position.getWidthDirAdj();
         zeilenEndX = Float.isNaN(zeilenEndX) ? endX : Math.max(zeilenEndX, endX);
+        if (!position.getUnicode().isBlank()) {
+          float startX = position.getXDirAdj();
+          zeilenStartX = Float.isNaN(zeilenStartX) ? startX : Math.min(zeilenStartX, startX);
+        }
         // Grundlinie = tiefstes Y des Laufs, wie schon in mitSuperskripten: Hochgestelltes sitzt
         // höher und darf die Zeile nicht nach oben ziehen.
         float y = position.getYDirAdj();
@@ -655,14 +683,16 @@ final class FontgroessenFilter {
     private void schreibeZeilenMarke() throws IOException {
       if (!Float.isNaN(zeilenEndX)) {
         writeString(
-            "%c%d,%d,%d%c"
+            "%c%d,%d,%d,%d%c"
                 .formatted(
                     ZEILEN_MARKE,
                     zeilenSeite,
                     Math.round(zeilenGrundlinie * 10),
                     Math.round(zeilenEndX),
+                    Math.round(Float.isNaN(zeilenStartX) ? zeilenEndX : zeilenStartX),
                     ZEILEN_MARKE));
         zeilenEndX = Float.NaN;
+        zeilenStartX = Float.NaN;
         zeilenGrundlinie = Float.NaN;
       }
     }

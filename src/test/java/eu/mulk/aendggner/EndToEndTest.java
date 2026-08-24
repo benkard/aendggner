@@ -1034,7 +1034,7 @@ class EndToEndTest {
         .containsExactly(null, "1", "2", "3", "4", "4a", "5", "6", "7", "8", "9", "10");
 
     // Norm für Norm gegen die amtliche Nachfassung vom 12. Juni 2026. Es bleiben genau zwei
-    // benannte Abweichungen — beide nicht in der Anwendung begründet:
+    // benannte Abweichungen — keine davon in der Anwendung begründet:
     var sollAsog = SAMPLEDATA.resolve("Berlin/ASOG-Bln-neu.txt");
     assumeTrue(Files.exists(sollAsog), "ASOG-Nachfassung fehlt");
     var soll = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(sollAsog);
@@ -1049,27 +1049,23 @@ class EndToEndTest {
         abweichend.add(normSoll.enbez());
       }
     }
-    // Drei benannte Abweichungen, keine davon in der Anwendung begründet:
+    // Zwei benannte Abweichungen, keine davon in der Anwendung begründet:
     //
     // § 67 — Das Portal setzt in der neuen Fassung amtliche Satznummern („(2) ¹Gegen einen …“);
     //   das Gesetzblatt, aus dem der Wortlaut stammt, setzt keine.
     // Anlage Nummer 23 — der oben benannte Rest: dort steht der Punkt, wo die Nachfassung ein
     //   Semikolon führt.
-    // Anlage Nummer 31 — das Zitat läuft im Gesetzblatt über einen Seitenwechsel, und der
-    //   ganzseitenbreite Titelblock des Änderungsgesetzes steht im Inhaltsstrom mitten darin
-    //   („… zur Sicherung des Be-“ / Titelblock / „triebs von Unterkünften …“). Das ist die
-    //   bekannte Berliner Layout-Frage, die erst eine geometrische Lesereihenfolge löst; sie
-    //   betrifft die Extraktion, nicht die Anwendung.
-    assertThat(abweichend).containsExactly("§ 67", "Anlage Nummer 23", "Anlage Nummer 31");
-    assertThat(
-            anwendung
-                .neu()
-                .norm("Anlage Nummer 31")
-                .orElseThrow()
-                .gesamtText()
-                .replaceAll("\\s+", " "))
-        .as("der Titelblock steht im Zitat — Beleg der offenen Layout-Frage")
-        .contains("Gesetz zur Änderung des Allgemeinen Sicherheits- und Ordnungsgesetzes");
+    assertThat(abweichend).containsExactly("§ 67", "Anlage Nummer 23");
+    // Die Nummer 31 war die dritte: Ihr Zitat läuft über einen Seitenwechsel, und der
+    // ganzseitenbreite Titelblock des Änderungsgesetzes steht im Inhaltsstrom mitten darin
+    // („… zur Sicherung des Be-“ / Titelblock / „triebs von Unterkünften …“). Seit die
+    // Lesereihenfolge dem Satzbild folgt, steht der Titel, wo er hingehört, und das Zitat liest
+    // sich durch.
+    var nummer31 =
+        anwendung.neu().norm("Anlage Nummer 31").orElseThrow().gesamtText().replaceAll("\\s+", " ");
+    assertThat(nummer31)
+        .doesNotContain("Gesetz zur Änderung des Allgemeinen Sicherheits- und Ordnungsgesetzes")
+        .contains("die Ordnungsaufgaben zur Sicherung des Betriebs von Unterkünften");
     assertThat(anwendung.neu().norm("§ 67").orElseThrow().gesamtText())
         .contains("Gegen einen straßenverkehrsrechtlichen Verwaltungsakt");
   }

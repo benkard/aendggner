@@ -299,19 +299,41 @@ Anführungszeichen, verklebte Wortgrenzen und zerlegt kodierte Umlaute. Die
 Brotschrift wird seitenweise bestimmt, sodass auch Ministeriumsentwürfe mit
 gemischten Layouts vollständig ausgelesen werden.
 
-(2) Fehlt im amtlichen Satz ein schließendes Anführungszeichen, so endet das
+(2) Die Reihenfolge, in der gelesen wird, ergibt sich aus dem Satzbild und nicht
+aus dem Inhaltsstrom. Gesucht wird die **Rinne** zwischen den beiden Spalten:
+die senkrechte Linie, die möglichst wenige Zeilen überschreiten, die nahe der
+Mitte des Satzspiegels liegt und zu deren beiden Seiten je eine Spalte von
+nennenswerter Breite steht. Die wenigen Zeilen, die sie gleichwohl
+überschreiten, sind die ganzseitenbreiten — Kolumnentitel, Seitenfuß,
+Titelblock —; sie zerlegen die Seite in Bänder. Gelesen wird Band für Band von
+oben nach unten, in jedem Band erst die linke, dann die rechte Spalte. Findet
+sich keine Rinne, so bleibt es beim Inhaltsstrom; innerhalb einer Spalte
+ohnehin.
+
+(3) Absatz 2 ist keine Förmelei. Das Berliner Gesetz- und Verordnungsblatt
+zeichnet den Titelblock des Gesetzes **zuletzt**, obgleich er über beiden
+Spalten steht; im Inhaltsstrom stand er damit mitten in einem Zitat, das über
+den Seitenwechsel läuft, und der Wortlaut der Anlage trug den Titel des
+Änderungsgesetzes in sich. Der übliche XY-Schnitt der Literatur — erst
+waagerecht am weitesten Weißraumband, dann senkrecht — leistet das nicht: Auf
+einer zweispaltigen Seite mit Kolumnentitel liegt das weiteste Band regelmäßig
+mitten im Satzspiegel; gelesen würde alsdann links oben, rechts oben, links
+unten, rechts unten. Die Spalte hat deshalb den Vorrang vor dem Band.
+
+(4) Fehlt im amtlichen Satz ein schließendes Anführungszeichen, so endet das
 Zitat an der nächsten Strukturgrenze, nämlich an einer Artikel-Überschrift oder —
 dort, wo die Anführungszeichen eines Artikels nachweislich nicht aufgehen — am
 nächsten Aufzählungspunkt des Änderungsdokuments. Der Vorgang wird als Warnung
 gemeldet.
 
-(3) Auf den Beispieldaten (§ 17 Absatz 2) werden hiernach alle Befehle der
+(5) Auf den Beispieldaten (§ 17 Absatz 2) werden hiernach alle Befehle der
 Fassungen des Bundesgesetzblattes und der aktuellen Entwürfe angewandt; für
 UWG, AGG und ProdHaftG verbleibt kein Befehl zur Prüfung von Hand. Im Übrigen
 gilt § 1 Absatz 4.
 
-(4) Bleibt die Aufbereitung im Einzelfall fehlerhaft, so ist nach § 6 Absatz 2
-mittels des Schalters `--extract-only` zu verfahren.
+(6) Bleibt die Aufbereitung im Einzelfall fehlerhaft, so ist nach § 6 Absatz 2
+mittels des Schalters `--extract-only` zu verfahren; in der Browserfassung
+mittels des Ankreuzfeldes nach § 14 Absatz 2.
 
 ## § 10 Quellformate: Gesetz, Entwurf, Antrag
 

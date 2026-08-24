@@ -26,11 +26,12 @@ Stammfassung kommt je Land aus dem Portal des Landes oder als handgepflegter Kla
 |Berlin
 |`Berlin/GVBl-2026-17_ASOG-LAF-AendG.pdf` — GVBl. für Berlin Nr. 17 vom 11.06.2026, S. 234
 (Gesetz zur Änderung des ASOG und des LAF-Errichtungsgesetzes vom 03.06.2026)
-|*Zweispaltiges Layout* (Herausgabe über Wolters Kluwer). Der Spaltenspike ist erledigt: Die
-Reihenfolge des Inhaltsstroms *ist* bereits die Lesereihenfolge, eine koordinatenbasierte
-Spaltenerkennung ist nicht nötig. Verbleibende Layout-Eigenheit sind ganzseitenbreite Rahmen
-(Titelblock, laufender Seitenkopf), die an falscher Stelle im Strom stehen — der Seitenkopf wird
-herausgeschnitten, der Titelblock landet weiterhin mitten im Text. Tiefe Verschachtelung
+|*Zweispaltiges Layout* (Herausgabe über Wolters Kluwer). Innerhalb einer Spalte ist die
+Reihenfolge des Inhaltsstroms bereits die Lesereihenfolge; die ganzseitenbreiten Rahmen dagegen
+stehen an falscher Stelle im Strom — der Titelblock wird *zuletzt* gezeichnet, obgleich er über
+beiden Spalten steht, und landete damit mitten im Fließtext. Seit Welle 21 folgt die Reihenfolge
+dem Satzbild (Rinne zwischen den Spalten, breite Zeilen als Bandgrenzen), und der Titelblock steht,
+wo er hingehört. Tiefe Verschachtelung
 a)/aa)/bb)/cc); Artikel 1 ändert eine *Anlage*, deren Einheiten als *Überschriften* („Nummer 6")
 statt als Aufzählungsmarken gesetzt sind. Artikel 2 (LAF-Errichtungsgesetz) ist ein voller
 Akzeptanzfall; das Portal setzt die amtlichen *Satznummern als angeklebte Ziffern* („(2) 1Gegen …").
@@ -152,16 +153,17 @@ vollständig belegt.
 * *Berlin* ist umgesetzt (`EndToEndTest.asogLafAendGBerlin`). Artikel 2
   (LAF-Errichtungsgesetz) ist ein *voller* Akzeptanzfall: beide Befehle angewandt, alle fünf
   Normen gleich der amtlichen Nachfassung vom 12. Juni 2026. Artikel 1 (ASOG) wird vollständig
-  erkannt und zu fünf Sechsteln angewandt; 168 der 171 Normen gleichen danach der Nachfassung.
+  erkannt und zu fünf Sechsteln angewandt; 169 der 171 Normen gleichen danach der Nachfassung.
   Die Nummern der Anlage sind seit dieser Welle *eigene Normen* („Anlage Nummer 23“), wie das
   Portal sie führt — damit trägt die vorhandene Absatz-Maschinerie ihre Befehle. Beide
   Stammfassungen sind über die Browsersteuerung beschafft.
 +
 --
-Die drei Abweichungen sind benannt und liegen nicht in der Anwendung: § 67 (das Portal setzt
-amtliche Satznummern, das Gesetzblatt nicht), Anlage Nummer 23 (der eine Rest, siehe unten) und
-Anlage Nummer 31 (der ganzseitenbreite Titelblock steht im Inhaltsstrom mitten im Zitat — die
-offene Layout-Frage). Der eine liegengebliebene Befehl benennt eine Grenze des Klartextformats:
+Die zwei Abweichungen sind benannt und liegen nicht in der Anwendung: § 67 (das Portal setzt
+amtliche Satznummern, das Gesetzblatt nicht) und Anlage Nummer 23 (der eine Rest, siehe unten).
+Die Anlage Nummer 31 war die dritte, bis die Lesereihenfolge dem Satzbild folgte: Der
+ganzseitenbreite Titelblock stand im Inhaltsstrom mitten in ihrem Zitat. Der eine liegengebliebene
+Befehl benennt eine Grenze des Klartextformats:
 Ein Zwischentitel ohne Absatzbezeichnung („Aus dem Bereich Verkehr:“) wird dem vorangehenden
 Absatz zugeschlagen, weshalb dessen Text nicht auf den Punkt endet, den der Befehl meint.
 --
@@ -253,9 +255,6 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
   dagegen als Aufzählungsmarken im Wortlaut der Anlage; dort bleibt es beim Markensuchen, und
   ein Befehl auf „die Überschrift der Nummer 1 der Anlage 8“ (GEG, Artikel 1 Nr. 43 b) aa))
   findet seine Stelle nicht. Ob die Anlagen des Bundes ebenso zu zerlegen sind, ist offen.
-* *Berlin, ganzseitenbreite Rahmen*: Titelblock und Impressum stehen im Inhaltsstrom an anderer
-  Stelle als im Satzbild (der Titelblock mitten im Fließtext der ersten Seite). Das zu beheben
-  verlangt eine geometrische Lesereihenfolge (XY-Cut), nicht bloß eine Spaltenerkennung.
 * *Rheinland-Pfalz*: Die Verkündungsplattform `verkuendung.rlp.de` verkündet erst seit dem
   01.07.2026 elektronisch; ältere GVBl-Hefte liegen nicht als freie Direkt-PDF vor.
 * Bremen, Hamburg, Mecklenburg-Vorpommern, Saarland, Brandenburg, Sachsen-Anhalt: noch nicht
@@ -266,10 +265,6 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
 Kein Land scheitert noch an reiner Extraktionsschwäche, und jedes Land mit einem Änderungs-
 dokument trägt nunmehr einen Belegfall bis zur Anwendung. Nach absteigendem Nutzen:
 
-. *Berlin, ganzseitenbreite Rahmen* (XY-Cut) — die letzte offene Layout-Frage, siehe „Noch
-  offen“. Sie ist seit dieser Welle *belegt*: Die Anlage Nummer 31 des ASOG weicht allein
-  deshalb von der Nachfassung ab, weil der Titelblock des Änderungsgesetzes im Inhaltsstrom
-  mitten in ihrem Zitat steht.
 . *Weitere Länder erfassen* — Rheinland-Pfalz (Verkündungsplattform erst ab 01.07.2026), Bremen,
   Hamburg, Mecklenburg-Vorpommern, Saarland, Brandenburg, Sachsen-Anhalt.
 
