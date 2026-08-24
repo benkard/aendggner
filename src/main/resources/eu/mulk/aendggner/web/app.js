@@ -30,6 +30,15 @@ async function alsBase64(datei) {
   return { name: datei.name, base64: btoa(roh) };
 }
 
+/** Hängt der Meldung einen Verweis auf das Ergebnis an; ein Blob, kein Server. */
+function oeffne(inhalt, art, aufschrift) {
+  const verweis = document.createElement("a");
+  verweis.href = URL.createObjectURL(new Blob([inhalt], { type: art }));
+  verweis.target = "_blank";
+  verweis.textContent = aufschrift;
+  meldung.append(verweis);
+}
+
 formular.addEventListener("submit", async (ereignis) => {
   ereignis.preventDefault();
 
@@ -39,6 +48,9 @@ formular.addEventListener("submit", async (ereignis) => {
     zeige("Bitte ein Stammgesetz und mindestens ein Änderungsdokument wählen.", "fehler");
     return;
   }
+
+  const artikel = document.querySelector("#artikel").value.trim();
+  const nurText = document.querySelector("#nurtext").checked;
 
   knopf.disabled = true;
   zeige("Lade das Rechenwerk (einmalig einige Megabyte) und werte aus …", "arbeit");
@@ -60,7 +72,8 @@ formular.addEventListener("submit", async (ereignis) => {
         stamm,
         patches,
         vollstaendig: document.querySelector("#vollstaendig").checked,
-        artikel: null,
+        artikel: artikel === "" ? null : artikel,
+        nurText,
       });
     });
 
@@ -69,22 +82,25 @@ formular.addEventListener("submit", async (ereignis) => {
       return;
     }
 
-    const blob = new Blob([ergebnis.html], { type: "text/html;charset=utf-8" });
-    const adresse = URL.createObjectURL(blob);
-
     // Kein window.open: Der Aufruf käme nach dem Warten auf den Worker und gälte dem Browser
     // nicht mehr als Nutzerhandlung — er würde als Popup blockiert. Stattdessen ein Link, der
     // sich öffnen und ebenso gut speichern lässt.
+    if (nurText) {
+      zeige(
+        `${ergebnis.text.length.toLocaleString("de-DE")} Zeichen gelesen; ` +
+          `keine Synopse erstellt. `,
+        "fertig",
+      );
+      oeffne(ergebnis.text, "text/plain;charset=utf-8", "Gelesenen Text öffnen");
+      return;
+    }
+
     zeige(
       `${ergebnis.angewandt} Befehle angewandt, ${ergebnis.manuell} manuell zu prüfen, ` +
         `${ergebnis.normen} geänderte Normen. `,
       "fertig",
     );
-    const verweis = document.createElement("a");
-    verweis.href = adresse;
-    verweis.target = "_blank";
-    verweis.textContent = "Synopse öffnen";
-    meldung.append(verweis);
+    oeffne(ergebnis.html, "text/html;charset=utf-8", "Synopse öffnen");
   } catch (e) {
     zeige("Verarbeitung fehlgeschlagen: " + (e && e.message ? e.message : e), "fehler");
   } finally {

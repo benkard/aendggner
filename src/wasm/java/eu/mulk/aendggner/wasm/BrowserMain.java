@@ -22,9 +22,10 @@ import org.graalvm.webimage.api.JSValue;
  * damit dieselbe {@link Pipeline} auf wie Befehlszeile und Tests.
  *
  * <p>Erwartet ein JS-Objekt <code>{stamm: {name, base64}, patches: [{name, base64}], artikel,
- * vollstaendig}</code> und liefert <code>{html, angewandt, manuell, normen}</code> oder <code>
- * {fehler}</code> zurück. Geworfen wird nichts: Eine Ausnahme im Wasm hinterlässt auf der JS-Seite
- * nur einen unlesbaren Stapel, also wird jeder Fehler als Text zurückgereicht.
+ * vollstaendig, nurText}</code> und liefert <code>{html, angewandt, manuell, normen}</code> — bei
+ * <code>nurText</code> stattdessen <code>{text}</code> — oder <code>{fehler}</code> zurück.
+ * Geworfen wird nichts: Eine Ausnahme im Wasm hinterlässt auf der JS-Seite nur einen unlesbaren
+ * Stapel, also wird jeder Fehler als Text zurückgereicht.
  *
  * <p>Der Dateiinhalt wandert als Base64-Text über die Grenze, nicht als {@code Uint8Array}: Die
  * Umsetzung typisierter Felder nach {@code byte[]} ist in Web Image derzeit defekt („byteArrayHub
@@ -70,6 +71,14 @@ public final class BrowserMain {
 
       var artikel = text(eingabe.get("artikel"));
       var vollstaendig = Boolean.TRUE.equals(wahrheitswert(eingabe.get("vollstaendig")));
+
+      if (Boolean.TRUE.equals(wahrheitswert(eingabe.get("nurText")))) {
+        // Der Notausgang der Befehlszeile (--extract-only) steht auch hier offen: Wer einem Rest
+        // nachgehen will, muss sehen können, was das Erzeugnis gelesen hat.
+        antwort.set(
+            "text", JSString.of(Pipeline.extrahiereText(stamm, List.copyOf(patches), false)));
+        return antwort;
+      }
 
       var ergebnis =
           Pipeline.erzeugeSynopse(
@@ -132,7 +141,8 @@ public final class BrowserMain {
       return b;
     }
     if (wert instanceof JSValue v) {
-      return v.asBoolean();
+      // Ein nicht gesetztes Feld kommt als „undefined“ herüber; asBoolean() bräche daran.
+      return "undefined".equals(v.typeof()) ? Boolean.FALSE : v.asBoolean();
     }
     return Boolean.FALSE;
   }

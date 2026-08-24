@@ -99,6 +99,34 @@ class EndToEndTest {
    * die Rechnung vollständig auf: <b>75 von 75</b>, kein Rest. Das ist zugleich der Beleg, dass die
    * 27 nie ein Mangel des Werkzeugs waren.
    */
+  /**
+   * Der Notausgang (§ 6 Absatz 2 des Handbuchs) gibt aus, was das Erzeugnis gelesen hat, und geht
+   * dabei denselben Weg wie die Synopse — auf ihn verlässt sich, wer einem unerklärlichen Rest
+   * nachgeht, und seit Welle 21 tut das auch die Browserfassung.
+   */
+  @Test
+  void notausgangLiefertDenGelesenenText() throws Exception {
+    assumeTrue(Files.exists(STAMMGESETZ), "IfSG-Beispieldaten fehlen");
+    assumeTrue(Files.exists(AENDERUNGSGESETZ), "BGBl-Beispiel-PDF fehlt");
+
+    var stamm = Quelle.lies(STAMMGESETZ);
+    var patches = List.of(Quelle.lies(AENDERUNGSGESETZ));
+
+    var bereinigt = Pipeline.extrahiereText(stamm, patches, false);
+    var roh = Pipeline.extrahiereText(stamm, patches, true);
+
+    // Wortgleich mit dem, was der Parser bekommt — sonst führte der Notausgang in die Irre.
+    assertThat(bereinigt)
+        .isEqualTo(
+            TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(AENDERUNGSGESETZ)) + "\n");
+    assertThat(bereinigt).contains("Nach § 28 wird folgender § 28a eingefügt");
+    // Die Bereinigung nimmt fort, was der Satz beisteuert (Kolumnentitel, Trennstriche); der
+    // Rohtext ist deshalb länger und trägt den Kopf des Gesetzblatts noch.
+    assertThat(roh).hasSizeGreaterThan(bereinigt.length());
+    assertThat(roh).contains("Bundesgesetzblatt");
+    assertThat(bereinigt).doesNotContain("Bundesgesetzblatt Jahrgang 2020 Teil I Nr.");
+  }
+
   @Test
   void ifsgGegenZeitrichtigenStamm() throws Exception {
     var xml = SAMPLEDATA.resolve("IfSG/BJNR104510000-2020.xml");

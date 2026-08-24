@@ -275,6 +275,31 @@ public final class Pipeline {
     return dokument.kopf().art().istEntwurfsfassung();
   }
 
+  /**
+   * Der Text der Änderungsdokumente, so wie das Erzeugnis ihn liest — der Notausgang des § 6 Absatz
+   * 2 des Handbuchs.
+   *
+   * <p>Bleibt die PDF-Aufbereitung im Einzelfall fehlerhaft, so ist nicht das Ergebnis zu
+   * beargwöhnen, sondern der Text nachzusehen, von Hand zu berichtigen und als Klartextdatei wieder
+   * einzuspeisen. Dass dieser Weg beiden Fassungen offensteht, ist kein Zierat: Wer im Browser
+   * arbeitet, hat sonst keine Möglichkeit, einem unerklärlichen Rest auf den Grund zu gehen.
+   *
+   * <p>Das Stammgesetz wird auch hier gebraucht, denn seine Schreibweise bestimmt den
+   * Superskriptmodus der Textgewinnung ({@link #superskriptModus}).
+   *
+   * @param roh die Bereinigung übergehen; nur zur Fehlersuche an der Textgewinnung selbst.
+   */
+  public static String extrahiereText(Quelle baseFile, List<Quelle> patches, boolean roh)
+      throws Exception {
+    var extraktor = new PatchTextExtraktor(superskriptModus(ladeStammgesetz(baseFile)));
+    var text = new StringBuilder();
+    for (var patch : patches) {
+      var roher = extraktor.extrahiere(patch);
+      text.append(roh ? roher : TextBereiniger.bereinige(roher)).append('\n');
+    }
+    return text.toString();
+  }
+
   /** Bequemlichkeit für Befehlszeile und Tests; im Browser gibt es keine {@link Path}e. */
   static Gesetz ladeStammgesetz(Path baseFile) throws Exception {
     return ladeStammgesetz(Quelle.lies(baseFile));

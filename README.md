@@ -157,7 +157,7 @@ Fassungen (`FASSUNGEN.txt`) geführt.
 `mvnw` abweichend bestimmt wird.
 
 (3) Vorausgesetzt wird ein Java-Entwicklungsbausatz der Fassung 21 oder neuer.
-Für die Herstellung der Browserfassung gilt abweichend § 14 Absatz 3.
+Für die Herstellung der Browserfassung gilt abweichend § 14 Absatz 4.
 
 ## § 5 Zulässige Eingaben
 
@@ -476,7 +476,18 @@ Pipeline (`eu.mulk.aendggner.Pipeline`, § 16 Absatz 1) über ein
 Upload-Formular zugänglich macht: Stammgesetz- und Änderungsgesetz-Datei(en)
 wählen, Synopse erhalten.
 
-(2) Über dem Formular steht ein zugeklappter Einführungsblock, der zwei
+(2) Der Vordruck stellt außer den beiden Dateifeldern dieselben Angaben zur
+Verfügung wie die Befehlszeile nach § 6 Absatz 2, nämlich das Feld
+„Anzuwendender Artikel“ (`--artikel`), das Ankreuzfeld „Unveränderte
+Vorschriften mit in die Synopse aufnehmen“ (`--vollstaendig`) und das
+Ankreuzfeld „Statt der Synopse nur den maschinell gelesenen Text der
+Änderungsdokumente ausgeben“ (`--extract-only`). Das letztgenannte ist kein
+Zierat: Ohne es hätte, wer im Browser arbeitet, keine Möglichkeit, einem
+unerklärlich unangewandten Befehl auf den Grund zu gehen. Der ausgegebene Text
+ist derselbe, den der Parser bekommt; er lässt sich sichern, von Hand
+berichtigen und als Klartextdatei wieder einreichen.
+
+(3) Über dem Formular steht ein zugeklappter Einführungsblock, der zwei
 durchgerechnete Fälle mit Verweisen auf die amtlichen Fundstellen anbietet,
 nämlich das UWG (`gesetze-im-internet.de/uwg_2004/xml.zip`) mit dem Dritten Gesetz
 zu seiner Änderung (BGBl. 2026 I Nr. 43) und das AGG
@@ -484,7 +495,7 @@ zu seiner Änderung (BGBl. 2026 I Nr. 43) und das AGG
 Mitausgeliefert wird nichts; die Seite ruft die Dateien auch nicht selbst ab, sie
 verweist nur darauf.
 
-(3) Ein Server ist nicht erforderlich: Die vollständige Verarbeitung —
+(4) Ein Server ist nicht erforderlich: Die vollständige Verarbeitung —
 PDF-Textgewinnung mit PDFBox eingeschlossen — läuft als WebAssembly-Modul im
 Browser, übersetzt mit GraalVM Web Image aus demselben Java-Quelltext.
 Ausgeliefert werden nur statische Dateien; die gewählten Dokumente verlassen den
@@ -496,7 +507,7 @@ nicht in der Community Edition:
 JAVA_HOME=/pfad/zu/oracle-graalvm ./mvnw -Pwasm package
 ```
 
-(4) Ergebnis ist `target/web/` mit `index.html`, `app.js`, `worker.js`,
+(5) Ergebnis ist `target/web/` mit `index.html`, `app.js`, `worker.js`,
 `style.css`, `favicon.svg`, `aendggner.js` und `aendggner.js.wasm` (rund 17 MB,
 komprimiert etwa 5 MB). Das Verzeichnis ist so, wie es dasteht, auslieferbar:
 `deploy/webpaket.sh` läuft am Ende desselben Befehls, wirft den mehrere hundert
@@ -504,7 +515,7 @@ Megabyte großen Textzwischenschritt `aendggner.js.wat` fort, schickt das Modul
 durch `wasm-opt -Oz` und legt den Quelltext der gebauten Fassung als
 `aendggner-quelltext.tar.gz` samt `quelltext-fassung.txt` bei.
 
-(5) Die Größe des Moduls beruht auf vier Vorkehrungen; wer eine davon zurücknimmt,
+(6) Die Größe des Moduls beruht auf vier Vorkehrungen; wer eine davon zurücknimmt,
 handelt sich die Megabyte wieder ein:
 
 1. `-Os` beim Übersetzen statt der auf Durchsatz gerichteten Voreinstellung;
@@ -522,7 +533,7 @@ handelt sich die Megabyte wieder ein:
    nutzt Binaryen auch Vorschläge, die noch kein Browser annimmt, und das Modul
    scheitert erst beim Instanziieren.
 
-(6) Im Quelltextarchiv fehlt der Beispielkorpus; `.gitattributes` nimmt
+(7) Im Quelltextarchiv fehlt der Beispielkorpus; `.gitattributes` nimmt
 `src/test/resources/sampledata` von `git archive` aus. Es sind Gesetzes- und
 Drucksachentexte fremder Urheberschaft, an denen allein die Tests messen —
 Quelltext im Sinne der AGPLv3 sind sie nicht, gebaut wird ohne sie, und sie
@@ -532,18 +543,18 @@ die Anschrift nach § 3 Absatz 2. Wächst das Archiv wieder über 8 MiB, so bric
 `webpaket.sh` ab; alsdann sind Massendaten ins Repository geraten, die dort nicht
 hingehören.
 
-(7) Trägt der Arbeitsbaum uneingecheckte Änderungen, so bricht die Herstellung
-nach Absatz 3 ab, denn der beigelegte Quelltext wäre alsdann nicht der gebaute.
+(8) Trägt der Arbeitsbaum uneingecheckte Änderungen, so bricht die Herstellung
+nach Absatz 4 ab, denn der beigelegte Quelltext wäre alsdann nicht der gebaute.
 Für einen Probelauf hilft `QUELLTEXT_UNGEPRUEFT=1`.
 
-(6) Zur örtlichen Ansicht genügt `file://` nicht; Browser laden Wasm-Module und
+(9) Zur örtlichen Ansicht genügt `file://` nicht; Browser laden Wasm-Module und
 Worker nur über HTTP (<http://localhost:8000/>):
 
 ```shell
 jwebserver -d target/web
 ```
 
-(7) Die Befehlszeilenfassung (§ 6) bleibt hiervon unberührt und ist weiterhin der
+(10) Die Befehlszeilenfassung (§ 6) bleibt hiervon unberührt und ist weiterhin der
 Weg für Massenläufe.
 
 ## § 15 Ausrollen

@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -129,12 +130,11 @@ public class AendGgner implements Callable<Integer> {
     }
 
     if (extractOnly) {
-      var gesetz = Pipeline.ladeStammgesetz(baseFile);
-      var extraktor = new PatchTextExtraktor(Pipeline.superskriptModus(gesetz));
+      var quellen = new ArrayList<Quelle>();
       for (var file : patches) {
-        var text = extraktor.extrahiere(file);
-        System.out.println(raw ? text : TextBereiniger.bereinige(text));
+        quellen.add(Quelle.lies(file));
       }
+      System.out.print(Pipeline.extrahiereText(Quelle.lies(baseFile), quellen, raw));
       return 0;
     }
 

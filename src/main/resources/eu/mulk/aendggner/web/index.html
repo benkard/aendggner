@@ -132,11 +132,28 @@
                 gewählten Reihenfolge nacheinander angewendet)</span></label>
             <input type="file" id="aenderung" name="aenderung" multiple required>
           </div>
+          <div class="feld">
+            <label for="artikel">Anzuwendender Artikel
+              <span class="erl">(nur auszufüllen, wenn abweichend: ohne Angabe werden alle
+                Artikel angewandt, deren Einleitung das oben bezeichnete Stammgesetz
+                nennt)</span></label>
+            <input type="text" id="artikel" name="artikel" inputmode="numeric"
+                   autocomplete="off" placeholder="z. B. 3">
+          </div>
           <div class="feld ankreuzfeld">
             <label>
               <input type="checkbox" id="vollstaendig" name="vollstaendig">
               Unveränderte Vorschriften mit in die Synopse aufnehmen
             </label>
+          </div>
+          <div class="feld ankreuzfeld">
+            <label>
+              <input type="checkbox" id="nurtext" name="nurtext">
+              Statt der Synopse nur den maschinell gelesenen Text der Änderungsdokumente ausgeben
+            </label>
+            <p class="erl nachsatz">Zur Nachschau, wenn ein Befehl unerklärlich unangewandt
+              bleibt: Der Text lässt sich sichern, von Hand berichtigen und als Klartextdatei
+              oben wieder einreichen.</p>
           </div>
         </div>
       </div>

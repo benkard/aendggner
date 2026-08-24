@@ -21,6 +21,65 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 24. August 2026,
+ zuletzt geändert durch die am 24. August 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Die Browserfassung ist seit ihrer Einführung als die vollwertige zweite Fassung
+des Erzeugnisses ausgegeben worden; sie war es nicht. Zwei Angaben, die die
+Befehlszeile seit jeher kennt, fehlten ihr: die Beschränkung auf einen einzelnen
+Artikel und die Ausgabe des maschinell gelesenen Textes. Die erste war im
+Vordruck nicht vorgesehen, obgleich Arbeiter und Rechenwerk den Wert längst
+durchreichten — das Formular sandte an ihrer Stelle einen leeren Wert. Die zweite
+war überhaupt nicht erreichbar.
+
+Das Fehlende wiegt ungleich: Die Artikelangabe erspart Mühe, die Textausgabe
+dagegen ist der einzige Weg, einem unerklärlich unangewandten Befehl auf den
+Grund zu gehen. Wer im Browser arbeitet, stand vor einem Ergebnis, das er nicht
+nachprüfen konnte, und war auf die Befehlszeile verwiesen — also gerade auf das,
+was die Browserfassung entbehrlich machen sollte.
+
+
+Artikel 1
+Gemeinsame Textgewinnung
+
+(1) Die Gewinnung des Änderungstextes wird aus der Befehlszeilenklasse in den
+    gemeinsamen Kern verlegt („Pipeline.extrahiereText“). Befehlszeile und
+    Browser nehmen fortan denselben Weg; die Ausgabe des Schalters
+    „--extract-only“ bleibt unverändert.
+
+(2) Eine Prüfung hält die Ausgabe gegen das, was der Parser bekommt. Führte der
+    Notausgang einen anderen Text vor, so wiese er in die Irre.
+
+
+Artikel 2
+Ergänzung des Vordrucks
+
+(1) Der Vordruck erhält das Feld „Anzuwendender Artikel“; ohne Eintragung bleibt
+    es beim bisherigen Verhalten, dass alle Artikel angewandt werden, deren
+    Einleitung das Stammgesetz nennt.
+
+(2) Er erhält ferner das Ankreuzfeld „Statt der Synopse nur den maschinell
+    gelesenen Text der Änderungsdokumente ausgeben“. Der Text wird als Verweis
+    zum Öffnen und Sichern bereitgestellt; er lässt sich von Hand berichtigen und
+    als Klartextdatei wieder einreichen.
+
+(3) Ein nicht gesetztes Feld kommt aus dem Fenster als „undefined“ herüber; die
+    Umsetzung nach Wahrheitswerten trägt dem nunmehr Rechnung, statt daran zu
+    scheitern.
+
+
+Artikel 3
+Berichtigung des Handbuchs
+
+(1) § 14 führte die Absatznummern (6) und (7) zweimal. Die Absätze werden
+    fortlaufend gezählt; der Verweis in § 4 wird angepasst.
+
+(2) In § 14 wird ein Absatz eingefügt, der die Angaben des Vordrucks den
+    Schaltern des § 6 Absatz 2 gegenüberstellt.
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 23. August 2026,
  zuletzt geändert durch die am 23. August 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

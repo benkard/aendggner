@@ -215,6 +215,24 @@ input[type="file"] {
   font-size: 0.75rem;
 }
 
+/* Die Eintragung von Hand steht auf einer Linie, wie im gedruckten Vordruck; sie ist kurz,
+   weil dort nur eine Artikelnummer hingehört. */
+input[type="text"] {
+  width: 8rem;
+  margin-top: 0.35rem;
+  padding: 0.1rem 0.2rem;
+  border: none;
+  border-bottom: 1px solid var(--linie);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 0.8125rem;
+}
+
+input[type="text"]::placeholder {
+  color: var(--muted);
+}
+
 /* Der Dateiwähler ist der einzige Knopf im Feld und trägt deshalb die Form der übrigen
    Eintragungsfelder: eckig, haarfein umrandet, weiß. */
 input[type="file"]::file-selector-button {
@@ -230,6 +248,12 @@ input[type="file"]::file-selector-button {
 
 input[type="file"]::file-selector-button:hover {
   background: var(--grund);
+}
+
+/* Der Nachsatz zu einem Ankreuzfeld steht unter dem Text, nicht neben ihm, und rückt bis
+   unter die Aufschrift ein. */
+.nachsatz {
+  margin: 0.15rem 0 0 1.6rem;
 }
 
 /* Das Ankreuzfeld steht vor dem Text und wird angekreuzt, nicht angehakt. */
