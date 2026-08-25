@@ -35,6 +35,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -107,7 +108,29 @@ public final class BefehlAnwender {
         ergebnisse[index] = angewandt(schritt.teil(), "(Gesetzesüberschrift)");
         continue;
       }
-      ergebnisse[index] = wendeAn(normen, gliederungen, schritt.teil());
+      var ergebnis = wendeAn(normen, gliederungen, schritt.teil());
+      if (ergebnis.status() == Status.MANUELL_PRUEFEN
+          && ergebnis.grund() == Grund.MEHRDEUTIG
+          && schritt.rueckfallStelle() != null) {
+        var enger = mitStelle(schritt.teil(), schritt.rueckfallStelle());
+        // Der zweite Versuch ist gefahrlos: Jeder Zweig meldet den Fehlschlag, bevor er schreibt.
+        // Gelingt er nicht, so bleibt der erste Protokolleintrag stehen — die Mehrdeutigkeit ist
+        // der wahre Befund und darf nicht durch ein „nicht auffindbar“ der zweiten Auflösung
+        // verdeckt werden.
+        if (enger != null) {
+          var zweiter = wendeAn(normen, gliederungen, enger);
+          if (zweiter.status() == Status.ANGEWANDT) {
+            ergebnis =
+                new AngewandteAenderung(
+                    schritt.teil(),
+                    Status.ANGEWANDT,
+                    zweiter.begruendung(),
+                    zweiter.betroffeneEnbez(),
+                    null);
+          }
+        }
+      }
+      ergebnisse[index] = ergebnis;
     }
     protokoll.addAll(verdichte(befehle, schritte, ergebnisse));
 
@@ -129,8 +152,17 @@ public final class BefehlAnwender {
    * Protokolleintrag sein Ergebnis eingeht. Ein Verbund ({@link Sammelbefehl}) zerfällt in je einen
    * Schritt pro Teilbefehl; jeder andere Befehl ist sein eigener einziger Schritt ({@code
    * ganzerBefehl}).
+   *
+   * @param rueckfallStelle die Einheit, die eine vorangehende Umnummerierung desselben Verbunds
+   *     soeben neu bezeichnet hat; {@code null} außerhalb eines Verbunds und vor der ersten
+   *     Umnummerierung. Sie kommt nur zum Zuge, wenn die norm-weite Auflösung mehrdeutig bleibt
+   *     (siehe {@link #anwenden}).
    */
-  private record Schritt(int befehlIndex, Aenderungsbefehl teil, boolean ganzerBefehl) {}
+  private record Schritt(
+      int befehlIndex,
+      Aenderungsbefehl teil,
+      boolean ganzerBefehl,
+      @Nullable Stelle rueckfallStelle) {}
 
   /** Faltet die Befehlsliste zur Schrittliste auf, in Dokumentreihenfolge. */
   private static List<Schritt> schritte(List<Aenderungsbefehl> befehle) {
@@ -140,20 +172,75 @@ public final class BefehlAnwender {
       if (befehl instanceof Sammelbefehl s) {
         falte(s, i, schritte);
       } else {
-        schritte.add(new Schritt(i, befehl, true));
+        schritte.add(new Schritt(i, befehl, true, null));
       }
     }
     return schritte;
   }
 
   private static void falte(Sammelbefehl befehl, int befehlIndex, List<Schritt> ziel) {
+    // Innerhalb eines Verbunds merkt sich das Auffalten die zuletzt gesehene Umnummerierung: Ihre
+    // neue Bezeichnung ist der Rückfall für die nachfolgenden Wortoperationen desselben Verbunds.
+    // Nur vorwärts und nur innerhalb dieses Verbunds — ein späterer Punkt des Dokuments hat mit
+    // ihr nichts zu schaffen.
+    Stelle zuletztUmnummeriert = null;
     for (var teil : befehl.teilbefehle()) {
       if (teil instanceof Sammelbefehl geschachtelt) {
         falte(geschachtelt, befehlIndex, ziel);
-      } else {
-        ziel.add(new Schritt(befehlIndex, teil, false));
+        continue;
+      }
+      ziel.add(new Schritt(befehlIndex, teil, false, rueckfall(zuletztUmnummeriert, teil)));
+      if (teil instanceof Umnummerierung um && !um.neu().istLeer()) {
+        zuletztUmnummeriert = um.neu();
       }
     }
+  }
+
+  /**
+   * Die Stelle, auf die eine Begleitklausel zurückfällt, wenn ihre norm-weite Auflösung mehrdeutig
+   * bleibt: die soeben umnummerierte Einheit.
+   *
+   * <p>Der Vorrang bleibt bei der norm-weiten Auflösung, denn nicht jede Begleitklausel meint die
+   * umnummerierte Einheit — „Die bisherige Nr. 11 wird Nr. 12 und die Angabe ‚schriftliche‘ wird
+   * gestrichen“ kann sehr wohl anderswo greifen. Erst wenn die weite Suche mehrere Fundstellen
+   * findet, entscheidet der engere Skopus; findet sie gar keine, so meint der Befehl etwas anderes
+   * und bleibt zu Recht liegen.
+   *
+   * <p>Der Rückfall greift nur bei Wortoperationen — Strukturbefehle nennen ihren Skopus ohnehin —
+   * und nur, wenn die Klausel keine eigene feinere Einheit nennt: Wer „in Satz 3“ sagt, hat seinen
+   * Skopus bereits bestimmt.
+   */
+  private static @Nullable Stelle rueckfall(
+      @Nullable Stelle zuletztUmnummeriert, Aenderungsbefehl teil) {
+    if (zuletztUmnummeriert == null
+        || !(teil instanceof Ersetzung
+            || teil instanceof Streichung
+            || teil instanceof WoerterEinfuegung)) {
+      return null;
+    }
+    if (zuletztUmnummeriert.paragraph().isPresent()) {
+      return zuletztUmnummeriert;
+    }
+    // Die neue Bezeichnung tritt zum Rahmen der Klausel hinzu — aber nur, wenn dieser nicht
+    // selbst schon eine Einheit derselben Art nennt. „In Absatz 3 …“ neben einer Umnummerierung
+    // auf Absatz 8 ergäbe „Absatz 3 Absatz 8“; wo das droht, wird nicht geraten.
+    var vorhandeneArten =
+        teil.stelle().komponenten().stream().map(k -> k.getClass()).collect(Collectors.toSet());
+    if (zuletztUmnummeriert.komponenten().stream()
+        .anyMatch(k -> vorhandeneArten.contains(k.getClass()))) {
+      return null;
+    }
+    return teil.stelle().plus(zuletztUmnummeriert);
+  }
+
+  /** Derselbe Befehl, auf eine engere Stelle festgelegt. */
+  private static @Nullable Aenderungsbefehl mitStelle(Aenderungsbefehl befehl, Stelle stelle) {
+    return switch (befehl) {
+      case Ersetzung e -> e.mitStelle(stelle);
+      case Streichung st -> st.mitStelle(stelle);
+      case WoerterEinfuegung w -> w.mitStelle(stelle);
+      default -> null;
+    };
   }
 
   /**

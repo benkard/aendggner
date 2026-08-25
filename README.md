@@ -212,7 +212,7 @@ java -jar target/aendggner-0.1.0-SNAPSHOT.jar \
 **`--stichtag <JJJJ-MM-TT>`**
 : Die an diesem Tage geltende Fassung erzeugen. Tritt das Änderungsgesetz
   gestaffelt in Kraft, so bleiben die an jenem Tage noch nicht geltenden Befehle
-  unangewandt und werden gesondert ausgewiesen (§ 8 Absatz 5). Ohne diese Angabe
+  unangewandt und werden gesondert ausgewiesen (§ 8 Absatz 6). Ohne diese Angabe
   werden alle Befehle angewandt.
 
 **`--neufassung <file>`**
@@ -325,7 +325,9 @@ Streichen und Umnummerierung.
 12. Verbünde aus Umnummerierung und Folgeänderung („§ 50 wird zu § 38 und wird
     wie folgt geändert“, „Die bisherige Nr. 7 wird Nr. 5 und das Komma wird durch
     das Wort „und“ ersetzt“). Eine Satzzeichen-Operation meint dabei stets die
-    soeben umnummerierte Einheit, weil ihr Zieltext nichts unterscheidet;
+    soeben umnummerierte Einheit, weil ihr Zieltext nichts unterscheidet; eine
+    Wortoperation dagegen löst zunächst norm-weit auf und fällt erst dann auf jene
+    Einheit zurück, wenn die weite Suche mehrdeutig bleibt (§ 8 Absatz 5);
 13. Verb-Rahmen, deren Unterpunkte allein die Fundstelle tragen („Es werden
     ersetzt: … in § 35 Absatz 3 die Angabe „X“ jeweils durch die Angabe „Y“,“),
     sowie
@@ -371,7 +373,17 @@ Verschoben wird stets nur nach vorn.
 angewandt, wenn jeder seiner Teile gegriffen hat; sonst nennt die Meldung den
 Teil und den Grund.
 
-(5) Ein Änderungsgesetz tritt nicht notwendig auf einen Schlag in Kraft. Der
+(5) Bleibt die Begleitklausel eines Verbunds bei norm-weiter Auflösung mehrdeutig,
+so entscheidet die soeben umnummerierte Einheit. Der Vorrang bleibt bei der weiten
+Suche, denn nicht jede Begleitklausel meint jene Einheit; findet sie gar keine
+Fundstelle, so meint der Befehl etwas anderes und bleibt zu Recht liegen — nur die
+Mehrdeutigkeit wird durch den engeren Skopus aufgelöst. Bleibt der Anker auch dort
+mehrdeutig, so steht die Mehrdeutigkeit im Protokoll und nicht die Begründung des
+zweiten Versuchs. Diese Regel gehört zur Anwendung und nicht zur Erkennung: Ob ein
+Anker mehrdeutig ist, steht erst nach den vorangegangenen Punkten fest — beim Lesen
+gibt es die neue Bezeichnung noch gar nicht.
+
+(6) Ein Änderungsgesetz tritt nicht notwendig auf einen Schlag in Kraft. Der
 Schlussartikel wird deshalb gelesen und jeder Befehl der besondersten Anordnung
 zugeordnet, die ihn erfasst („Artikel 1 Nummer 2 Buchstabe c tritt am 19. Juni
 2026 in Kraft“); im Übrigen gilt die Grundregel. Mit dem Schalter `--stichtag`
@@ -420,7 +432,8 @@ gemeldet.
 
 (5) Auf den Beispieldaten (§ 17 Absatz 2) werden hiernach alle Befehle der
 Fassungen des Bundesgesetzblattes und der aktuellen Entwürfe angewandt; für
-UWG, AGG und ProdHaftG verbleibt kein Befehl zur Prüfung von Hand. Im Übrigen
+UWG, AGG, ProdHaftG und — seit dieser Welle — für den Artikel 1 der GEG-Novelle
+mit seinen 119 Befehlen verbleibt kein Befehl zur Prüfung von Hand. Im Übrigen
 gilt § 1 Absatz 4.
 
 (6) Bleibt die Aufbereitung im Einzelfall fehlerhaft, so ist nach § 6 Absatz 2

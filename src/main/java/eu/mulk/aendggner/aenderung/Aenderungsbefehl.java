@@ -40,7 +40,11 @@ public sealed interface Aenderungsbefehl {
   /** „… werden die Wörter „A“ durch die Wörter „B“ ersetzt.“ */
   record Ersetzung(
       Stelle stelle, String alt, String neu, boolean jeweils, boolean amEnde, Provenienz provenienz)
-      implements Aenderungsbefehl {}
+      implements Aenderungsbefehl {
+    public Ersetzung mitStelle(Stelle neueStelle) {
+      return new Ersetzung(neueStelle, alt, neu, jeweils, amEnde, provenienz);
+    }
+  }
 
   /** „§ X wird wie folgt gefasst: „…““ */
   record Neufassung(Stelle stelle, String neuerText, Provenienz provenienz)
@@ -66,7 +70,11 @@ public sealed interface Aenderungsbefehl {
 
   /** „… werden nach dem Wort „A“ die Wörter „B“ eingefügt.“ */
   record WoerterEinfuegung(Stelle stelle, WortAnker anker, String woerter, Provenienz provenienz)
-      implements Aenderungsbefehl {}
+      implements Aenderungsbefehl {
+    public WoerterEinfuegung mitStelle(Stelle neueStelle) {
+      return new WoerterEinfuegung(neueStelle, anker, woerter, provenienz);
+    }
+  }
 
   /**
    * „Nach § 28 wird folgender § 28a eingefügt: „…““
@@ -111,7 +119,11 @@ public sealed interface Aenderungsbefehl {
 
   /** „… werden die Wörter „A“ gestrichen.“ */
   record Streichung(Stelle stelle, String woerter, Provenienz provenienz)
-      implements Aenderungsbefehl {}
+      implements Aenderungsbefehl {
+    public Streichung mitStelle(Stelle neueStelle) {
+      return new Streichung(neueStelle, woerter, provenienz);
+    }
+  }
 
   /** „Der bisherige Absatz 2 wird Absatz 3.“ */
   record Umnummerierung(Stelle stelle, Stelle neu, Provenienz provenienz)

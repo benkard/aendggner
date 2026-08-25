@@ -293,8 +293,8 @@ class EndToEndTest {
             .filter(a -> a.status() == BefehlAnwender.Status.MANUELL_PRUEFEN)
             .map(a -> a.befehl().provenienz().gliederungsPfad())
             .toList();
-    assertThat(manuellPfade).containsExactly("40. a) hh)");
-    assertThat(anwendung.anzahlAngewandt()).isEqualTo(118);
+    assertThat(manuellPfade).isEmpty();
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(119);
 
     // Die Kaskade des § 108 Absatz 1 geht lückenlos auf: 32 Nummern, keine doppelt, keine fehlend.
     var nummern =
@@ -312,6 +312,13 @@ class EndToEndTest {
     assertThat(nummern).hasSize(32).endsWith("32");
 
     var neu = anwendung.neu();
+    // Die Begleitklausel der Nummer 18/29 hat allein dort gegriffen — der Wortlaut gleicht der
+    // amtlichen Nachfassung (BJNR172810020.xml, § 108 Absatz 1 Nummer 29).
+    var paragraph108 = neu.norm("§ 108").orElseThrow().absaetze().get(0).text();
+    assertThat(paragraph108)
+        .contains("29. entgegen § 96 Absatz 1 oder Absatz 4 eine Bestätigung nicht")
+        .contains("30. entgegen § 96 Absatz 5 Satz 2 eine Abrechnung nicht");
+
     // Die Überschrift der Nummer 1 der Anlage 8 ist geändert — und nur sie: Der Titel der Anlage
     // trägt seinen eigenen Wortlaut unversehrt, den Punkt 43. a) ihm gegeben hat.
     var anlage8 = neu.norm("Anlage 8").orElseThrow();
@@ -1722,14 +1729,14 @@ class EndToEndTest {
     assumeTrue(Files.exists(xml) && Files.exists(pdf), "GEG-Beispieldaten fehlen");
 
     var vollstaendig = Pipeline.erzeugeSynopse(Pipeline.Auftrag.von(xml, List.of(pdf)));
-    assertThat(vollstaendig.anzahlAngewandt()).isEqualTo(118);
-    assertThat(vollstaendig.anzahlManuell()).isEqualTo(1);
+    assertThat(vollstaendig.anzahlAngewandt()).isEqualTo(119);
+    assertThat(vollstaendig.anzahlManuell()).isZero();
 
     var anfang2024 =
         Pipeline.erzeugeSynopse(
             Pipeline.Auftrag.von(xml, List.of(pdf)).mitStichtag(LocalDate.of(2024, 1, 1)));
-    assertThat(anfang2024.anzahlAngewandt()).isEqualTo(117);
-    assertThat(anfang2024.anzahlManuell()).isEqualTo(1);
+    assertThat(anfang2024.anzahlAngewandt()).isEqualTo(118);
+    assertThat(anfang2024.anzahlManuell()).isZero();
     assertThat(anfang2024.html())
         .contains("Am Stichtag noch nicht in Kraft")
         .contains("Tritt erst am 1. Oktober 2024 in Kraft");
@@ -1737,7 +1744,7 @@ class EndToEndTest {
     var oktober2024 =
         Pipeline.erzeugeSynopse(
             Pipeline.Auftrag.von(xml, List.of(pdf)).mitStichtag(LocalDate.of(2024, 10, 1)));
-    assertThat(oktober2024.anzahlAngewandt()).isEqualTo(118);
+    assertThat(oktober2024.anzahlAngewandt()).isEqualTo(119);
   }
 
   /**

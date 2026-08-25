@@ -1757,6 +1757,11 @@ final class BefehlErkenner {
     // Nach einer Umnummerierung wird die Wortoperation nicht auf die neue Stelle festgenagelt: sie
     // löst norm-weit auf (findet ihren Zieltext im umbenannten Absatz, ohne eine womöglich schon
     // bestehende Zielnummer fälschlich zu treffen) — das übernehmen die Zweige weiter unten.
+    // Bleibt die weite Auflösung mehrdeutig, so entscheidet erst beim Anwenden die soeben
+    // umnummerierte Einheit (siehe BefehlAnwender.rueckfall). Dort und nicht hier gehört die
+    // Regel hin: Ob ein Anker mehrdeutig ist, steht erst nach den vorangegangenen Punkten fest —
+    // der Erkenner sieht nur das Ausgangsgesetz, in dem es die neue Bezeichnung noch gar nicht
+    // gibt.
     if (REINE_WORT_OPERATION.matcher(rechts).lookingAt()
         && !(linksBefehl instanceof Umnummerierung)) {
       var praefix0 = lokativerPraefix(links);

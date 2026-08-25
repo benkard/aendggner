@@ -4,6 +4,7 @@ package eu.mulk.aendggner.anwendung;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Anfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Aufhebung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.BereichsUmnummerierung;
@@ -1776,5 +1777,118 @@ class BefehlAnwenderTest {
     assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.MANUELL_PRUEFEN);
     assertThat(ergebnis.protokoll().get(0).grund()).isEqualTo(Grund.NICHT_UNTERSTUETZT);
     assertThat(ergebnis.neu().norm("Anlage 8").orElseThrow().titel()).isEqualTo("Anforderungen");
+  }
+
+  private static Gesetz bussgeldkatalog() {
+    return new Gesetz(
+        "TestG",
+        "Testgesetz",
+        "TestG",
+        List.of(
+            new Norm(
+                "§ 108",
+                "Bußgeldvorschriften",
+                null,
+                List.of(
+                    new Absatz(
+                        "1",
+                        "17. entgegen § 90 Absatz 1 etwas tut,\n"
+                            + "18. entgegen § 96 Absatz 1 etwas unterlässt,\n"
+                            + "19. entgegen § 97 Absatz 1 etwas anderes tut,")),
+                false)));
+  }
+
+  private static Sammelbefehl verbund(Aenderungsbefehl... teile) {
+    return new Sammelbefehl(List.of(teile));
+  }
+
+  /**
+   * „Die bisherige Nummer 18 wird Nummer 29 und nach der Angabe ‚Absatz 1‘ werden die Wörter ‚oder
+   * Absatz 4‘ eingefügt.“ — Der Anker steht in jeder Nummer; norm-weit ist er mehrdeutig. Erst dann
+   * entscheidet die soeben umnummerierte Einheit.
+   */
+  @Test
+  void mehrdeutigeBegleitklauselFaelltAufDieUmnummerierteEinheitZurueck() {
+    var rahmen = stelle(new Stelle.Paragraph("108"), new Stelle.AbsatzNr("1"));
+    var befehl =
+        verbund(
+            new Umnummerierung(
+                rahmen.plus(stelle(new Stelle.NummerNr("18"))),
+                stelle(new Stelle.NummerNr("29")),
+                PROV),
+            new WoerterEinfuegung(
+                rahmen, new WortAnker.NachWoertern("Absatz 1"), "oder Absatz 4", PROV));
+
+    var ergebnis = BefehlAnwender.anwenden(bussgeldkatalog(), List.of(befehl));
+    assertThat(ergebnis.protokoll()).allMatch(a -> a.status() == Status.ANGEWANDT);
+
+    var text = ergebnis.neu().norm("§ 108").orElseThrow().absaetze().get(0).text();
+    // Allein die umnummerierte Nummer hat die Wörter bekommen.
+    assertThat(text).contains("29. entgegen § 96 Absatz 1 oder Absatz 4 etwas unterlässt,");
+    assertThat(text).contains("17. entgegen § 90 Absatz 1 etwas tut,");
+    assertThat(text).contains("19. entgegen § 97 Absatz 1 etwas anderes tut,");
+  }
+
+  /**
+   * Der Rückfall greift nur bei Mehrdeutigkeit, nie bei fehlendem Zieltext: Wer seinen Anker
+   * nirgends findet, meint etwas anderes — ihn in die umnummerierte Einheit zu zwingen wäre eine
+   * Falschanwendung, keine Verfeinerung.
+   */
+  @Test
+  void fehlenderZieltextFaelltNichtZurueck() {
+    var rahmen = stelle(new Stelle.Paragraph("108"), new Stelle.AbsatzNr("1"));
+    var befehl =
+        verbund(
+            new Umnummerierung(
+                rahmen.plus(stelle(new Stelle.NummerNr("18"))),
+                stelle(new Stelle.NummerNr("29")),
+                PROV),
+            new WoerterEinfuegung(
+                rahmen, new WortAnker.NachWoertern("Paragraph 1"), "oder Absatz 4", PROV));
+
+    var ergebnis = BefehlAnwender.anwenden(bussgeldkatalog(), List.of(befehl));
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.MANUELL_PRUEFEN);
+    assertThat(ergebnis.neu().norm("§ 108").orElseThrow().absaetze().get(0).text())
+        .doesNotContain("oder Absatz 4");
+  }
+
+  /**
+   * Bleibt der Anker auch in der umnummerierten Einheit mehrdeutig, so bleibt der Befehl liegen —
+   * und mit der Begründung des <em>ersten</em> Versuchs: Die Mehrdeutigkeit ist der wahre Befund.
+   */
+  @Test
+  void mehrdeutigBleibtMehrdeutig() {
+    var gesetz =
+        new Gesetz(
+            "TestG",
+            "Testgesetz",
+            "TestG",
+            List.of(
+                new Norm(
+                    "§ 108",
+                    null,
+                    null,
+                    List.of(
+                        new Absatz(
+                            "1",
+                            "17. entgegen § 90 Absatz 1 etwas tut,\n"
+                                + "18. entgegen § 96 Absatz 1 und § 97 Absatz 1 etwas unterlässt,")),
+                    false)));
+    var rahmen = stelle(new Stelle.Paragraph("108"), new Stelle.AbsatzNr("1"));
+    var befehl =
+        verbund(
+            new Umnummerierung(
+                rahmen.plus(stelle(new Stelle.NummerNr("18"))),
+                stelle(new Stelle.NummerNr("29")),
+                PROV),
+            new WoerterEinfuegung(
+                rahmen, new WortAnker.NachWoertern("Absatz 1"), "oder Absatz 4", PROV));
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz, List.of(befehl));
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.MANUELL_PRUEFEN);
+    assertThat(ergebnis.protokoll().get(0).grund()).isEqualTo(Grund.MEHRDEUTIG);
+    assertThat(ergebnis.protokoll().get(0).begruendung()).contains("mehrdeutig");
+    assertThat(ergebnis.neu().norm("§ 108").orElseThrow().absaetze().get(0).text())
+        .doesNotContain("oder Absatz 4");
   }
 }
