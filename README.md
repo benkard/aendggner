@@ -261,7 +261,15 @@ Auf diesem Wege lässt sich eine konsolidierte Fassung aus dem Stammheft und den
 (§ 13 Absatz 3). Mehrere Hefte in einem Lauf sind ohnehin zulässig; die Kette ist
 für das gedacht, was über einen Lauf hinausreicht.
 
-(3) Ausgegeben wird allein, was das Datenmodell trägt; erfunden wird nichts. Für
+(3) Die Kette meint verschiedene Hefte. Dasselbe Heft ein zweites Mal auf seine
+eigene Ausgabe anzuwenden ist keine Wiederholung ohne Folgen: Ein Befehl ist keine
+Zustandsbeschreibung, sondern eine Anordnung, und wer zweimal anfügt, fügt zweimal
+an. Das Erzeugnis führt kein Gedächtnis darüber, was es bereits getan hat — der
+Wortlaut allein sagt es ihm, und der sagt es nur dort, wo die Anordnung einen
+Zieltext voraussetzt, den es nicht mehr gibt. Wer prüfen will, ob eine Fassung ein
+Heft schon trägt, halte sie mit `--nachfassung` (§ 6b) dagegen.
+
+(4) Ausgegeben wird allein, was das Datenmodell trägt; erfunden wird nichts. Für
 Bundesrecht ist die Ausgabe deshalb eine getreue Wiedergabe des Wortlauts, aber kein
 Rundlauf ins gii-XML: Jenes Format führt einen Fußnotenapparat und Standangaben, die
 der Klartext nicht aufnimmt. Was der Klartext trägt, trägt er vollständig — dass der
