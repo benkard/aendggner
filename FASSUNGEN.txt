@@ -33,6 +33,16 @@ Wesentliche. Zugleich war das Ankreuzfeld für die unveränderten Vorschriften
 leer, obgleich die vollständige Synopse dem entspricht, was erwartet, wer
 ein Gesetz in seiner neuen Fassung ansehen will.
 
+Am selben Tage sind zwei Leistungen hinzugetreten, die das Erzeugnis längst
+erbringen konnte, aber nicht herausgab, und fünf namentlich festgehaltene Lücken
+der Befehlsabdeckung geschlossen worden. Die erste Leistung ist die
+fortgeschriebene Fassung selbst: Sie stand als vollständiges Gesetz im
+Arbeitsspeicher, verließ das Erzeugnis aber nur als halbe Spalte einer Synopse.
+Die zweite ist der Prüfmaßstab: Ob ein Lauf gelungen ist, entscheidet nicht die
+Zahl der angewandten Befehle, sondern der Wortlaut hinterher — und dieser Maßstab
+stand allein im Testcode, sodass jedes neue Land ihn ein zweites Mal aufschreiben
+musste.
+
 
 Artikel 1
 Ausklappbarer Abschnitt „Weitere Angaben“
@@ -76,11 +86,135 @@ Fortschreibung des Handbuchs
     werden fortlaufend weitergezählt; der Verweis in § 4 Absatz 3 wird angepasst.
 
 
+Artikel 4
+Ausgabe der fortgeschriebenen Fassung
+
+(1) Der Textausgeber (LandesRechtTextAusgeber) kehrt den Klartextleser um: Aus
+    einem Gesetz wird der kanonische Klartext nach § 5 Absatz 2 des Handbuchs.
+    Ausgegeben wird allein, was das Datenmodell trägt; erfunden wird nichts. Die
+    Abkürzungszeile tritt nur auf, wenn die Quelle eine geführt hat.
+
+(2) Zwei Grenzen des Formats sind im Quelltext benannt: Der Normkopf einer Anlage
+    nimmt keinen Titel auf, und eine Gliederungseinheit hinter der letzten Norm
+    des Textteils hat keinen anderen Ort als eben diesen.
+
+(3) Der Schalter „--neufassung <Datei>“ schreibt die Fassung neben der Synopse
+    fort; „-“ bezeichnet die Standardausgabe. Damit steht die Kette: Die Ausgabe
+    des ersten Laufes ist das Stammgesetz des zweiten.
+
+(4) Der Beleg ist der Rundlauf und nicht der Augenschein. Er wird an sämtlichen
+    dreiundzwanzig Klartext-Stammfassungen des Beispielkorpus geführt und
+    überdies am Bundesrecht, dessen Ausgangsformat das gii-XML ist.
+
+
+Artikel 5
+Abgleich mit der amtlichen Nachfassung
+
+(1) Der Nachfassungsabgleich (Nachfassungsabgleich) stellt die errechnete Fassung
+    normweise gegen die amtliche und weist die fehlenden, die überzähligen und die
+    abweichenden Normen aus. Verglichen wird nach Normalisierung des Leerraums;
+    die Überschrift zählt zum Wortlaut, denn auf sie zielen eigene Befehle.
+
+(2) Der Schalter „--nachfassung <Datei>“ nimmt dieselben Eingaben an wie das
+    Stammgesetz. Der Bericht tritt als Abschnitt „Abgleich mit der amtlichen
+    Nachfassung“ in die Synopse; die Abweichung wird dort wortweise gezeigt, links
+    die amtliche, rechts die errechnete Fassung. Geht der Abgleich nicht auf, so
+    endet der Lauf mit dem Rückgabewert 3.
+
+(3) Die Akzeptanzprüfungen fahren fortan denselben Abgleich; vier
+    handgeschriebene Vergleichsschleifen weichen ihm. Werkzeug und Prüfung messen
+    damit an einem Maßstab.
+
+(4) An die Stelle der Überladungsleiter der Pipeline tritt ein Auftrags-Record.
+
+
+Artikel 6
+Fortschreibung des Klartextlesers
+
+(1) Der Rundlauf nach Artikel 4 Absatz 4 hat zwei Mängel des Lesers zutage
+    gefördert. Eine nummerierte Zeile gilt als Unter-Überschrift, wenn ihr eine
+    weitere Überschrift folgt; als solche zählten bislang nur drei der fünf
+    Formen. Die arabische und die ordinalwörtliche Form treten hinzu.
+
+(2) Das Bundesrecht führt aufgehobene Paragraphen unter einer Sammelbezeichnung
+    („§§ 17 u. 18“, Titel „(weggefallen)“, im gii-XML mit der Platzhalterkennung
+    „(XXXX)“). Der kanonische Klartext kannte diese Kopfzeile nicht; sie wäre in
+    den Wortlaut der Vornorm gefallen und hätte ihn verfälscht.
+
+
+Artikel 7
+Die Überschrift einer Aufzählungseinheit
+
+(1) Der Überschrift-Zweig des Anwenders verzweigte bei jeder Stelle, die eine
+    Überschrift nennt, unbedingt auf den Titel der Norm und verwarf dabei jede
+    feinere Komponente schweigend. Welche Überschrift gemeint ist, entscheidet
+    fortan die Auflösung der Stelle ohne die Überschrift-Komponente: Löst sie auf
+    eine ganze Norm auf, so ist deren Titel gemeint; löst sie auf einen
+    Textbereich auf, so ist dessen Kopfzeile gemeint.
+
+(2) Ein Block aus einer einzigen Zeile hat keine Überschrift, sondern nur Text;
+    dort wird gerügt statt angewandt.
+
+(3) Die Neufassung einer solchen Kopfzeile bleibt eine bewusst gezogene Grenze
+    und wird nunmehr als solche gerügt: Die Kopfzeile trägt zugleich die
+    Aufzählungsmarke, die eine Neufassung nicht mitliefert.
+
+
+Artikel 8
+Skopus einer Wortoperation im Verbund
+
+(1) Bleibt die Begleitklausel eines Verbunds bei norm-weiter Auflösung
+    mehrdeutig, so entscheidet die soeben umnummerierte Einheit. Der Vorrang
+    bleibt bei der weiten Suche; findet sie gar keine Fundstelle, so meint der
+    Befehl etwas anderes und bleibt liegen.
+
+(2) Die Regel gehört zur Anwendung und nicht zur Erkennung: Ob ein Anker
+    mehrdeutig ist, steht erst nach den vorangegangenen Punkten fest. Der Schritt
+    trägt darum eine Rückfallstelle, die das Auffalten des Verbunds mitgibt —
+    vorwärts und nur innerhalb desselben Verbunds.
+
+
+Artikel 9
+Landesrechtliche Befehlsformen aus Rheinland-Pfalz
+
+(1) „Strichpunkt“ gilt als Nebenform des Semikolons, als Subjekt wie als Ziel.
+
+(2) Der Halbsatz wird eine eigene Ebene der Anfügung. Er beginnt keinen neuen
+    Satz, sondern setzt den bestehenden fort; angefügt wird er nur, wenn der
+    Zieltext auf einen Strichpunkt endet. Als Ziel einer Struktur-Einfügung oder
+    -Ersetzung bleibt er ausgeschlossen.
+
+(3) Der bezugspunktlose Chapeau-Lokator („In der Einleitung“, „Im Eingangssatz“)
+    tritt als zweite Alternative zum vorhandenen Muster.
+
+(4) Die Verweisung auf einen anderen Punkt desselben Artikels
+    (VerweisenderBefehl) wird gelesen und ausdrücklich als Grenze gerügt. Der
+    Rest wandert damit von „Befehl nicht erkannt“ zu „Nicht unterstützt“.
+
+
+Artikel 10
+Fortschreibung der Browserfassung und des Handbuchs
+
+(1) Der Vordruck erhält das Dateifeld „Amtliche Nachfassung“ und das Ankreuzfeld
+    „Auch die fortgeschriebene Fassung als Klartext ausgeben“, beide hinter der
+    Klappe nach Artikel 1.
+
+(2) Das Handbuch erhält die §§ 6a und 6b; § 7 nimmt die Nummern 13, 14 und 17
+    auf, § 8 einen Absatz über den Skopus im Verbund, § 17 einen Absatz über den
+    Rundlauf.
+
+
 Die Prüfung geht auf: Am UWG mit dem Dritten Gesetz zu seiner Änderung ergeben
 sich vorangekreuzt 19 Befehle, nichts manuell zu prüfen und 31 Normen in der
 Synopse, ohne Ankreuzung dieselben 19 Befehle und 6 geänderte Normen; der
 Abschnitt „Weitere Angaben“ steht beim Laden zu, klappt auf Druckanforderung auf
-und danach wieder zu.
+und danach wieder zu. Sämtliche 388 Prüfungen (zuvor 350) laufen durch, „reuse
+lint“ weist 190 von 190 Dateien als vollständig ausgezeichnet aus. Der Artikel 1
+der GEG-Novelle ist nunmehr vollständig angewandt (119 von 119 Befehlen, zuvor
+117); Berlin gibt am Abgleich 171 von 171 Normen gleich aus, Baden-Württemberg
+91 von 93 mit den beiden benannten Abweichungen; sämtliche 23 Befehle des
+rheinland-pfälzischen Heftes sind erschlossen. Die Browserfassung ist mit
+demselben Ergebnis durchgespielt worden.
 
 
 ════════════════════════════════════════════════════════════════════════════════

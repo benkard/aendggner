@@ -261,7 +261,7 @@ public final class HtmlRenderer {
           .append("<div>Errechnete Fassung</div></div>\n");
       for (var abweichung : abgleich.abweichungen()) {
         var spalten = WortDiff.vergleiche(abweichung.soll(), abweichung.ist());
-        sb.append("<section class=\"norm geaendert\">\n<h2>")
+        sb.append("<section class=\"norm abweichung\">\n<h2>")
             .append(esc(abweichung.enbez()))
             .append("</h2>\n<div class=\"vergleich\">\n<div class=\"alt\">")
             .append(spalten.altHtml())
@@ -515,6 +515,11 @@ public final class HtmlRenderer {
         padding-bottom: 0.9rem;
         border-bottom: 1px solid var(--linie);
       }
+      /* Die Randziffer zählt die Normen der Gegenüberstellung. Im Abgleich zählt sie nichts —
+         dort steht jede Norm für sich, und eine fortlaufende Nummer behauptete eine Ordnung, die
+         es nicht gibt. */
+      section.norm.abweichung { counter-increment: none; }
+      section.norm.abweichung::before { content: none; }
       section.norm::before {
         content: counter(norm);
         position: absolute;

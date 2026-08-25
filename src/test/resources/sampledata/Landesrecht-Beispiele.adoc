@@ -274,11 +274,6 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
 == Noch offen
 
 
-* *Anlagen-Nummern im gii-XML* — im Klartext des Landesrechts sind die Nummern einer Anlage
-  seit dieser Welle eigene Normen („Anlage Nummer 23“). Im gii-XML des Bundes stehen sie
-  dagegen als Aufzählungsmarken im Wortlaut der Anlage; dort bleibt es beim Markensuchen, und
-  ein Befehl auf „die Überschrift der Nummer 1 der Anlage 8“ (GEG, Artikel 1 Nr. 43 b) aa))
-  findet seine Stelle nicht. Ob die Anlagen des Bundes ebenso zu zerlegen sind, ist offen.
 * *Vorfassungen bei knapp gehaltenen juris-Portalen* — Rheinland-Pfalz, Saarland und
   Sachsen-Anhalt führen nur die aktuelle Gesamtausgabe nebst einer Aufzählung der Änderungen; die
   Schaltfläche „Gesamtausgaben-Liste", über die Hessen, Schleswig-Holstein, Berlin und
@@ -290,9 +285,25 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
 == Wo weitermachen
 
 Kein Land scheitert noch an reiner Extraktionsschwäche, und jedes Land mit einem Änderungs-
-dokument trägt nunmehr einen Belegfall bis zur Anwendung. Nach absteigendem Nutzen:
+dokument trägt nunmehr einen Belegfall bis zur Anwendung. Seit Welle 23 ist überdies der
+Prüfmaßstab selbst eine Leistung des Erzeugnisses: `--nachfassung` stellt das Ergebnis normweise
+gegen die amtliche Fassung, und `--neufassung` gibt die errechnete Fassung als kanonischen
+Klartext aus. Ein weiteres Land kostet damit Stammfassung, Heft und Nachfassung — keinen eigenen
+Prüfcode mehr. Nach absteigendem Nutzen:
 
 . *Weitere Länder erfassen* — Bremen, Hamburg, Mecklenburg-Vorpommern, Saarland, Sachsen-Anhalt.
+  Für Hamburg (`landesrecht-hamburg.de`) und Mecklenburg-Vorpommern (`landesrecht-mv.de`) ist
+  zuerst zu prüfen, ob die Portale einer Skriptabfrage antworten; sonst gilt der Browserweg.
+
+*Erledigt in Welle 23:* Die Frage nach den _Anlagen-Nummern im gii-XML_ war falsch gestellt. Eine
+Zerlegung braucht es nicht — der `StellenAufloeser` probiert längst beide Wege. Der Fehler saß im
+Überschrift-Zweig des Anwenders, der jede feinere Komponente schweigend verwarf und stets auf den
+Normtitel griff; die Überschrift einer Anlagen-Nummer ist im gii-XML die Kopfzeile ihres
+Aufzählungsblocks. Ebenso erledigt sind die drei rheinland-pfälzischen Idiome (Strichpunkt samt
+Halbsatz-Anfügung, „In der Einleitung“, Verweisung auf einen anderen Punkt — die letzte wird
+gelesen und ausdrücklich als Grenze gerügt) und der Skopus einer Wortoperation im Verbund: Die
+norm-weite Auflösung behält den Vorrang, bei Mehrdeutigkeit entscheidet die soeben umnummerierte
+Einheit. Der Artikel 1 der GEG-Novelle ist damit vollständig angewandt (119/119).
 
 *Erledigt:* _Brandenburg_ ist umgesetzt (Fraktionsgesetz, 4/4 Befehle, alle 24 Normen gleich der
 amtlichen Nachfassung). Der Fall hat gezeigt, dass nicht jedes Landesportal eine juris-Einseiten-
