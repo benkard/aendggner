@@ -21,6 +21,69 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 25. August 2026,
+ zuletzt geändert durch die am 25. August 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Der Vordruck der Browserfassung führte im Block „Angaben zu den Änderungen“ fünf
+Eintragungen untereinander auf: die Dateiwahl und vier Nebenangaben. Drei davon —
+der anzuwendende Artikel, der Stichtag und die reine Textausgabe — sind
+Sonderfälle, die im Regelfall leer bleiben; sie verstellten den Blick auf das
+Wesentliche. Zugleich war das Ankreuzfeld für die unveränderten Vorschriften
+leer, obgleich die vollständige Synopse dem entspricht, was erwartet, wer
+ein Gesetz in seiner neuen Fassung ansehen will.
+
+
+Artikel 1
+Ausklappbarer Abschnitt „Weitere Angaben“
+
+(1) Die Felder „Anzuwendender Artikel“ und „Stichtag“ sowie das Ankreuzfeld
+    „Statt der Synopse nur den maschinell gelesenen Text der Änderungsdokumente
+    ausgeben“ treten aus dem Block „Angaben zu den Änderungen“ heraus und stehen
+    fortan hinter der zugeklappten Aufschrift „Weitere Angaben“. Beschriftungen,
+    Erläuterungen und Bezeichner bleiben unberührt; die Auslesestellen in
+    „app.js“ gelten unverändert fort, weil eingeklappte Felder ihren Wert
+    behalten.
+
+(2) Die Aufschrift tritt an die Stelle der Leitspalte und läuft über die volle
+    Breite des Vordrucks — dieselbe Form, die die Leitspalte auf schmalem Schirm
+    ohnehin annimmt. Das Klappzeichen ist dasselbe wie an der Ausfüllhilfe.
+
+(3) Ein geschlossenes „details“ druckt seinen Inhalt nicht; ein Vordruck gehört
+    aber vollständig aufs Papier. Der Abschnitt klappt daher vor dem Druck
+    selbsttätig auf und nimmt danach seinen vorherigen Zustand wieder ein.
+
+
+Artikel 2
+Vorankreuzung der vollständigen Synopse
+
+(1) Das Ankreuzfeld „Unveränderte Vorschriften mit in die Synopse aufnehmen“ ist
+    im Vordruck vorangekreuzt. Die Befehlszeile bleibt unberührt: Dort ist
+    „--vollstaendig“ weiterhin ausdrücklich anzugeben.
+
+(2) Die Verfügung der Zentralstelle wies die Zahl der Einträge der Synopse als
+    „geänderte Normen“ aus. Das traf schon bisher nur zu, solange die
+    unveränderten Vorschriften fehlten, und wäre nunmehr im Regelfall unrichtig
+    geworden. Sind sie aufgenommen, so heißt die Zahl fortan „Normen in der
+    Synopse“.
+
+
+Artikel 3
+Fortschreibung des Handbuchs
+
+(1) § 14 erhält einen Absatz über die Anordnung der Angaben im Vordruck, die
+    Vorankreuzung und das Verhalten beim Drucken. Die nachfolgenden Absätze
+    werden fortlaufend weitergezählt; der Verweis in § 4 Absatz 3 wird angepasst.
+
+
+Die Prüfung geht auf: Am UWG mit dem Dritten Gesetz zu seiner Änderung ergeben
+sich vorangekreuzt 19 Befehle, nichts manuell zu prüfen und 31 Normen in der
+Synopse, ohne Ankreuzung dieselben 19 Befehle und 6 geänderte Normen; der
+Abschnitt „Weitere Angaben“ steht beim Laden zu, klappt auf Druckanforderung auf
+und danach wieder zu.
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 24. August 2026,
  zuletzt geändert durch die am 24. August 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

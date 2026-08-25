@@ -52,6 +52,7 @@ formular.addEventListener("submit", async (ereignis) => {
   const artikel = document.querySelector("#artikel").value.trim();
   const stichtag = document.querySelector("#stichtag").value.trim();
   const nurText = document.querySelector("#nurtext").checked;
+  const vollstaendig = document.querySelector("#vollstaendig").checked;
 
   knopf.disabled = true;
   zeige("Lade das Rechenwerk (einmalig einige Megabyte) und werte aus …", "arbeit");
@@ -72,7 +73,7 @@ formular.addEventListener("submit", async (ereignis) => {
       worker.postMessage({
         stamm,
         patches,
-        vollstaendig: document.querySelector("#vollstaendig").checked,
+        vollstaendig,
         artikel: artikel === "" ? null : artikel,
         stichtag: stichtag === "" ? null : stichtag,
         nurText,
@@ -97,9 +98,11 @@ formular.addEventListener("submit", async (ereignis) => {
       return;
     }
 
+    // Die Zahl zählt die Einträge der Synopse. Sind die unveränderten Vorschriften mit
+    // aufgenommen, so sind das nicht die geänderten Normen, und sie heißen dann anders.
     zeige(
       `${ergebnis.angewandt} Befehle angewandt, ${ergebnis.manuell} manuell zu prüfen, ` +
-        `${ergebnis.normen} geänderte Normen. `,
+        `${ergebnis.normen} ${vollstaendig ? "Normen in der Synopse" : "geänderte Normen"}. `,
       "fertig",
     );
     oeffne(ergebnis.html, "text/html;charset=utf-8", "Synopse öffnen");
@@ -108,4 +111,16 @@ formular.addEventListener("submit", async (ereignis) => {
   } finally {
     knopf.disabled = false;
   }
+});
+
+// Ein geschlossenes <details> druckt seinen Inhalt nicht; ein Vordruck gehört aber
+// vollständig aufs Papier, auch der eingeklappte Teil.
+const weitere = document.querySelector(".weitere");
+let warOffen = false;
+addEventListener("beforeprint", () => {
+  warOffen = weitere.open;
+  weitere.open = true;
+});
+addEventListener("afterprint", () => {
+  weitere.open = warOffen;
 });

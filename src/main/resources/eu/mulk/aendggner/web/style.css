@@ -250,6 +250,33 @@ input[type="file"]::file-selector-button:hover {
   background: var(--grund);
 }
 
+/* Nebenangaben, die selten auszufüllen sind, stehen hinter einer Klappe. Deren Aufschrift
+   tritt an die Stelle der Leitspalte und läuft über die volle Breite — dieselbe Form, die
+   die Leitspalte auf dem Telefon ohnehin annimmt. Das Dreieck ist dasselbe wie an der
+   Ausfüllhilfe. */
+.weitere summary {
+  padding: 0.4rem 0.5rem;
+  border-right: 1px solid var(--linie);
+  border-bottom: 1px solid var(--linie);
+  background: var(--grund);
+  font-size: 0.6875rem;
+  font-weight: bold;
+  cursor: pointer;
+  list-style: none;
+}
+
+.weitere summary::-webkit-details-marker {
+  display: none;
+}
+
+.weitere summary::before {
+  content: "\25B8\00A0";
+}
+
+.weitere[open] summary::before {
+  content: "\25BE\00A0";
+}
+
 /* Der Nachsatz zu einem Ankreuzfeld steht unter dem Text, nicht neben ihm, und rückt bis
    unter die Aufschrift ein. */
 .nachsatz {
@@ -531,7 +558,8 @@ code {
   a { text-decoration: none; }
   .block, .beachtung, .verfuegung { break-inside: avoid; }
 
-  .leitspalte, .ausfuellhinweis, .verfuegung, .verfuegung h2, .kreuz, .ausfuellhilfe {
+  .leitspalte, .ausfuellhinweis, .verfuegung, .verfuegung h2, .kreuz, .ausfuellhilfe,
+  .weitere summary {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }

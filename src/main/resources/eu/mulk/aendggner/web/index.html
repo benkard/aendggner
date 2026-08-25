@@ -132,6 +132,18 @@
                 gewählten Reihenfolge nacheinander angewendet)</span></label>
             <input type="file" id="aenderung" name="aenderung" multiple required>
           </div>
+          <div class="feld ankreuzfeld">
+            <label>
+              <input type="checkbox" id="vollstaendig" name="vollstaendig" checked>
+              Unveränderte Vorschriften mit in die Synopse aufnehmen
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <details class="weitere">
+        <summary>Weitere Angaben</summary>
+        <div class="felder">
           <div class="feld">
             <label for="artikel">Anzuwendender Artikel
               <span class="erl">(nur auszufüllen, wenn abweichend: ohne Angabe werden alle
@@ -150,12 +162,6 @@
           </div>
           <div class="feld ankreuzfeld">
             <label>
-              <input type="checkbox" id="vollstaendig" name="vollstaendig">
-              Unveränderte Vorschriften mit in die Synopse aufnehmen
-            </label>
-          </div>
-          <div class="feld ankreuzfeld">
-            <label>
               <input type="checkbox" id="nurtext" name="nurtext">
               Statt der Synopse nur den maschinell gelesenen Text der Änderungsdokumente ausgeben
             </label>
@@ -164,7 +170,7 @@
               oben wieder einreichen.</p>
           </div>
         </div>
-      </div>
+      </details>
 
       <div class="block">
         <div class="leitspalte">Antragstellung</div>
