@@ -1001,6 +1001,19 @@ public final class BefehlAnwender {
     var stelle = befehl.stelle();
 
     if (stelle.betrifftUeberschrift()) {
+      // Die Neufassung einer Überschrift trifft den Titel der Norm. Nennt die Stelle eine feinere
+      // Einheit („die Überschrift der Nummer 1 der Anlage 8“), so ist deren Kopfzeile gemeint —
+      // und die trägt außer der Überschrift auch die Aufzählungsmarke, die eine Neufassung nicht
+      // mitliefert. Was hier zu setzen wäre, steht deshalb nicht fest; gerügt wird es, statt die
+      // feinere Angabe zu verwerfen und den Normtitel zu überschreiben.
+      if (nenntFeinereEinheit(stelle)) {
+        return manuell(
+            befehl,
+            Grund.NICHT_UNTERSTUETZT,
+            "Die Neufassung der Überschrift von „"
+                + stelle.ohne(new Stelle.Ueberschrift()).anzeigeText()
+                + "“ ist nicht umgesetzt: Deren Kopfzeile trägt zugleich die Aufzählungsmarke.");
+      }
       var aufloesung = loeseNormAuf(normen, stelle);
       if (aufloesung.fehler() != null) {
         return manuell(befehl, aufloesung.grund(), aufloesung.fehler());
@@ -2145,23 +2158,14 @@ public final class BefehlAnwender {
    */
   private static AngewandteAenderung bearbeiteText(
       List<Norm> normen, Aenderungsbefehl befehl, TextOperation operation) {
-    // „In der Überschrift …“: die Operation wirkt auf den Titel der Norm, nicht auf ihren Text.
+    // „In der Überschrift …“ meint nicht immer den Titel der Norm. Nennt die Stelle eine feinere
+    // Einheit („In Anlage 8 Nummer 1 werden in der Überschrift die Wörter … gestrichen“), so ist
+    // die Überschrift jener Einheit gemeint — im gii-XML die Kopfzeile ihres Aufzählungsblocks.
+    // Zuvor verwarf dieser Zweig die feinere Angabe schweigend und griff auf den Normtitel; stand
+    // der Zieltext zufällig dort, so wurde die falsche Einheit geändert, ohne dass es jemand
+    // erfuhr.
     if (befehl.stelle().betrifftUeberschrift()) {
-      var aufloesung = loeseNormAuf(normen, befehl.stelle());
-      if (aufloesung.fehler() != null) {
-        return manuell(befehl, aufloesung.grund(), aufloesung.fehler());
-      }
-      var norm = normen.get(aufloesung.normIndex());
-      if (norm.titel() == null) {
-        return manuell(
-            befehl, Grund.BESTAND_WIDERSPRICHT, norm.enbez() + " hat keine Überschrift.");
-      }
-      var titelErgebnis = operation.wende(norm.titel());
-      if (titelErgebnis.fehler() != null) {
-        return manuell(befehl, titelErgebnis.grund(), titelErgebnis.fehler());
-      }
-      normen.set(aufloesung.normIndex(), norm.mitTitel(titelErgebnis.text()));
-      return angewandt(befehl, norm.enbez());
+      return bearbeiteUeberschrift(normen, befehl, operation);
     }
 
     var ergebnis = StellenAufloeser.aufloese(gesetzAus(normen), befehl.stelle());
@@ -2211,6 +2215,98 @@ public final class BefehlAnwender {
     absaetze.set(trefferIndex, absaetze.get(trefferIndex).mitText(treffer.text()));
     normen.set(fundstelle.normIndex(), norm.mitAbsaetzen(absaetze));
     return angewandt(befehl, norm.enbez());
+  }
+
+  /**
+   * Wendet eine Textoperation auf eine Überschrift an. Welche Überschrift gemeint ist, entscheidet
+   * nicht der Wortlaut des Befehls, sondern die Auflösung der Stelle ohne die
+   * Überschrift-Komponente:
+   *
+   * <ul>
+   *   <li>Löst sie auf eine ganze Norm auf, so ist deren Titel gemeint — der Regelfall („In der
+   *       Überschrift des § 5 …“), und ebenso dort, wo die Nummer einer Anlage eine eigene Norm ist
+   *       (Landesrecht seit Welle 20c).
+   *   <li>Löst sie auf einen Textbereich auf, so ist dessen <em>Kopfzeile</em> gemeint. Im gii-XML
+   *       des Bundes stehen die Nummern einer Anlage als Aufzählungsmarken im Wortlaut, und die
+   *       Kopfzeile trägt Marke und Überschrift („1. Wärmedämmung von … in den Fällen des § 69 und
+   *       § 71 Absatz 1“); die Kindzeilen sind ihr Inhalt.
+   * </ul>
+   *
+   * <p>Ein Block aus einer einzigen Zeile hat keine Überschrift, sondern nur Text. Dort wird nichts
+   * angewandt, sondern gerügt: Andernfalls träfe die Operation den ganzen Wortlaut und gäbe vor,
+   * eine Überschrift geändert zu haben.
+   */
+  private static AngewandteAenderung bearbeiteUeberschrift(
+      List<Norm> normen, Aenderungsbefehl befehl, TextOperation operation) {
+    var ohneUeberschrift = befehl.stelle().ohne(new Stelle.Ueberschrift());
+    var ergebnis = StellenAufloeser.aufloese(gesetzAus(normen), ohneUeberschrift);
+    if (ergebnis instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
+      return manuell(befehl, nicht.grund(), nicht.begruendung());
+    }
+    var fundstelle = ((StellenAufloeser.Ergebnis.Gefunden) ergebnis).fundstelle();
+    var norm = normen.get(fundstelle.normIndex());
+
+    if (fundstelle.bereich() == null) {
+      if (norm.titel() == null) {
+        return manuell(
+            befehl, Grund.BESTAND_WIDERSPRICHT, norm.enbez() + " hat keine Überschrift.");
+      }
+      var titelErgebnis = operation.wende(norm.titel());
+      if (titelErgebnis.fehler() != null) {
+        return manuell(befehl, titelErgebnis.grund(), titelErgebnis.fehler());
+      }
+      normen.set(fundstelle.normIndex(), norm.mitTitel(titelErgebnis.text()));
+      return angewandt(befehl, norm.enbez());
+    }
+
+    var absaetze = new ArrayList<>(norm.absaetze());
+    var absatz = absaetze.get(fundstelle.absatzIndex());
+    var kopfzeile = kopfzeileVon(absatz.text(), fundstelle.bereich());
+    if (kopfzeile == null) {
+      return manuell(
+          befehl,
+          Grund.STELLE_NICHT_AUFLOESBAR,
+          "„" + ohneUeberschrift.anzeigeText() + "“ trägt keine eigene Überschrift.");
+    }
+    var kopfErgebnis = operation.wende(absatz.text().substring(kopfzeile.von(), kopfzeile.bis()));
+    if (kopfErgebnis.fehler() != null) {
+      return manuell(befehl, kopfErgebnis.grund(), kopfErgebnis.fehler());
+    }
+    var neuerText =
+        absatz.text().substring(0, kopfzeile.von())
+            + kopfErgebnis.text()
+            + absatz.text().substring(kopfzeile.bis());
+    absaetze.set(fundstelle.absatzIndex(), absatz.mitText(neuerText));
+    normen.set(fundstelle.normIndex(), norm.mitAbsaetzen(absaetze));
+    return angewandt(befehl, norm.enbez());
+  }
+
+  /**
+   * Nennt die Stelle eine Einheit unterhalb der Norm — einen Absatz, einen Satz, eine Nummer oder
+   * einen Buchstaben? Nur dann meint „die Überschrift“ etwas anderes als den Titel der Norm.
+   */
+  private static boolean nenntFeinereEinheit(Stelle stelle) {
+    return stelle.komponenten().stream()
+        .anyMatch(
+            k ->
+                k instanceof Stelle.AbsatzNr
+                    || k instanceof Stelle.SatzNr
+                    || k instanceof Stelle.HalbsatzNr
+                    || k instanceof Stelle.NummerNr
+                    || k instanceof Stelle.BuchstabeNr);
+  }
+
+  /**
+   * Die erste Zeile eines Textbereichs, sofern ihr wenigstens eine weitere folgt; sonst {@code
+   * null}. Der Zeilenumbruch selbst bleibt außerhalb.
+   */
+  private static SatzTeiler.@Nullable SatzBereich kopfzeileVon(
+      String text, SatzTeiler.SatzBereich bereich) {
+    int umbruch = text.indexOf('\n', bereich.von());
+    if (umbruch < 0 || umbruch >= bereich.bis()) {
+      return null;
+    }
+    return new SatzTeiler.SatzBereich(bereich.von(), umbruch);
   }
 
   /** Wie {@link #bearbeiteText}, aber die Operation braucht den konkreten Zeichenbereich. */

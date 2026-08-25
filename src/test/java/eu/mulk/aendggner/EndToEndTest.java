@@ -261,16 +261,17 @@ class EndToEndTest {
    * auch eine Aufhebung als Räumende zählt, läuft sie vor der Umnummerierung, und § 108 Absatz 1
    * trägt danach die lückenlose Folge der Nummern 1 bis 32.
    *
-   * <ol>
-   *   <li>{@code 40. a) hh)} „Die bisherige Nummer 18 wird Nummer 29 und nach der Angabe ‚Absatz 1‘
-   *       werden die Wörter ‚oder Absatz 4‘ eingefügt.“ — Die Begleitklausel löst norm-weit auf
-   *       (bewusst so, siehe {@code BefehlErkenner}) und trifft dort 21 Vorkommen. Gemeint ist die
-   *       soeben umnummerierte Einheit.
-   *   <li>{@code 43. b) aa)} „In der Überschrift werden die Wörter … gestrichen.“ — Ziel ist die
-   *       Überschrift der <em>Nummer 1 der Anlage 8</em>. Das ist dieselbe offene Modellfrage wie
-   *       bei Berlins Anlage: Die Nummern einer Anlage brauchen einen eigenen Rang zwischen Norm
-   *       und Absatz.
-   * </ol>
+   * <p>Auch {@code 43. b) aa)} ist keiner mehr („In der Überschrift werden die Wörter … in den
+   * Fällen des § 69 und § 71 Absatz 1 … gestrichen.“). Ziel ist die Überschrift der <em>Nummer 1
+   * der Anlage 8</em>, und es brauchte dafür keinen eigenen Rang zwischen Norm und Absatz: Im
+   * gii-XML ist die Überschrift einer Anlagen-Nummer die Kopfzeile ihres Aufzählungsblocks. Der
+   * Fehler saß darin, dass der Überschrift-Zweig die feinere Angabe schweigend verwarf und stets
+   * auf den Normtitel griff.
+   *
+   * <p>Ein Rest bleibt: {@code 40. a) hh)} „Die bisherige Nummer 18 wird Nummer 29 und nach der
+   * Angabe ‚Absatz 1‘ werden die Wörter ‚oder Absatz 4‘ eingefügt.“ — Die Begleitklausel löst
+   * norm-weit auf (bewusst so, siehe {@code BefehlErkenner}) und trifft dort 21 Vorkommen. Gemeint
+   * ist die soeben umnummerierte Einheit.
    */
   @Test
   void gegGegenZeitrichtigenStamm() throws Exception {
@@ -292,8 +293,8 @@ class EndToEndTest {
             .filter(a -> a.status() == BefehlAnwender.Status.MANUELL_PRUEFEN)
             .map(a -> a.befehl().provenienz().gliederungsPfad())
             .toList();
-    assertThat(manuellPfade).containsExactly("40. a) hh)", "43. b) aa)");
-    assertThat(anwendung.anzahlAngewandt()).isEqualTo(117);
+    assertThat(manuellPfade).containsExactly("40. a) hh)");
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(118);
 
     // Die Kaskade des § 108 Absatz 1 geht lückenlos auf: 32 Nummern, keine doppelt, keine fehlend.
     var nummern =
@@ -311,6 +312,15 @@ class EndToEndTest {
     assertThat(nummern).hasSize(32).endsWith("32");
 
     var neu = anwendung.neu();
+    // Die Überschrift der Nummer 1 der Anlage 8 ist geändert — und nur sie: Der Titel der Anlage
+    // trägt seinen eigenen Wortlaut unversehrt, den Punkt 43. a) ihm gegeben hat.
+    var anlage8 = neu.norm("Anlage 8").orElseThrow();
+    assertThat(anlage8.gesamtText())
+        .contains("1. Wärmedämmung von Wärmeverteilungs- und Warmwasserleitungen sowie Armaturen")
+        .doesNotContain("sowie Armaturen in den Fällen des § 69 und § 71 Absatz 1");
+    assertThat(anlage8.titel())
+        .contains("Anforderungen an die Wärmedämmung von Rohrleitungen und Armaturen");
+
     // Der neue § 9a steht im Gesetz und in der Inhaltsübersicht.
     assertThat(neu.norm("§ 9a")).isPresent();
     assertThat(neu.norm("Inhaltsübersicht").orElseThrow().gesamtText())
@@ -1702,8 +1712,8 @@ class EndToEndTest {
   /**
    * Dasselbe am großen Fall, und zugleich die Probe auf die Schritt-Ordnung: Im GEG bleibt am 1.
    * Januar 2024 allein der Befehl der Nummer 22 zurück. Er steht in keiner Umnummerierungs-Kaskade,
-   * sodass die übrigen 115 unverändert durchlaufen — die drei liegengebliebenen Befehle sind
-   * dieselben wie ohne Stichtag und werden von der Auswahl nicht vermehrt.
+   * sodass die übrigen 116 unverändert durchlaufen — die liegengebliebenen Befehle sind dieselben
+   * wie ohne Stichtag und werden von der Auswahl nicht vermehrt.
    */
   @Test
   void gegStichtagLaesstDieUebrigenBefehleUnberuehrt() throws Exception {
@@ -1712,14 +1722,14 @@ class EndToEndTest {
     assumeTrue(Files.exists(xml) && Files.exists(pdf), "GEG-Beispieldaten fehlen");
 
     var vollstaendig = Pipeline.erzeugeSynopse(Pipeline.Auftrag.von(xml, List.of(pdf)));
-    assertThat(vollstaendig.anzahlAngewandt()).isEqualTo(117);
-    assertThat(vollstaendig.anzahlManuell()).isEqualTo(2);
+    assertThat(vollstaendig.anzahlAngewandt()).isEqualTo(118);
+    assertThat(vollstaendig.anzahlManuell()).isEqualTo(1);
 
     var anfang2024 =
         Pipeline.erzeugeSynopse(
             Pipeline.Auftrag.von(xml, List.of(pdf)).mitStichtag(LocalDate.of(2024, 1, 1)));
-    assertThat(anfang2024.anzahlAngewandt()).isEqualTo(116);
-    assertThat(anfang2024.anzahlManuell()).isEqualTo(2);
+    assertThat(anfang2024.anzahlAngewandt()).isEqualTo(117);
+    assertThat(anfang2024.anzahlManuell()).isEqualTo(1);
     assertThat(anfang2024.html())
         .contains("Am Stichtag noch nicht in Kraft")
         .contains("Tritt erst am 1. Oktober 2024 in Kraft");
@@ -1727,7 +1737,7 @@ class EndToEndTest {
     var oktober2024 =
         Pipeline.erzeugeSynopse(
             Pipeline.Auftrag.von(xml, List.of(pdf)).mitStichtag(LocalDate.of(2024, 10, 1)));
-    assertThat(oktober2024.anzahlAngewandt()).isEqualTo(117);
+    assertThat(oktober2024.anzahlAngewandt()).isEqualTo(118);
   }
 
   /**

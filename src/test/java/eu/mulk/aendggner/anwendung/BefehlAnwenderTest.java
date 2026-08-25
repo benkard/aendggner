@@ -1666,4 +1666,115 @@ class BefehlAnwenderTest {
     assertThat(ergebnis.anzahlManuell()).isEqualTo(1);
     assertThat(ergebnis.protokoll().get(0).begruendung()).contains("nicht so viele Einheiten");
   }
+
+  /**
+   * „In der Überschrift der Nummer 1 …“ meint die Kopfzeile jenes Aufzählungsblocks, nicht den
+   * Titel der Norm. Zuvor verwarf der Überschrift-Zweig die Nummer schweigend und griff auf den
+   * Normtitel — stand der Zieltext zufällig dort, so änderte er die falsche Einheit.
+   */
+  @Test
+  void ueberschriftEinerNummerIstDieKopfzeileIhresBlocks() {
+    var anlage =
+        new Norm(
+            "Anlage 8",
+            "Anforderungen an die Wärmedämmung in den Fällen des § 69",
+            null,
+            List.of(
+                new Absatz(
+                    null,
+                    "1. Wärmedämmung von Leitungen in den Fällen des § 69\n"
+                        + "  a) Leitungen sind in den Fällen des § 69 zu dämmen.\n"
+                        + "2. Sonstiges\n"
+                        + "  a) Im Übrigen gilt nichts.")),
+            false);
+    var gesetz = new Gesetz("TestG", "Testgesetz", "TestG", List.of(anlage));
+
+    var befehl =
+        new Streichung(
+            stelle(
+                new Stelle.Gliederungseinheit("Anlage", "8"),
+                new Stelle.NummerNr("1"),
+                new Stelle.Ueberschrift()),
+            " in den Fällen des § 69",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz, List.of(befehl));
+    assertThat(ergebnis.protokoll()).allMatch(a -> a.status() == Status.ANGEWANDT);
+
+    var text = ergebnis.neu().norm("Anlage 8").orElseThrow();
+    // Die Kopfzeile ist gestutzt …
+    assertThat(text.absaetze().get(0).text()).startsWith("1. Wärmedämmung von Leitungen\n");
+    // … der Buchstabe a) darunter und der Titel der Anlage dagegen unberührt: Beide führen
+    // denselben Wortlaut, und eine norm-weite Streichung hätte sie mitgenommen.
+    assertThat(text.absaetze().get(0).text())
+        .contains("a) Leitungen sind in den Fällen des § 69 zu dämmen.");
+    assertThat(text.titel()).isEqualTo("Anforderungen an die Wärmedämmung in den Fällen des § 69");
+  }
+
+  /**
+   * Ein Aufzählungsglied aus einer einzigen Zeile hat keine Überschrift, sondern nur Text. Dort
+   * wird nichts angewandt, sondern gerügt: Andernfalls träfe die Operation den ganzen Wortlaut und
+   * gäbe vor, eine Überschrift geändert zu haben.
+   */
+  @Test
+  void einzeiligesAufzaehlungsgliedTraegtKeineUeberschrift() {
+    var anlage =
+        new Norm(
+            "Anlage 8",
+            "Anforderungen",
+            null,
+            List.of(new Absatz(null, "1. Kurz und bündig\n2. Ebenso kurz")),
+            false);
+    var gesetz = new Gesetz("TestG", "Testgesetz", "TestG", List.of(anlage));
+
+    var befehl =
+        new Streichung(
+            stelle(
+                new Stelle.Gliederungseinheit("Anlage", "8"),
+                new Stelle.NummerNr("1"),
+                new Stelle.Ueberschrift()),
+            " und bündig",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz, List.of(befehl));
+    assertThat(ergebnis.protokoll()).hasSize(1);
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.MANUELL_PRUEFEN);
+    assertThat(ergebnis.protokoll().get(0).grund()).isEqualTo(Grund.STELLE_NICHT_AUFLOESBAR);
+    assertThat(ergebnis.protokoll().get(0).begruendung())
+        .contains("trägt keine eigene Überschrift");
+    assertThat(ergebnis.neu().norm("Anlage 8").orElseThrow().absaetze().get(0).text())
+        .isEqualTo("1. Kurz und bündig\n2. Ebenso kurz");
+  }
+
+  /**
+   * Die Neufassung der Überschrift einer Aufzählungseinheit bleibt eine bewusst gezogene Grenze:
+   * Deren Kopfzeile trägt zugleich die Aufzählungsmarke, die eine Neufassung nicht mitliefert.
+   * Gerügt wird sie deshalb — nicht auf den Normtitel umgebogen.
+   */
+  @Test
+  void neufassungDerUeberschriftEinerNummerWirdGeruegt() {
+    var anlage =
+        new Norm(
+            "Anlage 8",
+            "Anforderungen",
+            null,
+            List.of(new Absatz(null, "1. Wärmedämmung\n  a) Näheres.")),
+            false);
+
+    var gesetz = new Gesetz("TestG", "Testgesetz", "TestG", List.of(anlage));
+
+    var befehl =
+        new Neufassung(
+            stelle(
+                new Stelle.Gliederungseinheit("Anlage", "8"),
+                new Stelle.NummerNr("1"),
+                new Stelle.Ueberschrift()),
+            "Wärmedämmung und Kältedämmung",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz, List.of(befehl));
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.MANUELL_PRUEFEN);
+    assertThat(ergebnis.protokoll().get(0).grund()).isEqualTo(Grund.NICHT_UNTERSTUETZT);
+    assertThat(ergebnis.neu().norm("Anlage 8").orElseThrow().titel()).isEqualTo("Anforderungen");
+  }
 }
