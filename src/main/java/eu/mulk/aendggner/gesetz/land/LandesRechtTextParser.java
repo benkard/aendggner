@@ -404,8 +404,13 @@ final class LandesRechtTextParser {
       if (naechste.isEmpty()) {
         continue;
       }
+      // Als Nachfolger zählt jede Überschriftenform, nicht bloß die bayerische: Eine
+      // Katalogzeile, der unmittelbar „Unterabschnitt 12 …“ oder „Erster Teil …“ folgt, steht
+      // ebenso in Überschriftenstellung wie eine, der ein Normkopf folgt.
       return NORM_KOPF.matcher(naechste).matches()
           || GLIEDERUNG.matcher(naechste).matches()
+          || GLIEDERUNG_ARABISCH.matcher(naechste).matches()
+          || GLIEDERUNG_ORDINALWORT.matcher(naechste).matches()
           || UNTER_GLIEDERUNG.matcher(naechste).matches();
     }
     return false;
