@@ -15,6 +15,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Streichung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturErsetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Umnummerierung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.VerweisenderBefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WoerterEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortAnker;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortlautZuAbsatz;
@@ -1513,5 +1514,34 @@ class BefehlErkennerTest {
     var ersetzung = (Ersetzung) befehl.orElseThrow();
     assertThat(ersetzung.alt()).isEqualTo(";");
     assertThat(ersetzung.neu()).isEqualTo(",");
+  }
+
+  /**
+   * Die Verweisung auf einen anderen Punkt desselben Artikels wird gelesen, aber nicht ausgeführt.
+   * Erkannt zu werden ist gleichwohl mehr als gar nichts: Die Rüge sagt dann, dass das Erzeugnis
+   * die Grenze zieht, und nicht, dass die Vorlage unverständlich sei.
+   */
+  @Test
+  void erkenntDieVerweisungAufEinenAnderenPunkt() {
+    var befehl =
+        erkenne(
+            "Die Inhaltsübersicht wird entsprechend der vorstehenden Nummer 8 Buchst. a geändert.",
+            Stelle.LEER);
+
+    assertThat(befehl).containsInstanceOf(VerweisenderBefehl.class);
+    var verweisung = (VerweisenderBefehl) befehl.orElseThrow();
+    assertThat(verweisung.verweis()).isEqualTo("Nummer 8 Buchst. a");
+    assertThat(verweisung.stelle().betrifftInhaltsuebersicht()).isTrue();
+  }
+
+  /** Ein bloß adverbiales „entsprechend“ wird davon nicht mitgerissen. */
+  @Test
+  void adverbialesEntsprechendIstKeineVerweisung() {
+    var befehl =
+        erkenne(
+            "In § 5 werden die Wörter „entsprechend der Anlage“ durch die Wörter „nach der"
+                + " Anlage“ ersetzt.",
+            Stelle.LEER);
+    assertThat(befehl).containsInstanceOf(Ersetzung.class);
   }
 }

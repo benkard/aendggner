@@ -239,4 +239,19 @@ public sealed interface Aenderungsbefehl {
   /** Fallback für alles, was der Parser nicht versteht — muss manuell geprüft werden. */
   record UnbekannterBefehl(Stelle stelle, String originalText, Provenienz provenienz)
       implements Aenderungsbefehl {}
+
+  /**
+   * „Die Inhaltsübersicht wird entsprechend der vorstehenden Nummer 8 Buchst. a geändert.“
+   *
+   * <p>Ein Befehl, der seinen Inhalt nicht selbst nennt, sondern auf einen anderen Punkt desselben
+   * Artikels verweist. Er wird erkannt, aber nicht angewandt: Die sinngemäße Übertragung setzte
+   * voraus, dass der Anwender die Befehlsliste zurückliest und das Ziel umdeutet („Überschrift des
+   * § 13“ → Titelspalte der Übersichtszeile). Erkannt zu werden ist gleichwohl mehr als gar nichts
+   * — die Rüge sagt dann, dass das Erzeugnis die Grenze zieht, und nicht, dass die Vorlage
+   * unverständlich sei.
+   *
+   * @param verweis der Wortlaut der Verweisung („Nummer 8 Buchst. a“).
+   */
+  record VerweisenderBefehl(Stelle stelle, String verweis, Provenienz provenienz)
+      implements Aenderungsbefehl {}
 }

@@ -339,7 +339,15 @@ Streichen und Umnummerierung.
 15. Verb-Rahmen, deren Unterpunkte allein die Fundstelle tragen („Es werden
     ersetzt: … in § 35 Absatz 3 die Angabe „X“ jeweils durch die Angabe „Y“,“),
     sowie
-16. die Neufassung der Gesetzesüberschrift.
+16. die Neufassung der Gesetzesüberschrift sowie
+17. die Verweisung auf einen anderen Punkt desselben Artikels („Die
+    Inhaltsübersicht wird entsprechend der vorstehenden Nummer 8 Buchst. a
+    geändert“). Sie wird gelesen, aber nicht ausgeführt: Die sinngemäße
+    Übertragung setzte einen Rückgriff auf die Befehlsliste und eine Umdeutung
+    des Ziels voraus, die das Erzeugnis nicht leistet. Gelesen zu werden ist
+    gleichwohl mehr als gar nichts — die Rüge sagt alsdann, dass hier das
+    Erzeugnis die Grenze zieht, und nicht, dass die Vorlage unverständlich sei
+    (§ 1 Absatz 5).
 
 (3) Landesrechtliche Befehlsformen bestimmt ergänzend § 13.
 
@@ -613,9 +621,10 @@ gleichwohl vier allgemeine Funde gebracht: die Nebenform „die Worte“ für �
 Wörter“, den Seitenfuß des dortigen Gesetzblattes, der im Inhaltsstrom das
 Zitat einer Neufassung zerschneidet, den Strichpunkt samt Halbsatz-Anfügung
 (§ 7 Absatz 2 Nummer 13) und den bezugspunktlosen Chapeau-Lokator (§ 7 Absatz 2
-Nummer 14). Offen bleibt allein die Verweisung auf einen anderen Punkt desselben
-Artikels („Die Inhaltsübersicht wird entsprechend der vorstehenden Nummer 8
-Buchst. a geändert“).
+Nummer 14). Auch die Verweisung auf einen anderen
+Punkt desselben Artikels (§ 7 Absatz 2 Nummer 17) stammt von dort; sie wird
+gelesen und ausdrücklich als Grenze gerügt. Sämtliche 23 Befehle des Heftes sind
+damit erschlossen.
 
 (5) Welche Konvention welches Land beisteuert, welche Stammfassungen woher
 stammen und was noch offen ist, verzeichnet

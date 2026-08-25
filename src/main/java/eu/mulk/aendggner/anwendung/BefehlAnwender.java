@@ -18,6 +18,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturErsetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Umnummerierung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.UnbekannterBefehl;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.VerweisenderBefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WoerterEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortAnker;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortlautVoranstellung;
@@ -667,6 +668,20 @@ public final class BefehlAnwender {
     if (befehl instanceof UnbekannterBefehl) {
       return manuell(befehl, Grund.NICHT_ERKANNT, "Befehl nicht erkannt.");
     }
+    // Gelesen, aber bewusst nicht ausgeführt. Die Weiche steht vor der Inhaltsübersichts-Weiche,
+    // damit die Rüge den Verweis nennt und nicht bloß die allgemeine Grenze jener Norm: Die
+    // sinngemäße Übertragung eines anderen Punktes setzte einen Rückgriff auf die Befehlsliste und
+    // eine Umdeutung des Ziels voraus („Überschrift des § 13“ → Titelspalte der Übersichtszeile),
+    // die dieser Anwender nicht leistet. Sie zu erraten wäre schlimmer, als sie zu benennen.
+    if (befehl instanceof VerweisenderBefehl v) {
+      return manuell(
+          befehl,
+          Grund.NICHT_UNTERSTUETZT,
+          "Der Befehl verweist auf „"
+              + v.verweis()
+              + "“ desselben Artikels; die sinngemäße Übertragung auf die Inhaltsübersicht ist"
+              + " nicht umgesetzt.");
+    }
     // Sammelbefehle vor den Spezialweichen dispatchen (jeder Teil wird einzeln geroutet).
     if (befehl instanceof Sammelbefehl s) {
       return wendeSammelAn(normen, gliederungen, s);
@@ -724,6 +739,9 @@ public final class BefehlAnwender {
             wendeGliederungsUeberschriftenAn(normen, gliederungen, g);
         case Sammelbefehl s -> wendeSammelAn(normen, gliederungen, s);
         case UnbekannterBefehl u -> manuell(befehl, Grund.NICHT_ERKANNT, "Befehl nicht erkannt.");
+        // Oben abgefangen; die Weiche muss ihn gleichwohl kennen.
+        case VerweisenderBefehl v ->
+            manuell(befehl, Grund.NICHT_UNTERSTUETZT, "Verweisender Befehl.");
       };
     } catch (RuntimeException e) {
       return manuell(befehl, Grund.FEHLGESCHLAGEN, "Anwendung fehlgeschlagen: " + e);

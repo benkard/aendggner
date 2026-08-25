@@ -17,6 +17,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Streichung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturErsetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Umnummerierung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.VerweisenderBefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WoerterEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortAnker;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortlautVoranstellung;
@@ -520,6 +521,15 @@ final class BefehlErkenner {
 
   private static final Pattern HALBSATZ = Pattern.compile("Halbsatz(?: \\d+[a-z]?)?");
 
+  // „Die Inhaltsübersicht wird entsprechend der vorstehenden Nummer 8 Buchst. a geändert.“ — ein
+  // Befehl, der seinen Inhalt nicht nennt, sondern auf einen anderen Punkt verweist. Verankert auf
+  // den ganzen Satz, damit ein bloß adverbiales „entsprechend“ nicht mitgerissen wird; ohne
+  // verschachtelte Quantoren und daher für die Mustersuche kostenneutral.
+  private static final Pattern VERWEISENDE_AENDERUNG =
+      Pattern.compile(
+          "^Die Inhaltsübersicht wird entsprechend (?:der|dem) "
+              + "(?:vorstehenden |vorgenannten |nachstehenden )?(.+?) geändert\\.$");
+
   private static final Pattern EBENE_BEZEICHNUNG =
       Pattern.compile(
           "^(?:(?:§|Art\\.) (\\d+[a-z]?)|(?:Absatz|Abs\\.) (\\d+[a-z]?)|Satz(?: (\\d+[a-z]?))?|Sätze"
@@ -879,6 +889,13 @@ final class BefehlErkenner {
       String text, Stelle kontext, ZitatExtraktor.Ergebnis zitate, Provenienz provenienz) {
 
     Matcher m;
+
+    // Die Verweisung auf einen anderen Punkt desselben Artikels. Sie steht ganz vorn, weil sie
+    // den vollen Satz beansprucht und sonst von der Neufassung an sich gezogen würde.
+    if ((m = VERWEISENDE_AENDERUNG.matcher(text)).matches()) {
+      return Optional.of(
+          new VerweisenderBefehl(mitInhaltsuebersicht(kontext), m.group(1).strip(), provenienz));
+    }
 
     // Inhaltsübersichts-Angaben zuerst prüfen, bevor NEUFASSUNG/STRUKTUR_ERSETZUNG die Phrase
     // strukturell (aber mit unparsbarer Stelle) an sich ziehen.

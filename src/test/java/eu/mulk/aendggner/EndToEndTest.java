@@ -10,6 +10,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Sammelbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.UnbekannterBefehl;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.VerweisenderBefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortAnker;
 import eu.mulk.aendggner.aenderung.parse.AenderungsantragParser;
 import eu.mulk.aendggner.aenderung.parse.AenderungsgesetzParser;
@@ -19,6 +20,7 @@ import eu.mulk.aendggner.aenderung.parse.SuperskriptModus;
 import eu.mulk.aendggner.aenderung.parse.TextBereiniger;
 import eu.mulk.aendggner.aenderung.parse.ZitatExtraktor;
 import eu.mulk.aendggner.anwendung.BefehlAnwender;
+import eu.mulk.aendggner.anwendung.Grund;
 import eu.mulk.aendggner.anwendung.Nachfassungsabgleich;
 import eu.mulk.aendggner.gesetz.Absatz;
 import eu.mulk.aendggner.gesetz.Gesetz;
@@ -1889,14 +1891,20 @@ class EndToEndTest {
     assertThat(befehlAn(parseErgebnis, "5. a) aa)")).isInstanceOf(Sammelbefehl.class);
     assertThat(befehlAn(parseErgebnis, "7. a) aa)")).isInstanceOf(Ersetzung.class);
 
-    // Eine benannte Grenze bleibt: die Verweisung auf einen anderen Punkt desselben Artikels
-    // („Die Inhaltsübersicht wird entsprechend der vorstehenden Nummer 8 Buchst. a geändert“).
-    var unerkannt =
-        parseErgebnis.befehle().stream()
-            .filter(b -> b instanceof UnbekannterBefehl)
-            .map(b -> b.provenienz().gliederungsPfad())
-            .toList();
-    assertThat(unerkannt).containsExactly("12.");
+    // Kein Befehl des Heftes bleibt mehr ungelesen.
+    assertThat(parseErgebnis.befehle()).noneMatch(b -> b instanceof UnbekannterBefehl);
+
+    // Die Verweisung auf einen anderen Punkt desselben Artikels wird gelesen, aber bewusst nicht
+    // ausgeführt. Der Unterschied ist kein kosmetischer: Die Synopse sagt fortan, dass das
+    // Erzeugnis hier die Grenze zieht, und nicht, dass die Vorlage unverständlich sei.
+    var verweisung = befehlAn(parseErgebnis, "12.");
+    assertThat(verweisung).isInstanceOf(VerweisenderBefehl.class);
+    assertThat(((VerweisenderBefehl) verweisung).verweis()).isEqualTo("Nummer 8 Buchst. a");
+
+    var anwendung = BefehlAnwender.anwenden(gesetz, List.of(verweisung));
+    assertThat(anwendung.protokoll().get(0).grund()).isEqualTo(Grund.NICHT_UNTERSTUETZT);
+    assertThat(anwendung.protokoll().get(0).begruendung())
+        .contains("verweist auf „Nummer 8 Buchst. a“");
   }
 
   private static Aenderungsbefehl befehlAn(
