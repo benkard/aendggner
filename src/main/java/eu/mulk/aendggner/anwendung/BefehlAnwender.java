@@ -591,6 +591,7 @@ public final class BefehlAnwender {
                   bezeichnung, s.stelle().paragraph().map(Stelle.Paragraph::sigel).orElse("§"));
           case ABSATZ -> new Stelle.AbsatzNr(bezeichnung);
           case SATZ -> new Stelle.SatzNr(bezeichnung);
+          case HALBSATZ -> new Stelle.HalbsatzNr(bezeichnung);
           case NUMMER -> new Stelle.NummerNr(bezeichnung);
           case BUCHSTABE -> new Stelle.BuchstabeNr(bezeichnung);
         };
@@ -1276,6 +1277,15 @@ public final class BefehlAnwender {
         normen.addAll(vonIndex, neue);
         yield angewandt(befehl, neue.stream().map(Norm::enbez).toList());
       }
+      // Ein Halbsatz ist keine selbständig bezeichnete Einheit: Er lässt sich anfügen
+      // (siehe wendeAnfuegungAn), aber nicht als Ziel ersetzen oder einfügen — welche Hälfte
+      // eines Satzes gemeint wäre, sagt keine Bezeichnung.
+      case HALBSATZ ->
+          manuell(
+              befehl,
+              Grund.NICHT_UNTERSTUETZT,
+              "Der Halbsatz ist keine selbständig bezeichnete Einheit; nur seine Anfügung ist"
+                  + " umgesetzt.");
     };
   }
 
@@ -1474,6 +1484,15 @@ public final class BefehlAnwender {
                 }
                 return TextErgebnis.ok(neuerText);
               });
+      // Ein Halbsatz ist keine selbständig bezeichnete Einheit: Er lässt sich anfügen
+      // (siehe wendeAnfuegungAn), aber nicht als Ziel ersetzen oder einfügen — welche Hälfte
+      // eines Satzes gemeint wäre, sagt keine Bezeichnung.
+      case HALBSATZ ->
+          manuell(
+              befehl,
+              Grund.NICHT_UNTERSTUETZT,
+              "Der Halbsatz ist keine selbständig bezeichnete Einheit; nur seine Anfügung ist"
+                  + " umgesetzt.");
     };
   }
 
@@ -1636,6 +1655,21 @@ public final class BefehlAnwender {
               normen,
               befehl,
               text -> TextErgebnis.ok(text.stripTrailing() + " " + befehl.text().strip()));
+      // Ein Halbsatz beginnt keinen neuen Satz, sondern setzt den bestehenden hinter dem
+      // Strichpunkt fort. Angehängt wird deshalb wie beim Satz — aber nur, wenn der Zieltext
+      // tatsächlich auf einen Strichpunkt endet: Sonst stünde der Halbsatz hinter einem Punkt und
+      // wäre gerade kein Halbsatz. Regelmäßig setzt ihn der Verbund unmittelbar zuvor.
+      case HALBSATZ ->
+          bearbeiteText(
+              normen,
+              befehl,
+              text ->
+                  text.stripTrailing().endsWith(";")
+                      ? TextErgebnis.ok(text.stripTrailing() + " " + befehl.text().strip())
+                      : TextErgebnis.fehler(
+                          "Der Halbsatz setzt einen Strichpunkt voraus; der Zieltext endet nicht"
+                              + " darauf.",
+                          Grund.BESTAND_WIDERSPRICHT));
       case NUMMER, BUCHSTABE ->
           bearbeiteText(
               normen,

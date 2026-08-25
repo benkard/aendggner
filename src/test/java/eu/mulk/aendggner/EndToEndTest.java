@@ -6,6 +6,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Sammelbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.UnbekannterBefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortAnker;
@@ -1878,20 +1880,31 @@ class EndToEndTest {
             .filter(b -> b.provenienz().originalText().contains("die Worte"))
             .toList();
     assertThat(wortbefehle).hasSizeGreaterThanOrEqualTo(7);
-    assertThat(wortbefehle).filteredOn(b -> b instanceof UnbekannterBefehl).hasSize(1);
+    assertThat(wortbefehle).noneMatch(b -> b instanceof UnbekannterBefehl);
 
-    // Drei benannte Idiom-Grenzen, alle im Wortlaut festgehalten:
-    //   5. a) aa) — Satzzeichen-Ersetzung im Verbund mit einer Halbsatz-Anfügung („wird der Punkt
-    //     durch einen Strichpunkt ersetzt und folgender Halbsatz angefügt“).
-    //   7. a) aa) — „In der Einleitung“ als Ziel, also der Chapeau eines Satzes mit Nummern.
-    //   12. — die Verweisung auf einen anderen Punkt desselben Artikels („Die Inhaltsübersicht wird
-    //     entsprechend der vorstehenden Nummer 8 Buchst. a geändert“).
+    // Der Strichpunkt-Verbund („wird der Punkt durch einen Strichpunkt ersetzt und folgender
+    // Halbsatz angefügt“) und der bezugspunktlose Chapeau („In der Einleitung“) werden gelesen;
+    // dass beide gleichwohl nicht greifen, liegt an der Quelle und nicht am Werkzeug: Der Stamm
+    // ist hier die Nachfassung, ihr Wortlaut trägt die Änderung bereits.
+    assertThat(befehlAn(parseErgebnis, "5. a) aa)")).isInstanceOf(Sammelbefehl.class);
+    assertThat(befehlAn(parseErgebnis, "7. a) aa)")).isInstanceOf(Ersetzung.class);
+
+    // Eine benannte Grenze bleibt: die Verweisung auf einen anderen Punkt desselben Artikels
+    // („Die Inhaltsübersicht wird entsprechend der vorstehenden Nummer 8 Buchst. a geändert“).
     var unerkannt =
         parseErgebnis.befehle().stream()
             .filter(b -> b instanceof UnbekannterBefehl)
             .map(b -> b.provenienz().gliederungsPfad())
             .toList();
-    assertThat(unerkannt).containsExactly("5. a) aa)", "7. a) aa)", "12.");
+    assertThat(unerkannt).containsExactly("12.");
+  }
+
+  private static Aenderungsbefehl befehlAn(
+      AenderungsgesetzParser.ParseErgebnis ergebnis, String gliederungsPfad) {
+    return ergebnis.befehle().stream()
+        .filter(b -> gliederungsPfad.equals(b.provenienz().gliederungsPfad()))
+        .findFirst()
+        .orElseThrow();
   }
 
   /**

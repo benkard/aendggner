@@ -22,6 +22,8 @@ public sealed interface Aenderungsbefehl {
     PARAGRAPH,
     ABSATZ,
     SATZ,
+    /** Die Hälfte eines am Strichpunkt geteilten Satzes; sie beginnt keinen neuen Satz. */
+    HALBSATZ,
     NUMMER,
     BUCHSTABE
   }

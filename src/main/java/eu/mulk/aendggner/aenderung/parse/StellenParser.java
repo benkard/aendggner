@@ -54,10 +54,18 @@ public final class StellenParser {
   // „in dem Satzteil vor Nummer 1“, „in der Angabe vor Nummer 1“, bayerisch auch „Satzteil nach
   // Nr. 3“ — verfeinernde Chapeau-Angaben ohne eigene Stelle-Komponente; die Ersetzung sucht
   // ohnehin im Text der umgebenden Stelle.
+  //
+  // Die zweite Alternative nennt keinen Bezugspunkt: „In der Einleitung“ (Rheinland-Pfalz) meint
+  // dasselbe wie „im Satzteil vor Nummer 1“, nämlich den Chapeau des Satzes, den der Rahmen
+  // bezeichnet. Auch sie trägt keine eigene Komponente. Kommt der Zieltext außer im Chapeau auch
+  // in einer Nummer vor, so meldet die Auflösung Mehrdeutigkeit — der richtige Ausgang; eine
+  // echte Verengung auf den Satzteil vor der ersten Marke wäre eine eigene Komponente und gehört
+  // nicht hierher.
   private static final Pattern CHAPEAU_QUALIFIER =
       Pattern.compile(
-          "(?i)(?:im |in dem |in der |dem |der )?(?:Satzteil|Angabe) (?:vor|nach) "
-              + "(?:Nummer|Nr\\.|Buchstabe|Buchst\\.|Satz|Absatz|Abs\\.) \\S+");
+          "(?i)(?:im |in dem |in der |dem |der )?(?:(?:Satzteil|Angabe) (?:vor|nach) "
+              + "(?:Nummer|Nr\\.|Buchstabe|Buchst\\.|Satz|Absatz|Abs\\.) \\S+"
+              + "|(?:Einleitungssatz|Eingangssatz|Einleitung)(?!\\p{L}))");
 
   /**
    * Wahr, wenn die Phrase ausschließlich aus einem Chapeau-Qualifier besteht (z.B. „im Satzteil vor

@@ -1891,4 +1891,72 @@ class BefehlAnwenderTest {
     assertThat(ergebnis.neu().norm("§ 108").orElseThrow().absaetze().get(0).text())
         .doesNotContain("oder Absatz 4");
   }
+
+  /**
+   * Ein Halbsatz setzt den Satz hinter dem Strichpunkt fort; er beginnt keinen neuen. Angefügt wird
+   * er deshalb wie ein Satz — aber nur hinter einem Strichpunkt. Endet der Zieltext auf einen
+   * Punkt, so wäre das Angefügte gerade kein Halbsatz, und der Befehl bleibt liegen.
+   */
+  @Test
+  void halbsatzWirdHinterDemStrichpunktAngefuegt() {
+    var gesetz =
+        new Gesetz(
+            "TestG",
+            "Testgesetz",
+            "TestG",
+            List.of(
+                new Norm(
+                    "§ 8",
+                    null,
+                    null,
+                    List.of(new Absatz("1", "Erster Satz. Der zweite Satz endet hier;")),
+                    false)));
+
+    var befehl =
+        new Anfuegung(
+            stelle(new Stelle.Paragraph("8"), new Stelle.AbsatzNr("1")),
+            Ebene.HALBSATZ,
+            null,
+            "die Bearbeitungszeit zählt zu den Fachstudien.",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz, List.of(befehl));
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(ergebnis.neu().norm("§ 8").orElseThrow().absaetze().get(0).text())
+        .isEqualTo(
+            "Erster Satz. Der zweite Satz endet hier; die Bearbeitungszeit zählt zu den"
+                + " Fachstudien.");
+  }
+
+  @Test
+  void halbsatzOhneStrichpunktBleibtLiegen() {
+    var gesetz =
+        new Gesetz(
+            "TestG",
+            "Testgesetz",
+            "TestG",
+            List.of(
+                new Norm(
+                    "§ 8",
+                    null,
+                    null,
+                    List.of(new Absatz("1", "Erster Satz. Der zweite Satz endet hier.")),
+                    false)));
+
+    var befehl =
+        new Anfuegung(
+            stelle(new Stelle.Paragraph("8"), new Stelle.AbsatzNr("1")),
+            Ebene.HALBSATZ,
+            null,
+            "die Bearbeitungszeit zählt zu den Fachstudien.",
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz, List.of(befehl));
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.MANUELL_PRUEFEN);
+    assertThat(ergebnis.protokoll().get(0).grund()).isEqualTo(Grund.BESTAND_WIDERSPRICHT);
+    assertThat(ergebnis.protokoll().get(0).begruendung())
+        .contains("setzt einen Strichpunkt voraus");
+    assertThat(ergebnis.neu().norm("§ 8").orElseThrow().absaetze().get(0).text())
+        .isEqualTo("Erster Satz. Der zweite Satz endet hier.");
+  }
 }

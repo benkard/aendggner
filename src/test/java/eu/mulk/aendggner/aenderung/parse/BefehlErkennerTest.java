@@ -1473,4 +1473,45 @@ class BefehlErkennerTest {
     assertThat(BefehlErkenner.erkenne(text, Stelle.LEER, zitate, PROV))
         .containsInstanceOf(Ersetzung.class);
   }
+
+  /**
+   * Rheinland-Pfalz: „In Satz 2 wird der Punkt durch einen Strichpunkt ersetzt und folgender
+   * Halbsatz angefügt: „…““. Zwei Neuerungen in einem Satz — der Strichpunkt als deutsche Nebenform
+   * des Semikolons und der Halbsatz als Ebene der Anfügung. Die Verbundmechanik selbst bestand
+   * bereits.
+   */
+  @Test
+  void erkenntStrichpunktErsetzungMitHalbsatzAnfuegung() {
+    var befehl =
+        erkenne(
+            "In Satz 2 wird der Punkt durch einen Strichpunkt ersetzt und folgender Halbsatz"
+                + " angefügt: „die Bearbeitungszeit der Abschlussarbeit zählt zu den"
+                + " Fachstudien.“",
+            new Stelle(List.of(new Stelle.Paragraph("8"), new Stelle.AbsatzNr("1"))));
+
+    assertThat(befehl).containsInstanceOf(Sammelbefehl.class);
+    var teile = ((Sammelbefehl) befehl.orElseThrow()).teilbefehle();
+    assertThat(teile).hasSize(2);
+
+    assertThat(teile.get(0)).isInstanceOf(Ersetzung.class);
+    var ersetzung = (Ersetzung) teile.get(0);
+    assertThat(ersetzung.alt()).isEqualTo(".");
+    assertThat(ersetzung.neu()).isEqualTo(";");
+    assertThat(ersetzung.stelle().anzeigeText()).isEqualTo("§ 8 Absatz 1 Satz 2");
+
+    assertThat(teile.get(1)).isInstanceOf(Anfuegung.class);
+    var anfuegung = (Anfuegung) teile.get(1);
+    assertThat(anfuegung.ebene()).isEqualTo(Ebene.HALBSATZ);
+    assertThat(anfuegung.text()).contains("die Bearbeitungszeit der Abschlussarbeit");
+  }
+
+  /** Der Strichpunkt gilt auch als Subjekt („Der Strichpunkt wird durch ein Komma ersetzt“). */
+  @Test
+  void erkenntDenStrichpunktAlsSubjekt() {
+    var befehl = erkenne("Der Strichpunkt am Ende wird durch ein Komma ersetzt.", PARAGRAPH_5);
+    assertThat(befehl).containsInstanceOf(Ersetzung.class);
+    var ersetzung = (Ersetzung) befehl.orElseThrow();
+    assertThat(ersetzung.alt()).isEqualTo(";");
+    assertThat(ersetzung.neu()).isEqualTo(",");
+  }
 }

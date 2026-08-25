@@ -138,4 +138,18 @@ class StellenParserTest {
             StellenParser.parse("Absatz 1 in der Angabe vor Nummer 1").orElseThrow().anzeigeText())
         .isEqualTo("Absatz 1");
   }
+
+  /**
+   * „In der Einleitung“ (Rheinland-Pfalz) ist ein Chapeau-Lokator wie „im Satzteil vor Nummer 1“:
+   * Er nennt keinen Bezugspunkt und trägt deshalb keine eigene Komponente — die Operation läuft auf
+   * der Stelle, die der Rahmen bezeichnet.
+   */
+  @Test
+  void einleitungIstEinChapeauLokator() {
+    assertThat(StellenParser.istNurChapeau("In der Einleitung")).isTrue();
+    assertThat(StellenParser.istNurChapeau("Im Eingangssatz")).isTrue();
+    assertThat(StellenParser.istNurChapeau("in dem Einleitungssatz")).isTrue();
+    // Ein Wort, das bloß so anfängt, ist keiner.
+    assertThat(StellenParser.istNurChapeau("In der Einleitungsformel")).isFalse();
+  }
 }

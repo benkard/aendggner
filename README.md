@@ -328,10 +328,18 @@ Streichen und Umnummerierung.
     soeben umnummerierte Einheit, weil ihr Zieltext nichts unterscheidet; eine
     Wortoperation dagegen löst zunächst norm-weit auf und fällt erst dann auf jene
     Einheit zurück, wenn die weite Suche mehrdeutig bleibt (§ 8 Absatz 5);
-13. Verb-Rahmen, deren Unterpunkte allein die Fundstelle tragen („Es werden
+13. der Halbsatz als Ebene der Anfügung („wird der Punkt durch einen Strichpunkt
+    ersetzt und folgender Halbsatz angefügt: „…““). Er beginnt keinen neuen Satz,
+    sondern setzt den bestehenden hinter dem Strichpunkt fort; angefügt wird er
+    deshalb nur, wenn der Zieltext tatsächlich auf einen Strichpunkt endet.
+    „Strichpunkt“ gilt dabei als Nebenform des Semikolons;
+14. der bezugspunktlose Chapeau-Lokator („In der Einleitung“, „Im Eingangssatz“) —
+    er meint dasselbe wie „im Satzteil vor Nummer 1“ und trägt wie dieser keine
+    eigene Stellenkomponente;
+15. Verb-Rahmen, deren Unterpunkte allein die Fundstelle tragen („Es werden
     ersetzt: … in § 35 Absatz 3 die Angabe „X“ jeweils durch die Angabe „Y“,“),
     sowie
-14. die Neufassung der Gesetzesüberschrift.
+16. die Neufassung der Gesetzesüberschrift.
 
 (3) Landesrechtliche Befehlsformen bestimmt ergänzend § 13.
 
@@ -601,9 +609,13 @@ Berlin und Baden-Württemberg jede Fassung datierbar ausgeben, fehlt dort. Für
 Rheinland-Pfalz (Ausbildungs- und Prüfungsordnung der Unfallkasse) reicht die
 Prüfung deshalb nur bis zur Befehlserkennung — nicht weil das Werkzeug es nicht
 könnte, sondern weil die Vorfassung nicht zu beschaffen ist. Der Fall hat
-gleichwohl zwei allgemeine Funde gebracht: die Nebenform „die Worte“ für „die
-Wörter“ und den Seitenfuß des dortigen Gesetzblattes, der im Inhaltsstrom das
-Zitat einer Neufassung zerschneidet.
+gleichwohl vier allgemeine Funde gebracht: die Nebenform „die Worte“ für „die
+Wörter“, den Seitenfuß des dortigen Gesetzblattes, der im Inhaltsstrom das
+Zitat einer Neufassung zerschneidet, den Strichpunkt samt Halbsatz-Anfügung
+(§ 7 Absatz 2 Nummer 13) und den bezugspunktlosen Chapeau-Lokator (§ 7 Absatz 2
+Nummer 14). Offen bleibt allein die Verweisung auf einen anderen Punkt desselben
+Artikels („Die Inhaltsübersicht wird entsprechend der vorstehenden Nummer 8
+Buchst. a geändert“).
 
 (5) Welche Konvention welches Land beisteuert, welche Stammfassungen woher
 stammen und was noch offen ist, verzeichnet

@@ -180,7 +180,7 @@ final class BefehlErkenner {
   // ersetzt: „…““ — der Ersatz steht als Zitatblock hinter dem Doppelpunkt.
   private static final Pattern PUNKT_DURCH_WORTLAUT =
       Pattern.compile(
-          "^(?:In )?(.+?) (?:wird|werden) (der Punkt|das Komma|das Semikolon)"
+          "^(?:In )?(.+?) (?:wird|werden) (der Punkt|das Komma|das Semikolon|der Strichpunkt)"
               + " am Ende(?: des Satzes)? durch "
               + "(?:die |den )?folgende[n]? (?:Wörter|Wortlaut) ersetzt: "
               + Z
@@ -194,12 +194,12 @@ final class BefehlErkenner {
   // prüft, statt es an das Einheitsende zu heften.
   private static final Pattern SATZZEICHEN_ERSETZUNG_OHNE_STELLE =
       Pattern.compile(
-          "^(Der Punkt|Das Komma|Das Semikolon)(?: am Ende(?: des Satzes)?)? wird durch "
+          "^(Der Punkt|Das Komma|Das Semikolon|Der Strichpunkt)(?: am Ende(?: des Satzes)?)? wird durch "
               + "(ein Komma und "
               + WOERTER
               + " "
               + Z
-              + "|ein Komma|einen Punkt|ein Semikolon|"
+              + "|ein Komma|einen Punkt|ein Semikolon|einen Strichpunkt|"
               + WOERTER
               + " "
               + Z
@@ -209,13 +209,13 @@ final class BefehlErkenner {
   // „am Ende“ ist wie oben entbehrlich.
   private static final Pattern SATZZEICHEN_ERSETZUNG =
       Pattern.compile(
-          "^(?:In )?(.+?) (?:wird|werden) (der Punkt|das Komma|das Semikolon)"
+          "^(?:In )?(.+?) (?:wird|werden) (der Punkt|das Komma|das Semikolon|der Strichpunkt)"
               + "(?: am Ende(?: des Satzes)?)? durch "
               + "(ein Komma und "
               + WOERTER
               + " "
               + Z
-              + "|ein Komma|einen Punkt|ein Semikolon|"
+              + "|ein Komma|einen Punkt|ein Semikolon|einen Strichpunkt|"
               + WOERTER
               + " "
               + Z
@@ -473,7 +473,7 @@ final class BefehlErkenner {
               + WOERTER
               + " "
               + Z
-              + "(?: am Ende)? durch (ein Komma|ein Semikolon|einen Punkt) ersetzt\\.$");
+              + "(?: am Ende)? durch (ein Komma|ein Semikolon|einen Strichpunkt|einen Punkt) ersetzt\\.$");
 
   // „In Satz 2 wird nach dem Wort «1» ein Komma und werden die Wörter «2» eingefügt.“
   private static final Pattern KOMMA_UND_WOERTER_EINFUEGUNG =
@@ -517,6 +517,8 @@ final class BefehlErkenner {
               + "(?:die |der |das )?folgende[nrs]? Angabe(?:n)?(?: zu .+?)? (?:ein|an)gefügt: "
               + Z
               + "\\.?$");
+
+  private static final Pattern HALBSATZ = Pattern.compile("Halbsatz(?: \\d+[a-z]?)?");
 
   private static final Pattern EBENE_BEZEICHNUNG =
       Pattern.compile(
@@ -583,7 +585,7 @@ final class BefehlErkenner {
               + WOERTER
               + " "
               + Z
-              + "|(ein Komma|ein Semikolon))$");
+              + "|(ein Komma|ein Semikolon|einen Strichpunkt))$");
 
   // „… ein Komma eingefügt und werden …“: Trennstellen eines Verbundbefehls sind „ und “ (ggf. mit
   // Komma) bzw. „, “ direkt vor „wird/werden“. Innerhalb von Zitaten steht „ und “ als «n»
@@ -597,7 +599,7 @@ final class BefehlErkenner {
               + "|, (?=(?:die (?:Wörter|Worte)|das Wort|die Angabe|die Zahl) «)"
               // Ebenso vor einer Satzzeichen-Klausel („… ersetzt, der Punkt am Ende durch ein
               // Semikolon ersetzt und …“).
-              + "|, (?=(?:der Punkt|das Komma|das Semikolon) am Ende)");
+              + "|, (?=(?:der Punkt|das Komma|das Semikolon|der Strichpunkt) am Ende)");
   private static final Pattern WIRD_WERDEN = Pattern.compile(" (?:wird|werden) ");
 
   // Rechte Verbundklausel, die ihre Fundstelle als Struktureinheit nennt („in Satz 1 wird …“,
@@ -622,7 +624,7 @@ final class BefehlErkenner {
           "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?(nach|vor) "
               + "(?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl|der Verweisung) "
               + Z
-              + " (ein Komma|ein Semikolon|einen Punkt) eingefügt\\.$");
+              + " (ein Komma|ein Semikolon|einen Strichpunkt|einen Punkt) eingefügt\\.$");
 
   // „Nach der Angabe «1» wird die Angabe «2» eingefügt.“ — Anker zuerst, ohne eigene Stelle (nutzt
   // den Kontext). Tritt vor allem als rechte Klausel eines Verbundbefehls auf.
@@ -634,7 +636,7 @@ final class BefehlErkenner {
               + WOERTER
               + " "
               + Z
-              + "|(ein Komma|ein Semikolon)) eingefügt\\.$");
+              + "|(ein Komma|ein Semikolon|einen Strichpunkt)) eingefügt\\.$");
 
   private BefehlErkenner() {}
 
@@ -1646,7 +1648,7 @@ final class BefehlErkenner {
 
   // Klausel, deren Subjekt ein Satzzeichen ist („das Komma wird durch … ersetzt“).
   private static final Pattern SATZZEICHEN_SUBJEKT =
-      Pattern.compile("(?i)(?:der Punkt|das Komma|das Semikolon)\\b");
+      Pattern.compile("(?i)(?:der Punkt|das Komma|das Semikolon|der Strichpunkt)\\b");
 
   private static Optional<Aenderungsbefehl> erkenneVerbund(
       String text, Stelle kontext, ZitatExtraktor.Ergebnis zitate, Provenienz provenienz) {
@@ -2032,6 +2034,11 @@ final class BefehlErkenner {
   private record EbeneBezeichnung(Ebene ebene, String bezeichnung) {}
 
   private static Optional<EbeneBezeichnung> ebeneUndBezeichnung(String phrase) {
+    // Der Halbsatz steht außerhalb des Musters, damit dessen Gruppennummern unberührt bleiben;
+    // eine Bezeichnung führt er nicht, denn angefügt wird stets hinter dem Strichpunkt.
+    if (HALBSATZ.matcher(phrase.strip()).matches()) {
+      return Optional.of(new EbeneBezeichnung(Ebene.HALBSATZ, null));
+    }
     var m = EBENE_BEZEICHNUNG.matcher(phrase.strip());
     if (!m.matches()) {
       return Optional.empty();
@@ -2280,6 +2287,7 @@ final class BefehlErkenner {
       case PARAGRAPH -> new Stelle.Paragraph(nummer);
       case ABSATZ -> new Stelle.AbsatzNr(nummer);
       case SATZ -> new Stelle.SatzNr(nummer);
+      case HALBSATZ -> new Stelle.HalbsatzNr(nummer);
       case NUMMER -> new Stelle.NummerNr(nummer);
       case BUCHSTABE -> new Stelle.BuchstabeNr(nummer);
     };
@@ -2366,7 +2374,8 @@ final class BefehlErkenner {
     return switch (Character.toLowerCase(phrase.charAt(0)) + phrase.substring(1)) {
       case "der Punkt", "einen Punkt" -> ".";
       case "das Komma", "ein Komma" -> ",";
-      case "das Semikolon", "ein Semikolon" -> ";";
+      // „Strichpunkt“ ist die deutsche Nebenform des Semikolons; Rheinland-Pfalz schreibt sie.
+      case "das Semikolon", "ein Semikolon", "der Strichpunkt", "einen Strichpunkt" -> ";";
       default -> throw new IllegalArgumentException("Unbekanntes Satzzeichen: " + phrase);
     };
   }
