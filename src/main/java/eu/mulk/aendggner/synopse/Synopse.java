@@ -4,6 +4,7 @@ package eu.mulk.aendggner.synopse;
 
 import eu.mulk.aendggner.aenderung.Inkrafttreten;
 import eu.mulk.aendggner.anwendung.BefehlAnwender.AngewandteAenderung;
+import eu.mulk.aendggner.anwendung.Nachfassungsabgleich;
 import eu.mulk.aendggner.gesetz.Gesetz;
 import eu.mulk.aendggner.gesetz.Gliederung;
 import eu.mulk.aendggner.gesetz.Norm;
@@ -19,6 +20,8 @@ import org.jspecify.annotations.Nullable;
  * @param stichtag der Tag, dessen Fassung gezeigt wird; {@code null} heißt: alle Befehle, ohne
  *     Rücksicht auf das Inkrafttreten.
  * @param nichtInKraft die Befehle, die am Stichtag noch nicht galten und deshalb unterblieben.
+ * @param abgleich der normweise Vergleich mit einer amtlichen Nachfassung, soweit eine angegeben
+ *     wurde; {@code null} sonst.
  */
 public record Synopse(
     Gesetz alt,
@@ -29,7 +32,8 @@ public record Synopse(
     List<String> warnungen,
     @Nullable Inkrafttreten inkrafttreten,
     @Nullable LocalDate stichtag,
-    List<AngewandteAenderung> nichtInKraft) {
+    List<AngewandteAenderung> nichtInKraft,
+    @Nullable Nachfassungsabgleich abgleich) {
 
   public Synopse(
       Gesetz alt,
@@ -47,7 +51,26 @@ public record Synopse(
         warnungen,
         null,
         null,
-        List.of());
+        List.of(),
+        null);
+  }
+
+  /**
+   * Die Synopse mit dem Abgleich gegen eine amtliche Nachfassung. Er tritt erst nach dem Aufbau
+   * hinzu, weil er die fertige neue Fassung voraussetzt.
+   */
+  public Synopse mitAbgleich(@Nullable Nachfassungsabgleich neuerAbgleich) {
+    return new Synopse(
+        alt,
+        neu,
+        eintraege,
+        gliederungsAenderungen,
+        manuellZuPruefen,
+        warnungen,
+        inkrafttreten,
+        stichtag,
+        nichtInKraft,
+        neuerAbgleich);
   }
 
   /** Eine geänderte Gliederungs-Überschrift (Teil/Abschnitt/…); {@code alt == null} bei neuen. */

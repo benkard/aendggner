@@ -55,6 +55,8 @@ public final class HtmlRenderer {
 
     sb.append("</div>\n");
 
+    rendereAbgleich(sb, synopse);
+
     rendereManuellZuPruefen(sb, synopse);
 
     rendereFuss(sb);
@@ -230,6 +232,61 @@ public final class HtmlRenderer {
       case GEAENDERT -> " <span class=\"badge geaendert-badge\">geändert</span>";
       case UNVERAENDERT -> "";
     };
+  }
+
+  /**
+   * Der Abgleich mit der amtlichen Nachfassung. Er steht vor dem Abschnitt „Manuell prüfen“, denn
+   * er beantwortet die vorrangige Frage: Nicht, ob jeder Befehl angewandt wurde, entscheidet über
+   * die Richtigkeit, sondern ob der Wortlaut hinterher derselbe ist. Die Abweichungen werden
+   * wortweise gezeigt — links, was amtlich steht, rechts, was errechnet wurde.
+   */
+  private static void rendereAbgleich(StringBuilder sb, Synopse synopse) {
+    var abgleich = synopse.abgleich();
+    if (abgleich == null) {
+      return;
+    }
+    sb.append("<section class=\"abgleich\">\n<h2>Abgleich mit der amtlichen Nachfassung</h2>\n");
+    sb.append("<p class=\"bilanz")
+        .append(abgleich.gehtAuf() ? " geht-auf" : "")
+        .append("\">")
+        .append(esc(abgleich.kurzbericht()))
+        .append("</p>\n");
+    liste(sb, "Im Erzeugnis fehlende Normen", abgleich.fehlende());
+    liste(sb, "Im Erzeugnis überzählige Normen", abgleich.ueberzaehlige());
+    if (!abgleich.abweichungen().isEmpty()) {
+      sb.append("<h3>Abweichender Wortlaut <span class=\"anzahl\">")
+          .append(abgleich.abweichungen().size())
+          .append("</span></h3>\n<div class=\"gegenueberstellung\">\n")
+          .append("<div class=\"spaltenkopf\"><div>Amtliche Nachfassung</div>")
+          .append("<div>Errechnete Fassung</div></div>\n");
+      for (var abweichung : abgleich.abweichungen()) {
+        var spalten = WortDiff.vergleiche(abweichung.soll(), abweichung.ist());
+        sb.append("<section class=\"norm geaendert\">\n<h2>")
+            .append(esc(abweichung.enbez()))
+            .append("</h2>\n<div class=\"vergleich\">\n<div class=\"alt\">")
+            .append(spalten.altHtml())
+            .append("</div>\n<div class=\"neu\">")
+            .append(spalten.neuHtml())
+            .append("</div>\n</div>\n</section>\n");
+      }
+      sb.append("</div>\n");
+    }
+    sb.append("</section>\n");
+  }
+
+  private static void liste(StringBuilder sb, String ueberschrift, List<String> posten) {
+    if (posten.isEmpty()) {
+      return;
+    }
+    sb.append("<h3>")
+        .append(esc(ueberschrift))
+        .append(" <span class=\"anzahl\">")
+        .append(posten.size())
+        .append("</span></h3>\n<ul>\n");
+    for (var posten1 : posten) {
+      sb.append("<li>").append(esc(posten1)).append("</li>\n");
+    }
+    sb.append("</ul>\n");
   }
 
   private static void rendereManuellZuPruefen(StringBuilder sb, Synopse synopse) {
@@ -528,7 +585,7 @@ public final class HtmlRenderer {
 
       /* Die Abschnittsüberschriften sind Beschriftungsstreifen über die volle Breite, wie im
          Muster die Zeile „Verfügung des Finanzamts“. */
-      section.gliederung-aenderungen > h2, section.manuell > h2 {
+      section.gliederung-aenderungen > h2, section.manuell > h2, section.abgleich > h2 {
         margin: 0 0 0.6rem;
         padding: 0.25rem 0.5rem;
         border: 1px solid var(--linie);
@@ -558,6 +615,30 @@ public final class HtmlRenderer {
         text-align: center;
       }
       section.manuell li { margin-bottom: 0.6rem; font-size: 0.75rem; }
+
+      /* Der Abgleich mit der amtlichen Nachfassung. Seine Bilanz ist die Zahl, auf die es
+         ankommt; sie steht deshalb im Kasten und nicht im Fließtext. Geht sie auf, so wird das
+         nicht durch Farbe gefeiert — ein Formblatt jubelt nicht —, sondern durch Fettung. */
+      section.abgleich { margin-top: 1.5rem; padding-top: 1.25rem; }
+      section.abgleich h3 { margin: 1rem 0 0.4rem; font-size: 0.6875rem; }
+      section.abgleich h3 .anzahl {
+        display: inline-block;
+        min-width: 1.5rem;
+        margin-left: 0.35rem;
+        padding: 0 0.25rem;
+        border: 1px solid var(--linie);
+        background: var(--grund);
+        text-align: center;
+      }
+      section.abgleich li { font-size: 0.75rem; }
+      .bilanz {
+        margin: 0 0 0.6rem;
+        padding: 0.25rem 0.5rem;
+        border: 1px solid var(--linie);
+        font-size: 0.75rem;
+        text-align: center;
+      }
+      .bilanz.geht-auf { font-weight: bold; }
       .originaltext { font-family: var(--antiqua); color: var(--muted); font-size: 0.8125rem; }
 
       /* Vordrucknummer links, Ausgabestand rechts, beide winzig und ohne Zierrat. */
@@ -624,7 +705,7 @@ public final class HtmlRenderer {
            Stelle hatte nie eine — er sagt, was gedruckt und was eingetragen ist. */
         del, ins, .badge, .entwurfshinweis, .spaltenkopf div,
         .vorspann dt, section.norm::before,
-        section.gliederung-aenderungen > h2, section.manuell > h2 {
+        section.gliederung-aenderungen > h2, section.manuell > h2, section.abgleich > h2 {
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
         }

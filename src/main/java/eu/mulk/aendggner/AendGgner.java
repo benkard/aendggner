@@ -113,6 +113,23 @@ public class AendGgner implements Callable<Integer> {
               + "yet entered into force are listed separately instead of being applied.")
   private String stichtag;
 
+  @Option(
+      names = "--neufassung",
+      paramLabel = "<file>",
+      description =
+          "Also write the amended base law as canonical plain text (\"-\" = stdout). The file can "
+              + "be fed back in as the base law of a further amendment act.")
+  private String neufassung;
+
+  @Option(
+      names = "--nachfassung",
+      paramLabel = "<file>",
+      description =
+          "Compare the result against the official amended version, norm by norm. Accepts the same "
+              + "formats as the base law. The report is added to the synopsis; a mismatch yields "
+              + "exit code 3.")
+  private Path nachfassung;
+
   public static void main(String... args) {
     int exitCode = new CommandLine(new AendGgner()).execute(args);
     System.exit(exitCode);
@@ -220,7 +237,14 @@ public class AendGgner implements Callable<Integer> {
       }
     }
 
-    var ergebnis = Pipeline.erzeugeSynopse(baseFile, patches, artikel, vollstaendig, tag);
+    var auftrag =
+        Pipeline.Auftrag.von(baseFile, patches)
+            .mitArtikel(artikel)
+            .mitVollstaendig(vollstaendig)
+            .mitStichtag(tag)
+            .mitNachfassung(nachfassung == null ? null : Quelle.lies(nachfassung));
+
+    var ergebnis = Pipeline.erzeugeSynopse(auftrag);
 
     if (output.equals("-")) {
       System.out.println(ergebnis.html());
@@ -229,9 +253,38 @@ public class AendGgner implements Callable<Integer> {
       log.infof("Synopse nach %s geschrieben.", output);
     }
 
+    if (neufassung != null) {
+      if (neufassung.equals("-")) {
+        System.out.print(ergebnis.neufassung());
+      } else {
+        Files.writeString(Path.of(neufassung), ergebnis.neufassung(), StandardCharsets.UTF_8);
+        log.infof("Neue Fassung nach %s geschrieben.", neufassung);
+      }
+    }
+
     System.err.printf(
         "%d Befehle angewandt, %d manuell zu prüfen, %d geänderte Normen.%n",
         ergebnis.anzahlAngewandt(), ergebnis.anzahlManuell(), ergebnis.anzahlGeaenderteNormen());
+
+    var abgleich = ergebnis.abgleich();
+    if (abgleich != null) {
+      System.err.println("Abgleich mit der amtlichen Nachfassung: " + abgleich.kurzbericht());
+      for (var abweichung : abgleich.abweichungen()) {
+        System.err.println("  abweichend: " + abweichung.enbez());
+      }
+      for (var fehlend : abgleich.fehlende()) {
+        System.err.println("  fehlt: " + fehlend);
+      }
+      for (var ueberzaehlig : abgleich.ueberzaehlige()) {
+        System.err.println("  überzählig: " + ueberzaehlig);
+      }
+      // Ein eigener Ausgang, damit ein Massenlauf die Abweichung bemerkt, ohne die Ausgabe zu
+      // lesen. Er geht dem Ausgang 2 vor: Dass die Fassung nicht stimmt, wiegt schwerer als
+      // dass kein Befehl gegriffen hat — Letzteres wäre ohnehin dessen Ursache.
+      if (!abgleich.gehtAuf()) {
+        return 3;
+      }
+    }
 
     return ergebnis.anzahlAngewandt() == 0 && ergebnis.anzahlProtokollEintraege() > 0 ? 2 : 0;
   }

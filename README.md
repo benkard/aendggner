@@ -39,6 +39,8 @@ durchgerechneten Beispiele sind der kürzeste Weg zum ersten Ergebnis
 - [§ 4 Herstellung des Erzeugnisses](#-4-herstellung-des-erzeugnisses)
 - [§ 5 Zulässige Eingaben](#-5-zulässige-eingaben)
 - [§ 6 Betrieb der Befehlszeilenfassung](#-6-betrieb-der-befehlszeilenfassung)
+- [§ 6a Die fortgeschriebene Fassung; die Kette](#-6a-die-fortgeschriebene-fassung-die-kette)
+- [§ 6b Abgleich mit der amtlichen Nachfassung](#-6b-abgleich-mit-der-amtlichen-nachfassung)
 - [§ 7 Erkannte Änderungsbefehle](#-7-erkannte-änderungsbefehle)
 - [§ 8 Reihenfolge der Anwendung](#-8-reihenfolge-der-anwendung)
 - [§ 9 Aufbereitung der Druckwerke](#-9-aufbereitung-der-druckwerke)
@@ -213,6 +215,15 @@ java -jar target/aendggner-0.1.0-SNAPSHOT.jar \
   unangewandt und werden gesondert ausgewiesen (§ 8 Absatz 5). Ohne diese Angabe
   werden alle Befehle angewandt.
 
+**`--neufassung <file>`**
+: Neben der Synopse die fortgeschriebene Fassung als kanonischen Klartext (§ 5
+  Absatz 2) ausgeben; „`-`“ bezeichnet die Standardausgabe. Die Ausgabe ist als
+  Stammgesetz eines weiteren Änderungsheftes wieder einlesbar (§ 6a).
+
+**`--nachfassung <file>`**
+: Das Ergebnis Norm für Norm gegen die amtliche Nachfassung halten (§ 6b). Es
+  gelten dieselben Eingabeformate wie für das Stammgesetz.
+
 **`--extract-only`**
 : Nur den bereinigten Lineartext des Änderungsdokuments ausgeben. Dies ist
   angezeigt, wenn die PDF-Aufbereitung (§ 9) fehlerhaft bleibt: Der Text ist zu
@@ -227,6 +238,63 @@ java -jar target/aendggner-0.1.0-SNAPSHOT.jar \
 
 (4) Die vollständige Schalterliste einschließlich der Schalter für die
 Fehlersuche gibt `--help` aus.
+
+## § 6a Die fortgeschriebene Fassung; die Kette
+
+(1) Ein Änderungsgesetz sagt, was zu tun ist; das Erzeugnis rechnet aus, was danach
+gilt. Diese Fassung ist nicht bloß die rechte Spalte der Synopse, sondern ein
+eigenes Erzeugnis: Der Schalter `--neufassung` (§ 6 Absatz 2) gibt sie als
+kanonischen Klartext im Format des § 5 Absatz 2 aus.
+
+(2) Daraus folgt die **Kette**. Wer zwei Hefte nacheinander auf dasselbe Stammgesetz
+anwenden will, gibt die Ausgabe des ersten Laufes als Stammgesetz des zweiten ein:
+
+```shell
+java -jar target/aendggner-0.1.0-SNAPSHOT.jar stamm.txt heft-1.pdf \
+  --neufassung zwischenfassung.txt -o synopse-1.html
+java -jar target/aendggner-0.1.0-SNAPSHOT.jar zwischenfassung.txt heft-2.pdf \
+  --neufassung endfassung.txt -o synopse-2.html
+```
+
+Auf diesem Wege lässt sich eine konsolidierte Fassung aus dem Stammheft und den
+Änderungsheften des Gesetzblattes zusammensetzen, wo kein Portal sie fertig liefert
+(§ 13 Absatz 3). Mehrere Hefte in einem Lauf sind ohnehin zulässig; die Kette ist
+für das gedacht, was über einen Lauf hinausreicht.
+
+(3) Ausgegeben wird allein, was das Datenmodell trägt; erfunden wird nichts. Für
+Bundesrecht ist die Ausgabe deshalb eine getreue Wiedergabe des Wortlauts, aber kein
+Rundlauf ins gii-XML: Jenes Format führt einen Fußnotenapparat und Standangaben, die
+der Klartext nicht aufnimmt. Was der Klartext trägt, trägt er vollständig — dass der
+Leser aus der Ausgabe dasselbe Gesetz wiedergewinnt, ist an sämtlichen
+Klartext-Stammfassungen des Beispielkorpus geprüft (§ 17 Absatz 3).
+
+## § 6b Abgleich mit der amtlichen Nachfassung
+
+(1) Ob ein Lauf gelungen ist, entscheidet nicht die Zahl der angewandten Befehle,
+sondern der Wortlaut hinterher. Der Schalter `--nachfassung` (§ 6 Absatz 2) nimmt die
+amtliche Fassung nach dem Änderungsgesetz entgegen und stellt das Ergebnis Norm für
+Norm dagegen:
+
+```shell
+java -jar target/aendggner-0.1.0-SNAPSHOT.jar ASOG-Bln-alt.txt GVBl-2026-17.pdf \
+  --artikel 1 --nachfassung ASOG-Bln-neu.txt -o synopse.html
+# → Abgleich mit der amtlichen Nachfassung: 171 von 171 Normen gleich
+```
+
+(2) Ausgewiesen werden die fehlenden, die überzähligen und die abweichenden Normen;
+bei den abweichenden zeigt die Synopse den Unterschied wortweise unter der Aufschrift
+**Abgleich mit der amtlichen Nachfassung**, links die amtliche, rechts die errechnete
+Fassung. Verglichen wird nach Normalisierung des Leerraums: Wie ein Portal umbricht,
+ist kein Rechtsinhalt — jedes Wort und jedes Satzzeichen dagegen schon. Die
+Überschrift zählt zum Wortlaut, denn auf sie zielen eigene Befehle.
+
+(3) Geht der Abgleich nicht auf, so endet der Lauf mit dem Rückgabewert 3. Das ist für
+Massenläufe gedacht, die die Ausgabe nicht lesen.
+
+(4) Es ist derselbe Abgleich, den die Akzeptanzprüfungen fahren (§ 17 Absatz 2).
+Damit messen Werkzeug und Prüfung an einem Maßstab, und die Erschließung eines
+weiteren Landes braucht keinen eigenen Prüfcode mehr: Stammfassung, Heft, Nachfassung
+— das Erzeugnis sagt selbst, wo es danebenliegt.
 
 ## § 7 Erkannte Änderungsbefehle
 
@@ -538,17 +606,22 @@ wählen, Synopse erhalten.
 (2) Der Vordruck stellt außer den beiden Dateifeldern dieselben Angaben zur
 Verfügung wie die Befehlszeile nach § 6 Absatz 2, nämlich das Feld
 „Anzuwendender Artikel“ (`--artikel`), das Feld „Stichtag“ (`--stichtag`), das
-Ankreuzfeld „Unveränderte Vorschriften mit in die Synopse aufnehmen“
-(`--vollstaendig`) und das
+Dateifeld „Amtliche Nachfassung“ (`--nachfassung`), das Ankreuzfeld
+„Unveränderte Vorschriften mit in die Synopse aufnehmen“ (`--vollstaendig`), das
+Ankreuzfeld „Auch die fortgeschriebene Fassung als Klartext ausgeben“
+(`--neufassung`) und das
 Ankreuzfeld „Statt der Synopse nur den maschinell gelesenen Text der
 Änderungsdokumente ausgeben“ (`--extract-only`). Das letztgenannte ist kein
 Zierat: Ohne es hätte, wer im Browser arbeitet, keine Möglichkeit, einem
 unerklärlich unangewandten Befehl auf den Grund zu gehen. Der ausgegebene Text
 ist derselbe, den der Parser bekommt; er lässt sich sichern, von Hand
-berichtigen und als Klartextdatei wieder einreichen.
+berichtigen und als Klartextdatei wieder einreichen. Ebensowenig Zierat ist die
+Ausgabe der fortgeschriebenen Fassung: Ohne sie bliebe die Kette nach § 6a
+Absatz 2 der Befehlszeile vorbehalten.
 
-(3) Von diesen Angaben stehen die drei selten auszufüllenden — „Anzuwendender
-Artikel“, „Stichtag“ und die Textausgabe — hinter der zugeklappten Aufschrift
+(3) Von diesen Angaben stehen die selten auszufüllenden — „Anzuwendender
+Artikel“, „Stichtag“, die Nachfassung, die Textausgabe und die Ausgabe der
+fortgeschriebenen Fassung — hinter der zugeklappten Aufschrift
 „Weitere Angaben“; die beiden Dateifelder und das Ankreuzfeld für die
 unveränderten Vorschriften bleiben offen im Vordruck. Dieses Ankreuzfeld ist
 abweichend von der Befehlszeile vorangekreuzt: Wer eine Synopse ansieht, will in
@@ -738,9 +811,20 @@ deshalb entbehrlich.
 
 (2) Die Prüfung umfasst neben den Einzelprüfungen Akzeptanzprüfungen, die
 vollständige Änderungshefte auf die zugehörige Stammfassung anwenden und das
-Ergebnis gegen die amtliche Nachfassung stellen. Die hierfür verwendeten
+Ergebnis gegen die amtliche Nachfassung stellen — mit demselben Abgleich, den
+`--nachfassung` fährt (§ 6b Absatz 4). Die hierfür verwendeten
 Beispieldaten nebst Herkunftsnachweis (`SOURCES`) liegen unter
 `src/test/resources/sampledata/`.
+
+(3) Der Textausgeber (§ 6a) wird nicht am Augenschein geprüft, sondern am
+**Rundlauf**: Was er schreibt, muss der Lader wieder zu demselben Gesetz lesen.
+Geprüft wird das an sämtlichen Klartext-Stammfassungen des Beispielkorpus und
+überdies am Bundesrecht, dessen Ausgangsformat das gii-XML ist. Der Rundlauf ist
+kein Selbstzweck: Er deckt gerade die Verluste auf, die ein Ausgeber sonst
+stillschweigend einbaut, und hat auf Anhieb zwei Lücken des Lesers zutage
+gefördert — die unvollständige Nachfolgerliste der Unter-Überschriften und die
+aufgehobene Sammelnorm des Bundesrechts („§§ 17 u. 18 (weggefallen)“), deren
+Kopfzeile zuvor in den Wortlaut der Vornorm gefallen wäre.
 
 ## Lizenz
 

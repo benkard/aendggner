@@ -160,6 +160,24 @@
                 ausgewiesen. Ohne Angabe werden alle Befehle angewandt)</span></label>
             <input type="date" id="stichtag" name="stichtag" autocomplete="off">
           </div>
+          <div class="feld">
+            <label for="nachfassung">Amtliche Nachfassung
+              <span class="erl">(nur auszufüllen, wenn das Ergebnis dagegen zu halten ist: Die
+                Synopse weist alsdann Norm für Norm aus, worin die errechnete Fassung von der
+                amtlichen abweicht. Angenommen werden dieselben Formate wie beim
+                Stammgesetz)</span></label>
+            <input type="file" id="nachfassung" name="nachfassung"
+                   accept=".xml,.zip,.pdf,.txt,text/plain,application/pdf">
+          </div>
+          <div class="feld ankreuzfeld">
+            <label>
+              <input type="checkbox" id="neufassung" name="neufassung">
+              Auch die fortgeschriebene Fassung als Klartext ausgeben
+            </label>
+            <p class="erl nachsatz">Sie lässt sich sichern und als Stammgesetz eines weiteren
+              Änderungsheftes wieder einreichen — so entsteht die Fortschreibung über mehrere
+              Hefte hinweg.</p>
+          </div>
           <div class="feld ankreuzfeld">
             <label>
               <input type="checkbox" id="nurtext" name="nurtext">

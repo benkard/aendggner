@@ -125,6 +125,21 @@ final class LandesRechtTextParser {
               + "((?:\\p{Lu}|\\().*[^.]))?\\s*$");
 
   /**
+   * Der Kopf einer aufgehobenen Sammelnorm: Zwei oder mehr weggefallene Paragraphen führt das
+   * Bundesrecht unter einer gemeinsamen Bezeichnung („§§ 17 u. 18“, Titel „(weggefallen)“); das
+   * gii-XML stellt ihr die Platzhalterkennung „(XXXX)“ voran, die zur Bezeichnung gehört und nicht
+   * zum Text.
+   *
+   * <p>Ohne diese Zeile könnte der kanonische Klartext kein Bundesgesetz tragen: Die Kopfzeile
+   * fiele in den Wortlaut der Vornorm und verfälschte ihn. Erkannt wird nur die aufgehobene Form —
+   * eine Sammelbezeichnung tragen ausschließlich weggefallene Normen, und die zwei Leerzeichen vor
+   * dem Titel sind dieselbe kanonische Marke wie beim gewöhnlichen Normkopf.
+   */
+  private static final Pattern SAMMEL_NORM_KOPF =
+      Pattern.compile(
+          "^((?:\\(X+\\) )?(?:§§|Artt\\.) \\S.*?) {2}(\\((?:weggefallen|aufgehoben)\\))$");
+
+  /**
    * Der Kopf einer Nummer innerhalb einer Anlage („Nummer 6“). Die Nummern eines
    * Zuständigkeitskatalogs sind keine Aufzählungsglieder, sondern eigene Einheiten mit eigener
    * Absatzzählung — das Landesrechtsportal führt jede als eigene Einzelnorm, und die
@@ -204,6 +219,7 @@ final class LandesRechtTextParser {
       var roemisch = zeile != null ? GLIEDERUNG_ROEMISCH.matcher(zeile) : null;
       var unterGliederung = zeile != null ? UNTER_GLIEDERUNG.matcher(zeile) : null;
       var normKopf = zeile != null ? NORM_KOPF.matcher(zeile) : null;
+      var sammelKopf = zeile != null ? SAMMEL_NORM_KOPF.matcher(zeile) : null;
       var anlagenKopf = zeile != null ? ANLAGEN_KOPF.matcher(zeile) : null;
       var uebersicht = INHALTSUEBERSICHT.equals(zeile);
       // Die Inhaltsübersicht führt die Gliederungs-Überschriften des Gesetzes als eigene Zeilen mit
@@ -225,6 +241,7 @@ final class LandesRechtTextParser {
               && !imAnlagenteil
               && normKopf.matches()
               && istNeuerNormKopf(normKopf.group(2), letzteNormNummer);
+      boolean neueSammelNorm = zeile != null && !imAnlagenteil && sammelKopf.matches();
       boolean neueAnlage = zeile != null && anlagenKopf.matches();
       var anlagenNummer =
           zeile != null && imAnlagenteil ? ANLAGEN_NUMMER_KOPF.matcher(zeile) : null;
@@ -234,6 +251,7 @@ final class LandesRechtTextParser {
           || uebersicht
           || gliederungsZeile
           || neueNorm
+          || neueSammelNorm
           || neueAnlage
           || neueAnlagenNummer) {
         // Laufende Norm abschließen.
@@ -298,6 +316,11 @@ final class LandesRechtTextParser {
           normEnbez = normKopf.group(1) + " " + normKopf.group(2);
           normTitel = normKopf.group(3) != null ? normKopf.group(3).strip() : null;
           letzteNormNummer = numerisch(normKopf.group(2));
+        } else if (neueSammelNorm) {
+          // Die Monotonieprobe bleibt unberührt: Eine Sammelbezeichnung trägt keine einzelne
+          // Nummer, an der sich fortzählen ließe.
+          normEnbez = sammelKopf.group(1);
+          normTitel = sammelKopf.group(2);
         } else if (roemisch.matches()) {
           gliederungsZaehler++;
           elternKennzahl = String.format("%03d", gliederungsZaehler);
@@ -336,6 +359,7 @@ final class LandesRechtTextParser {
         || GLIEDERUNG_ARABISCH.matcher(zeile).matches()
         || GLIEDERUNG_ORDINALWORT.matcher(zeile).matches()
         || NORM_KOPF.matcher(zeile).matches()
+        || SAMMEL_NORM_KOPF.matcher(zeile).matches()
         || (roemisch.matches() && istUnterGliederung(roemisch, zeilen, i));
   }
 

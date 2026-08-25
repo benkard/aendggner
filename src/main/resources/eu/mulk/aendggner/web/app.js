@@ -32,6 +32,11 @@ async function alsBase64(datei) {
 
 /** Hängt der Meldung einen Verweis auf das Ergebnis an; ein Blob, kein Server. */
 function oeffne(inhalt, art, aufschrift) {
+  // Es können mehrere Ergebnisse nebeneinander stehen (Synopse und fortgeschriebene Fassung);
+  // dann trennt sie ein Punkt, damit die Aufschriften nicht aneinanderkleben.
+  if (meldung.querySelector("a")) {
+    meldung.append(" · ");
+  }
   const verweis = document.createElement("a");
   verweis.href = URL.createObjectURL(new Blob([inhalt], { type: art }));
   verweis.target = "_blank";
@@ -49,6 +54,8 @@ formular.addEventListener("submit", async (ereignis) => {
     return;
   }
 
+  const nachfassungDatei = document.querySelector("#nachfassung").files[0] ?? null;
+  const neufassungGewuenscht = document.querySelector("#neufassung").checked;
   const artikel = document.querySelector("#artikel").value.trim();
   const stichtag = document.querySelector("#stichtag").value.trim();
   const nurText = document.querySelector("#nurtext").checked;
@@ -58,9 +65,10 @@ formular.addEventListener("submit", async (ereignis) => {
   zeige("Lade das Rechenwerk (einmalig einige Megabyte) und werte aus …", "arbeit");
 
   try {
-    const [stamm, patches] = await Promise.all([
+    const [stamm, patches, nachfassung] = await Promise.all([
       alsBase64(stammDatei),
       Promise.all(patchDateien.map(alsBase64)),
+      nachfassungDatei ? alsBase64(nachfassungDatei) : null,
     ]);
 
     if (!worker) {
@@ -76,6 +84,7 @@ formular.addEventListener("submit", async (ereignis) => {
         vollstaendig,
         artikel: artikel === "" ? null : artikel,
         stichtag: stichtag === "" ? null : stichtag,
+        nachfassung,
         nurText,
       });
     });
@@ -102,10 +111,18 @@ formular.addEventListener("submit", async (ereignis) => {
     // aufgenommen, so sind das nicht die geänderten Normen, und sie heißen dann anders.
     zeige(
       `${ergebnis.angewandt} Befehle angewandt, ${ergebnis.manuell} manuell zu prüfen, ` +
-        `${ergebnis.normen} ${vollstaendig ? "Normen in der Synopse" : "geänderte Normen"}. `,
+        `${ergebnis.normen} ${vollstaendig ? "Normen in der Synopse" : "geänderte Normen"}. ` +
+        (ergebnis.abgleich ? `Abgleich: ${ergebnis.abgleich}. ` : ""),
       "fertig",
     );
     oeffne(ergebnis.html, "text/html;charset=utf-8", "Synopse öffnen");
+    if (neufassungGewuenscht) {
+      oeffne(
+        ergebnis.neufassung,
+        "text/plain;charset=utf-8",
+        "Fortgeschriebene Fassung öffnen",
+      );
+    }
   } catch (e) {
     zeige("Verarbeitung fehlgeschlagen: " + (e && e.message ? e.message : e), "fehler");
   } finally {

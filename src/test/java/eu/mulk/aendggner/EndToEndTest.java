@@ -17,11 +17,13 @@ import eu.mulk.aendggner.aenderung.parse.SuperskriptModus;
 import eu.mulk.aendggner.aenderung.parse.TextBereiniger;
 import eu.mulk.aendggner.aenderung.parse.ZitatExtraktor;
 import eu.mulk.aendggner.anwendung.BefehlAnwender;
+import eu.mulk.aendggner.anwendung.Nachfassungsabgleich;
 import eu.mulk.aendggner.gesetz.Absatz;
 import eu.mulk.aendggner.gesetz.Gesetz;
 import eu.mulk.aendggner.gesetz.gii.GiiXmlLoader;
 import eu.mulk.aendggner.synopse.HtmlRenderer;
 import eu.mulk.aendggner.synopse.SynopseBuilder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -737,13 +739,13 @@ class EndToEndTest {
     assumeTrue(Files.exists(pfad), "Nachfassung " + nachfassung + " fehlt");
     var soll = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(pfad);
     assertThat(soll.normen()).hasSameSizeAs(alt.normen());
-    for (var normSoll : soll.normen()) {
-      var normIst = anwendung.neu().norm(normSoll.enbez());
-      assertThat(normIst).as("Norm %s fehlt", normSoll.enbez()).isPresent();
-      assertThat(normIst.orElseThrow().gesamtText().replaceAll("\\s+", " ").strip())
-          .as("Norm %s", normSoll.enbez())
-          .isEqualTo(normSoll.gesamtText().replaceAll("\\s+", " ").strip());
-    }
+
+    // Geprüft wird mit demselben Abgleich, den auch --nachfassung fährt: Werkzeug und Test messen
+    // an einem Maßstab, sonst geht der eine durch, wo der andere anschlüge.
+    var abgleich = Nachfassungsabgleich.vergleiche(soll, anwendung.neu());
+    assertThat(abgleich.fehlende()).isEmpty();
+    assertThat(abgleich.abweichungen()).as("Abweichungen gegen die amtliche Nachfassung").isEmpty();
+    assertThat(abgleich.gehtAuf()).as(abgleich.kurzbericht()).isTrue();
   }
 
   /**
@@ -1055,17 +1057,10 @@ class EndToEndTest {
     var sollAsog = SAMPLEDATA.resolve("Berlin/ASOG-Bln-neu.txt");
     assumeTrue(Files.exists(sollAsog), "ASOG-Nachfassung fehlt");
     var soll = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(sollAsog);
-    var abweichend = new java.util.ArrayList<String>();
-    for (var normSoll : soll.normen()) {
-      var normIst = anwendung.neu().norm(normSoll.enbez()).orElseThrow();
-      if (!normIst
-          .gesamtText()
-          .replaceAll("\\s+", " ")
-          .strip()
-          .equals(normSoll.gesamtText().replaceAll("\\s+", " ").strip())) {
-        abweichend.add(normSoll.enbez());
-      }
-    }
+    var abweichend =
+        Nachfassungsabgleich.vergleiche(soll, anwendung.neu()).abweichungen().stream()
+            .map(Nachfassungsabgleich.Abweichung::enbez)
+            .toList();
     // Keine Abweichung mehr: Alle 171 Normen gleichen der amtlichen Nachfassung.
     //
     // § 67 trug die beiden zuvor benannten Abweichungen: Das Portal setzt in der neuen Fassung
@@ -1148,17 +1143,10 @@ class EndToEndTest {
     var soll =
         new eu.mulk.aendggner.gesetz.land.LandesRechtLoader()
             .load(SAMPLEDATA.resolve("BadenWuerttemberg/KomWO-BW-neu.txt"));
-    var abweichend = new java.util.ArrayList<String>();
-    for (var normSoll : soll.normen()) {
-      var normIst = anwendung.neu().norm(normSoll.enbez()).orElseThrow();
-      if (!normIst
-          .gesamtText()
-          .replaceAll("\\s+", " ")
-          .strip()
-          .equals(normSoll.gesamtText().replaceAll("\\s+", " ").strip())) {
-        abweichend.add(normSoll.enbez());
-      }
-    }
+    var abweichend =
+        Nachfassungsabgleich.vergleiche(soll, anwendung.neu()).abweichungen().stream()
+            .map(Nachfassungsabgleich.Abweichung::enbez)
+            .toList();
     // § 20: Der Befehl ersetzt das Wort „Name“ durch „der vollständige Familienname“; im Zieltext
     //   steht davor bereits „der“, sodass es doppelt erscheint. Die amtliche Nachfassung räumt das
     //   auf, der Befehlswortlaut tut es nicht — ÄndGgner wendet den Wortlaut an.
@@ -1353,13 +1341,10 @@ class EndToEndTest {
     assumeTrue(Files.exists(soll), "Hessische Nachfassung fehlt");
     var amtlich = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(soll);
     assertThat(amtlich.normen()).hasSize(52);
-    for (var normSoll : amtlich.normen()) {
-      var normIst = anwendung.neu().norm(normSoll.enbez());
-      assertThat(normIst).as("Norm %s fehlt", normSoll.enbez()).isPresent();
-      assertThat(normIst.orElseThrow().gesamtText().replaceAll("\\s+", " ").strip())
-          .as("Norm %s", normSoll.enbez())
-          .isEqualTo(normSoll.gesamtText().replaceAll("\\s+", " ").strip());
-    }
+    var abgleich = Nachfassungsabgleich.vergleiche(amtlich, anwendung.neu());
+    assertThat(abgleich.fehlende()).isEmpty();
+    assertThat(abgleich.abweichungen()).isEmpty();
+    assertThat(abgleich.gleich()).isEqualTo(52);
   }
 
   /**
@@ -1527,8 +1512,8 @@ class EndToEndTest {
         Files.exists(alt) && Files.exists(entwurfPdf) && Files.exists(antragPdf),
         "BayJG-Beispieldaten fehlen");
 
-    var ohne = Pipeline.erzeugeSynopse(alt, List.of(entwurfPdf), null, false);
-    var mit = Pipeline.erzeugeSynopse(alt, List.of(entwurfPdf, antragPdf), null, false);
+    var ohne = Pipeline.erzeugeSynopse(Pipeline.Auftrag.von(alt, List.of(entwurfPdf)));
+    var mit = Pipeline.erzeugeSynopse(Pipeline.Auftrag.von(alt, List.of(entwurfPdf, antragPdf)));
 
     assertThat(mit.anzahlAngewandt()).isEqualTo(ohne.anzahlAngewandt()).isEqualTo(154);
     assertThat(mit.anzahlManuell()).isEqualTo(ohne.anzahlManuell()).isEqualTo(0);
@@ -1607,8 +1592,8 @@ class EndToEndTest {
         Files.exists(xml) && Files.exists(empfehlung) && Files.exists(entwurf),
         "GEG-Beispieldaten fehlen");
 
-    var ausEmpfehlung = Pipeline.erzeugeSynopse(xml, List.of(empfehlung), null, false);
-    var ausEntwurf = Pipeline.erzeugeSynopse(xml, List.of(entwurf), null, false);
+    var ausEmpfehlung = Pipeline.erzeugeSynopse(Pipeline.Auftrag.von(xml, List.of(empfehlung)));
+    var ausEntwurf = Pipeline.erzeugeSynopse(Pipeline.Auftrag.von(xml, List.of(entwurf)));
 
     // 69 statt der früheren 68: Nennt der Rahmen dieselbe Gliederungseinheit wie der Befehl („…
     // Teil 2 wird wie folgt geändert: … die Angabe zur Überschrift von Teil 2 Abschnitt 4 …“),
@@ -1635,7 +1620,7 @@ class EndToEndTest {
     var pdf = SAMPLEDATA.resolve("IfSG/1924334.pdf");
     assumeTrue(Files.exists(xml) && Files.exists(pdf), "IfSG-Beispieldaten fehlen");
 
-    var ergebnis = Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false);
+    var ergebnis = Pipeline.erzeugeSynopse(Pipeline.Auftrag.von(xml, List.of(pdf)));
 
     // 51 statt der früheren 47: Die Satzzählung folgt jetzt der amtlichen — eine eingerückte
     // Aufzählungsmarke beendet keinen Satz, und eine Ordnungszahl vor einem Gliederungswort („nach
@@ -1655,7 +1640,7 @@ class EndToEndTest {
     var pdf = SAMPLEDATA.resolve("GEG/BT-Drs-21-7071_Beschlussempfehlung.pdf");
     assumeTrue(Files.exists(xml) && Files.exists(pdf), "GEG-Beispieldaten fehlen");
 
-    var ergebnis = Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false);
+    var ergebnis = Pipeline.erzeugeSynopse(Pipeline.Auftrag.von(xml, List.of(pdf)));
 
     assertThat(ergebnis.anzahlAngewandt()).isZero();
     assertThat(ergebnis.html()).contains("keine Änderungsbefehle");
@@ -1682,7 +1667,7 @@ class EndToEndTest {
     assumeTrue(Files.exists(xml) && Files.exists(pdf), "UWG-Beispieldaten fehlen");
 
     // Ohne Stichtag bleibt es beim vollen Bestand — aber nicht stillschweigend.
-    var ohne = Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false);
+    var ohne = Pipeline.erzeugeSynopse(Pipeline.Auftrag.von(xml, List.of(pdf)));
     assertThat(ohne.anzahlAngewandt()).isEqualTo(19);
     assertThat(ohne.html())
         .contains("Das Änderungsgesetz tritt gestaffelt in Kraft")
@@ -1690,7 +1675,9 @@ class EndToEndTest {
         .contains("<dt>Inkrafttreten</dt><dd>27. September 2026 (gestaffelt, siehe unten)</dd>");
 
     // Am 19. Juni 2026 galt genau ein Befehl: der Buchstabe c der Nummer 2.
-    var frueh = Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false, LocalDate.of(2026, 6, 19));
+    var frueh =
+        Pipeline.erzeugeSynopse(
+            Pipeline.Auftrag.von(xml, List.of(pdf)).mitStichtag(LocalDate.of(2026, 6, 19)));
     assertThat(frueh.anzahlAngewandt()).isEqualTo(1);
     assertThat(frueh.anzahlManuell()).isZero();
     assertThat(frueh.html())
@@ -1698,12 +1685,16 @@ class EndToEndTest {
         .contains("Am Stichtag noch nicht in Kraft")
         .contains("Tritt erst am 27. September 2026 in Kraft");
     // Der Tag davor ändert noch gar nichts.
-    var davor = Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false, LocalDate.of(2026, 6, 18));
+    var davor =
+        Pipeline.erzeugeSynopse(
+            Pipeline.Auftrag.von(xml, List.of(pdf)).mitStichtag(LocalDate.of(2026, 6, 18)));
     assertThat(davor.anzahlAngewandt()).isZero();
 
     // Am 27. September 2026 ist das Gesetz vollständig in Kraft; dann deckt sich die Fassung mit
     // der ungefilterten, und der Abschnitt „noch nicht in Kraft“ entfällt.
-    var spaet = Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false, LocalDate.of(2026, 9, 27));
+    var spaet =
+        Pipeline.erzeugeSynopse(
+            Pipeline.Auftrag.von(xml, List.of(pdf)).mitStichtag(LocalDate.of(2026, 9, 27)));
     assertThat(spaet.anzahlAngewandt()).isEqualTo(19);
     assertThat(spaet.html()).doesNotContain("Am Stichtag noch nicht in Kraft");
   }
@@ -1720,12 +1711,13 @@ class EndToEndTest {
     var pdf = SAMPLEDATA.resolve("GEG/bgbl123s0280_regelungstext.pdf");
     assumeTrue(Files.exists(xml) && Files.exists(pdf), "GEG-Beispieldaten fehlen");
 
-    var vollstaendig = Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false);
+    var vollstaendig = Pipeline.erzeugeSynopse(Pipeline.Auftrag.von(xml, List.of(pdf)));
     assertThat(vollstaendig.anzahlAngewandt()).isEqualTo(117);
     assertThat(vollstaendig.anzahlManuell()).isEqualTo(2);
 
     var anfang2024 =
-        Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false, LocalDate.of(2024, 1, 1));
+        Pipeline.erzeugeSynopse(
+            Pipeline.Auftrag.von(xml, List.of(pdf)).mitStichtag(LocalDate.of(2024, 1, 1)));
     assertThat(anfang2024.anzahlAngewandt()).isEqualTo(116);
     assertThat(anfang2024.anzahlManuell()).isEqualTo(2);
     assertThat(anfang2024.html())
@@ -1733,7 +1725,8 @@ class EndToEndTest {
         .contains("Tritt erst am 1. Oktober 2024 in Kraft");
 
     var oktober2024 =
-        Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false, LocalDate.of(2024, 10, 1));
+        Pipeline.erzeugeSynopse(
+            Pipeline.Auftrag.von(xml, List.of(pdf)).mitStichtag(LocalDate.of(2024, 10, 1)));
     assertThat(oktober2024.anzahlAngewandt()).isEqualTo(117);
   }
 
@@ -1753,7 +1746,8 @@ class EndToEndTest {
     assumeTrue(Files.exists(xml) && Files.exists(pdf), "IfSG-Beispieldaten fehlen");
 
     var novemberFassung =
-        Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false, LocalDate.of(2020, 11, 19));
+        Pipeline.erzeugeSynopse(
+            Pipeline.Auftrag.von(xml, List.of(pdf)).mitStichtag(LocalDate.of(2020, 11, 19)));
     assertThat(novemberFassung.anzahlAngewandt()).isEqualTo(65);
     assertThat(novemberFassung.html())
         .contains("Am Stichtag noch nicht in Kraft")
@@ -1761,7 +1755,8 @@ class EndToEndTest {
 
     // Am 1. April 2021 kommen die zehn Befehle des Artikels 2 und der Doppelbuchstabe hinzu.
     var aprilFassung =
-        Pipeline.erzeugeSynopse(xml, List.of(pdf), null, false, LocalDate.of(2021, 4, 1));
+        Pipeline.erzeugeSynopse(
+            Pipeline.Auftrag.von(xml, List.of(pdf)).mitStichtag(LocalDate.of(2021, 4, 1)));
     assertThat(aprilFassung.anzahlAngewandt()).isEqualTo(75);
     assertThat(aprilFassung.html()).doesNotContain("Am Stichtag noch nicht in Kraft");
   }
@@ -1812,7 +1807,7 @@ class EndToEndTest {
     assertThat(grundregel.wortlaut())
         .isEqualTo("Dieses Gesetz tritt am Tag nach der Verkündung in Kraft.");
 
-    var synopse = Pipeline.erzeugeSynopse(alt, List.of(pdf), null, false);
+    var synopse = Pipeline.erzeugeSynopse(Pipeline.Auftrag.von(alt, List.of(pdf)));
     assertThat(synopse.anzahlAngewandt()).isEqualTo(4);
     assertThat(synopse.html()).doesNotContain("tritt gestaffelt in Kraft");
   }
@@ -1880,5 +1875,67 @@ class EndToEndTest {
             .map(b -> b.provenienz().gliederungsPfad())
             .toList();
     assertThat(unerkannt).containsExactly("5. a) aa)", "7. a) aa)", "12.");
+  }
+
+  /**
+   * Der Abgleich mit der amtlichen Nachfassung ist fortan eine Leistung des Erzeugnisses und nicht
+   * bloß eine des Testcodes: {@code --nachfassung} nimmt dieselben Eingaben an wie das Stammgesetz
+   * und stellt das Ergebnis normweise dagegen. Berlin, Artikel 1: 171 von 171.
+   */
+  @Test
+  void nachfassungWirdNormweiseAbgeglichen() throws Exception {
+    var alt = SAMPLEDATA.resolve("Berlin/ASOG-Bln-alt.txt");
+    var neu = SAMPLEDATA.resolve("Berlin/ASOG-Bln-neu.txt");
+    var pdf = SAMPLEDATA.resolve("Berlin/GVBl-2026-17_ASOG-LAF-AendG.pdf");
+    assumeTrue(
+        Files.exists(alt) && Files.exists(neu) && Files.exists(pdf), "ASOG-Beispieldaten fehlen");
+
+    var ergebnis =
+        Pipeline.erzeugeSynopse(
+            Pipeline.Auftrag.von(alt, List.of(pdf))
+                .mitArtikel("1")
+                .mitNachfassung(Quelle.lies(neu)));
+
+    var abgleich = ergebnis.abgleich();
+    assertThat(abgleich).isNotNull();
+    assertThat(abgleich.gehtAuf()).as(abgleich.kurzbericht()).isTrue();
+    assertThat(abgleich.gleich()).isEqualTo(171);
+    assertThat(abgleich.geprueft()).isEqualTo(171);
+    // Und er steht in der Synopse, wo ihn auch findet, wer keine Befehlszeile liest.
+    assertThat(ergebnis.html())
+        .contains("Abgleich mit der amtlichen Nachfassung")
+        .contains("171 von 171 Normen gleich");
+  }
+
+  /**
+   * Die Kette steht und fällt damit, dass die ausgegebene Fassung wieder eingelesen dasselbe Gesetz
+   * ergibt. Geprüft wird das hier am <em>Bundesrecht</em> — der Rundlauf-Test des Textausgebers
+   * deckt nur die Klartext-Stammfassungen ab, und gerade der Weg vom gii-XML in den kanonischen
+   * Klartext ist der, den die Kette braucht: Wer ein zweites Heft auf das Ergebnis des ersten
+   * anwenden will, hat kein XML mehr, sondern nur diesen Text.
+   */
+  @Test
+  void dieAusgegebeneFassungLaesstSichWiederEinlesen() throws Exception {
+    var xml = SAMPLEDATA.resolve("UWG/BJNR141400004.xml");
+    var pdf = SAMPLEDATA.resolve("UWG/bgbl126s0043_regelungstext.pdf");
+    assumeTrue(Files.exists(xml) && Files.exists(pdf), "UWG-Beispieldaten fehlen");
+
+    var erst = Pipeline.erzeugeSynopse(Pipeline.Auftrag.von(xml, List.of(pdf)));
+    assertThat(erst.anzahlAngewandt()).isEqualTo(19);
+
+    // Der zweite Lauf hält dasselbe Ergebnis gegen den Text, den der erste geschrieben hat. Geht
+    // der Abgleich auf, so trägt der Text die Fassung vollständig — und damit die Kette.
+    var zweit =
+        Pipeline.erzeugeSynopse(
+            Pipeline.Auftrag.von(xml, List.of(pdf))
+                .mitNachfassung(
+                    new Quelle("UWG-neu.txt", erst.neufassung().getBytes(StandardCharsets.UTF_8))));
+
+    var abgleich = zweit.abgleich();
+    assertThat(abgleich).isNotNull();
+    assertThat(abgleich.fehlende()).isEmpty();
+    assertThat(abgleich.ueberzaehlige()).isEmpty();
+    assertThat(abgleich.abweichungen()).isEmpty();
+    assertThat(abgleich.gehtAuf()).as(abgleich.kurzbericht()).isTrue();
   }
 }

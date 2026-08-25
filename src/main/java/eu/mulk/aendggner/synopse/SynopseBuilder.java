@@ -80,7 +80,8 @@ public final class SynopseBuilder {
         parseWarnungen,
         inkrafttreten,
         stichtag,
-        nichtInKraft);
+        nichtInKraft,
+        null);
   }
 
   /**

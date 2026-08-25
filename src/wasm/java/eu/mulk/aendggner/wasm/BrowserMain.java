@@ -23,8 +23,9 @@ import org.graalvm.webimage.api.JSValue;
  * damit dieselbe {@link Pipeline} auf wie Befehlszeile und Tests.
  *
  * <p>Erwartet ein JS-Objekt <code>{stamm: {name, base64}, patches: [{name, base64}], artikel,
- * stichtag, vollstaendig, nurText}</code> und liefert <code>{html, angewandt, manuell,
- * normen}</code> — bei <code>nurText</code> stattdessen <code>{text}</code> — oder <code>{fehler}
+ * stichtag, vollstaendig, nachfassung, nurText}</code> und liefert <code>{html, angewandt,
+ * manuell, normen, neufassung, abgleich}</code> — bei <code>nurText</code> stattdessen <code>{text}
+ * </code> — oder <code>{fehler}
  * </code> zurück. Geworfen wird nichts: Eine Ausnahme im Wasm hinterlässt auf der JS-Seite nur
  * einen unlesbaren Stapel, also wird jeder Fehler als Text zurückgereicht.
  *
@@ -73,6 +74,8 @@ public final class BrowserMain {
       var artikel = text(eingabe.get("artikel"));
       var stichtag = text(eingabe.get("stichtag"));
       var vollstaendig = Boolean.TRUE.equals(wahrheitswert(eingabe.get("vollstaendig")));
+      var nachfassungsDatei = eingabe.get("nachfassung");
+      var nachfassung = nachfassungsDatei == null ? null : quelle(nachfassungsDatei);
 
       if (Boolean.TRUE.equals(wahrheitswert(eingabe.get("nurText")))) {
         // Der Notausgang der Befehlszeile (--extract-only) steht auch hier offen: Wer einem Rest
@@ -84,11 +87,14 @@ public final class BrowserMain {
 
       var ergebnis =
           Pipeline.erzeugeSynopse(
-              stamm,
-              List.copyOf(patches),
-              artikel == null || artikel.isBlank() ? null : artikel,
-              vollstaendig,
-              stichtag == null || stichtag.isBlank() ? null : LocalDate.parse(stichtag.strip()));
+              Pipeline.Auftrag.von(stamm, List.copyOf(patches))
+                  .mitArtikel(artikel == null || artikel.isBlank() ? null : artikel)
+                  .mitVollstaendig(vollstaendig)
+                  .mitStichtag(
+                      stichtag == null || stichtag.isBlank()
+                          ? null
+                          : LocalDate.parse(stichtag.strip()))
+                  .mitNachfassung(nachfassung));
 
       // Java-Werte kämen auf der JS-Seite als undurchsichtige Proxys an; JSString/JSNumber
       // erzeugen echte JS-Werte.
@@ -96,6 +102,12 @@ public final class BrowserMain {
       antwort.set("angewandt", JSNumber.of(ergebnis.anzahlAngewandt()));
       antwort.set("manuell", JSNumber.of(ergebnis.anzahlManuell()));
       antwort.set("normen", JSNumber.of(ergebnis.anzahlGeaenderteNormen()));
+      // Die fortgeschriebene Fassung geht stets mit heraus; die Seite bietet sie zum Sichern an.
+      // Wer im Browser arbeitet, hat sonst keinen Weg, die Kette Heft auf Heft zu schließen.
+      antwort.set("neufassung", JSString.of(ergebnis.neufassung()));
+      if (ergebnis.abgleich() != null) {
+        antwort.set("abgleich", JSString.of(ergebnis.abgleich().kurzbericht()));
+      }
     } catch (Throwable e) {
       e.printStackTrace();
       var meldung = e.getMessage();

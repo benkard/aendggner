@@ -15,12 +15,15 @@ import eu.mulk.aendggner.aenderung.parse.SuperskriptModus;
 import eu.mulk.aendggner.aenderung.parse.TextBereiniger;
 import eu.mulk.aendggner.anwendung.BefehlAnwender;
 import eu.mulk.aendggner.anwendung.Grund;
+import eu.mulk.aendggner.anwendung.Nachfassungsabgleich;
 import eu.mulk.aendggner.gesetz.Gesetz;
 import eu.mulk.aendggner.gesetz.Superskript;
 import eu.mulk.aendggner.gesetz.gii.GiiXmlLoader;
 import eu.mulk.aendggner.gesetz.land.LandesRechtLoader;
+import eu.mulk.aendggner.gesetz.land.LandesRechtTextAusgeber;
 import eu.mulk.aendggner.synopse.HtmlRenderer;
 import eu.mulk.aendggner.synopse.SynopseBuilder;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -42,12 +45,82 @@ public final class Pipeline {
 
   private Pipeline() {}
 
+  /**
+   * Was ein Auftrag zu erledigen ist. Der Record tritt an die Stelle einer Überladungsleiter: Mit
+   * jedem weiteren Wahlrecht wuchs die Zahl der Signaturen, und die Aufrufer mussten Angaben
+   * durchreichen, die sie nichts angehen. Pflicht sind das Stammgesetz und wenigstens ein
+   * Änderungsdokument; alles Übrige tritt über die {@code mit…}-Methoden hinzu.
+   *
+   * @param artikel nur diesen Artikel des Änderungsgesetzes anwenden; {@code null} = alle, deren
+   *     Einleitung das Stammgesetz nennt.
+   * @param vollstaendig auch unveränderte Normen in die Synopse aufnehmen.
+   * @param stichtag die Fassung dieses Tages erzeugen: Befehle, die an ihm noch nicht in Kraft
+   *     waren, bleiben unangewandt und werden gesondert ausgewiesen. {@code null} = alle Befehle
+   *     anwenden (dann warnt die Synopse, wenn das Gesetz gestaffelt in Kraft tritt).
+   * @param nachfassung die amtliche Nachfassung, gegen die das Ergebnis normweise zu halten ist;
+   *     {@code null} = kein Abgleich.
+   */
+  public record Auftrag(
+      Quelle stammgesetz,
+      List<Quelle> aenderungsdokumente,
+      @Nullable String artikel,
+      boolean vollstaendig,
+      @Nullable LocalDate stichtag,
+      @Nullable Quelle nachfassung) {
+
+    public Auftrag {
+      aenderungsdokumente = List.copyOf(aenderungsdokumente);
+    }
+
+    public static Auftrag von(Quelle stammgesetz, List<Quelle> aenderungsdokumente) {
+      return new Auftrag(stammgesetz, aenderungsdokumente, null, false, null, null);
+    }
+
+    /** Bequemlichkeit für Befehlszeile und Tests; im Browser gibt es keine {@link Path}e. */
+    public static Auftrag von(Path stammgesetz, List<Path> aenderungsdokumente) throws IOException {
+      var quellen = new ArrayList<Quelle>();
+      for (var datei : aenderungsdokumente) {
+        quellen.add(Quelle.lies(datei));
+      }
+      return von(Quelle.lies(stammgesetz), quellen);
+    }
+
+    public Auftrag mitArtikel(@Nullable String neuerArtikel) {
+      return new Auftrag(
+          stammgesetz, aenderungsdokumente, neuerArtikel, vollstaendig, stichtag, nachfassung);
+    }
+
+    public Auftrag mitVollstaendig(boolean neuVollstaendig) {
+      return new Auftrag(
+          stammgesetz, aenderungsdokumente, artikel, neuVollstaendig, stichtag, nachfassung);
+    }
+
+    public Auftrag mitStichtag(@Nullable LocalDate neuerStichtag) {
+      return new Auftrag(
+          stammgesetz, aenderungsdokumente, artikel, vollstaendig, neuerStichtag, nachfassung);
+    }
+
+    public Auftrag mitNachfassung(@Nullable Quelle neueNachfassung) {
+      return new Auftrag(
+          stammgesetz, aenderungsdokumente, artikel, vollstaendig, stichtag, neueNachfassung);
+    }
+  }
+
+  /**
+   * @param neufassung die fortgeschriebene Fassung als kanonischer Klartext. Sie fällt ohnehin an
+   *     und wird deshalb stets mitgegeben: An ihr hängen die Kette (Heft auf Heft) und jede Prüfung
+   *     von außen.
+   * @param abgleich der normweise Vergleich mit der amtlichen Nachfassung; {@code null}, wenn der
+   *     Auftrag keine nannte.
+   */
   public record Ergebnis(
       String html,
       long anzahlAngewandt,
       long anzahlManuell,
       int anzahlGeaenderteNormen,
-      int anzahlProtokollEintraege) {}
+      int anzahlProtokollEintraege,
+      String neufassung,
+      @Nullable Nachfassungsabgleich abgleich) {}
 
   /**
    * Ein eingespeistes Änderungsdokument samt erkannter Art und aufbereitetem Text.
@@ -87,44 +160,11 @@ public final class Pipeline {
     }
   }
 
-  /** Bequemlichkeit für Befehlszeile und Tests; im Browser gibt es keine {@link Path}e. */
-  public static Ergebnis erzeugeSynopse(
-      Path baseFile, List<Path> patches, String artikel, boolean vollstaendig) throws Exception {
-    return erzeugeSynopse(baseFile, patches, artikel, vollstaendig, null);
-  }
-
-  public static Ergebnis erzeugeSynopse(
-      Path baseFile,
-      List<Path> patches,
-      String artikel,
-      boolean vollstaendig,
-      @Nullable LocalDate stichtag)
-      throws Exception {
-    var patchQuellen = new ArrayList<Quelle>();
-    for (var patch : patches) {
-      patchQuellen.add(Quelle.lies(patch));
-    }
-    return erzeugeSynopse(Quelle.lies(baseFile), patchQuellen, artikel, vollstaendig, stichtag);
-  }
-
-  public static Ergebnis erzeugeSynopse(
-      Quelle baseFile, List<Quelle> patches, String artikel, boolean vollstaendig)
-      throws Exception {
-    return erzeugeSynopse(baseFile, patches, artikel, vollstaendig, null);
-  }
-
-  /**
-   * @param stichtag die Fassung dieses Tages erzeugen: Befehle, die an ihm noch nicht in Kraft
-   *     waren, bleiben unangewandt und werden gesondert ausgewiesen. {@code null} = alle Befehle
-   *     anwenden (dann warnt die Synopse, wenn das Gesetz gestaffelt in Kraft tritt).
-   */
-  public static Ergebnis erzeugeSynopse(
-      Quelle baseFile,
-      List<Quelle> patches,
-      String artikel,
-      boolean vollstaendig,
-      @Nullable LocalDate stichtag)
-      throws Exception {
+  public static Ergebnis erzeugeSynopse(Auftrag auftrag) throws Exception {
+    var baseFile = auftrag.stammgesetz();
+    var patches = auftrag.aenderungsdokumente();
+    var artikel = auftrag.artikel();
+    var stichtag = auftrag.stichtag();
     var altesGesetz = ladeStammgesetz(baseFile);
     var extraktor = new PatchTextExtraktor(superskriptModus(altesGesetz));
     var parser = new AenderungsgesetzParser();
@@ -165,7 +205,20 @@ public final class Pipeline {
     var gesamtErgebnis = new BefehlAnwender.AnwendungsErgebnis(gesetz, protokoll);
     var synopse =
         SynopseBuilder.baue(
-            altesGesetz, gesamtErgebnis, warnungen, vollstaendig, inkrafttreten, stichtag);
+            altesGesetz,
+            gesamtErgebnis,
+            warnungen,
+            auftrag.vollstaendig(),
+            inkrafttreten,
+            stichtag);
+
+    // Der Abgleich setzt die fertige neue Fassung voraus und tritt deshalb erst hier hinzu.
+    Nachfassungsabgleich abgleich = null;
+    if (auftrag.nachfassung() != null) {
+      abgleich = Nachfassungsabgleich.vergleiche(ladeStammgesetz(auftrag.nachfassung()), gesetz);
+      synopse = synopse.mitAbgleich(abgleich);
+    }
+
     var quellenZeile = baseFile.name() + " + " + String.join(" + ", quellen);
     var html = HtmlRenderer.rendere(synopse, quellenZeile, entwurfsfassung);
 
@@ -174,7 +227,9 @@ public final class Pipeline {
         gesamtErgebnis.anzahlAngewandt(),
         gesamtErgebnis.anzahlManuell(),
         synopse.eintraege().size(),
-        protokoll.size());
+        protokoll.size(),
+        LandesRechtTextAusgeber.ausgeben(gesetz),
+        abgleich);
   }
 
   /** Die Befehle eines Dokuments, geschieden nach dem, was am Stichtag schon galt. */
