@@ -36,16 +36,20 @@ public class AendGgner implements Callable<Integer> {
 
   @Parameters(
       index = "0",
+      paramLabel = "<base law>",
       description =
-          "The base law: gii-norm XML from gesetze-im-internet.de, or — for Bavarian state law —"
-              + " the consolidated version from gesetze-bayern.de (PDF or canonical plain text).")
-  private Path baseFile;
+          "The base law: gii-norm XML from gesetze-im-internet.de, or — for state law — the"
+              + " consolidated version from the state portal (PDF or canonical plain text). May be"
+              + " a file, an http(s) URL, or \"gii:<abbr>\" (e.g. gii:uwg) for federal law.")
+  private String baseFile;
 
   @Parameters(
       index = "1..*",
       arity = "*",
-      description = "The amendment act(s) to apply (BGBl PDF or plain text).")
-  private List<Path> patches;
+      paramLabel = "<amendment>",
+      description =
+          "The amendment act(s) to apply (BGBl PDF or plain text). May be files or http(s) URLs.")
+  private List<String> patches;
 
   @Option(
       names = {"-o", "--output"},
@@ -126,9 +130,18 @@ public class AendGgner implements Callable<Integer> {
       paramLabel = "<file>",
       description =
           "Compare the result against the official amended version, norm by norm. Accepts the same "
-              + "formats as the base law. The report is added to the synopsis; a mismatch yields "
+              + "inputs as the base law. The report is added to the synopsis; a mismatch yields "
               + "exit code 3.")
-  private Path nachfassung;
+  private String nachfassung;
+
+  /** Die angegebenen Eingaben, jede über {@link Bezug} beschafft. */
+  private static List<Quelle> hole(List<String> angaben) throws IOException, InterruptedException {
+    var quellen = new ArrayList<Quelle>();
+    for (var angabe : angaben) {
+      quellen.add(Bezug.hole(angabe));
+    }
+    return quellen;
+  }
 
   public static void main(String... args) {
     int exitCode = new CommandLine(new AendGgner()).execute(args);
@@ -142,7 +155,7 @@ public class AendGgner implements Callable<Integer> {
     log.debugf("Logging configured.");
 
     if (dumpGesetz) {
-      var gesetz = Pipeline.ladeStammgesetz(baseFile);
+      var gesetz = Pipeline.ladeStammgesetz(Bezug.hole(baseFile));
       System.out.printf(
           "%s — %s (%d Normen)%n", gesetz.jurabk(), gesetz.langue(), gesetz.normen().size());
       for (var norm : gesetz.normen()) {
@@ -157,11 +170,7 @@ public class AendGgner implements Callable<Integer> {
     }
 
     if (extractOnly) {
-      var quellen = new ArrayList<Quelle>();
-      for (var file : patches) {
-        quellen.add(Quelle.lies(file));
-      }
-      System.out.print(Pipeline.extrahiereText(Quelle.lies(baseFile), quellen, raw));
+      System.out.print(Pipeline.extrahiereText(Bezug.hole(baseFile), hole(patches), raw));
       return 0;
     }
 
@@ -170,11 +179,11 @@ public class AendGgner implements Callable<Integer> {
       // Ohne weitere Argumente wird die erste Datei selbst eingeordnet — zum Nachsehen, was
       // ÄndGgner in einem einzelnen Dokument erkennt, braucht es dann kein Stammgesetz.
       var zuPruefen = patches == null || patches.isEmpty() ? List.of(baseFile) : patches;
-      for (var file : zuPruefen) {
-        var kopf = DokumentErkenner.erkenne(extraktor.extrahiere(file));
+      for (var quelle : hole(zuPruefen)) {
+        var kopf = DokumentErkenner.erkenne(extraktor.extrahiere(quelle));
         System.out.printf(
             "%s: %s [eigene Drs. %s, Bezug %s] %s%n",
-            file.getFileName(),
+            quelle.name(),
             kopf.art(),
             kopf.eigeneDrucksache() == null ? "—" : kopf.eigeneDrucksache(),
             kopf.bezugsDrucksachen().isEmpty() ? "—" : String.join(", ", kopf.bezugsDrucksachen()),
@@ -184,15 +193,15 @@ public class AendGgner implements Callable<Integer> {
     }
 
     if (dumpBefehle) {
-      var gesetz = Pipeline.ladeStammgesetz(baseFile);
+      var gesetz = Pipeline.ladeStammgesetz(Bezug.hole(baseFile));
       var extraktor = new PatchTextExtraktor(Pipeline.superskriptModus(gesetz));
       var parser = new AenderungsgesetzParser();
-      for (var file : patches) {
-        var text = TextBereiniger.bereinige(extraktor.extrahiere(file));
+      for (var quelle : hole(patches)) {
+        var text = TextBereiniger.bereinige(extraktor.extrahiere(quelle));
         var ergebnis = parser.parse(text, gesetz, artikel);
         System.out.printf(
             "%s: %d Befehle aus Artikel %s%n",
-            file.getFileName(), ergebnis.befehle().size(), ergebnis.artikel());
+            quelle.name(), ergebnis.befehle().size(), ergebnis.artikel());
         for (var warnung : ergebnis.warnungen()) {
           System.err.println("WARNUNG: " + warnung);
         }
@@ -238,11 +247,11 @@ public class AendGgner implements Callable<Integer> {
     }
 
     var auftrag =
-        Pipeline.Auftrag.von(baseFile, patches)
+        Pipeline.Auftrag.von(Bezug.hole(baseFile), hole(patches))
             .mitArtikel(artikel)
             .mitVollstaendig(vollstaendig)
             .mitStichtag(tag)
-            .mitNachfassung(nachfassung == null ? null : Quelle.lies(nachfassung));
+            .mitNachfassung(nachfassung == null ? null : Bezug.hole(nachfassung));
 
     var ergebnis = Pipeline.erzeugeSynopse(auftrag);
 

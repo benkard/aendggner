@@ -166,7 +166,7 @@ Für die Herstellung der Browserfassung gilt abweichend § 14 Absatz 5.
 
 (1) Als Stammgesetz des Bundes wird XML im gii-norm-Format von
 [gesetze-im-internet.de](https://www.gesetze-im-internet.de/) angenommen. Das
-Portal gibt seine Werke nur als Archiv aus (`…/<kurz>/xml.zip`); das Archiv wird
+Portal gibt seine Werke nur als Archiv aus (`…/<kennung>/xml.zip`); das Archiv wird
 unmittelbar angenommen und der enthaltene XML-Eintrag daraus entpackt, ein
 Zwischenschritt von Hand entfällt.
 
@@ -192,6 +192,32 @@ Gesetz- und Verordnungsblätter der Länder und der Drucksachen von Bundestag,
 Bundesrat und Landtagen sowie Klartext angenommen. Die Dokumentart wird aus dem
 Text erschlossen, nicht aus dem Dateinamen (§ 10). Änderungsanträge dürfen
 zusammen mit demjenigen Entwurf angegeben werden, den sie ändern (§ 11).
+
+(4) Jede Eingabe — Stammgesetz, Änderungsdokument und Nachfassung — darf statt
+eines Dateipfades auch eine Anschrift sein:
+
+1. `http://…` oder `https://…` lädt das Werk unmittelbar, etwa eine Drucksache
+   von `dserver.bundestag.de`;
+2. `gii:<kennung>` steht für das Bundesrecht und wird zu
+   `https://www.gesetze-im-internet.de/<kennung>/xml.zip` aufgelöst. Die Kennung
+   ist der vorletzte Teil der Portaladresse; sie ergibt sich aus der Abkürzung des
+   Gesetzes, klein geschrieben, wobei jedes andere Zeichen als Buchstabe, Ziffer
+   und Bindestrich zum Unterstrich wird (`gii:"UWG 2004"` → `uwg_2004`). Führt sie
+   ins Leere, so wird im Verzeichnis des Portals nachgeschlagen: `gii:geg` findet
+   sich selbst, `gii:uwg` findet `uwg_2004`. Bleiben mehrere übrig, so wird nicht
+   geraten, sondern aufgezählt.
+
+Ein vorhandener Dateipfad hat stets den Vorrang. Geladenes wird unter
+`~/.cache/aendggner` (oder `$XDG_CACHE_HOME`) abgelegt und beim nächsten Lauf von
+dort genommen; ist das Verzeichnis nicht beschreibbar, wird eben jedes Mal geladen.
+Ein Vermittler wird aus `HTTPS_PROXY`/`HTTP_PROXY` übernommen. Die Browserfassung
+(§ 14) kennt diesen Weg nicht — dort verweigert der Wagen des Benutzers einer
+fremden Anschrift die Auskunft.
+
+```shell
+java -jar target/aendggner-0.1.0-SNAPSHOT.jar "gii:UWG 2004" \
+  https://dserver.bundestag.de/btd/21/018/2101855.pdf -o synopse.html
+```
 
 ## § 6 Betrieb der Befehlszeilenfassung
 
@@ -227,7 +253,8 @@ java -jar target/aendggner-0.1.0-SNAPSHOT.jar \
 
 **`--nachfassung <file>`**
 : Das Ergebnis Norm für Norm gegen die amtliche Nachfassung halten (§ 6b). Es
-  gelten dieselben Eingabeformate wie für das Stammgesetz.
+  gelten dieselben Eingaben wie für das Stammgesetz, auch die Anschriften des § 5
+  Absatz 4.
 
 **`--extract-only`**
 : Nur den bereinigten Lineartext des Änderungsdokuments ausgeben. Dies ist

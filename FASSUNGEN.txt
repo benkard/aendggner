@@ -21,6 +21,83 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 26. August 2026 (dritte Fassung des Tages),
+ zuletzt geändert durch die am 26. August 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Das Handbuch verlangte bislang, jede Eingabe als Datei bereitzuhalten. Für das
+Bundesrecht war das eine Zumutung: Die Anschrift des Norm-XML folgt aus der
+Abkürzung des Gesetzes, und wer sie von Hand herunterlädt, verrichtet eine Arbeit,
+die das Erzeugnis selbst verrichten kann. Dasselbe gilt für die Drucksachen, die
+der Bundestag frei ausgibt.
+
+
+Artikel 1
+Beschaffung der Eingaben
+
+(1) Es wird der Bezug (Bezug) eingeführt. Er nimmt eine Angabe entgegen und gibt
+    eine Quelle zurück. Angegeben werden können ein Dateipfad, eine Anschrift
+    („http://“, „https://“) sowie die Kurzform „gii:<Kennung>“ für das
+    Bundesrecht. Der vorhandene Dateipfad hat stets den Vorrang.
+
+(2) Die Kennung ergibt sich aus der Abkürzung des Gesetzes: klein geschrieben,
+    wobei jedes andere Zeichen als Buchstabe, Ziffer und Bindestrich zum
+    Unterstrich wird („UWG 2004“ wird „uwg_2004“). Führt sie ins Leere, so wird im
+    Verzeichnis des Portals (gii-toc.xml) nachgeschlagen; eine Kennung, die mit der
+    angegebenen beginnt, ist gemeint, sofern es genau eine gibt. Sonst wird nicht
+    geraten, sondern aufgezählt.
+
+(3) Geladenes wird unter „~/.cache/aendggner“ (oder „$XDG_CACHE_HOME“) abgelegt und
+    beim nächsten Lauf von dort genommen. Der Zwischenspeicher ist eine
+    Bequemlichkeit und keine Bedingung: Ist das Verzeichnis nicht beschreibbar, so
+    wird jedes Mal geladen.
+
+(4) Ein Vermittler wird aus „HTTPS_PROXY“ und Verwandten übernommen, samt Kennung
+    und Kennwort. Die Laufzeit liest diese Angaben nicht von sich aus, obgleich sie
+    auf der Kommandozeile die gewohnten sind; in einer Behörde führt jeder Weg über
+    einen solchen Vermittler.
+
+(5) Der Bezug gehört allein der Befehlszeile. Die Kernpipeline kennt weiterhin nur
+    die Quelle (Name und Bytes), und die Browserfassung rührt ihn nicht an: Dort
+    gibt es kein Dateisystem, und der Wagen des Benutzers verweigert einer fremden
+    Anschrift ohnehin die Auskunft.
+
+
+Artikel 2
+Änderung der Befehlszeile
+
+Die Befehlszeile (AendGgner) nimmt das Stammgesetz, die Änderungsdokumente und die
+Nachfassung fortan als Zeichenketten entgegen und beschafft sie über den Bezug. Die
+Meldungen nennen den Namen der Quelle und nicht mehr den Dateinamen; für eine Datei
+ist das dasselbe.
+
+
+Artikel 3
+Änderung des Handbuchs
+
+Das Handbuch (README.md) wird wie folgt geändert:
+
+1.  § 5 wird um den Absatz 4 ergänzt (Anschriften als Eingabe, Kennung des
+    Bundesrechts, Zwischenspeicher, Vermittler, Vorrang der Datei).
+
+2.  In § 6 Absatz 2 wird die Erläuterung zu „--nachfassung“ angepasst.
+
+
+Schlussbestimmung
+
+Die vorstehenden Änderungen sind durch die Prüfung sämtlicher Testfälle
+(vierhundertfünfzehn an der Zahl, zuvor vierhundertsechs) sowie durch die
+vollständige Erstellung (mvnw verify) bestätigt worden. Der Abruf selbst gehört
+nicht in eine Prüfung, die auf jedem Rechner laufen soll; geprüft werden die
+Ableitung der Kennung, die Ableitung des Namens und der Vorrang der vorhandenen
+Datei (BezugTest). Von Hand belegt ist der volle Lauf ohne jede Datei:
+„gii:UWG 2004“ nebst der Drucksache 21/1855 von dserver.bundestag.de ergibt zwanzig
+angewandte Befehle, und die Synopse aus „gii:UWG 2004“ gleicht bis auf den Namen der
+Quelle zeichengenau derjenigen aus der örtlichen XML-Datei. Die Auszeichnung nach
+REUSE ist vollständig (196 von 196 Dateien).
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 26. August 2026 (zweite Fassung des Tages),
  zuletzt geändert durch die am 26. August 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════
