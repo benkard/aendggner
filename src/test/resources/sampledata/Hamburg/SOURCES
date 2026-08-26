@@ -1,0 +1,74 @@
+Beispieldaten Hamburg — Herkunft und Aufbereitung
+=================================================
+
+1. Änderungsdokument
+   HmbGVBl-2026-17_GutachterausschussVO-AendVO.pdf
+   Hamburgisches Gesetz- und Verordnungsblatt Teil I, Nr. 17 vom 26. Mai 2026,
+   S. 147: Verordnung zur Änderung der Verordnung über den Gutachterausschuss
+   für Grundstückswerte vom 12. Mai 2026.
+   Bezogen über https://www.luewu.de/wp-content/uploads/2026/05/GVBL_HH_2026-17.pdf
+   (abgerufen am 26.08.2026). Das Blatt gibt der Verlag Lütcke & Wulff heraus;
+   die Jahrgänge liegen unter https://www.luewu.de/gesetz-und-verordnungsblatt/
+   frei und ohne Anmeldung. Das Heft trägt drei Verkündungen; maßgeblich ist die
+   zweite.
+
+2. Stammfassung (vor der Änderung)
+   GAusschV-HH-alt.txt
+   Verordnung über den Gutachterausschuss für Grundstückswerte vom 12. Mai 2009
+   (HmbGVBl. S. 124) in ihrer Ursprungsfassung.
+   Die Änderungshistorie des Landesrechtsportals
+   (https://www.landesrecht-hamburg.de/bsha/document/jlr-NNLHH0000638E, Reiter
+   „Änderungshistorie“) weist für diese Verordnung genau eine Änderung aus — eben
+   die des Heftes Nr. 17/2026. Die Fassung vor der Änderung ist deshalb die
+   Ursprungsfassung, und die steht im Gesetzblatt selbst:
+   https://www.luewu.de/wp-content/uploads/2025/08/GVBL_HH_2009-20.pdf
+   (HmbGVBl. Nr. 20 vom 15. Mai 2009, S. 124).
+   Aufbereitet mit `--extract-only` des Erzeugnisses (der zweispaltige Satz des
+   Blattes verlangt dessen Lesereihenfolge; `pdftotext -layout` verschränkt die
+   Spalten) und von Hand in das kanonische Klartextformat gebracht: Titelzeile,
+   Klammerzusatz mit der juris-Abkürzung, Normköpfe „§ N␣␣Titel“. Entfernt wurden
+   die Eingangsformel, der Kolumnentitel und die Schlussformel.
+
+3. Nachfassung (nach der Änderung), nur als Prüfmaßstab
+   GAusschV-HH-neu.txt
+   Dieselbe Verordnung in der ab dem 1. Juli 2026 geltenden Fassung, entnommen der
+   Gesamtausgabe des Landesrechtsportals (Stand: 26.08.2026) und in dasselbe
+   Klartextformat gebracht.
+
+   Zum Portal: landesrecht-hamburg.de ist — wie die Portale Hessens, Berlins,
+   Schleswig-Holsteins und Baden-Württembergs — eine juris-Einseitenanwendung.
+   Eine Skriptabfrage erhält nur die rund 5,6 kB große Anwendungshülle; der Text
+   kommt allein über eine Browsersteuerung. Anders als jene Portale führt Hamburg
+   keine „Gesamtausgaben-Liste“ mit datierbaren Adressen, sondern nur die aktuelle
+   Gesamtausgabe nebst einer Änderungshistorie. Für dieses Beispiel genügt das,
+   weil es nur eine einzige Änderung gibt; wo eine Vorschrift mehrfach geändert
+   worden ist, führt der Weg über die Hefte des Gesetzblattes.
+
+4. Was der Fall trägt
+   - Die Änderungsverordnung gliedert sich in *Paragraphen* (§ 1 Änderung, § 2
+     Inkrafttreten), während die erste Verkündung desselben Heftes sich in Artikel
+     gliedert. Ein Sammelheft führt beide Gliederungen nebeneinander.
+   - Ihre Änderungsbefehle sind *dezimal* gegliedert (6.1, 7.1.1, 7.2.3), wo die
+     übrigen Blätter a)/aa) setzen.
+   - Idiome: „erhält folgende Fassung“, „die Textstelle „…“", „Hinter § 7 wird
+     folgender § 7a eingefügt“, „Es wird folgender Absatz 3 angefügt“, „§§ 6 und 7
+     erhalten folgende Fassung“.
+   - Der Satz des Blattes setzt zwischen Paragraphenzeichen und Nummer ein
+     *schmales Leerzeichen* (U+2009).
+   - Der Kolumnentitel steht im Inhaltsstrom und fällt hinter das Zitat eines
+     Befehls; das Schlusswort der Eingangsformel („verordnet:“) fällt in der
+     rechten Spalte mitten in einen Absatz.
+
+5. Benannte Abweichungen von der amtlichen Nachfassung
+   § 3 und § 4: Die Nummern 2 und 3 des Heftes schreiben „wir die Textstelle …
+     ersetzt“ statt „wird“. Das ist ein Verkündungsfehler; beide Befehle bleiben
+     unerkannt. Geraten wird nicht — ein Werkzeug, das „wir“ als „wird“ liest,
+     läse morgen auch anderes, was dort nicht steht.
+   § 6: Das Gesetzblatt setzt in der neuen Fassung „1. in Präsenz“ ohne Komma,
+     das Portal „1. in Präsenz,“. Das Erzeugnis wendet den Wortlaut an.
+   § 9: Nummer 7.1.3 fasst die Nummer 3 neu, Nummer 7.1.4 macht die bisherige
+     Nummer 3 zur Nummer 4. Beide meinen die ursprüngliche Zählung. Vorgezogen
+     wird die Umnummerierung — sonst verlöre die bisherige Nummer 3 ihren
+     Wortlaut —, und die Neufassung findet ihre Bezeichnung alsdann geräumt und
+     bleibt liegen. Die Neufassung einer soeben geräumten Bezeichnung als
+     Einfügung zu vollziehen, leistet das Erzeugnis nicht.

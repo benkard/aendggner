@@ -1700,6 +1700,84 @@ class EndToEndTest {
         .containsOnlyOnce("Fortgeschrieben durch: Änderungsgesetz vom 12. Februar 2026");
   }
 
+  /**
+   * Hamburg: Die Verordnung zur Änderung der Verordnung über den Gutachterausschuss für
+   * Grundstückswerte (HmbGVBl. Nr. 17/2026, S. 147).
+   *
+   * <p>Der Fall bringt eine Gliederung, die im übrigen Landesrecht nicht vorkommt: Das
+   * Änderungsdokument selbst teilt sich in <em>Paragraphen</em> (§ 1 Änderung, § 2 Inkrafttreten),
+   * obgleich dasselbe Heft davor eine Verkündung führt, die sich in Artikel teilt; und seine
+   * Befehle sind <em>dezimal</em> gegliedert (6.1, 7.1.1, 7.2.3) statt a)/aa)/aaa). Dazu vier
+   * Idiome — „die Textstelle“, „Hinter § 7 wird … eingefügt“, „Es wird folgender Absatz angefügt“,
+   * „§§ 6 und 7 erhalten folgende Fassung“ — und ein schmales Leerzeichen zwischen
+   * Paragraphenzeichen und Nummer.
+   *
+   * <p>Vier Normen weichen von der amtlichen Nachfassung ab; drei davon liegen an der Vorlage und
+   * nicht am Werkzeug (siehe {@code Hamburg/SOURCES}).
+   */
+  @Test
+  void gutachterausschussVOHamburg() throws Exception {
+    var alt = SAMPLEDATA.resolve("Hamburg/GAusschV-HH-alt.txt");
+    var pdf = SAMPLEDATA.resolve("Hamburg/HmbGVBl-2026-17_GutachterausschussVO-AendVO.pdf");
+    var neu = SAMPLEDATA.resolve("Hamburg/GAusschV-HH-neu.txt");
+    assumeTrue(Files.exists(alt) && Files.exists(pdf), "Hamburger Beispieldaten fehlen");
+
+    var gesetz = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(alt);
+    assertThat(gesetz.jurabk()).isEqualTo("GAusschV HA 2009");
+    assertThat(gesetz.normen()).hasSize(13);
+
+    var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(pdf));
+    // Das schmale Leerzeichen (U+2009) zwischen § und Nummer ist normalisiert; ohne das wäre
+    // „§ 1“ kein Kopf, und das ganze Heft bliebe ungelesen.
+    assertThat(text).contains("\n§ 1\n").doesNotContain("§\u2009");
+    // Der Kolumnentitel steht im Inhaltsstrom und fiele sonst hinter das Zitat eines Befehls.
+    assertThat(text).doesNotContain("Dienstag, den 26. Mai 2026 149");
+
+    var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, null);
+    // Der Artikel-Modus findet nichts, das die Verordnung beträfe; erst die §-Teilung tut es.
+    assertThat(parseErgebnis.artikel()).containsExactly("1");
+    assertThat(parseErgebnis.befehle()).hasSize(21);
+
+    // Die Dezimalgliederung trägt ihre Herkunft im Label; der Pfad wiederholt sie nicht.
+    assertThat(befehlAn(parseErgebnis, "7.1.4"))
+        .isInstanceOf(Aenderungsbefehl.Umnummerierung.class);
+    assertThat(befehlAn(parseErgebnis, "8.1")).isInstanceOf(Aenderungsbefehl.Neufassung.class);
+
+    // Zwei Befehle bleiben unerkannt, und zwar zu Recht: Die Nummern 2 und 3 des Heftes schreiben
+    // „wir die Textstelle … ersetzt“ statt „wird“. Das ist ein Verkündungsfehler, und geraten wird
+    // nicht.
+    var unerkannt =
+        parseErgebnis.befehle().stream()
+            .filter(b -> b instanceof UnbekannterBefehl)
+            .map(b -> b.provenienz().gliederungsPfad())
+            .toList();
+    assertThat(unerkannt).containsExactly("2.", "3.");
+
+    var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(17);
+
+    // Der angefügte Schlusssatz steht hinter der Aufzählung auf eigener Zeile und nicht am Ende
+    // des letzten Aufzählungsgliedes.
+    var neunter = anwendung.neu().norm("§ 9").orElseThrow().absaetze().get(0).text();
+    assertThat(neunter)
+        .contains("\nDie DIN EN ISO/IEC 17024 ist zur kostenfreien Einsicht")
+        // Das Satzzeichen, das an die Stelle eines Wortes tritt, nimmt dessen Zwischenraum mit.
+        .contains("zur Erfüllung ihrer Aufgaben,\n")
+        // Die bisherige Nummer 3 ist erhalten: Die Umnummerierung geht der Neufassung vor, die
+        // ihre Bezeichnung neu vergäbe — sonst ginge jener Wortlaut verloren.
+        .contains("4. weitere Personen und Stellen");
+
+    assumeTrue(Files.exists(neu), "Hamburger Nachfassung fehlt");
+    var soll = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(neu);
+    var abgleich = Nachfassungsabgleich.vergleiche(soll, anwendung.neu());
+    assertThat(abgleich.fehlende()).isEmpty();
+    assertThat(abgleich.ueberzaehlige()).isEmpty();
+    // § 3 und § 4: der Verkündungsfehler „wir“. § 6: das Gesetzblatt setzt „1. in Präsenz“ ohne
+    // Komma, das Portal mit. § 9: die Neufassung der soeben geräumten Nummer 3.
+    assertThat(abgleich.abweichungen().stream().map(a -> a.enbez()).toList())
+        .containsExactly("§ 3", "§ 4", "§ 6", "§ 9");
+  }
+
   private static Aenderungsbefehl befehlZu(
       AenderungsgesetzParser.ParseErgebnis ergebnis, String gliederungsPfad) {
     return ergebnis.befehle().stream()

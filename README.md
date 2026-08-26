@@ -438,6 +438,13 @@ Streichen und Umnummerierung.
     führt allein Bezeichnung und Überschrift, und was im Absatz eines Paragraphen
     geschieht, hat in ihr kein Gegenstück.
 
+18. die hamburgischen Nebenformen: „die Textstelle „…““ neben „die Wörter“ und
+    „die Angabe“, „hinter“ neben „nach“ (als Ort der Einfügung wie als Wortanker)
+    sowie die subjektlose Anfügung „Es wird folgender Absatz 3 angefügt: „…““,
+    deren Ziel allein aus dem Rahmen folgt; ferner
+19. die Neufassung einer Paragraphenfolge („§§ 6 und 7 erhalten folgende
+    Fassung: „…““) — sie wird in Einzel-Neufassungen zerlegt.
+
 (3) Landesrechtliche Befehlsformen bestimmt ergänzend § 13.
 
 ## § 8 Reihenfolge der Anwendung
@@ -504,7 +511,11 @@ steht nicht im Gesetzestext.
 
 (1) Die PDF-Aufbereitung toleriert die üblichen Drucksachen-Artefakte, nämlich
 Seitenköpfe und -füße, Vorabfassungs-Wasserzeichen, vertauschte oder gerade
-Anführungszeichen, verklebte Wortgrenzen und zerlegt kodierte Umlaute. Die
+Anführungszeichen, verklebte Wortgrenzen und zerlegt kodierte Umlaute. Zum
+Leerraum zählen dabei auch die typographischen Ausschlüsse, die Javas Begriff
+des Leerzeichens nicht kennt: Das hamburgische Gesetzblatt setzt zwischen
+Paragraphenzeichen und Nummer ein schmales Leerzeichen (U+2009), und ohne dessen
+Normalisierung wäre „§ 1“ dort kein Normkopf. Die
 Brotschrift wird seitenweise bestimmt, sodass auch Ministeriumsentwürfe mit
 gemischten Layouts vollständig ausgelesen werden.
 
@@ -515,9 +526,15 @@ Mitte des Satzspiegels liegt und zu deren beiden Seiten je eine Spalte von
 nennenswerter Breite steht. Die wenigen Zeilen, die sie gleichwohl
 überschreiten, sind die ganzseitenbreiten — Kolumnentitel, Seitenfuß,
 Titelblock —; sie zerlegen die Seite in Bänder. Gelesen wird Band für Band von
-oben nach unten, in jedem Band erst die linke, dann die rechte Spalte. Findet
-sich keine Rinne, so bleibt es beim Inhaltsstrom; innerhalb einer Spalte
-ohnehin.
+oben nach unten, in jedem Band erst die linke, dann die rechte Spalte, jede von
+oben nach unten. Findet sich keine Rinne, so bleibt es beim Inhaltsstrom.
+
+Innerhalb einer Spalte folgt die Lesung der Grundlinie und nicht dem Strom. Wo
+dieser ohnehin von oben nach unten läuft — der Regelfall —, ändert das nichts,
+denn die Sortierung ist stabil; wo er es nicht tut, bewahrt sie vor dem
+Schlimmsten. Im hamburgischen Gesetzblatt fällt das Schlusswort der
+Eingangsformel („verordnet:“) mitten in einen Absatz der rechten Spalte und
+zerschneidet dort ein Wort.
 
 (3) Absatz 2 ist keine Förmelei. Das Berliner Gesetz- und Verordnungsblatt
 zeichnet den Titelblock des Gesetzes **zuletzt**, obgleich er über beiden
@@ -685,6 +702,21 @@ Telemedienzuständigkeitsgesetz, Landesmediengesetz, Ausführungsgesetz zum
 17. Rundfunkänderungsstaatsvertrag und, mit 101 Befehlen an 31 Normen der größte
 Fall des Heftes, das WDR-Gesetz —, jeweils mit Akzeptanztests gegen die amtlichen
 Nachfassungen.
+
+(2a) Hamburg bringt zwei Eigenheiten, die im übrigen Landesrecht nicht vorkommen.
+Zum einen gliedert sich dort das *Änderungsdokument* in Paragraphen (§ 1 Änderung,
+§ 2 Inkrafttreten), während dasselbe Heft davor eine Verkündung führt, die sich in
+Artikel gliedert; ein Sammelheft trägt also beide Gliederungen nebeneinander, und
+die §-Teilung greift deshalb nicht erst dann, wenn ein Heft überhaupt keinen
+Artikel führt, sondern schon dann, wenn kein Artikel das Stammgesetz betrifft. Zum
+anderen sind die Befehle **dezimal** gegliedert („6.1“, „7.1.1“, „7.2.3“), wo die
+übrigen Blätter a)/aa)/aaa) setzen; die Ebene steht dabei in der Zahl selbst, und
+der Gliederungspfad wiederholt sie nicht. Der Fall (Verordnung über den
+Gutachterausschuss für Grundstückswerte, HmbGVBl. Nr. 17/2026) ist gegen die
+amtliche Nachfassung belegt: 21 Befehle gelesen, 17 angewandt, zehn von vierzehn
+Normen gleich. Von den vier Abweichungen liegen drei an der Vorlage — zwei Befehle
+schreiben „wir“ statt „wird“, und in einem dritten Fall setzt das Gesetzblatt ein
+Komma, das das Portal führt, nicht.
 
 (3) Die meisten Landesportale geben ihre Stammfassungen einer Skriptabfrage nicht
 aus, sondern nur ihre leere Anwendungshülle; einem Browser dagegen schon, und auf

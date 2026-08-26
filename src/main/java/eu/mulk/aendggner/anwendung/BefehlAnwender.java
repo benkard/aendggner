@@ -362,8 +362,32 @@ public final class BefehlAnwender {
     var belegt = new ArrayList<Set<String>>(anzahl);
     for (var schritt : schritte) {
       raeumt.add(geraeumteBezeichnungen(schritt.teil()));
-      belegt.add(belegteBezeichnungen(schritt.teil()));
+      belegt.add(new LinkedHashSet<>(belegteBezeichnungen(schritt.teil())));
     }
+    // Auch eine Neufassung kann eine Bezeichnung neu vergeben — aber nur dort, wo eine
+    // aufsteigende Umnummerierung sie zuvor räumt. „Nummer 3 erhält folgende Fassung: …“ neben
+    // „Die bisherige Nummer 3 wird Nummer 4“ meint die ursprüngliche Zählung (§ 8 Absatz 1 des
+    // Handbuchs); liefe die Neufassung zuerst, so verlöre die bisherige Nummer 3 ihren Wortlaut,
+    // und die Umnummerierung benennte alsdann die neue — ein stiller Verlust. Ohne einen solchen
+    // Räumer bleibt die Neufassung, was sie ist: das Umschreiben einer vorhandenen Einheit, das
+    // keinen Vorrang beansprucht.
+    var aufsteigendGeraeumt = new LinkedHashSet<String>();
+    for (var schritt : schritte) {
+      for (var u : umnummerierungen(schritt.teil())) {
+        if (nummeriertAufwaerts(u)) {
+          aufsteigendGeraeumt.add(u.stelle().anzeigeText());
+        }
+      }
+    }
+    for (int i = 0; i < anzahl; i++) {
+      for (var n : neufassungen(schritte.get(i).teil())) {
+        var bezeichnung = n.stelle().anzeigeText();
+        if (belegbareBezeichnung(n.stelle()) && aufsteigendGeraeumt.contains(bezeichnung)) {
+          belegt.get(i).add(bezeichnung);
+        }
+      }
+    }
+
     var reihenfolge = new ArrayList<Integer>(anzahl);
     // 0 = offen, 1 = in Arbeit (Zyklus-Bremse), 2 = eingereiht.
     var stand = new byte[anzahl];
@@ -527,6 +551,50 @@ public final class BefehlAnwender {
     return belegt;
   }
 
+  /**
+   * Ob die Umnummerierung aufwärts zählt („Nummer 3 wird Nummer 4“) und damit ihre bisherige
+   * Bezeichnung für eine neue Einheit freigibt. Abwärts zählt, wer eine Lücke schließt; dort
+   * entsteht kein Platz.
+   */
+  private static boolean nummeriertAufwaerts(Umnummerierung u) {
+    var alt = letzteMarke(u.stelle());
+    var neu = letzteMarke(u.neu());
+    if (alt == null || neu == null || !alt.matches("\\d+[a-z]?") || !neu.matches("\\d+[a-z]?")) {
+      return false;
+    }
+    int altZahl = Integer.parseInt(alt.replaceAll("[a-z]$", ""));
+    int neuZahl = Integer.parseInt(neu.replaceAll("[a-z]$", ""));
+    return neuZahl > altZahl || (neuZahl == altZahl && neu.compareTo(alt) > 0);
+  }
+
+  /** Die Zählung der letzten Komponente einer Stelle; {@code null}, wenn sie keine trägt. */
+  private static @Nullable String letzteMarke(Stelle stelle) {
+    if (stelle.komponenten().isEmpty()) {
+      return null;
+    }
+    return switch (stelle.komponenten().get(stelle.komponenten().size() - 1)) {
+      case Stelle.AbsatzNr a -> a.nummer();
+      case Stelle.NummerNr n -> n.nummer();
+      case Stelle.BuchstabeNr b -> b.kennung();
+      default -> null;
+    };
+  }
+
+  /**
+   * Ob die Stelle eine gezählte Einheit benennt, deren Bezeichnung ein anderer Schritt räumen kann.
+   * Die Überschrift und der ganze Paragraph gehören nicht dazu: Sie tragen keine Zählung, die eine
+   * Umnummerierung verschöbe.
+   */
+  private static boolean belegbareBezeichnung(Stelle stelle) {
+    if (stelle.komponenten().isEmpty()) {
+      return false;
+    }
+    var letzte = stelle.komponenten().get(stelle.komponenten().size() - 1);
+    return letzte instanceof Stelle.AbsatzNr
+        || letzte instanceof Stelle.NummerNr
+        || letzte instanceof Stelle.BuchstabeNr;
+  }
+
   // Aufzählungsmarken in Zitatblöcken, je Ebene.
   private static final Pattern NUMMER_MARKER = Pattern.compile("(?m)^[ \\t]*(\\d+[a-z]?)\\.[ \\t]");
   private static final Pattern BUCHSTABE_MARKER =
@@ -653,6 +721,16 @@ public final class BefehlAnwender {
       case StrukturEinfuegung e -> List.of(e);
       case Sammelbefehl s ->
           s.teilbefehle().stream().flatMap(t -> einfuegungen(t).stream()).toList();
+      default -> List.of();
+    };
+  }
+
+  /** Die Neufassungen eines Befehls — auch die in einem Verbund. */
+  private static List<Neufassung> neufassungen(Aenderungsbefehl befehl) {
+    return switch (befehl) {
+      case Neufassung n -> List.of(n);
+      case Sammelbefehl s ->
+          s.teilbefehle().stream().flatMap(t -> neufassungen(t).stream()).toList();
       default -> List.of();
     };
   }
@@ -1077,6 +1155,9 @@ public final class BefehlAnwender {
               if (brauchtFuge(befehl.alt(), befehl.neu())) {
                 return TextErgebnis.ok(ersetzeMitFuge(text, befehl.alt(), befehl.neu()));
               }
+              if (verliertFuge(befehl.alt(), befehl.neu())) {
+                return TextErgebnis.ok(ersetzeOhneFuge(text, befehl.alt(), befehl.neu()));
+              }
               return TextErgebnis.ok(ersetzeWortweise(text, befehl.alt(), befehl.neu()));
             }));
   }
@@ -1102,6 +1183,33 @@ public final class BefehlAnwender {
     int von = 0;
     for (int idx = findeVorkommen(text, alt, 0); idx >= 0; idx = findeVorkommen(text, alt, von)) {
       sb.append(text, von, idx).append(neu);
+      von = idx + alt.length();
+    }
+    return sb.append(text, von, text.length()).toString();
+  }
+
+  /**
+   * Der umgekehrte Fall: Tritt an die Stelle eines Wortes ein Satzzeichen, so weicht der
+   * Zwischenraum davor. „In Nummer 2 wird das Wort „und“ am Ende durch ein Komma ersetzt“ führt
+   * sonst auf „…Aufgaben ,“ statt auf „…Aufgaben,“. Ein Satzzeichen schließt an, es steht nicht für
+   * sich.
+   */
+  private static boolean verliertFuge(String alt, String neu) {
+    return NUR_SATZZEICHEN.matcher(neu).matches()
+        && !alt.isEmpty()
+        && Character.isLetterOrDigit(alt.codePointAt(0));
+  }
+
+  /** Ersetzt und nimmt dabei den Zwischenraum vor dem Ersetzten mit. */
+  private static String ersetzeOhneFuge(String text, String alt, String neu) {
+    var sb = new StringBuilder();
+    int von = 0;
+    for (int idx = text.indexOf(alt); idx >= 0; idx = text.indexOf(alt, von)) {
+      int anfang = idx;
+      while (anfang > 0 && text.charAt(anfang - 1) == ' ') {
+        anfang--;
+      }
+      sb.append(text, von, anfang).append(neu);
       von = idx + alt.length();
     }
     return sb.append(text, von, text.length()).toString();
@@ -1759,6 +1867,31 @@ public final class BefehlAnwender {
             }));
   }
 
+  /**
+   * Hängt einen Satz an einen Text an.
+   *
+   * <p>Endet der Text auf ein Aufzählungsglied, so beginnt der angefügte Satz eine eigene Zeile: Er
+   * gehört dem Absatz und nicht dem letzten Glied. Das Handbuch der Rechtsförmlichkeit setzt einen
+   * solchen Schlusssatz linksbündig hinter die Aufzählung, und die amtlichen Fassungen tun es auch
+   * („… zur Erfüllung ihrer Aufgaben und“ / „4. …“ / „Die DIN EN ISO/IEC 17024 ist …
+   * niedergelegt.“). Sonst schließt er wie gewohnt mit einem Zwischenraum an.
+   */
+  private static String haengeSatzAn(String text, String satz) {
+    var gestutzt = text.stripTrailing();
+    int zeilenAnfang = gestutzt.lastIndexOf('\n') + 1;
+    var letzteZeile = gestutzt.substring(zeilenAnfang);
+    var gliedmarke = java.util.regex.Pattern.compile("^(?:\\d+[a-z]?\\.|[a-z]{1,3}\\))[ \\t]");
+    if (!gliedmarke.matcher(letzteZeile.stripLeading()).find()) {
+      return gestutzt + " " + satz;
+    }
+    // Die neue Zeile erbt die Einrückung des Blockes, nicht die des letzten Gliedes: Die
+    // Einrückung trägt die Gliederung, und eine bündig gesetzte Zeile beendete den Block, dem der
+    // Satz gerade zugehören soll.
+    var erste = gestutzt.split("\n", 2)[0];
+    var einrueckung = erste.substring(0, erste.length() - erste.stripLeading().length());
+    return gestutzt + "\n" + einrueckung + satz;
+  }
+
   private static AngewandteAenderung wendeAnfuegungAn(List<Norm> normen, Anfuegung befehl) {
     return switch (befehl.ebene()) {
       case ABSATZ -> {
@@ -1774,9 +1907,7 @@ public final class BefehlAnwender {
       }
       case SATZ ->
           bearbeiteText(
-              normen,
-              befehl,
-              text -> TextErgebnis.ok(text.stripTrailing() + " " + befehl.text().strip()));
+              normen, befehl, text -> TextErgebnis.ok(haengeSatzAn(text, befehl.text().strip())));
       // Ein Halbsatz beginnt keinen neuen Satz, sondern setzt den bestehenden hinter dem
       // Strichpunkt fort. Angehängt wird deshalb wie beim Satz — aber nur, wenn der Zieltext
       // tatsächlich auf einen Strichpunkt endet: Sonst stünde der Halbsatz hinter einem Punkt und

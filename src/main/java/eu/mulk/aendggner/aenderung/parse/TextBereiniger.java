@@ -284,6 +284,14 @@ public final class TextBereiniger {
           "[ \\t]*\\d{1,4}[ \\t]+Gesetz- und Verordnungsblatt für den Freistaat"
               + " Thüringen[ \\t]*");
 
+  // HmbGVBl.: Der Kolumnentitel steht gleichfalls im Inhaltsstrom und trägt die Seitenzahl in der
+  // Mitte („Dienstag, den 26. Mai 2026 149HmbGVBl. Nr. 17“ bzw. „HmbGVBl. Nr. 17 Dienstag, den
+  // 26. Mai 2026 147“). Er fällt hinter das Zitat eines Befehls und nähme ihm den Schlusspunkt.
+  private static final Pattern GVBL_HH_KOPF =
+      Pattern.compile(
+          "[ \\t]*(?:HmbGVBl\\. Nr\\. \\d+[ \\t]*)?\\p{L}+tag, den \\d{1,2}\\. \\p{L}+ \\d{4}"
+              + "[ \\t]*\\d{0,4}[ \\t]*(?:HmbGVBl\\. Nr\\. \\d+)?[ \\t]*");
+
   // GBl. für Baden-Württemberg: Der Seitenfuß („Gesetzblatt für Baden-Württemberg, Jahrgang 2026,
   // Nr. 26 vom 27. Februar 2026 Seite 2 von 7“) steht gleichfalls im Inhaltsstrom, und zwar mitten
   // im Befehlstext — er trennt dort sogar den Zieltext eines Befehls von seinem Verb („… die
@@ -317,6 +325,13 @@ public final class TextBereiniger {
   private static final Pattern SACHNUMMER_MIT_LEERZEICHEN =
       Pattern.compile("(§|Art\\.) (\\d+) ([a-z])(?![a-zäöüß).])");
 
+  /**
+   * Leerraumzeichen, die Javas {@code \s} nicht kennt: das geschützte Leerzeichen und die
+   * typographischen Ausschlüsse (schmal, halbgeviert, geviert und dergleichen).
+   */
+  private static final Pattern UNSICHTBARER_LEERRAUM =
+      Pattern.compile("[\\u00A0\\u1680\\u2000-\\u200A\\u202F\\u205F\\u3000]");
+
   /** C0-Steuerzeichen außer Tabulator und Zeilenumbruch; im Fließtext stets Extraktionsmüll. */
   private static final Pattern STEUERZEICHEN =
       Pattern.compile("[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]");
@@ -331,9 +346,11 @@ public final class TextBereiniger {
     // gewöhnlichen Ziffern und nähme SatzTeiler und Superskript ihre Grundlage. Die Umbruch-Marker
     // des FontgroessenFilters liegen im Private-Use-Bereich und bleiben unberührt.
     rohText = Normalizer.normalize(rohText, Normalizer.Form.NFC);
-    // Geschützte Leerzeichen (GVBl-Satz: „§  1“, „Abs.  2“) sind für Javas \s und
-    // String.strip unsichtbar — früh auf gewöhnliche Leerzeichen normalisieren.
-    var text = rohText.replace(' ', ' ').replace(' ', ' ');
+    // Leerraum, der für Javas \s und String.strip unsichtbar ist: das geschützte Leerzeichen
+    // (GVBl-Satz: „§  1“, „Abs.  2“) und die feinen Ausschlüsse des Bleisatzes. Das hamburgische
+    // Gesetzblatt setzt zwischen Paragraphenzeichen und Nummer ein schmales Leerzeichen (U+2009);
+    // ohne diese Normalisierung ist „§ 1“ dort kein Normkopf, und ein ganzes Heft bliebe ungelesen.
+    var text = UNSICHTBARER_LEERRAUM.matcher(rohText).replaceAll(" ");
     // Steuerzeichen aus fehlgeleiteten Glyphenzuordnungen (im GVBl. für Berlin trägt der Einzug
     // der Aufzählungsglieder ein U+0007). Sie sind unsichtbar, stehen aber vor dem Befehlstext und
     // ließen dessen Zeilenanfangs-Anker ins Leere greifen.
@@ -348,6 +365,7 @@ public final class TextBereiniger {
     text = GVBL_BERLIN_KOPF.matcher(text).replaceAll("\n");
     text = GVBL_TH_KOPF.matcher(text).replaceAll("\n");
     text = GVBL_TH_FUSS.matcher(text).replaceAll("\n");
+    text = GVBL_HH_KOPF.matcher(text).replaceAll("\n");
     text = GBL_BW_FUSS.matcher(text).replaceAll("\n");
     text = GVBL_RP_FUSS.matcher(text).replaceAll("\n");
     var zeilen = entferneKolumnentitel(zerlegeInZeilen(text));
@@ -656,8 +674,16 @@ public final class TextBereiniger {
     var woerter = new java.util.HashSet<String>();
     for (var zeile : zeilen) {
       for (var wort : WORTGRENZE.split(zeile.text())) {
-        if (!wort.isEmpty()) {
-          woerter.add(wort);
+        if (wort.isEmpty()) {
+          continue;
+        }
+        woerter.add(wort);
+        // Der Punkt gehört zur Wortgrenze nicht (wegen „Abs.“, „Nr.“); am Satzende klebt er
+        // gleichwohl am Wort. Ohne die abgestreifte Form fände „(Immo-“ + „WertV)“ seinen
+        // Beweis nicht, obgleich das Dokument „ImmoWertV.“ ein paar Zeilen weiter führt.
+        var ohnePunkte = wort.replaceAll("^\\.+|\\.+$", "");
+        if (!ohnePunkte.isEmpty() && !ohnePunkte.equals(wort)) {
+          woerter.add(ohnePunkte);
         }
       }
     }

@@ -190,6 +190,11 @@ SPDX-FileCopyrightText = "Land Brandenburg"
 SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
 
 [[annotations]]
+path = ["src/test/resources/sampledata/Hamburg/HmbGVBl-2026-17_GutachterausschussVO-AendVO.pdf"]
+SPDX-FileCopyrightText = "Freie und Hansestadt Hamburg"
+SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
+
+[[annotations]]
 path = ["src/test/resources/sampledata/RheinlandPfalz/GVBl-2026-21_UKAPOGS-E3-AendVO.pdf"]
 SPDX-FileCopyrightText = "Land Rheinland-Pfalz"
 SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
@@ -210,6 +215,8 @@ path = [
   "src/test/resources/sampledata/Berlin/ASOG-Bln-alt.txt",
   "src/test/resources/sampledata/Brandenburg/FraktG-alt.txt",
   "src/test/resources/sampledata/Brandenburg/FraktG-neu.txt",
+  "src/test/resources/sampledata/Hamburg/GAusschV-HH-alt.txt",
+  "src/test/resources/sampledata/Hamburg/GAusschV-HH-neu.txt",
   "src/test/resources/sampledata/RheinlandPfalz/UKAPOGS-E3-neu.txt",
   "src/test/resources/sampledata/Berlin/ASOG-Bln-neu.txt",
   "src/test/resources/sampledata/Berlin/LAF-ErrG-alt.txt",
@@ -239,6 +246,7 @@ path = [
   "src/test/resources/sampledata/GEG/SOURCES",
   "src/test/resources/sampledata/Berlin/SOURCES",
   "src/test/resources/sampledata/Brandenburg/SOURCES",
+  "src/test/resources/sampledata/Hamburg/SOURCES",
   "src/test/resources/sampledata/RheinlandPfalz/SOURCES",
   "src/test/resources/sampledata/Hessen/SOURCES",
   "src/test/resources/sampledata/SchleswigHolstein/SOURCES",

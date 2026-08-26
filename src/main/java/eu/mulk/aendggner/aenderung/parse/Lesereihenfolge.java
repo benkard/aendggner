@@ -140,17 +140,26 @@ final class Lesereihenfolge {
   }
 
   /**
-   * Ein Band zwischen zwei breiten Zeilen: erst die linke Spalte, dann die rechte, jede in der
-   * Reihenfolge des Inhaltsstroms.
+   * Ein Band zwischen zwei breiten Zeilen: erst die linke Spalte, dann die rechte, jede von oben
+   * nach unten.
+   *
+   * <p>Die Spalte folgt ihrer Grundlinie und nicht dem Inhaltsstrom. Wo der Strom ohnehin von oben
+   * nach unten läuft — der Regelfall —, ändert das nichts; die Sortierung ist stabil, gleich hohe
+   * Zeilen behalten ihre Folge. Wo er es nicht tut, bewahrt sie vor dem Schlimmsten: Im
+   * hamburgischen Gesetzblatt fällt das Schlusswort der Eingangsformel („verordnet:“) mitten in
+   * einen Absatz der rechten Spalte und zerschneidet dort ein Wort.
    */
   private static void bandAusgeben(
       List<Zeile> ergebnis, List<Zeile> links, List<Zeile> rechts, float oben, float unten) {
     for (var spalte : List.of(links, rechts)) {
+      var band = new ArrayList<Zeile>();
       for (var zeile : spalte) {
         if (zeile.grundlinie() > oben && zeile.grundlinie() < unten) {
-          ergebnis.add(zeile);
+          band.add(zeile);
         }
       }
+      band.sort((a, b) -> Float.compare(a.grundlinie(), b.grundlinie()));
+      ergebnis.addAll(band);
     }
   }
 

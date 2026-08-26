@@ -6,6 +6,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Zerlegt den Rumpf eines Artikels in einen Baum von Gliederungspunkten (1. → a) → aa)).
@@ -23,6 +24,15 @@ final class GliederungsScanner {
 
   /** Ergebnis: Text vor dem ersten Gliederungspunkt (Einleitungssatz) und die Punkte selbst. */
   record ScanErgebnis(String vorspann, List<GliederungsPunkt> punkte) {}
+
+  /**
+   * Dezimalgliederung: „6.1“, „7.1.1“ — die Ebene steht in der Zahl selbst. Das hamburgische
+   * Gesetzblatt gliedert seine Änderungsbefehle so, wo andere Blätter a)/aa) setzen. Der Punkt
+   * hinter dem letzten Glied ist wahlfrei; ein Leerzeichen muss folgen, sonst wäre „6.1“ aus
+   * „Nummer 6.1“ ein Marker.
+   */
+  private static final Pattern DEZIMAL_MARKER =
+      Pattern.compile("^(\\d+(?:\\.\\d+[a-z]?)+)\\.?\\s+(\\S.*)$");
 
   // Eingeschobene Punkte tragen Suffixe: „2a.“, „a1)“, „aa1)“.
   private static final Pattern NUMMER_MARKER = Pattern.compile("^(\\d+[a-z]?)\\.\\s+(.*)$");
@@ -70,6 +80,11 @@ final class GliederungsScanner {
   private record Marker(String label, int ebene, String rest) {}
 
   private static Marker erkenneMarker(String zeile) {
+    var dezimal = DEZIMAL_MARKER.matcher(zeile);
+    if (dezimal.matches()) {
+      var label = dezimal.group(1);
+      return new Marker(label, label.split("\\.").length, dezimal.group(2));
+    }
     var dreifach = DREIFACHBUCHSTABE_MARKER.matcher(zeile);
     if (dreifach.matches()) {
       return new Marker(dreifach.group(1), 4, dreifach.group(3));
@@ -98,10 +113,20 @@ final class GliederungsScanner {
     }
     // Sonst: nur ein Eröffnungslabel einer tieferen Ebene ist zulässig.
     int aktuelleTiefe = stapel.isEmpty() ? 0 : stapel.peekLast().ebene;
-    return marker.ebene == aktuelleTiefe + 1 && istEroeffnung(marker);
+    var eltern = stapel.isEmpty() ? null : stapel.peekLast().label;
+    return marker.ebene == aktuelleTiefe + 1 && istEroeffnung(marker, eltern);
   }
 
-  private static boolean istEroeffnung(Marker marker) {
+  /**
+   * Ob das Label eine Ebene eröffnet. Die Dezimalgliederung trägt ihre Herkunft im Label: „6.1“
+   * eröffnet die Unterebene von „6.“, aber nur dort — unter „7.“ hätte sie nichts zu suchen.
+   */
+  private static boolean istEroeffnung(Marker marker, @Nullable String eltern) {
+    if (marker.label.contains(".")) {
+      return eltern != null
+          && marker.label.startsWith(eltern.endsWith(".") ? eltern : eltern + ".")
+          && marker.label.endsWith(".1");
+    }
     return switch (marker.ebene) {
       case 1 -> marker.label.equals("1");
       case 2 -> marker.label.equals("a");
@@ -112,6 +137,18 @@ final class GliederungsScanner {
   }
 
   private static boolean istNachfolger(String vorher, String nachher) {
+    // Dezimalgliederung: Nachfolger ist, wer denselben Vorspann trägt und im letzten Glied
+    // fortzählt („7.1.1“ → „7.1.2“).
+    if (vorher.contains(".") || nachher.contains(".")) {
+      int vorherTrenner = vorher.lastIndexOf('.');
+      int nachherTrenner = nachher.lastIndexOf('.');
+      if (vorherTrenner < 0 || nachherTrenner < 0) {
+        return false;
+      }
+      return vorher.substring(0, vorherTrenner).equals(nachher.substring(0, nachherTrenner))
+          && istNachfolger(
+              vorher.substring(vorherTrenner + 1), nachher.substring(nachherTrenner + 1));
+    }
     if (vorher.matches("\\d+[a-z]?") && nachher.matches("\\d+[a-z]?")) {
       var vorherZahl = Integer.parseInt(vorher.replaceAll("[a-z]$", ""));
       var vorherSuffix = vorher.replaceAll("^\\d+", "");

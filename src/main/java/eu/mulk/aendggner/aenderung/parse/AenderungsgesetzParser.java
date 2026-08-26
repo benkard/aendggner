@@ -73,10 +73,20 @@ public final class AenderungsgesetzParser {
     var zitate = ZitatExtraktor.extrahiere(text);
     var artikelBloecke = teileInArtikel(zitate.text(), ARTIKEL_UEBERSCHRIFT, entwurfsGrenzen);
     boolean paragraphenModus = false;
-    if (artikelBloecke.isEmpty()) {
-      artikelBloecke =
+    // Ein Sammelheft führt beide Gliederungen nebeneinander: Die eine Verkündung teilt sich in
+    // Artikel, die nächste in Paragraphen (so das hamburgische GVBl. Nr. 17/2026). Es genügt
+    // deshalb nicht, die §-Teilung erst dann zu versuchen, wenn das Heft überhaupt keinen Artikel
+    // führt — sie ist auch dann zu versuchen, wenn kein Artikel das Stammgesetz betrifft.
+    if (artikelBloecke.isEmpty()
+        || artikelBloecke.stream()
+            .noneMatch(b -> istRelevant(b, ziel, zitate, artikelFilter, false))) {
+      var nachParagraphen =
           teileInArtikel(zitate.text(), PARAGRAPH_UEBERSCHRIFT_AUSSEN, entwurfsGrenzen);
-      paragraphenModus = !artikelBloecke.isEmpty();
+      if (nachParagraphen.stream()
+          .anyMatch(b -> istRelevant(b, ziel, zitate, artikelFilter, true))) {
+        artikelBloecke = nachParagraphen;
+        paragraphenModus = true;
+      }
     }
 
     var befehle = new ArrayList<Aenderungsbefehl>();
@@ -86,12 +96,7 @@ public final class AenderungsgesetzParser {
 
     for (int artikelIndex = 0; artikelIndex < artikelBloecke.size(); artikelIndex++) {
       var artikel = artikelBloecke.get(artikelIndex);
-      var relevant =
-          artikelFilter != null
-              ? artikel.label.equals(artikelFilter)
-                  && (!paragraphenModus || hatAenderungsformel(artikel))
-              : betrifft(artikel, ziel, zitate);
-      if (!relevant) {
+      if (!istRelevant(artikel, ziel, zitate, artikelFilter, paragraphenModus)) {
         continue;
       }
       log.infof("Artikel %s betrifft %s.", artikel.label, ziel.jurabk());
@@ -137,6 +142,22 @@ public final class AenderungsgesetzParser {
                 artikelBloecke.stream().map(b -> String.join("\n", b.zeilen())).toList(),
                 letzterBetroffen + 1);
     return new ParseErgebnis(befehle, betroffeneArtikel, warnungen, inkrafttreten);
+  }
+
+  /**
+   * Ob dieser Block anzuwenden ist: der benannte, wenn ein Filter gesetzt ist, sonst jeder, dessen
+   * Einleitung das Stammgesetz nennt. Im §-Modus muss der benannte Block überdies eine
+   * Änderungsformel tragen — ein Heft führt mehrere Verkündungen mit je eigener §-Zählung.
+   */
+  private static boolean istRelevant(
+      ArtikelBlock artikel,
+      Gesetz ziel,
+      ZitatExtraktor.Ergebnis zitate,
+      @Nullable String artikelFilter,
+      boolean paragraphenModus) {
+    return artikelFilter != null
+        ? artikel.label.equals(artikelFilter) && (!paragraphenModus || hatAenderungsformel(artikel))
+        : betrifft(artikel, ziel, zitate);
   }
 
   private static final String AENDERUNGSFORMEL = "wird wie folgt geändert:";
@@ -231,7 +252,12 @@ public final class AenderungsgesetzParser {
       ZitatExtraktor.Ergebnis zitate,
       List<Aenderungsbefehl> befehle) {
 
-    var eigenerPfad = pfad.isEmpty() ? markerText(punkt) : pfad + " " + markerText(punkt);
+    // Die Dezimalgliederung trägt ihre Herkunft im Label selbst („6.“ → „6.1“); ihn dem Pfad des
+    // Elternpunktes noch einmal anzuhängen ergäbe „6. 6.1“.
+    var eigenerPfad =
+        pfad.isEmpty() || punkt.label().startsWith(pfad.replaceAll("\\.$", "") + ".")
+            ? markerText(punkt)
+            : pfad + " " + markerText(punkt);
     var text = punkt.text().replaceAll("\\s+", " ").strip();
     var provenienz = new Provenienz(artikelLabel, eigenerPfad, zitate.stelleZitateWiederHer(text));
 
@@ -303,6 +329,11 @@ public final class AenderungsgesetzParser {
   }
 
   private static String markerText(GliederungsScanner.GliederungsPunkt punkt) {
+    if (punkt.label().contains(".")) {
+      // Dezimalgliederung: Das Label ist schon vollständig („7.1.1“); ein Klammerzeichen
+      // dahinter wäre eine Erfindung.
+      return punkt.label();
+    }
     return punkt.label().matches("\\d+[a-z]?") ? punkt.label() + "." : punkt.label() + ")";
   }
 

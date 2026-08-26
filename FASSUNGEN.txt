@@ -21,6 +21,112 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 26. August 2026 (vierte Fassung des Tages),
+ zuletzt geändert durch die am 26. August 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Hamburg tritt als vierzehntes Land hinzu. Das dortige Gesetzblatt bringt zwei
+Gliederungen, die im übrigen Landesrecht nicht vorkommen: Das Änderungsdokument
+selbst teilt sich in Paragraphen, obgleich dasselbe Heft davor eine Verkündung
+führt, die sich in Artikel teilt; und seine Befehle sind dezimal gegliedert, wo
+die übrigen Blätter Buchstaben setzen. Der Fall hat überdies vier Idiome, drei
+Aufbereitungs- und drei Anwendungsfunde gebracht.
+
+
+Artikel 1
+Aufbereitung des hamburgischen Satzes
+
+(1) Der Textbereiniger (TextBereiniger) normalisiert fortan sämtlichen Leerraum,
+    den Javas Begriff des Leerzeichens nicht kennt (schmal, halbgeviert, geviert
+    und dergleichen). Das Blatt setzt zwischen Paragraphenzeichen und Nummer ein
+    schmales Leerzeichen; ohne dies ist „§ 1“ dort kein Normkopf, und ein ganzes
+    Heft bliebe ungelesen.
+
+(2) Der Kolumnentitel des Blattes („Dienstag, den 26. Mai 2026 149HmbGVBl.
+    Nr. 17“) steht im Inhaltsstrom und fällt hinter das Zitat eines Befehls; er
+    wird wie der Berliner und der thüringische herausgeschnitten.
+
+(3) Die Lesereihenfolge (Lesereihenfolge) ordnet die Zeilen einer Spalte fortan
+    nach ihrer Grundlinie und nicht mehr nach dem Inhaltsstrom. Die Sortierung ist
+    stabil und ändert am Regelfall nichts; im hamburgischen Satz bewahrt sie davor,
+    dass das Schlusswort der Eingangsformel („verordnet:“) mitten in einen Absatz
+    der rechten Spalte fällt und dort ein Wort zerschneidet.
+
+(4) Der Wortbestand, der über Trennstriche vor Großbuchstaben entscheidet, nimmt
+    fortan auch die von Punkten befreite Form eines Wortes auf. Ohne sie fände
+    „(Immo-“ + „WertV)“ seinen Beweis nicht, obgleich das Dokument „ImmoWertV.“
+    wenige Zeilen weiter führt.
+
+
+Artikel 2
+Gliederung und Erkennung
+
+(1) Der Gliederungsscanner (GliederungsScanner) erkennt die Dezimalgliederung
+    („6.1“, „7.1.1“). Die Ebene steht in der Zahl selbst; eröffnet wird eine
+    Unterebene nur unter demjenigen Punkt, dessen Bezeichnung das Label
+    voranstellt. Der Gliederungspfad der Provenienz wiederholt sie nicht.
+
+(2) Die Artikelteilung (AenderungsgesetzParser) versucht die §-Teilung fortan
+    nicht erst dann, wenn ein Heft überhaupt keinen Artikel führt, sondern schon
+    dann, wenn kein Artikel das Stammgesetz betrifft. Ein Sammelheft trägt beide
+    Gliederungen nebeneinander.
+
+(3) Der Befehlserkenner (BefehlErkenner) nimmt vier Nebenformen an: „die
+    Textstelle“ neben „die Wörter“ und „die Angabe“; „hinter“ neben „nach“ (als
+    Ort der Einfügung wie als Wortanker); die subjektlose Anfügung („Es wird
+    folgender Absatz 3 angefügt: „…““), deren Ziel allein aus dem Rahmen folgt;
+    und die Neufassung einer Paragraphenfolge auch mit „und“ statt „bis“ und ohne
+    vorangestelltes „Die“.
+
+
+Artikel 3
+Anwendung
+
+(1) Tritt ein Satzzeichen an die Stelle eines Wortes, so nimmt es dessen
+    Zwischenraum mit („…Aufgaben und“ wird „…Aufgaben,“ und nicht „…Aufgaben ,“).
+    Das ist die Umkehrung der bereits geregelten Fuge.
+
+(2) Ein Satz, der an einen Absatz mit Aufzählung angefügt wird, tritt auf eine
+    eigene Zeile: Er gehört dem Absatz und nicht dem letzten Aufzählungsglied. Er
+    erbt dabei die Einrückung des Blockes, denn die Einrückung trägt die
+    Gliederung; bündig gesetzt beendete er den Block, dem er zugehören soll.
+
+(3) Eine Neufassung, deren Bezeichnung eine aufsteigende Umnummerierung räumt,
+    tritt hinter diese zurück. „Nummer 3 erhält folgende Fassung“ neben „Die
+    bisherige Nummer 3 wird Nummer 4“ meint die ursprüngliche Zählung; liefe die
+    Neufassung zuerst, so verlöre die bisherige Nummer 3 ihren Wortlaut. Die
+    Neufassung findet ihre Bezeichnung alsdann geräumt und bleibt zu Recht liegen;
+    sie als Einfügung zu vollziehen, bleibt einer späteren Welle vorbehalten.
+
+
+Artikel 4
+Beispieldaten und Handbuch
+
+(1) Unter `Hamburg/` treten das Heft Nr. 17/2026, die Ursprungsfassung der
+    Verordnung über den Gutachterausschuss für Grundstückswerte und die amtliche
+    Nachfassung hinzu, nebst Herkunftsnachweis. Die Auszeichnung nach REUSE ist
+    entsprechend ergänzt.
+
+(2) Das Handbuch (README.md) wird geändert: § 7 Absatz 2 um die Nummern 18 und 19
+    (hamburgische Nebenformen, Neufassung einer Paragraphenfolge), § 9 Absatz 1
+    und 2 (unsichtbarer Leerraum, Grundlinien-Ordnung innerhalb der Spalte) und
+    § 13 um einen Absatz 2a. Das Beispieldaten-Verzeichnis
+    (`Landesrecht-Beispiele.adoc`) führt Hamburg als umgesetzt.
+
+
+Schlussbestimmung
+
+Die vorstehenden Änderungen sind durch die Prüfung sämtlicher Testfälle
+(vierhundertfünfundzwanzig an der Zahl, zuvor vierhundertfünfzehn) sowie durch die
+vollständige Erstellung (mvnw verify) bestätigt worden. Der hamburgische Fall
+steht auf einundzwanzig gelesenen und siebzehn angewandten Befehlen; zehn von
+vierzehn Normen gleichen der amtlichen Nachfassung. Von den vier Abweichungen
+liegen drei an der Vorlage: Die Nummern 2 und 3 des Heftes schreiben „wir“ statt
+„wird“, und in § 6 setzt das Gesetzblatt ein Komma nicht, das das Portal führt.
+Die Auszeichnung nach REUSE ist vollständig (200 von 200 Dateien).
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 26. August 2026 (dritte Fassung des Tages),
  zuletzt geändert durch die am 26. August 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

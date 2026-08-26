@@ -47,7 +47,7 @@ final class BefehlErkenner {
 
   // Wiederkehrende Bausteine.
   private static final String WOERTER =
-      "(?:die (?:Wörter|Worte)|das Wort|die Angabe|die Zahl|die Verweisung)";
+      "(?:die (?:Wörter|Worte)|das Wort|die Angabe|die Zahl|die Verweisung|die Textstelle)";
   private static final String Z = "«(\\d+)»";
 
   // Der Doppelpunkt fehlt gelegentlich (Seitenumbruch-Artefakt); für einen Punkt mit Unterpunkten
@@ -139,7 +139,7 @@ final class BefehlErkenner {
   // darf auch hier verkürzt sein („Die Angabe „X“ wird durch „Y“ ersetzt“, hessisches GVBl).
   private static final Pattern ERSETZUNG_OHNE_STELLE =
       Pattern.compile(
-          "^(?:Die (?:Wörter|Worte)|Das Wort|Die Angabe|Die Zahl|Die Verweisung) "
+          "^(?:Die (?:Wörter|Worte)|Das Wort|Die Angabe|Die Zahl|Die Verweisung|Die Textstelle) "
               + Z
               + " (?:wird|werden) (jeweils )?durch (?:"
               + WOERTER
@@ -153,7 +153,7 @@ final class BefehlErkenner {
   private static final Pattern ERSETZUNG_MIT_ANKER =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?nach "
-              + "(?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl|der Verweisung) "
+              + "(?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl|der Verweisung|der Textstelle) "
               + Z
               + " "
               + WOERTER
@@ -169,7 +169,7 @@ final class BefehlErkenner {
   private static final Pattern WORT_VORANSTELLUNG =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?"
-              + "(?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl|der Verweisung) "
+              + "(?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl|der Verweisung|der Textstelle) "
               + Z
               + " "
               + WOERTER
@@ -224,8 +224,8 @@ final class BefehlErkenner {
 
   private static final Pattern WOERTER_EINFUEGUNG =
       Pattern.compile(
-          "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?(nach|vor) "
-              + "(?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl|der Verweisung) "
+          "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?(nach|hinter|vor) "
+              + "(?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl|der Verweisung|der Textstelle) "
               + Z
               + " "
               + WOERTER
@@ -247,7 +247,7 @@ final class BefehlErkenner {
 
   private static final Pattern STRUKTUR_EINFUEGUNG =
       Pattern.compile(
-          "^(Nach|Vor) (.+?) (?:wird|werden) (?:der |die |das )?folgende[nrs]? (?:neue[nrs]? )?(.+?) "
+          "^(Nach|Hinter|Vor) (.+?) (?:wird|werden) (?:der |die |das )?folgende[nrs]? (?:neue[nrs]? )?(.+?) "
               + "(?:ein|an)gefügt: "
               + ENUM
               + Z
@@ -258,7 +258,7 @@ final class BefehlErkenner {
   // statt einer Stellenangabe; das Ziel selbst erbt der Befehl aus dem Kontextrahmen.
   private static final Pattern STRUKTUR_EINFUEGUNG_WORTANKER =
       Pattern.compile(
-          "^(Nach|Vor) (?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl) "
+          "^(Nach|Hinter|Vor) (?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl|der Textstelle) "
               + Z
               + " (?:wird|werden) (?:der |die |das )?folgende[nrs]? (?:neue[nrs]? )?(.+?) "
               + "(?:ein|an)gefügt: "
@@ -272,7 +272,7 @@ final class BefehlErkenner {
   private static final Pattern STRUKTUR_EINFUEGUNG_IN_GLIEDERUNG =
       Pattern.compile(
           "^In (?:Buch|Teil|Kapitel|Abschnitt|Unterabschnitt|Titel) \\S+ (?:wird|werden) "
-              + "(?i:(nach|vor)) (.+?) (?:der |die |das )?folgende[nrs]? (?:neue[nrs]? )?(.+?) "
+              + "(?i:(nach|hinter|vor)) (.+?) (?:der |die |das )?folgende[nrs]? (?:neue[nrs]? )?(.+?) "
               + "(?:ein|an)gefügt: "
               + ENUM
               + Z
@@ -284,7 +284,7 @@ final class BefehlErkenner {
   // („nach dem Satz 1“) gehört zum Satzbau, nicht zur Stelle.
   private static final Pattern STRUKTUR_EINFUEGUNG_MIT_STELLE =
       Pattern.compile(
-          "^In (.+?) (?:wird|werden) (?i:(nach|vor)) (?:dem |der |den )?(.+?) "
+          "^In (.+?) (?:wird|werden) (?i:(nach|hinter|vor)) (?:dem |der |den )?(.+?) "
               + "(?:der |die |das )?folgende[nrs]? (?:neue[nrs]? )?(.+?) "
               + "(?:ein|an)gefügt: "
               + ENUM
@@ -300,7 +300,7 @@ final class BefehlErkenner {
   // selbst und wird von diesem Muster nicht getroffen.
   private static final Pattern STRUKTUR_ANFUEGUNG_MIT_STELLE =
       Pattern.compile(
-          "^(?:Dem |Der |In |)(.+?) (?:wird|werden) (?:der |die |das )?folgende[nrs]? (.+?)"
+          "^(?:Dem |Der |In |)(?!Es )(.+?) (?:wird|werden) (?:der |die |das )?folgende[nrs]? (.+?)"
               + "(?: wird| werden)? angefügt ?: "
               + ENUM
               + Z
@@ -308,7 +308,7 @@ final class BefehlErkenner {
 
   private static final Pattern STRUKTUR_ANFUEGUNG =
       Pattern.compile(
-          "^(?:Der |Die |Das )?[Ff]olgende[nrs]? (.+?) (?:wird|werden) angefügt ?: "
+          "^(?:Es (?:wird|werden) )?(?:Der |Die |Das )?[Ff]olgende[nrs]? (.+?) (?:(?:wird|werden) )?angefügt ?: "
               + ENUM
               + Z
               + "\\.?$");
@@ -403,7 +403,7 @@ final class BefehlErkenner {
   // allem als rechte Klausel eines Verbunds auf („… ersetzt und die Angabe „X“ wird gestrichen“).
   private static final Pattern STREICHUNG_OHNE_STELLE =
       Pattern.compile(
-          "^(?:Die (?:Wörter|Worte)|Das Wort|Die Angabe|Die Zahl|Die Verweisung) "
+          "^(?:Die (?:Wörter|Worte)|Das Wort|Die Angabe|Die Zahl|Die Verweisung|Die Textstelle) "
               + Z
               + " (?:wird|werden) "
               + "(?:jeweils )?gestrichen\\.$");
@@ -456,7 +456,7 @@ final class BefehlErkenner {
   // #paragraphBereichNeufassung}).
   private static final Pattern PARAGRAPH_BEREICH_NEUFASSUNG =
       Pattern.compile(
-          "^Die (§§|Artt?\\.) (\\d+[a-z]?) bis (\\d+[a-z]?) "
+          "^(?:Die )?(§§|Artt?\\.) (\\d+[a-z]?) (?:bis|und) (\\d+[a-z]?) "
               + NEUFASSUNG_VERB
               + ": "
               + Z
@@ -479,8 +479,8 @@ final class BefehlErkenner {
   // „In Satz 2 wird nach dem Wort «1» ein Komma und werden die Wörter «2» eingefügt.“
   private static final Pattern KOMMA_UND_WOERTER_EINFUEGUNG =
       Pattern.compile(
-          "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?(nach|vor) "
-              + "(?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl|der Verweisung) "
+          "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?(nach|hinter|vor) "
+              + "(?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl|der Verweisung|der Textstelle) "
               + Z
               // Das wiederholte Verb fehlt im amtlichen Satz oft („… ein Komma und die Angabe „…“
               // eingefügt“, GV. NRW.).
@@ -631,8 +631,8 @@ final class BefehlErkenner {
   // einfügen)
   private static final Pattern KOMMA_EINFUEGUNG =
       Pattern.compile(
-          "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?(nach|vor) "
-              + "(?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl|der Verweisung) "
+          "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?(nach|hinter|vor) "
+              + "(?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl|der Verweisung|der Textstelle) "
               + Z
               + " (ein Komma|ein Semikolon|einen Strichpunkt|einen Punkt) eingefügt\\.$");
 
@@ -640,7 +640,7 @@ final class BefehlErkenner {
   // den Kontext). Tritt vor allem als rechte Klausel eines Verbundbefehls auf.
   private static final Pattern EINFUEGUNG_ANKER_ZUERST =
       Pattern.compile(
-          "^(Nach|Vor) (?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl) "
+          "^(Nach|Hinter|Vor) (?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl|der Textstelle) "
               + Z
               + " (?:wird|werden) (?:"
               + WOERTER
@@ -1219,7 +1219,7 @@ final class BefehlErkenner {
     if ((m = EINFUEGUNG_ANKER_ZUERST.matcher(text)).matches()) {
       var ankerWoerter = wortZitat(zitate, m.group(2));
       var anker =
-          m.group(1).equalsIgnoreCase("nach")
+          !m.group(1).equalsIgnoreCase("vor")
               ? new WortAnker.NachWoertern(ankerWoerter)
               : new WortAnker.VorWoertern(ankerWoerter);
       var woerter = m.group(3) != null ? wortZitat(zitate, m.group(3)) : satzzeichen(m.group(4));
@@ -1254,7 +1254,7 @@ final class BefehlErkenner {
       }
       var ankerWoerter = wortZitat(zitate, m.group(2));
       var anker =
-          m.group(1).equalsIgnoreCase("nach")
+          !m.group(1).equalsIgnoreCase("vor")
               ? new WortAnker.NachWoertern(ankerWoerter)
               : new WortAnker.VorWoertern(ankerWoerter);
       var textInhalt =

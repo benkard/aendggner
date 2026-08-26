@@ -1544,4 +1544,92 @@ class BefehlErkennerTest {
             Stelle.LEER);
     assertThat(befehl).containsInstanceOf(Ersetzung.class);
   }
+
+  // --- Hamburger Idiome (HmbGVBl. Nr. 17/2026) --------------------------------------------------
+
+  /** „Hinter“ steht dem „nach“ gleich; das hamburgische Blatt setzt es durchweg. */
+  @Test
+  void erkenntEinfuegungHinterEinerNorm() {
+    var befehl = erkenne("Hinter § 7 wird folgender § 7a eingefügt: „§ 7a Aufgaben“", Stelle.LEER);
+
+    assertThat(befehl).containsInstanceOf(StrukturEinfuegung.class);
+    var einfuegung = (StrukturEinfuegung) befehl.orElseThrow();
+    assertThat(einfuegung.vorher()).isFalse();
+    assertThat(einfuegung.stelle().anzeigeText()).isEqualTo("§ 7");
+    assertThat(einfuegung.bezeichnung()).isEqualTo("7a");
+  }
+
+  @Test
+  void erkenntEinfuegungHinterEinemAbsatz() {
+    var befehl =
+        erkenne(
+            "Hinter Absatz 3 wird folgender neuer Absatz 4 eingefügt: „(4) Nicht"
+                + " grundstücksbezogene Auskünfte sind zu erteilen.“",
+            PARAGRAPH_5);
+
+    assertThat(befehl).containsInstanceOf(StrukturEinfuegung.class);
+    var einfuegung = (StrukturEinfuegung) befehl.orElseThrow();
+    assertThat(einfuegung.vorher()).isFalse();
+    assertThat(einfuegung.bezeichnung()).isEqualTo("4");
+  }
+
+  /** Die Anfügung ohne Subjekt: Das Ziel steht im Rahmen, der Satz nennt nur das Angefügte. */
+  @Test
+  void erkenntAnfuegungOhneSubjekt() {
+    var befehl =
+        erkenne(
+            "Es wird folgender Absatz 3 angefügt: „(3) Personenbezogene Daten sind zu löschen.“",
+            PARAGRAPH_5);
+
+    assertThat(befehl).isPresent();
+    assertThat(befehl.orElseThrow().stelle().anzeigeText()).isEqualTo("§ 5");
+  }
+
+  @Test
+  void erkenntSatzAnfuegungOhneSubjekt() {
+    var befehl =
+        erkenne("Es wird folgender Satz angefügt: „Die Norm ist niedergelegt.“", PARAGRAPH_5);
+
+    assertThat(befehl).isPresent();
+  }
+
+  /** „Textstelle“ ist die hamburgische Nebenform zu „Wörter“ und „Angabe“. */
+  @Test
+  void erkenntTextstellenErsetzung() {
+    var befehl =
+        erkenne(
+            "In § 3 Absatz 2 Nummer 1 wird die Textstelle „Absatz 5“ durch die Textstelle"
+                + " „Absatz 8“ ersetzt.",
+            Stelle.LEER);
+
+    assertThat(befehl).containsInstanceOf(Ersetzung.class);
+    var ersetzung = (Ersetzung) befehl.orElseThrow();
+    assertThat(ersetzung.alt()).isEqualTo("Absatz 5");
+    assertThat(ersetzung.neu()).isEqualTo("Absatz 8");
+  }
+
+  @Test
+  void erkenntEinfuegungHinterEinerTextstelle() {
+    var befehl =
+        erkenne(
+            "In Satz 3 wird hinter der Textstelle „Sachverständige nach Absatz 1 Nummer 2“ die"
+                + " Textstelle „und 3“ eingefügt.",
+            PARAGRAPH_5);
+
+    assertThat(befehl).containsInstanceOf(WoerterEinfuegung.class);
+    var einfuegung = (WoerterEinfuegung) befehl.orElseThrow();
+    assertThat(einfuegung.woerter()).isEqualTo("und 3");
+  }
+
+  /** „§§ 6 und 7 erhalten folgende Fassung“ — die Neufassung einer Paragraphenfolge. */
+  @Test
+  void erkenntNeufassungMehrererParagraphen() {
+    var befehl =
+        erkenne(
+            "§§ 6 und 7 erhalten folgende Fassung: „§ 6 Verfahren (1) Beraten wird gemeinsam."
+                + " § 7 Aufgaben Das vorsitzende Mitglied ist verantwortlich.“",
+            Stelle.LEER);
+
+    assertThat(befehl).isPresent();
+  }
 }

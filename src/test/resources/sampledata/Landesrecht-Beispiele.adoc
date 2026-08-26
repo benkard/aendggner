@@ -104,6 +104,22 @@ Kopfelement *vor* der Überschrift, die Aufzählungen sind echte `<ol>`-Listen, 
 Stilblatt erzeugt, und an ehemaligen Trennstellen führt das Portal vereinzelt *Steuerzeichen*
 (U+0002) mit. Voller Akzeptanzfall (4/4 Befehle, alle 24 Normen).
 
+|Hamburg
+|`Hamburg/HmbGVBl-2026-17_GutachterausschussVO-AendVO.pdf` — HmbGVBl. Teil I Nr. 17 vom
+26.05.2026, S. 147 (Verordnung zur Änderung der Verordnung über den Gutachterausschuss für
+Grundstückswerte vom 12.05.2026)
+|Sammelheft mit drei Verkündungen, deren erste sich in *Artikel*, deren zweite sich in
+*Paragraphen* gliedert — beide Gliederungen nebeneinander in einem Heft. Die Änderungsbefehle
+sind *dezimal* gegliedert („6.1“, „7.1.1“, „7.2.3“). Der Satz setzt zwischen § und Nummer ein
+*schmales Leerzeichen* (U+2009), führt den Kolumnentitel im Inhaltsstrom und lässt das
+Schlusswort der Eingangsformel („verordnet:“) in die rechte Spalte fallen. Idiome: „die
+Textstelle „…““, „Hinter § 7 wird folgender § 7a eingefügt“, „Es wird folgender Absatz 3
+angefügt“, „§§ 6 und 7 erhalten folgende Fassung“. Voller Belegfall, Stammfassung
+`Hamburg/GAusschV-HH-alt.txt` (Ursprungsfassung aus HmbGVBl. Nr. 20/2009, S. 124), Prüfmaßstab
+`GAusschV-HH-neu.txt`. Das Blatt selbst liegt bei `luewu.de` frei; das Portal ist eine
+juris-Einseitenanwendung *ohne* Fassungsliste — es führt nur die aktuelle Gesamtausgabe und
+eine Änderungshistorie.
+
 |Rheinland-Pfalz
 |`RheinlandPfalz/GVBl-2026-21_UKAPOGS-E3-AendVO.pdf` — GVBl. RP 2026 Nr. 21 vom 10.08.2026
 (Erste Landesverordnung zur Änderung der Ausbildungs- und Prüfungsordnung … Unfallkasse)
@@ -174,6 +190,19 @@ bleiben nur Abweichungen, in denen die amtliche Nachfassung selbst vom Befehlswo
 überzähliges Anführungszeichen aus dem Änderungsgesetz; § 93 LMG NRW: zusätzlich die Wörter
 „Film (“ gestrichen) — ÄndGgner wendet dort den Wortlaut an. Damit ist das Heft GV. NRW. 7/2026
 vollständig belegt.
+* *Hamburg* ist umgesetzt (`EndToEndTest.gutachterausschussVOHamburg`): 21 Befehle gelesen,
+  17 angewandt; zehn von vierzehn Normen gleichen der amtlichen Nachfassung. Der Fall hat sechs
+  allgemeine Funde gebracht: die Dezimalgliederung der Befehle; die §-Teilung eines Heftes, das
+  daneben Artikel führt; das schmale Leerzeichen; den Kolumnentitel im Inhaltsstrom; die
+  Grundlinien-Ordnung innerhalb einer Spalte; und drei Anwendungsfunde (ein Satzzeichen, das an
+  die Stelle eines Wortes tritt, nimmt dessen Zwischenraum mit; ein an eine Aufzählung angefügter
+  Satz steht auf eigener Zeile in der Einrückung des Blockes; die Neufassung einer Bezeichnung,
+  die eine aufsteigende Umnummerierung räumt, tritt hinter diese zurück, damit der bisherige
+  Wortlaut nicht verlorengeht). Von den vier Abweichungen liegen drei an der Vorlage: Zwei Befehle
+  schreiben „wir“ statt „wird“ (ein Verkündungsfehler — geraten wird nicht), und in § 6 setzt das
+  Gesetzblatt ein Komma, das das Portal führt, nicht. Die vierte ist eine benannte Grenze: die
+  Neufassung einer soeben geräumten Bezeichnung als Einfügung zu vollziehen.
+
 * *Berlin* ist umgesetzt (`EndToEndTest.asogLafAendGBerlin`). Artikel 2
   (LAF-Errichtungsgesetz) ist ein *voller* Akzeptanzfall: beide Befehle angewandt, alle fünf
   Normen gleich der amtlichen Nachfassung vom 12. Juni 2026. Artikel 1 (ASOG) wird vollständig
@@ -280,7 +309,7 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
   Baden-Württemberg jede Fassung datierbar ausgeben, fehlt dort. Ohne Vorfassung ist kein
   Akzeptanzfall möglich, sondern nur die Prüfung bis zur Befehlserkennung. Ein Ausweg wäre, die
   Vorfassung aus den *Einzelnormen* mit ihren Stichtagen zusammenzusetzen.
-* Bremen, Hamburg, Mecklenburg-Vorpommern, Saarland, Sachsen-Anhalt: noch nicht erfasst.
+* Bremen, Mecklenburg-Vorpommern, Saarland, Sachsen-Anhalt: noch nicht erfasst.
 
 == Wo weitermachen
 
@@ -291,9 +320,12 @@ gegen die amtliche Fassung, und `--neufassung` gibt die errechnete Fassung als k
 Klartext aus. Ein weiteres Land kostet damit Stammfassung, Heft und Nachfassung — keinen eigenen
 Prüfcode mehr. Nach absteigendem Nutzen:
 
-. *Weitere Länder erfassen* — Bremen, Hamburg, Mecklenburg-Vorpommern, Saarland, Sachsen-Anhalt.
-  Für Hamburg (`landesrecht-hamburg.de`) und Mecklenburg-Vorpommern (`landesrecht-mv.de`) ist
-  zuerst zu prüfen, ob die Portale einer Skriptabfrage antworten; sonst gilt der Browserweg.
+. *Weitere Länder erfassen* — Bremen, Mecklenburg-Vorpommern, Saarland, Sachsen-Anhalt.
+  Für Mecklenburg-Vorpommern ist die Skriptprobe gemacht: `landesrecht-mv.de` antwortet wie
+  Hamburg nur mit der 5,6 kB großen Anwendungshülle. Das *Gesetzblatt* dagegen liegt frei —
+  `regierung-mv.de/static/Regierungsportal/Justizministerium/…/GVOBl.%20Nr.%20N%20v.%20T.M.JJJJ.pdf`,
+  und ein Änderungsgesetz ist damit ohne Browsersteuerung zu beschaffen; nur die Stammfassung
+  verlangt sie. Für Bremen ist `transparenz.bremen.de` zu prüfen (offenes HTML zu erwarten).
 
 *Erledigt in Welle 23:* Die Frage nach den _Anlagen-Nummern im gii-XML_ war falsch gestellt. Eine
 Zerlegung braucht es nicht — der `StellenAufloeser` probiert längst beide Wege. Der Fehler saß im
