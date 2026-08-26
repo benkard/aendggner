@@ -320,12 +320,28 @@ gegen die amtliche Fassung, und `--neufassung` gibt die errechnete Fassung als k
 Klartext aus. Ein weiteres Land kostet damit Stammfassung, Heft und Nachfassung — keinen eigenen
 Prüfcode mehr. Nach absteigendem Nutzen:
 
-. *Weitere Länder erfassen* — Bremen, Mecklenburg-Vorpommern, Saarland, Sachsen-Anhalt.
-  Für Mecklenburg-Vorpommern ist die Skriptprobe gemacht: `landesrecht-mv.de` antwortet wie
-  Hamburg nur mit der 5,6 kB großen Anwendungshülle. Das *Gesetzblatt* dagegen liegt frei —
-  `regierung-mv.de/static/Regierungsportal/Justizministerium/…/GVOBl.%20Nr.%20N%20v.%20T.M.JJJJ.pdf`,
-  und ein Änderungsgesetz ist damit ohne Browsersteuerung zu beschaffen; nur die Stammfassung
-  verlangt sie. Für Bremen ist `transparenz.bremen.de` zu prüfen (offenes HTML zu erwarten).
+. *Weitere Länder erfassen* — Bremen, Mecklenburg-Vorpommern, Saarland, Sachsen-Anhalt. Die
+  Beschaffungswege sind für alle vier geprüft (26.08.2026):
++
+--
+Mecklenburg-Vorpommern:: Das Gesetzblatt liegt *frei und skriptlesbar* unter
+`regierung-mv.de/static/Regierungsportal/Justizministerium/Inhalte/Rechtliches/GVOBI.M-V/GVOBl.%20Nr.%20<N>%20v.%20<T.M.JJJJ>.pdf`;
+ein Änderungsgesetz ist damit ohne Browsersteuerung zu haben. Das Portal `landesrecht-mv.de`
+dagegen ist eine juris-Einseitenanwendung (5,6 kB Hülle) und führt — wie Hamburg — *keine*
+Fassungsliste, sondern nur die aktuelle Gesamtausgabe nebst Änderungshistorie; die Adressform
+`…/document/<Kennung>@<JJJJMMTT>` weist es ab. Die Gesamtausgabe nennt immerhin ihren
+Geltungszeitraum („Gesamtausgabe in der Gültigkeit vom 12.06.2026 bis 31.08.2026“), sodass sich
+erkennen lässt, ob sie genau ein Heft trägt. Ein voller Belegfall verlangt deshalb dasselbe wie
+Hamburg: eine Vorschrift, die *genau einmal* geändert worden ist — dann ist die Vorfassung die
+Ursprungsfassung aus dem Gesetzblatt. Der geprüfte Fall (Gesetz zur Änderung der Landesbauordnung
+M-V und des Architekten- und Ingenieurgesetzes, GVOBl. Nr. 16 vom 11.06.2026) taugt dafür nicht:
+Beide Stammgesetze sind vielfach geändert.
+Bremen:: `transparenz.bremen.de` antwortet einer Skriptabfrage mit gewöhnlichem HTML (Status 200,
+44 kB) — das zweite offene Portal nach BRAVORS. Der Weg ist damit frei; er ist nur noch zu gehen.
+Saarland und Sachsen-Anhalt:: unverändert ohne Vorfassungen (siehe „Noch offen“); dort bleibt es
+bei der Prüfung bis zur Befehlserkennung, es sei denn, die Einzelnormen mit ihren Stichtagen
+tragen.
+--
 
 *Erledigt in Welle 23:* Die Frage nach den _Anlagen-Nummern im gii-XML_ war falsch gestellt. Eine
 Zerlegung braucht es nicht — der `StellenAufloeser` probiert längst beide Wege. Der Fehler saß im
