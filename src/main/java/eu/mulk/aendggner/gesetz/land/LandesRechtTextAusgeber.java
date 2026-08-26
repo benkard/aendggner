@@ -59,6 +59,11 @@ public final class LandesRechtTextAusgeber {
     if (gesetz.stand() != null) {
       sb.append("Stand: ").append(gesetz.stand().kommentar()).append('\n');
     }
+    // Was das Erzeugnis selbst getan hat, steht mit im Kopf: Ohne diese Zeilen wüsste die nächste
+    // Stufe der Kette nicht, welche Hefte der Wortlaut schon trägt (siehe Fortschreibung).
+    for (var heft : gesetz.fortschreibungen()) {
+      sb.append("Fortgeschrieben durch: ").append(heft.bezeichnung()).append('\n');
+    }
 
     var gliederungen = gesetz.gliederungen();
     int gliederungsZeiger = 0;

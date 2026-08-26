@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import eu.mulk.aendggner.aenderung.DokumentArt;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -43,6 +44,51 @@ class DokumentErkennerTest {
     var kopf = DokumentErkenner.erkenne(new PatchTextExtraktor().extrahiere(pfad));
 
     assertThat(kopf.art()).isEqualTo(erwartet);
+  }
+
+  /**
+   * Das Ausfertigungsdatum aus der Zeile „Vom …“. An ihm erkennt die Fassung ein Heft wieder, das
+   * auf sie schon angewandt worden ist; deshalb darf es nicht geraten sein. Ein Sammelheft stellt
+   * mehrere Verkündungen nebeneinander (so das thüringische GVBl. Nr. 2/2026 mit vieren), und
+   * welche von ihnen das Dokument ausmacht, sagt sein Kopf nicht — dann bleibt das Datum leer.
+   */
+  @ParameterizedTest
+  @CsvSource({
+    "UWG/bgbl126s0043_regelungstext.pdf,                          2026-02-12",
+    "Brandenburg/GVBl-I-2026-12_FraktG-AendG.pdf,                 2026-04-22",
+    "NRW/GV-NRW-2026-S202_22-Rundfunkaenderungsgesetz.pdf,        2026-03-24",
+    "Hessen/GVBl-2026-05_11-AendVO-verkehrsrechtl-Zustaendigkeiten.pdf, 2026-01-28",
+    "Thueringen/GVBl-TH-2026-02_KiGaFinanzVO-AendVO-ua.pdf,       ",
+    "GEG/BT-Drs-20-6875_Regierungsentwurf.pdf,                    ",
+  })
+  void liestDasAusfertigungsdatum(String datei, String erwartet) throws Exception {
+    var pfad = SAMPLEDATA.resolve(datei.strip());
+    assumeTrue(Files.exists(pfad), "Beispieldatei fehlt: " + datei);
+
+    var kopf = DokumentErkenner.erkenne(new PatchTextExtraktor().extrahiere(pfad));
+
+    assertThat(kopf.ausfertigung())
+        .isEqualTo(erwartet == null ? null : LocalDate.parse(erwartet.strip()));
+  }
+
+  /**
+   * Woran ein Heft sich nennt: an seiner Drucksachennummer, sonst an seinem Ausfertigungsdatum. Der
+   * Dateiname bleibt außen vor — er ist eine Zufälligkeit des Ablageortes, und an der Bezeichnung
+   * hängt die Wiedererkennung in der Kette.
+   */
+  @Test
+  void bezeichnetSichNachDemDokumentUndNichtNachDerDatei() throws Exception {
+    var gesetzblatt = SAMPLEDATA.resolve("UWG/bgbl126s0043_regelungstext.pdf");
+    var drucksache = SAMPLEDATA.resolve("UWG/BT-Drs-21-1855_Regierungsentwurf.pdf");
+    assumeTrue(Files.exists(gesetzblatt) && Files.exists(drucksache), "UWG-Beispieldaten fehlen");
+
+    assertThat(
+            DokumentErkenner.erkenne(new PatchTextExtraktor().extrahiere(gesetzblatt))
+                .anzeigeName())
+        .isEqualTo("Änderungsgesetz vom 12. Februar 2026");
+    assertThat(
+            DokumentErkenner.erkenne(new PatchTextExtraktor().extrahiere(drucksache)).anzeigeName())
+        .isEqualTo("Gesetzentwurf Drs. 21/1855");
   }
 
   /** Die Drucksachennummern stiften die Verbindung zwischen Antrag und Entwurf. */

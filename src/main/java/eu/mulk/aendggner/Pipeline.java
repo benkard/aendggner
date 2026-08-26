@@ -16,6 +16,7 @@ import eu.mulk.aendggner.aenderung.parse.TextBereiniger;
 import eu.mulk.aendggner.anwendung.BefehlAnwender;
 import eu.mulk.aendggner.anwendung.Grund;
 import eu.mulk.aendggner.anwendung.Nachfassungsabgleich;
+import eu.mulk.aendggner.gesetz.Fortschreibung;
 import eu.mulk.aendggner.gesetz.Gesetz;
 import eu.mulk.aendggner.gesetz.Superskript;
 import eu.mulk.aendggner.gesetz.gii.GiiXmlLoader;
@@ -170,7 +171,9 @@ public final class Pipeline {
     var parser = new AenderungsgesetzParser();
 
     var warnungen = new ArrayList<String>();
-    var dokumente = wendeAntraegeAn(leseDokumente(patches, extraktor, warnungen), warnungen);
+    var dokumente =
+        ordneNachAusfertigung(
+            wendeAntraegeAn(leseDokumente(patches, extraktor, warnungen), warnungen), warnungen);
 
     var gesetz = altesGesetz;
     var protokoll = new ArrayList<BefehlAnwender.AngewandteAenderung>();
@@ -179,6 +182,10 @@ public final class Pipeline {
     Inkrafttreten inkrafttreten = null;
 
     for (var dokument : dokumente) {
+      var heft = new Fortschreibung(dokument.kopf().anzeigeName(), dokument.kopf().ausfertigung());
+      if (gesetz.traegt(heft)) {
+        warnungen.add(doppelanwendungsRuege(dokument, heft));
+      }
       var parseErgebnis = parser.parse(dokument.text(), gesetz, artikel, entwurfsGrenzen(dokument));
       if (parseErgebnis.befehle().isEmpty()) {
         warnungen.add(
@@ -191,7 +198,13 @@ public final class Pipeline {
       }
       var geteilt = teileNachStichtag(parseErgebnis, stichtag, warnungen);
       var anwendung = BefehlAnwender.anwenden(gesetz, geteilt.anzuwenden());
-      gesetz = anwendung.neu();
+      // Vermerkt wird nur, was auch gewirkt hat: Ein Heft, dessen Befehle sämtlich liegenblieben,
+      // hat den Wortlaut nicht fortgeschrieben und darf ihn deshalb nicht als fortgeschrieben
+      // ausweisen.
+      gesetz =
+          anwendung.anzahlAngewandt() > 0 && !gesetz.traegt(heft)
+              ? anwendung.neu().mitFortschreibung(heft)
+              : anwendung.neu();
       protokoll.addAll(anwendung.protokoll());
       protokoll.addAll(geteilt.zurueckgestellt());
       warnungen.addAll(parseErgebnis.warnungen());
@@ -230,6 +243,50 @@ public final class Pipeline {
         protokoll.size(),
         LandesRechtTextAusgeber.ausgeben(gesetz),
         abgleich);
+  }
+
+  /**
+   * Die Rüge, wenn ein Heft ein zweites Mal auf denselben Wortlaut trifft.
+   *
+   * <p>Ein Änderungsbefehl ist keine Zustandsbeschreibung, sondern eine Anordnung: Wer zweimal
+   * anfügt, fügt zweimal an. Am Wortlaut allein ist das nicht zu erkennen — die Befehle greifen ein
+   * zweites Mal anstandslos —, wohl aber an dem, was die Fassung über sich selbst mitführt.
+   * Abgebrochen wird gleichwohl nicht: Es kann Gründe geben, dasselbe Heft erneut anzuwenden, und
+   * verworfen wird hier nichts (§ 1 Absatz 4 des Handbuchs). Gesagt wird es.
+   */
+  private static String doppelanwendungsRuege(Quelldokument dokument, Fortschreibung heft) {
+    return ("Die Fassung trägt „%s“ bereits; %s wird damit ein zweites Mal angewandt. Ein Befehl"
+            + " ist eine Anordnung und keine Zustandsbeschreibung: Was angefügt wird, wird dann"
+            + " zweimal angefügt. Gemeint ist die Kette wohl mit einem anderen Heft.")
+        .formatted(heft.bezeichnung(), dokument.quelle().name());
+  }
+
+  /**
+   * Bringt die Hefte in die Reihenfolge ihrer Ausfertigung.
+   *
+   * <p>Die Kette wendet Heft auf Heft an; jedes setzt den Stand voraus, den das vorige hinterlassen
+   * hat. Die Reihenfolge der Aufrufargumente ist dafür kein Maßstab, das Ausfertigungsdatum schon.
+   * Umgestellt wird nur, wenn <em>jedes</em> Dokument ein Datum trägt — sonst fehlt der gemeinsame
+   * Maßstab, und geraten wird nicht. Und umgestellt wird nicht stillschweigend.
+   */
+  private static List<Quelldokument> ordneNachAusfertigung(
+      List<Quelldokument> dokumente, List<String> warnungen) {
+    if (dokumente.size() < 2 || dokumente.stream().anyMatch(d -> d.kopf().ausfertigung() == null)) {
+      return dokumente;
+    }
+    var geordnet = new ArrayList<>(dokumente);
+    geordnet.sort(java.util.Comparator.comparing(d -> d.kopf().ausfertigung()));
+    if (geordnet.equals(dokumente)) {
+      return dokumente;
+    }
+    warnungen.add(
+        "Die Änderungsdokumente wurden nach ihrem Ausfertigungsdatum geordnet und in dieser Folge"
+            + " angewandt: "
+            + geordnet.stream()
+                .map(d -> d.quelle().name())
+                .collect(java.util.stream.Collectors.joining(", "))
+            + ". Jedes Heft setzt den Stand voraus, den das vorige hinterlässt.");
+    return List.copyOf(geordnet);
   }
 
   /** Die Befehle eines Dokuments, geschieden nach dem, was am Stichtag schon galt. */

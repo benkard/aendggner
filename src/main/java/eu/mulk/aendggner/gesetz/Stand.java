@@ -3,6 +3,7 @@
 package eu.mulk.aendggner.gesetz;
 
 import java.time.LocalDate;
+import java.util.regex.Pattern;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -19,4 +20,39 @@ import org.jspecify.annotations.Nullable;
  * @param juengsteAenderung das späteste Datum, das irgendeine Standangabe nennt — der wirkliche
  *     Stand des Wortlauts; {@code null}, wenn keine Angabe ein Datum trägt.
  */
-public record Stand(String kommentar, @Nullable LocalDate juengsteAenderung) {}
+public record Stand(String kommentar, @Nullable LocalDate juengsteAenderung) {
+
+  /** „… v. 19.6.2020 I 1385“ — das Datum, das eine Standangabe nennt. */
+  private static final Pattern STANDDATUM =
+      Pattern.compile("v\\. (\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})");
+
+  /** Eine Standzeile mitsamt dem spätesten Datum, das in ihr steht. */
+  public static Stand aus(String kommentar) {
+    return new Stand(kommentar, juengstesDatum(kommentar));
+  }
+
+  /**
+   * Das späteste Datum, das {@code text} nennt; {@code null}, wenn keines darin steht. Eine
+   * Standangabe nennt mitunter mehrere, und ein verschriebenes Datum („19.5..2020“) kommt vor — es
+   * bleibt außer Betracht, statt den ganzen Stand zu verwerfen.
+   */
+  public static @Nullable LocalDate juengstesDatum(String text) {
+    LocalDate juengste = null;
+    var m = STANDDATUM.matcher(text);
+    while (m.find()) {
+      try {
+        var datum =
+            LocalDate.of(
+                Integer.parseInt(m.group(3)),
+                Integer.parseInt(m.group(2)),
+                Integer.parseInt(m.group(1)));
+        if (juengste == null || datum.isAfter(juengste)) {
+          juengste = datum;
+        }
+      } catch (RuntimeException verschrieben) {
+        // Ein unmögliches Datum bleibt außer Betracht.
+      }
+    }
+    return juengste;
+  }
+}

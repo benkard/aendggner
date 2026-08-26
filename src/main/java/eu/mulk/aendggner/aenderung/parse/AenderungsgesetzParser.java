@@ -8,6 +8,7 @@ import eu.mulk.aendggner.aenderung.Inkrafttreten;
 import eu.mulk.aendggner.aenderung.Provenienz;
 import eu.mulk.aendggner.aenderung.Stelle;
 import eu.mulk.aendggner.gesetz.Gesetz;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -383,8 +384,8 @@ public final class AenderungsgesetzParser {
    * geraten wird nicht.
    */
   private static Optional<String> standWarnung(String vorspann, Gesetz ziel) {
-    var stand = ziel.stand();
-    if (stand == null || stand.juengsteAenderung() == null) {
+    var wortlautStand = ziel.wortlautStand();
+    if (wortlautStand == null) {
       return Optional.empty();
     }
     var satzDatum = EINLEITUNGS_DATUM.matcher(vorspann.replaceAll("\\s+", " "));
@@ -392,14 +393,14 @@ public final class AenderungsgesetzParser {
       return Optional.empty();
     }
     var genannt = DeutschesDatum.lies(satzDatum.group(1), satzDatum.group(2), satzDatum.group(3));
-    if (genannt == null || !stand.juengsteAenderung().isAfter(genannt)) {
+    if (genannt == null || !wortlautStand.isAfter(genannt)) {
       return Optional.empty();
     }
     return Optional.of(
         "Das Stammgesetz ist jünger als das Änderungsgesetz: Sein Wortlaut ist bis zum "
-            + DeutschesDatum.schreibe(stand.juengsteAenderung())
+            + DeutschesDatum.schreibe(wortlautStand)
             + " fortgeschrieben („"
-            + stand.kommentar()
+            + standHerkunft(ziel, wortlautStand)
             + "“), während der Einleitungssatz die Fassung vom "
             + satzDatum.group(1)
             + ". "
@@ -409,6 +410,20 @@ public final class AenderungsgesetzParser {
             + " fortschreibt. Befehle, deren Zieltext „im Zieltext nicht vorkommt“, beruhen"
             + " wahrscheinlich hierauf und nicht auf einem Mangel des Werkzeugs; abzuhelfen ist"
             + " ihnen nur mit der zeitrichtigen Fassung des Stammgesetzes.");
+  }
+
+  /**
+   * Woher der Wortlautstand rührt: aus einem Heft, das das Erzeugnis selbst angewandt hat, sonst
+   * aus der Standangabe der Quelle. In der Kette ist die Fassung nämlich jünger als ihre eigene
+   * Standzeile — sie trägt die Hefte, die seither auf sie angewandt worden sind.
+   */
+  private static String standHerkunft(Gesetz ziel, LocalDate wortlautStand) {
+    for (var heft : ziel.fortschreibungen()) {
+      if (wortlautStand.equals(heft.datum())) {
+        return heft.bezeichnung();
+      }
+    }
+    return ziel.stand() != null ? ziel.stand().kommentar() : "";
   }
 
   /**

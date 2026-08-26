@@ -181,6 +181,10 @@ angenommen. Hierbei gilt:
    ergibt sich aus der geladenen Stammfassung, nicht aus einer Länderkennung.
 3. Das Zitiersigel (§ oder Art.) folgt gleichfalls aus den Normköpfen der
    Stammfassung.
+4. Der Kopf darf hinter dem Titelblock die Zeilen „Stand: …“ und
+   „Fortgeschrieben durch: …“ führen. Jene gibt den Stand der Quelle wieder,
+   diese jedes Heft, das auf den Wortlaut bereits angewandt worden ist; beide
+   schreibt `--neufassung`, und beide werden zurückgelesen (§ 6a Absatz 4).
 
 (3) Als Änderungsdokument werden PDF-Dateien des Bundesgesetzblattes, der
 Gesetz- und Verordnungsblätter der Länder und der Drucksachen von Bundestag,
@@ -258,18 +262,42 @@ java -jar target/aendggner-0.1.0-SNAPSHOT.jar zwischenfassung.txt heft-2.pdf \
 
 Auf diesem Wege lässt sich eine konsolidierte Fassung aus dem Stammheft und den
 Änderungsheften des Gesetzblattes zusammensetzen, wo kein Portal sie fertig liefert
-(§ 13 Absatz 3). Mehrere Hefte in einem Lauf sind ohnehin zulässig; die Kette ist
-für das gedacht, was über einen Lauf hinausreicht.
+(§ 13 Absatz 3). Mehrere Hefte in einem Lauf sind ohnehin zulässig und werden
+gleichfalls nacheinander angewandt, jedes auf das Ergebnis des vorigen; die Kette
+über mehrere Läufe ist für das gedacht, was über einen Lauf hinausreicht.
 
-(3) Die Kette meint verschiedene Hefte. Dasselbe Heft ein zweites Mal auf seine
+(3) Tragen sämtliche Hefte eines Laufes ein Ausfertigungsdatum, so werden sie in
+dessen Reihenfolge angewandt und nicht in der der Aufrufargumente — jedes Heft setzt
+den Stand voraus, den das vorige hinterlässt. Fehlt einem das Datum, so bleibt es bei
+der Aufrufreihenfolge; geraten wird nicht. Umgestellt wird nie stillschweigend: Die
+Synopse nennt die gewählte Folge.
+
+(4) Die Kette meint verschiedene Hefte. Dasselbe Heft ein zweites Mal auf seine
 eigene Ausgabe anzuwenden ist keine Wiederholung ohne Folgen: Ein Befehl ist keine
 Zustandsbeschreibung, sondern eine Anordnung, und wer zweimal anfügt, fügt zweimal
-an. Das Erzeugnis führt kein Gedächtnis darüber, was es bereits getan hat — der
-Wortlaut allein sagt es ihm, und der sagt es nur dort, wo die Anordnung einen
-Zieltext voraussetzt, den es nicht mehr gibt. Wer prüfen will, ob eine Fassung ein
-Heft schon trägt, halte sie mit `--nachfassung` (§ 6b) dagegen.
+an. Dem Wortlaut allein ist das nicht anzusehen — die Befehle greifen ein zweites Mal
+anstandslos. Die Fassung führt deshalb mit, welche Hefte auf ihr schon vollzogen
+sind: Der kanonische Klartext trägt dafür im Kopf die Zeilen
 
-(4) Ausgegeben wird allein, was das Datenmodell trägt; erfunden wird nichts. Für
+```text
+Stand: Zuletzt geändert durch Art. 6 G v. 12.5.2026 I Nr. 139
+Fortgeschrieben durch: Änderungsgesetz vom 12. Februar 2026
+```
+
+und der Lader liest sie zurück. Trifft ein Heft ein zweites Mal auf dieselbe Fassung,
+so wird das gerügt; abgebrochen wird nicht, denn verworfen wird hier nichts
+(§ 1 Absatz 4). Ein Heft nennt sich dabei nach dem, was in ihm selbst steht — nach
+seiner Drucksachennummer, sonst nach seinem Ausfertigungsdatum („Vom 12. Februar
+2026“) —, und nicht nach seinem Dateinamen. Führt ein Sammelheft mehrere
+Verkündungen, so bleibt es unbezeichnet: Welche von ihnen es ausmacht, sagt es nicht,
+und ein falsch bezeichnetes Heft wäre schlimmer als ein unbezeichnetes.
+
+(5) Aus dem Vermerk folgt zugleich, dass die Altersrüge (§ 1 Absatz 6) in der Kette
+weiterträgt: Wer ein Heft anwendet, macht den Wortlaut so jung wie dieses Heft, und
+ein weiteres Heft, das eine ältere Fassung fortschreiben will, wird als solches
+erkannt — auch dann, wenn die Standzeile der Quelle davon noch nichts weiß.
+
+(6) Ausgegeben wird allein, was das Datenmodell trägt; erfunden wird nichts. Für
 Bundesrecht ist die Ausgabe deshalb eine getreue Wiedergabe des Wortlauts, aber kein
 Rundlauf ins gii-XML: Jenes Format führt einen Fußnotenapparat und Standangaben, die
 der Klartext nicht aufnimmt. Was der Klartext trägt, trägt er vollständig — dass der
@@ -866,7 +894,9 @@ kein Selbstzweck: Er deckt gerade die Verluste auf, die ein Ausgeber sonst
 stillschweigend einbaut, und hat auf Anhieb zwei Lücken des Lesers zutage
 gefördert — die unvollständige Nachfolgerliste der Unter-Überschriften und die
 aufgehobene Sammelnorm des Bundesrechts („§§ 17 u. 18 (weggefallen)“), deren
-Kopfzeile zuvor in den Wortlaut der Vornorm gefallen wäre.
+Kopfzeile zuvor in den Wortlaut der Vornorm gefallen wäre. Der Rundlauf umfasst
+auch den Kopf: Standangabe und angewandte Hefte müssen ihn überstehen, sonst
+verlöre die Kette bei jedem Schritt ihr Gedächtnis (§ 6a Absatz 4).
 
 ## Lizenz
 

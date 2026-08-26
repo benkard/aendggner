@@ -4,6 +4,7 @@ package eu.mulk.aendggner.aenderung.parse;
 
 import eu.mulk.aendggner.aenderung.DokumentArt;
 import eu.mulk.aendggner.aenderung.DokumentKopf;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -78,6 +79,9 @@ public final class DokumentErkenner {
   /** So viele Zeilen darf ein Titel überspannen. */
   private static final int TITELZEILEN = 6;
 
+  /** Die Ausfertigungszeile eines verkündeten Werkes: „Vom 22. April 2026“. */
+  private static final Pattern VOM_ZEILE = Pattern.compile("^Vom " + DeutschesDatum.MUSTER + "$");
+
   /**
    * @param rohText der unbereinigte Extraktionstext des Dokuments.
    */
@@ -85,7 +89,47 @@ public final class DokumentErkenner {
     var zeilen = kopfZeilen(rohText);
     var art = bestimmeArt(zeilen, rohText);
     return new DokumentKopf(
-        art, eigeneDrucksache(zeilen), bezugsDrucksachen(zeilen), titel(zeilen));
+        art,
+        eigeneDrucksache(zeilen),
+        bezugsDrucksachen(zeilen),
+        titel(zeilen),
+        ausfertigung(rohText));
+  }
+
+  /**
+   * Eine Rohtextzeile, wie die Erkennung sie liest: ohne die Zeilenend- und Schriftgrößenmarken aus
+   * dem privaten Unicode-Bereich, die erst der {@link TextBereiniger} auswertet, und ohne
+   * geschützte Leerzeichen, die für {@code \s} nicht als Leerraum zählen. Beides hinge sonst
+   * unsichtbar an Titeln, Nummern und Daten.
+   */
+  private static String normiere(String zeile) {
+    return ZU_LEERRAUM.matcher(zeile).replaceAll(" ").replaceAll("\\s+", " ").strip();
+  }
+
+  /**
+   * Das Ausfertigungsdatum, das die Zeile „Vom …“ nennt.
+   *
+   * <p>Nur wenn das <em>ganze</em> Dokument genau eine solche Zeile führt. Ein Sammelheft stellt
+   * mehrere Verkündungen nebeneinander (so das thüringische GVBl. Nr. 2/2026 mit vieren), und
+   * welche von ihnen das Dokument ausmacht, sagt es nicht; dann bleibt das Datum lieber leer, als
+   * falsch zu sein. Denn an ihm hängt die Wiedererkennung des Heftes, und ein falsch bezeichnetes
+   * Heft wäre schlimmer als ein unbezeichnetes. Gesucht wird deshalb über den vollen Text und nicht
+   * bloß über die {@link #KOPFZEILEN} des Kopfes: Die zweite Verkündung stünde sonst außerhalb des
+   * Blickfeldes, und das Heft trüge den Namen der ersten.
+   */
+  private static @Nullable LocalDate ausfertigung(String rohText) {
+    LocalDate gefunden = null;
+    for (var zeile : rohText.split("\n", -1)) {
+      var m = VOM_ZEILE.matcher(normiere(zeile));
+      if (!m.matches()) {
+        continue;
+      }
+      if (gefunden != null) {
+        return null;
+      }
+      gefunden = DeutschesDatum.lies(m.group(1), m.group(2), m.group(3));
+    }
+    return gefunden;
   }
 
   /**
@@ -94,10 +138,7 @@ public final class DokumentErkenner {
   private static List<String> kopfZeilen(String rohText) {
     var zeilen = new ArrayList<String>();
     for (var zeile : rohText.split("\n", -1)) {
-      // Der Rohtext trägt noch die Zeilenend- und Schriftgrößenmarken aus dem privaten
-      // Unicode-Bereich, die erst der TextBereiniger auswertet, dazu geschützte Leerzeichen, die
-      // für \s nicht als Leerraum zählen. Beides hinge sonst unsichtbar an Titeln und Nummern.
-      var normiert = ZU_LEERRAUM.matcher(zeile).replaceAll(" ").replaceAll("\\s+", " ").strip();
+      var normiert = normiere(zeile);
       if (normiert.isEmpty()) {
         continue;
       }

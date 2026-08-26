@@ -1667,6 +1667,39 @@ class EndToEndTest {
     assertThat(ergebnis.html()).contains("keine Änderungsbefehle");
   }
 
+  /**
+   * Die Kette und ihr Gedächtnis. Die eigene Ausgabe ist wieder Eingabe; sie trägt im Kopf, welche
+   * Hefte auf ihr schon vollzogen sind. Trifft dasselbe Heft ein zweites Mal auf sie, so greifen
+   * seine Befehle abermals — ein Befehl ist eine Anordnung und keine Zustandsbeschreibung —, und
+   * der angefügte Absatz stünde zweimal da. Am Wortlaut allein ist das nicht zu erkennen, wohl aber
+   * an dem, was die Fassung über sich selbst mitführt.
+   */
+  @Test
+  void ketteRuegtDasZweimalAngewandteHeft() throws Exception {
+    var xml = SAMPLEDATA.resolve("UWG/BJNR141400004.xml");
+    var pdf = SAMPLEDATA.resolve("UWG/bgbl126s0043_regelungstext.pdf");
+    assumeTrue(Files.exists(xml) && Files.exists(pdf), "UWG-Beispieldaten fehlen");
+
+    var erste = Pipeline.erzeugeSynopse(Pipeline.Auftrag.von(xml, List.of(pdf)));
+    assertThat(erste.anzahlAngewandt()).isEqualTo(19);
+    // Das Heft nennt sich nach dem, was im Dokument steht (Ausfertigungsdatum), nicht nach seinem
+    // Dateinamen — sonst hinge die Wiedererkennung an einer Zufälligkeit des Ablageortes.
+    assertThat(erste.neufassung())
+        .containsOnlyOnce("Fortgeschrieben durch: Änderungsgesetz vom 12. Februar 2026");
+
+    var zwischenfassung =
+        new Quelle("UWG-Zwischenfassung.txt", erste.neufassung().getBytes(StandardCharsets.UTF_8));
+    var zweite =
+        Pipeline.erzeugeSynopse(Pipeline.Auftrag.von(zwischenfassung, List.of(Quelle.lies(pdf))));
+
+    assertThat(zweite.html())
+        .contains("Die Fassung trägt „Änderungsgesetz vom 12. Februar 2026“ bereits")
+        .contains("ein zweites Mal angewandt");
+    // Vermerkt bleibt das Heft einmal: Die Liste zählt Hefte, nicht Anwendungen.
+    assertThat(zweite.neufassung())
+        .containsOnlyOnce("Fortgeschrieben durch: Änderungsgesetz vom 12. Februar 2026");
+  }
+
   private static Aenderungsbefehl befehlZu(
       AenderungsgesetzParser.ParseErgebnis ergebnis, String gliederungsPfad) {
     return ergebnis.befehle().stream()

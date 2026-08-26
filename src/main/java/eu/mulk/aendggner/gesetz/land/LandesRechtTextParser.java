@@ -3,9 +3,11 @@
 package eu.mulk.aendggner.gesetz.land;
 
 import eu.mulk.aendggner.gesetz.Absatz;
+import eu.mulk.aendggner.gesetz.Fortschreibung;
 import eu.mulk.aendggner.gesetz.Gesetz;
 import eu.mulk.aendggner.gesetz.Gliederung;
 import eu.mulk.aendggner.gesetz.Norm;
+import eu.mulk.aendggner.gesetz.Stand;
 import eu.mulk.aendggner.gesetz.Superskript;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,6 +39,13 @@ import org.jspecify.annotations.Nullable;
 final class LandesRechtTextParser {
 
   private static final Pattern ABSATZ_MARKER = Pattern.compile("^\\((\\d+[a-z]?)\\)\\s+");
+
+  /** Die Standangabe der Quelle, wie der {@link LandesRechtTextAusgeber} sie schreibt. */
+  private static final Pattern STAND_ZEILE = Pattern.compile("^Stand: (\\S.*)$");
+
+  /** Ein bereits angewandtes Änderungsheft, gleichfalls aus der Feder des Ausgebers. */
+  private static final Pattern FORTSCHREIBUNGS_ZEILE =
+      Pattern.compile("^Fortgeschrieben durch: (\\S.*)$");
 
   // Juris-Abkürzung direkt hinter dem Langtitel. Bayern führt einteilige Kürzel („(BayJG)“), die
   // übrigen Länder oft mehrteilige („(GO NRW)“); Nur die Zeile unmittelbar nach dem Titel wird
@@ -189,7 +198,20 @@ final class LandesRechtTextParser {
       }
     }
     // Rest des Titelblocks (Datum, Fundstellen, Vollzitat) bis zur ersten Struktur überspringen.
+    // Zwei Zeilenformen werden dabei aufgenommen statt verworfen: die Standangabe der Quelle und
+    // die Hefte, die das Erzeugnis selbst schon angewandt hat. Beides gibt der Ausgeber aus; würde
+    // es hier fallen, so verlöre die Kette bei jedem Schritt ihr Gedächtnis.
+    Stand stand = null;
+    var fortschreibungen = new ArrayList<Fortschreibung>();
     while (i < zeilen.size() && !istStrukturZeile(zeilen, i)) {
+      var kopfzeile = zeilen.get(i).strip();
+      var standZeile = STAND_ZEILE.matcher(kopfzeile);
+      var heftZeile = FORTSCHREIBUNGS_ZEILE.matcher(kopfzeile);
+      if (standZeile.matches()) {
+        stand = Stand.aus(standZeile.group(1).strip());
+      } else if (heftZeile.matches()) {
+        fortschreibungen.add(Fortschreibung.aus(heftZeile.group(1).strip()));
+      }
       i++;
     }
 
@@ -347,7 +369,14 @@ final class LandesRechtTextParser {
           "Kein „§ N“- oder „Art. N“-Normkopf gefunden — ist das eine konsolidierte Fassung im"
               + " kanonischen Klartextformat?");
     }
-    return new Gesetz(jurabk != null ? jurabk : langue, langue, kurzue, normen, gliederungen);
+    return new Gesetz(
+        jurabk != null ? jurabk : langue,
+        langue,
+        kurzue,
+        normen,
+        gliederungen,
+        stand,
+        fortschreibungen);
   }
 
   /** Eröffnet die Zeile eine Struktureinheit (Gliederung, Inhaltsübersicht oder Normkopf)? */

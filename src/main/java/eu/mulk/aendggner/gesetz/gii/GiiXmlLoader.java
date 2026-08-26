@@ -165,10 +165,6 @@ public final class GiiXmlLoader {
     return null;
   }
 
-  /** „… v. 19.6.2020 I 1385“ — das Datum, das eine Standangabe nennt. */
-  private static final Pattern STANDDATUM =
-      Pattern.compile("v\\. (\\d{1,2})\\.(\\d{1,2})\\.(\\d{4})");
-
   /**
    * Der Stand des Gesetzes: die Standzeile im Wortlaut und das späteste Datum, das
    * <em>irgendeine</em> Standangabe nennt. Die Hinweise („Änderung durch Art. 1 G v. 18.11.2020 …
@@ -186,20 +182,9 @@ public final class GiiXmlLoader {
       if (zeile == null && "Stand".equals(kindText(angabe, "standtyp"))) {
         zeile = kommentar;
       }
-      var m = STANDDATUM.matcher(kommentar);
-      while (m.find()) {
-        try {
-          var datum =
-              LocalDate.of(
-                  Integer.parseInt(m.group(3)),
-                  Integer.parseInt(m.group(2)),
-                  Integer.parseInt(m.group(1)));
-          if (juengste == null || datum.isAfter(juengste)) {
-            juengste = datum;
-          }
-        } catch (RuntimeException ignoriert) {
-          // Ein verschriebenes Datum („19.5..2020“) kommt vor; es bleibt außer Betracht.
-        }
+      var datum = Stand.juengstesDatum(kommentar);
+      if (datum != null && (juengste == null || datum.isAfter(juengste))) {
+        juengste = datum;
       }
     }
     return zeile == null ? null : new Stand(zeile, juengste);

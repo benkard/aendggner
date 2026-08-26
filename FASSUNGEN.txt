@@ -21,6 +21,120 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 26. August 2026,
+ zuletzt geändert durch die am 26. August 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Die Kette führte kein Gedächtnis. Wer die eigene Ausgabe des Erzeugnisses als
+Stammgesetz eines weiteren Laufes einspeiste, gab ihr eine Fassung, der nicht
+anzusehen war, welche Hefte auf ihr bereits vollzogen sind; dasselbe Heft ein
+zweites Mal angewandt fügte denselben Absatz ein zweites Mal an. Bei näherer
+Prüfung erwies sich der Mangel als tiefer, als die bisherige Warnung des
+Handbuchs (§ 6a Absatz 3 alter Fassung) besagte: Der Textausgeber schrieb die
+Standangabe der Quelle sehr wohl aus, der Textparser aber verwarf sie mitsamt
+allem, was vor dem ersten Normkopf steht. Die vom Erzeugnis errechnete Fassung
+war mithin standlos, und die Altersrüge (§ 1 Absatz 6 des Handbuchs) konnte auf
+ihr niemals anschlagen.
+
+
+Artikel 1
+Vermerk der angewandten Änderungshefte
+
+(1) Es wird der Begriff der Fortschreibung (Fortschreibung) eingeführt. Sie
+    bezeichnet ein Änderungsheft, das auf einen Wortlaut bereits angewandt worden
+    ist, und besteht aus dessen Bezeichnung und dessen Ausfertigungsdatum.
+
+(2) Das Gesetz (Gesetz) führt fortan die geordnete Liste seiner Fortschreibungen
+    mit. Hinzu treten die Methoden „mitFortschreibung“, „traegt“ und
+    „wortlautStand“; letztere gibt das späteste Datum an, das entweder die
+    Standangabe der Quelle oder eines der angewandten Hefte nennt.
+
+(3) Der Textausgeber (LandesRechtTextAusgeber) schreibt für jede Fortschreibung
+    die Zeile „Fortgeschrieben durch: …“ hinter die Standzeile. Der Textparser
+    (LandesRechtTextParser) nimmt beide Zeilenformen im Titelblock auf, statt sie
+    zu verwerfen. Damit übersteht das Gedächtnis den Rundlauf.
+
+(4) Die Standzeile wird bei dieser Gelegenheit an einer Stelle zusammengeführt:
+    Die Erhebung des jüngsten Datums aus einer Standangabe steht fortan im Stand
+    (Stand.juengstesDatum, Stand.aus) und nicht mehr im Lader des gii-XML, der
+    sie nunmehr von dort bezieht.
+
+
+Artikel 2
+Bezeichnung eines Änderungsdokuments aus ihm selbst
+
+(1) Der Dokumentkopf (DokumentKopf) wird um das Ausfertigungsdatum ergänzt. Der
+    Dokumenterkenner (DokumentErkenner) erhebt es aus der für sich stehenden
+    Zeile „Vom <Datum>“.
+
+(2) Erhoben wird es nur, wenn das gesamte Dokument genau eine solche Zeile führt.
+    Ein Sammelheft stellt mehrere Verkündungen nebeneinander — das thüringische
+    Gesetz- und Verordnungsblatt Nr. 2/2026 deren vier —, und welche von ihnen
+    das Dokument ausmacht, sagt es nicht. Gesucht wird deshalb über den vollen
+    Text und nicht über die ersten einhundertzwanzig Kopfzeilen; anderenfalls
+    bliebe die zweite Verkündung außer Sicht und das Heft trüge den Namen der
+    ersten.
+
+(3) Der Anzeigename (DokumentKopf.anzeigeName) nennt fortan neben der eigenen
+    Drucksachennummer hilfsweise das Ausfertigungsdatum („Änderungsgesetz vom
+    12. Februar 2026“). Er ist zugleich der Schlüssel, an dem eine Fassung ein
+    Heft wiedererkennt; maßgeblich ist mithin, was im Dokument steht, und nicht,
+    wie die Datei benannt ist.
+
+
+Artikel 3
+Rüge der zweiten Anwendung; Reihenfolge der Hefte
+
+(1) Die Kernpipeline (Pipeline) vermerkt nach jedem Änderungsdokument, dessen
+    Befehle wenigstens einmal gegriffen haben, die zugehörige Fortschreibung am
+    Gesetz. Ein Heft, dessen Befehle sämtlich liegenblieben, hat den Wortlaut
+    nicht fortgeschrieben und wird nicht vermerkt.
+
+(2) Trägt die Fassung das Heft bereits, so ergeht eine Rüge in der Synopse. Der
+    Lauf wird nicht abgebrochen und kein Befehl verworfen (§ 1 Absatz 4 des
+    Handbuchs); vermerkt wird das Heft alsdann kein zweites Mal, denn die Liste
+    zählt Hefte und nicht Anwendungen.
+
+(3) Tragen sämtliche Änderungsdokumente eines Laufes ein Ausfertigungsdatum, so
+    werden sie in dessen Reihenfolge angewandt; jedes Heft setzt den Stand
+    voraus, den das vorige hinterlässt. Fehlt einem das Datum, so verbleibt es
+    bei der Reihenfolge der Aufrufargumente. Eine Umstellung wird in der Synopse
+    genannt.
+
+(4) Die Altersrüge (AenderungsgesetzParser) bemisst sich fortan nach dem
+    Wortlautstand des Gesetzes und nicht mehr allein nach dessen Standzeile. Sie
+    trägt damit auch in der Kette: Wer ein Heft anwendet, macht den Wortlaut so
+    jung wie dieses Heft.
+
+
+Artikel 4
+Änderung des Handbuchs
+
+Das Handbuch (README.md) wird wie folgt geändert:
+
+1.  § 5 Absatz 2 wird um eine Nummer 4 ergänzt, die die beiden Kopfzeilen des
+    kanonischen Klartextes benennt.
+
+2.  § 6a wird um die Absätze 3 bis 5 ergänzt (Reihenfolge der Hefte, Gedächtnis
+    der Kette nebst Rüge, Fortwirkung der Altersrüge); die bisherigen Absätze 3
+    und 4 werden die Absätze 4 und 6.
+
+3.  § 17 Absatz 3 wird dahin ergänzt, dass der Rundlauf auch den Kopf umfasst.
+
+
+Schlussbestimmung
+
+Die vorstehenden Änderungen sind durch die Prüfung sämtlicher Testfälle
+(dreihundertsiebenundneunzig an der Zahl, zuvor dreihundertachtundachtzig) sowie
+durch die vollständige Erstellung (mvnw verify) bestätigt worden. Neu hinzu
+getreten sind der Rundlauf des Kopfes (LandesRechtTextAusgeberTest), die Erhebung
+und die Prüfung des Ausfertigungsdatums an sechs Beispieldokumenten
+(DokumentErkennerTest) sowie die Kettenprüfung am Heft des Dritten Gesetzes zur
+Änderung des Gesetzes gegen den unlauteren Wettbewerb (EndToEndTest). Die
+Auszeichnung nach REUSE ist vollständig (191 von 191 Dateien).
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 25. August 2026,
  zuletzt geändert durch die am 25. August 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════
