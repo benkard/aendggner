@@ -25,6 +25,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortlautVoranstellung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortlautZuAbsatz;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortlautZuSatz;
 import eu.mulk.aendggner.aenderung.Stelle;
+import eu.mulk.aendggner.aenderung.parse.PunktPfad;
 import eu.mulk.aendggner.gesetz.Absatz;
 import eu.mulk.aendggner.gesetz.Gesetz;
 import eu.mulk.aendggner.gesetz.Gliederung;
@@ -107,6 +108,14 @@ public final class BefehlAnwender {
           && istNurUeberschrift(n.stelle())) {
         neuerLangtitel = n.neuerText().replaceAll("\\s+", " ").strip();
         ergebnisse[index] = angewandt(schritt.teil(), "(Gesetzesüberschrift)");
+        continue;
+      }
+      // Der verweisende Befehl braucht die Befehlsliste — er nimmt einen anderen Punkt desselben
+      // Artikels in Bezug —, und die hat nur diese Schleife. Er steht deshalb hier und nicht in der
+      // Weiche. Vorausgesetzt ist, dass der verwiesene Punkt bereits vollzogen ist; das trägt die
+      // Schritt-Ordnung, denn ein Verweis auf einen „vorstehenden“ Punkt steht hinter ihm.
+      if (schritt.ganzerBefehl() && schritt.teil() instanceof VerweisenderBefehl v) {
+        ergebnisse[index] = fuehreVerweisungAus(normen, befehle, v);
         continue;
       }
       var ergebnis = wendeAn(normen, gliederungen, schritt.teil());
@@ -658,6 +667,103 @@ public final class BefehlAnwender {
     };
   }
 
+  /**
+   * Führt den verweisenden Befehl aus: „Die Inhaltsübersicht wird entsprechend der vorstehenden
+   * Nummer 8 Buchst. a geändert.“
+   *
+   * <p>Ausgeführt wird nicht der Wortlaut des verwiesenen Punktes, sondern sein Ergebnis. Jener
+   * ändert die Überschrift eines Paragraphen; die Angabe der Inhaltsübersicht wird alsdann auf den
+   * Titel gesetzt, den der Paragraph nunmehr trägt. Das ist genau, was „entsprechend“ meint, und es
+   * erspart, jede Befehlsform ein zweites Mal auf dem Zeilenmodell nachzubilden.
+   *
+   * <p>Was der Verweis nicht trägt, bleibt liegen und wird benannt: ein Punkt, der sich nicht
+   * findet, und ein Punkt, der etwas anderes als eine Überschrift ändert. Für letzteren wäre die
+   * Übertragung zu erraten — die Inhaltsübersicht führt allein Bezeichnung und Überschrift, und was
+   * im Absatz eines Paragraphen geschieht, hat in ihr kein Gegenstück.
+   */
+  private static AngewandteAenderung fuehreVerweisungAus(
+      List<Norm> normen, List<Aenderungsbefehl> befehle, VerweisenderBefehl verweisung) {
+    var pfad = PunktPfad.aus(verweisung.verweis());
+    if (pfad.isEmpty()) {
+      return manuell(
+          verweisung,
+          Grund.NICHT_UNTERSTUETZT,
+          "Der Verweis auf „"
+              + verweisung.verweis()
+              + "“ nennt keinen Gliederungspunkt, dem sich ein Befehl zuordnen ließe.");
+    }
+    var verwiesene = new ArrayList<Aenderungsbefehl>();
+    for (var befehl : befehle) {
+      if (trifftPfad(befehl, verweisung, pfad)) {
+        if (befehl instanceof Sammelbefehl s) {
+          verwiesene.addAll(s.teilbefehle());
+        } else {
+          verwiesene.add(befehl);
+        }
+      }
+    }
+    if (verwiesene.isEmpty()) {
+      return manuell(
+          verweisung,
+          Grund.STELLE_NICHT_AUFLOESBAR,
+          "Der verwiesene Punkt „"
+              + verweisung.verweis()
+              + "“ findet sich nicht im selben Artikel.");
+    }
+    var betroffen = new LinkedHashSet<String>();
+    for (var befehl : verwiesene) {
+      if (!befehl.stelle().betrifftUeberschrift()) {
+        return manuell(
+            verweisung,
+            Grund.NICHT_UNTERSTUETZT,
+            "Der verwiesene Punkt „"
+                + verweisung.verweis()
+                + "“ ändert keine Überschrift; nur deren Änderung hat in der Inhaltsübersicht ein"
+                + " Gegenstück.");
+      }
+      var paragraph = befehl.stelle().paragraph().orElse(null);
+      if (paragraph == null) {
+        return manuell(
+            verweisung,
+            Grund.STELLE_NICHT_AUFLOESBAR,
+            "Der verwiesene Punkt „" + verweisung.verweis() + "“ nennt keinen Paragraphen.");
+      }
+      int index = StellenAufloeser.normIndex(gesetzAus(normen), paragraph.enbez());
+      if (index < 0) {
+        return manuell(
+            verweisung,
+            Grund.BESTAND_WIDERSPRICHT,
+            "Das Gesetz führt keinen " + paragraph.enbez() + ".");
+      }
+      var titel = normen.get(index).titel();
+      if (titel == null || titel.isBlank()) {
+        return manuell(
+            verweisung,
+            Grund.BESTAND_WIDERSPRICHT,
+            paragraph.enbez() + " trägt keine Überschrift, die nachzuführen wäre.");
+      }
+      var ergebnis =
+          InhaltsuebersichtAnwender.fuehreTitelNach(normen, verweisung, paragraph, titel);
+      if (ergebnis.status() != Status.ANGEWANDT) {
+        return ergebnis;
+      }
+      betroffen.add(paragraph.enbez());
+    }
+    return new AngewandteAenderung(
+        verweisung, Status.ANGEWANDT, "", new LinkedHashSet<>(List.of("Inhaltsübersicht")), null);
+  }
+
+  /** Ob der Befehl an dem Punkt steht, auf den die Verweisung zielt (oder unterhalb seiner). */
+  private static boolean trifftPfad(
+      Aenderungsbefehl befehl, VerweisenderBefehl verweisung, String pfad) {
+    var herkunft = befehl.provenienz();
+    if (!herkunft.artikel().equals(verweisung.provenienz().artikel())) {
+      return false;
+    }
+    var eigener = herkunft.gliederungsPfad();
+    return eigener.equals(pfad) || eigener.startsWith(pfad + " ");
+  }
+
   private static boolean istNurUeberschrift(Stelle stelle) {
     return stelle.komponenten().size() == 1
         && stelle.komponenten().get(0) instanceof Stelle.Ueberschrift;
@@ -668,19 +774,17 @@ public final class BefehlAnwender {
     if (befehl instanceof UnbekannterBefehl) {
       return manuell(befehl, Grund.NICHT_ERKANNT, "Befehl nicht erkannt.");
     }
-    // Gelesen, aber bewusst nicht ausgeführt. Die Weiche steht vor der Inhaltsübersichts-Weiche,
-    // damit die Rüge den Verweis nennt und nicht bloß die allgemeine Grenze jener Norm: Die
-    // sinngemäße Übertragung eines anderen Punktes setzte einen Rückgriff auf die Befehlsliste und
-    // eine Umdeutung des Ziels voraus („Überschrift des § 13“ → Titelspalte der Übersichtszeile),
-    // die dieser Anwender nicht leistet. Sie zu erraten wäre schlimmer, als sie zu benennen.
+    // Ausgeführt wird der verweisende Befehl in der Schleife von anwenden(), die allein die
+    // Befehlsliste kennt. Hierher gerät er nur als Teil eines Sammelbefehls oder wenn ihn jemand
+    // einzeln anwendet; dann fehlt der Bezugspunkt, und das ist zu sagen.
     if (befehl instanceof VerweisenderBefehl v) {
       return manuell(
           befehl,
-          Grund.NICHT_UNTERSTUETZT,
+          Grund.STELLE_NICHT_AUFLOESBAR,
           "Der Befehl verweist auf „"
               + v.verweis()
-              + "“ desselben Artikels; die sinngemäße Übertragung auf die Inhaltsübersicht ist"
-              + " nicht umgesetzt.");
+              + "“ desselben Artikels; die übrigen Befehle des Artikels liegen an dieser Stelle"
+              + " nicht vor.");
     }
     // Sammelbefehle vor den Spezialweichen dispatchen (jeder Teil wird einzeln geroutet).
     if (befehl instanceof Sammelbefehl s) {
@@ -2711,12 +2815,21 @@ public final class BefehlAnwender {
   // Eine §-Überschrift beginnt mit „§ N“, gefolgt von einem großgeschriebenen Titelwort — im
   // Gegensatz zu Querverweisen wie „§ 71 Absatz 1“ oder „§§ 42 bis 45“. Die Negativliste schließt
   // die Untergliederungs- und Verbindungswörter aus, sodass an solchen Stellen nicht getrennt wird.
+  // Ein Normkopf steht am Anfang einer Zeile oder wenigstens am Anfang eines Satzes. Ohne diese
+  // Bedingung zerschnitte ein Querverweis mitten im Satz den Block: „… mit Systemen für die
+  // Gebäudeautomatisierung nach § 71a Projektunterlagen in überprüfbarer Form vorzulegen.“ trägt
+  // hinter dem Verweis ein großgeschriebenes Wort und sähe damit aus wie eine Überschrift. Der
+  // Wortbestand unterscheidet beide nicht — die Stellung tut es. Der Satzanfang muss neben dem
+  // Zeilenanfang gelten, weil ein Zitat auch flach ankommen kann („§ 1a Erstes Neu (1) Inhalt
+  // eins. § 1b Zweites Neu …“).
   private static final Pattern PARAGRAPH_UEBERSCHRIFT =
       Pattern.compile(
-          "(?=(?:§|Art\\.)\\s*\\d+[a-z]?\\s+"
+          "(?:^[ \\t]*|(?<=[.:!?] )|(?<=[.:!?]“ ))"
+              + "(?=(?:§|Art\\.)\\s*\\d+[a-z]?(?:[ \\t]*$|\\s+"
               + "(?!Absatz|Absätze|Abs|Satz|Sätze|Nummer|Nummern|Nr|Buchstabe|Buchstaben|Buchst"
               + "|und|bis|oder|sowie|des|der|dieses|genannten)"
-              + "\\p{Lu})");
+              + "\\p{Lu}))",
+          Pattern.MULTILINE);
 
   /**
    * Zerlegt einen Zitatblock mehrerer Paragraphen an den §-Überschriften (nicht an Querverweisen)
@@ -2831,11 +2944,24 @@ public final class BefehlAnwender {
     int i = von + 1;
     while (i < zeilen.size()
         && !zeilen.get(i).isEmpty()
-        && Character.isLowerCase(zeilen.get(i).codePointAt(0))) {
+        && (Character.isLowerCase(zeilen.get(i).codePointAt(0))
+            || UNVOLLENDET.matcher(zeilen.get(i - 1)).find())) {
       i++;
     }
     return i;
   }
+
+  /**
+   * Eine Zeile, die so endet, ist nicht zu Ende: Kein Normtitel schließt mit einem Binde- oder
+   * Verhältniswort. Die Großschreibung der Folgezeile besagt dann nichts — „… in elektrischen
+   * Wärmepumpen und“ / „Wärmepumpen-Hybridheizungen“ ist eine Überschrift, die der Satz am
+   * Spaltenrand umbrochen hat, und keine zwei Sachen.
+   */
+  private static final Pattern UNVOLLENDET =
+      Pattern.compile(
+          "(?:\\b(?:und|oder|sowie|mit|von|vom|zu|zur|zum|in|im|an|am|auf|für|bei|beim|über|unter"
+              + "|nach|aus|durch|gegen|ohne|des|der|die|das|dem|den|eines|einer|einem|einen)|-)$",
+          Pattern.CASE_INSENSITIVE);
 
   /** Zerlegt zitierten Text in Absätze anhand der „(n)“-Marker. */
   static List<Absatz> parseAbsaetze(String zitat) {

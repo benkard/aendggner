@@ -15,6 +15,7 @@ import eu.mulk.aendggner.aenderung.parse.SuperskriptModus;
 import eu.mulk.aendggner.aenderung.parse.TextBereiniger;
 import eu.mulk.aendggner.anwendung.BefehlAnwender;
 import eu.mulk.aendggner.anwendung.Grund;
+import eu.mulk.aendggner.anwendung.InhaltsuebersichtsProbe;
 import eu.mulk.aendggner.anwendung.Nachfassungsabgleich;
 import eu.mulk.aendggner.gesetz.Fortschreibung;
 import eu.mulk.aendggner.gesetz.Gesetz;
@@ -215,6 +216,9 @@ public final class Pipeline {
     if (stichtag == null && inkrafttreten != null && inkrafttreten.gestaffelt()) {
       warnungen.add(staffelungsWarnung(inkrafttreten));
     }
+    // Erst nach allen Heften: Ob die Inhaltsübersicht dem Text folgt, steht am Ende fest und nicht
+    // nach jedem einzelnen Schritt.
+    warnungen.addAll(InhaltsuebersichtsProbe.pruefe(altesGesetz, gesetz));
     var gesamtErgebnis = new BefehlAnwender.AnwendungsErgebnis(gesetz, protokoll);
     var synopse =
         SynopseBuilder.baue(

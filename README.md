@@ -41,6 +41,7 @@ durchgerechneten Beispiele sind der kürzeste Weg zum ersten Ergebnis
 - [§ 6 Betrieb der Befehlszeilenfassung](#-6-betrieb-der-befehlszeilenfassung)
 - [§ 6a Die fortgeschriebene Fassung; die Kette](#-6a-die-fortgeschriebene-fassung-die-kette)
 - [§ 6b Abgleich mit der amtlichen Nachfassung](#-6b-abgleich-mit-der-amtlichen-nachfassung)
+- [§ 6c Probe auf die Inhaltsübersicht](#-6c-probe-auf-die-inhaltsübersicht)
 - [§ 7 Erkannte Änderungsbefehle](#-7-erkannte-änderungsbefehle)
 - [§ 8 Reihenfolge der Anwendung](#-8-reihenfolge-der-anwendung)
 - [§ 9 Aufbereitung der Druckwerke](#-9-aufbereitung-der-druckwerke)
@@ -332,6 +333,28 @@ Damit messen Werkzeug und Prüfung an einem Maßstab, und die Erschließung eine
 weiteren Landes braucht keinen eigenen Prüfcode mehr: Stammfassung, Heft, Nachfassung
 — das Erzeugnis sagt selbst, wo es danebenliegt.
 
+## § 6c Probe auf die Inhaltsübersicht
+
+(1) Ein Änderungsgesetz, das Paragraphen einfügt, aufhebt, umnummeriert oder ihre
+Überschriften neu fasst, muss die Angaben der Inhaltsübersicht eigens mitändern; das
+Handbuch der Rechtsförmlichkeit verlangt dafür eigene Befehle (§ 7 Absatz 2 Nummer 7).
+Bleiben sie aus oder greifen sie nicht, so bleibt die Übersicht hinter dem Text
+zurück — **ohne dass ein einziger Befehl liegenbliebe**. Das zeigt keine Zahl des
+Protokolls an.
+
+(2) Nach vollzogener Anwendung wird die Inhaltsübersicht deshalb gegen den Normbestand
+gehalten und jede Abweichung gerügt. Geprüft wird allein der Unterschied: die Normen,
+deren Bezeichnung oder Überschrift *dieser Lauf* verändert hat. Was die Quelle von sich
+aus ungenau führt, geht die Probe nichts an — das wäre ein Befund über die Quelle und
+nicht über den Lauf.
+
+(3) Geheilt wird nichts. Die Inhaltsübersicht ist eine Norm wie jede andere; sie ohne
+Befehl fortzuschreiben hieße, Recht zu erfinden.
+
+(4) Die Rüge nennt den Befund und nicht dessen Ursache. Es kommt nämlich vor, dass die
+amtliche Fassung selbst beides verschieden führt: Das Gebäudeenergiegesetz schreibt in
+der Überschrift des § 71k „Gas“ und in der Angabe dazu „Erdgas“.
+
 ## § 7 Erkannte Änderungsbefehle
 
 (1) Erkannt werden die gebräuchlichsten Änderungsbefehle des Handbuchs der
@@ -378,12 +401,15 @@ Streichen und Umnummerierung.
 16. die Neufassung der Gesetzesüberschrift sowie
 17. die Verweisung auf einen anderen Punkt desselben Artikels („Die
     Inhaltsübersicht wird entsprechend der vorstehenden Nummer 8 Buchst. a
-    geändert“). Sie wird gelesen, aber nicht ausgeführt: Die sinngemäße
-    Übertragung setzte einen Rückgriff auf die Befehlsliste und eine Umdeutung
-    des Ziels voraus, die das Erzeugnis nicht leistet. Gelesen zu werden ist
-    gleichwohl mehr als gar nichts — die Rüge sagt alsdann, dass hier das
-    Erzeugnis die Grenze zieht, und nicht, dass die Vorlage unverständlich sei
-    (§ 1 Absatz 5).
+    geändert“). Übertragen wird nicht der Wortlaut des verwiesenen Punktes,
+    sondern sein **Ergebnis**: Jener ändert die Überschrift eines Paragraphen,
+    und die Angabe der Inhaltsübersicht wird auf den Titel gesetzt, den der
+    Paragraph danach trägt. Das trifft, was „entsprechend“ meint, und erspart es,
+    jede Befehlsform ein zweites Mal auf dem Zeilenmodell der Übersicht
+    nachzubilden. Zielt der verwiesene Punkt auf etwas anderes als eine
+    Überschrift, so bleibt der Befehl liegen, und die Rüge sagt es: Die Übersicht
+    führt allein Bezeichnung und Überschrift, und was im Absatz eines Paragraphen
+    geschieht, hat in ihr kein Gegenstück.
 
 (3) Landesrechtliche Befehlsformen bestimmt ergänzend § 13.
 

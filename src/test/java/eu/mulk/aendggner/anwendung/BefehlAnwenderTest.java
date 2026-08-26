@@ -18,6 +18,7 @@ import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturErsetzung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Umnummerierung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.UnbekannterBefehl;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.VerweisenderBefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WoerterEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.WortAnker;
 import eu.mulk.aendggner.aenderung.Provenienz;
@@ -1027,6 +1028,81 @@ class BefehlAnwenderTest {
     assertThat(absatzText(ergebnis.neu(), "Inhaltsübersicht", 0))
         .doesNotContain("Abschnitt 1 | Grundsätze")
         .contains("Teil 2 | Verfahren\n§ 3 | Ablauf");
+  }
+
+  // --- Der verweisende Befehl ------------------------------------------------------------------
+
+  /**
+   * „Die Inhaltsübersicht wird entsprechend der vorstehenden Nummer 8 Buchst. a geändert.“ Der
+   * verwiesene Punkt ändert die Überschrift des § 1; die Angabe wird auf den Titel nachgeführt, den
+   * der Paragraph danach trägt. Übertragen wird also das Ergebnis jenes Punktes und nicht sein
+   * Wortlaut — das trifft, was „entsprechend“ meint.
+   */
+  @Test
+  void fuehrtDieInhaltsuebersichtDemVerwiesenenPunktNach() {
+    var ueberschrift =
+        new Ersetzung(
+            new Stelle(List.of(new Stelle.Paragraph("1"), new Stelle.Ueberschrift())),
+            "Zweck",
+            "Zweck und Ziel",
+            false,
+            false,
+            new Provenienz("1", "8. a)", "(Test)"));
+    var verweisung =
+        new VerweisenderBefehl(
+            iuStelle(), "Nummer 8 Buchst. a", new Provenienz("1", "12.", "(Test)"));
+
+    var ergebnis =
+        BefehlAnwender.anwenden(gesetzMitInhaltsuebersicht(), List.of(ueberschrift, verweisung));
+
+    assertThat(ergebnis.protokoll()).allMatch(a -> a.status() == Status.ANGEWANDT);
+    assertThat(ergebnis.neu().norm("§ 1").orElseThrow().titel()).isEqualTo("Zweck und Ziel");
+    assertThat(absatzText(ergebnis.neu(), "Inhaltsübersicht", 0))
+        .contains("§ 1 | Zweck und Ziel")
+        .doesNotContain("§ 1 | Zweck\n");
+  }
+
+  /**
+   * Was der Verweis nicht trägt, bleibt liegen und wird benannt. Die Inhaltsübersicht führt allein
+   * Bezeichnung und Überschrift; was im Absatz eines Paragraphen geschieht, hat in ihr kein
+   * Gegenstück, und es zu erraten wäre schlimmer, als die Grenze zu benennen.
+   */
+  @Test
+  void ruegtDenVerweisAufEinenPunktOhneGegenstueckInDerUebersicht() {
+    var imAbsatz =
+        new Ersetzung(
+            new Stelle(List.of(new Stelle.Paragraph("1"))),
+            "Text",
+            "Wortlaut",
+            false,
+            false,
+            new Provenienz("1", "8. a)", "(Test)"));
+    var verweisung =
+        new VerweisenderBefehl(
+            iuStelle(), "Nummer 8 Buchst. a", new Provenienz("1", "12.", "(Test)"));
+
+    var ergebnis =
+        BefehlAnwender.anwenden(gesetzMitInhaltsuebersicht(), List.of(imAbsatz, verweisung));
+
+    var ruege = ergebnis.protokoll().get(1);
+    assertThat(ruege.status()).isEqualTo(Status.MANUELL_PRUEFEN);
+    assertThat(ruege.grund()).isEqualTo(Grund.NICHT_UNTERSTUETZT);
+    assertThat(ruege.begruendung()).contains("ändert keine Überschrift");
+  }
+
+  /** Ein Verweis ins Leere ist keine Grenze des Erzeugnisses, sondern ein Befund am Dokument. */
+  @Test
+  void ruegtDenVerweisAufEinenNichtVorhandenenPunkt() {
+    var verweisung =
+        new VerweisenderBefehl(
+            iuStelle(), "Nummer 8 Buchst. a", new Provenienz("1", "12.", "(Test)"));
+
+    var ergebnis = BefehlAnwender.anwenden(gesetzMitInhaltsuebersicht(), List.of(verweisung));
+
+    var ruege = ergebnis.protokoll().get(0);
+    assertThat(ruege.status()).isEqualTo(Status.MANUELL_PRUEFEN);
+    assertThat(ruege.grund()).isEqualTo(Grund.STELLE_NICHT_AUFLOESBAR);
+    assertThat(ruege.begruendung()).contains("findet sich nicht im selben Artikel");
   }
 
   // --- Gliederungs-Überschriften ---------------------------------------------------------------

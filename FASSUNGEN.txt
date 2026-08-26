@@ -21,6 +21,116 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 26. August 2026 (zweite Fassung des Tages),
+ zuletzt geändert durch die am 26. August 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Der verweisende Befehl („Die Inhaltsübersicht wird entsprechend der vorstehenden
+Nummer 8 Buchst. a geändert“) wurde bislang gelesen, aber nicht ausgeführt; das
+Handbuch wies ihn in § 7 Absatz 2 Nummer 17 als Grenze aus. Die Grenze bestand
+nicht in der Sache: Zu übertragen ist nicht der Wortlaut des verwiesenen Punktes,
+sondern sein Ergebnis. Jener ändert die Überschrift eines Paragraphen; die Angabe
+der Inhaltsübersicht ist alsdann auf den Titel zu setzen, den der Paragraph danach
+trägt.
+
+Hinzu tritt eine Prüfung, die es bisher nicht gab. Ein Änderungsgesetz muss die
+Angaben der Inhaltsübersicht eigens mitändern; unterbleibt das oder greifen die
+Befehle nicht, so bleibt die Übersicht hinter dem Text zurück, ohne dass ein
+einziger Befehl liegenbliebe. Die neue Probe hat auf Anhieb drei Mängel des
+Erzeugnisses aufgedeckt, die keine Zahl des Protokolls angezeigt hatte.
+
+
+Artikel 1
+Ausführung des verweisenden Befehls
+
+(1) Die Lesart der Gliederungspunkte, mit denen ein Änderungsgesetz auf sich
+    selbst verweist („Nummer 11 Buchstabe a Doppelbuchstabe bb“, abgekürzt „Nr. 8
+    Buchst. a“), wird an einer Stelle zusammengefasst (PunktPfad). Der Leser des
+    Inkrafttretens (InkrafttretensLeser) bezieht sie fortan von dort.
+
+(2) Der Anwender (BefehlAnwender) führt den verweisenden Befehl in der Schleife
+    aus, die als einzige die Befehlsliste kennt. Er sucht den verwiesenen Punkt im
+    selben Artikel — auch unterhalb seiner, wenn der Verweis eine Nummer und nicht
+    einen Buchstaben nennt —, entnimmt ihm den betroffenen Paragraphen und setzt
+    dessen Angabe auf die jetzige Überschrift (InhaltsuebersichtAnwender.
+    fuehreTitelNach).
+
+(3) Was der Verweis nicht trägt, bleibt liegen und wird benannt: der Punkt, der
+    sich nicht findet, und der Punkt, der etwas anderes als eine Überschrift
+    ändert. Die Inhaltsübersicht führt allein Bezeichnung und Überschrift; was im
+    Absatz eines Paragraphen geschieht, hat in ihr kein Gegenstück.
+
+
+Artikel 2
+Probe auf die Inhaltsübersicht
+
+(1) Nach vollzogener Anwendung wird die Inhaltsübersicht gegen den Normbestand
+    gehalten (InhaltsuebersichtsProbe). Gerügt werden die fehlende Angabe zu einer
+    eingefügten oder geänderten Norm, das Auseinandergehen von Angabe und
+    Überschrift sowie die verbliebene Angabe zu einer beseitigten Norm.
+
+(2) Geprüft wird allein der Unterschied, den dieser Lauf bewirkt hat. Was die
+    Quelle von sich aus ungenau führt, bleibt außer Betracht; es wäre ein Befund
+    über die Quelle und nicht über den Lauf. Ebenso bleiben die Anlagen außer
+    Betracht, denn die Inhaltsübersicht führt sie nicht.
+
+(3) Geheilt wird nichts. Die Rüge nennt überdies den Befund und nicht dessen
+    Ursache: Die amtliche Fassung des Gebäudeenergiegesetzes selbst schreibt in
+    der Überschrift des § 71k „Gas“ und in der Angabe dazu „Erdgas“.
+
+
+Artikel 3
+Berichtigung dreier Mängel, welche die Probe aufgedeckt hat
+
+(1) Die Zerlegung eines Zitats in Angabe-Zeilen (InhaltsuebersichtAnwender)
+    trennte nur an §-Angaben. Ein Zitat, das mit einer Gliederungsmarke beginnt
+    und darauf zwanzig Paragraphen aufführt — so das Gebäudeenergiegesetz-Heft von
+    2023 mit „Unterabschnitt 4 … § 71 … § 71p …“ —, blieb deshalb eine einzige
+    Zeile, und jede spätere Angabe zu einem dieser Paragraphen wäre unauffindbar
+    gewesen. Die Zerlegung erfolgt fortan an allen Zeilenanfängen einer Übersicht;
+    sie ist zugleich mit derjenigen der Gesamt-Neufassung zusammengeführt, die
+    dasselbe längst richtig tat.
+
+(2) Die Zerlegung eines eingefügten Paragraphen-Blocks (BefehlAnwender) trennte an
+    jedem „§ N“, dem ein großgeschriebenes Wort folgte. Ein Querverweis mitten im
+    Satz sah damit aus wie eine Überschrift: „… mit Systemen für die
+    Gebäudeautomatisierung nach § 71a Projektunterlagen in überprüfbarer Form
+    vorzulegen.“ erzeugte einen Paragraphen „§ 71a“ mit einem halben Satz als
+    Überschrift. Ein Normkopf muss fortan eine Zeile oder wenigstens einen Satz
+    eröffnen; der Wortbestand unterscheidet beide nicht, die Stellung tut es.
+
+(3) Die Überschrift einer zitierten Norm endete bislang an der ersten
+    großgeschrieben beginnenden Zeile. Ein am Spaltenrand umbrochener Titel verlor
+    dadurch seinen zweiten Teil („Verordnungsermächtigung zu dem Einsatz von
+    Kältemitteln in elektrischen Wärmepumpen und“ / „Wärmepumpen-Hybridheizungen“).
+    Endet eine Zeile auf ein Binde- oder Verhältniswort oder auf einen Trennstrich,
+    so ist sie fortan nicht zu Ende.
+
+
+Artikel 4
+Änderung des Handbuchs
+
+Das Handbuch (README.md) wird wie folgt geändert:
+
+1.  Nach § 6b wird der § 6c „Probe auf die Inhaltsübersicht“ eingefügt; die
+    Inhaltsübersicht des Handbuchs wird entsprechend ergänzt.
+
+2.  § 7 Absatz 2 Nummer 17 wird neu gefasst; die dort ausgewiesene Grenze entfällt.
+
+
+Schlussbestimmung
+
+Die vorstehenden Änderungen sind durch die Prüfung sämtlicher Testfälle
+(vierhundertsechs an der Zahl, zuvor dreihundertsiebenundneunzig) sowie durch die
+vollständige Erstellung (mvnw verify) bestätigt worden. Neu hinzu getreten sind
+drei Prüfungen des verweisenden Befehls (BefehlAnwenderTest) und sechs der Probe
+(InhaltsuebersichtsProbeTest). Das Heft des Gebäudeenergiegesetzes von 2023 wird
+weiterhin vollständig angewandt (119 von 119); die Probe rügt dort nur noch, was
+die amtliche Fassung selbst verschieden führt (§ 71k, § 71l). Die Auszeichnung
+nach REUSE ist vollständig (194 von 194 Dateien).
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 26. August 2026,
  zuletzt geändert durch die am 26. August 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

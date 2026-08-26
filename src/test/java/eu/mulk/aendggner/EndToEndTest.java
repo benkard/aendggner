@@ -1927,17 +1927,23 @@ class EndToEndTest {
     // Kein Befehl des Heftes bleibt mehr ungelesen.
     assertThat(parseErgebnis.befehle()).noneMatch(b -> b instanceof UnbekannterBefehl);
 
-    // Die Verweisung auf einen anderen Punkt desselben Artikels wird gelesen, aber bewusst nicht
-    // ausgeführt. Der Unterschied ist kein kosmetischer: Die Synopse sagt fortan, dass das
-    // Erzeugnis hier die Grenze zieht, und nicht, dass die Vorlage unverständlich sei.
+    // Die Verweisung auf einen anderen Punkt desselben Artikels wird gelesen und ausgeführt: Der
+    // verwiesene Punkt ändert die Überschrift des § 13, und die Angabe der Inhaltsübersicht wird
+    // ihr nachgeführt. Hier scheitert das nicht am Erzeugnis, sondern am Gegenstand — diese
+    // Verordnung führt gar keine Inhaltsübersicht, und die Rüge sagt genau das.
     var verweisung = befehlAn(parseErgebnis, "12.");
     assertThat(verweisung).isInstanceOf(VerweisenderBefehl.class);
     assertThat(((VerweisenderBefehl) verweisung).verweis()).isEqualTo("Nummer 8 Buchst. a");
+    assertThat(gesetz.norm("Inhaltsübersicht")).isEmpty();
 
-    var anwendung = BefehlAnwender.anwenden(gesetz, List.of(verweisung));
-    assertThat(anwendung.protokoll().get(0).grund()).isEqualTo(Grund.NICHT_UNTERSTUETZT);
-    assertThat(anwendung.protokoll().get(0).begruendung())
-        .contains("verweist auf „Nummer 8 Buchst. a“");
+    var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
+    var protokoll =
+        anwendung.protokoll().stream()
+            .filter(a -> a.befehl() == verweisung)
+            .findFirst()
+            .orElseThrow();
+    assertThat(protokoll.grund()).isEqualTo(Grund.BESTAND_WIDERSPRICHT);
+    assertThat(protokoll.begruendung()).contains("keine Inhaltsübersicht");
   }
 
   private static Aenderungsbefehl befehlAn(

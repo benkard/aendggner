@@ -39,11 +39,7 @@ public final class InkrafttretensLeser {
    * deren Schlussvorschrift verweist entsprechend („§ 3 Nr. 2“).
    */
   private static final Pattern PUNKTBEZUG =
-      Pattern.compile(
-          "(?:Artikel|Art\\.|§)\\s*(\\d+[a-z]?)"
-              + "(?:\\s+(?:Nummer|Nr\\.)\\s+(\\d+[a-z]?))?"
-              + "(?:\\s+Buchstabe\\s+(\\p{Ll})\\b)?"
-              + "(?:\\s+Doppelbuchstabe\\s+(\\p{Ll}{2})\\b)?");
+      Pattern.compile("(?:Artikel|Art\\.|§)\\s*(\\d+[a-z]?)" + PunktPfad.MUSTER);
 
   private static final Pattern VERB = Pattern.compile("\\b(?:tritt|treten)\\b");
 
@@ -164,17 +160,7 @@ public final class InkrafttretensLeser {
     var bezuege = new ArrayList<Punktbezug>();
     var treffer = PUNKTBEZUG.matcher(satz);
     while (treffer.find()) {
-      var pfad = new StringBuilder();
-      if (treffer.group(2) != null) {
-        pfad.append(treffer.group(2)).append('.');
-        if (treffer.group(3) != null) {
-          pfad.append(' ').append(treffer.group(3)).append(')');
-          if (treffer.group(4) != null) {
-            pfad.append(' ').append(treffer.group(4)).append(')');
-          }
-        }
-      }
-      bezuege.add(new Punktbezug(treffer.group(1), pfad.toString()));
+      bezuege.add(new Punktbezug(treffer.group(1), PunktPfad.baue(treffer, 1)));
     }
     return List.copyOf(bezuege);
   }

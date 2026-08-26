@@ -105,6 +105,22 @@ final class InhaltsuebersichtAnwender {
   }
 
   /**
+   * Führt die Angabe einer Norm ihrer Überschrift nach: Die Zeile der Inhaltsübersicht, die den
+   * Paragraphen führt, wird auf den jetzigen Titel gesetzt.
+   *
+   * <p>Das ist die Ausführung des verweisenden Befehls („Die Inhaltsübersicht wird entsprechend der
+   * vorstehenden Nummer 8 Buchst. a geändert“). Übertragen wird nicht der Wortlaut jenes Punktes,
+   * sondern sein Ergebnis: Was die Überschrift nach seiner Anwendung besagt, besagt fortan auch die
+   * Angabe. Der Umweg über das Ergebnis erspart es, jede Befehlsform ein zweites Mal auf dem
+   * Zeilenmodell nachzubilden — und er trifft genau das, was der Verweis meint.
+   */
+  static AngewandteAenderung fuehreTitelNach(
+      List<Norm> normen, Aenderungsbefehl befehl, Stelle.Paragraph paragraph, String neuerTitel) {
+    var ziel = List.<Stelle.Komponente>of(paragraph);
+    return ersetzeZeilen(normen, befehl, ziel, ziel, paragraph.enbez() + " " + neuerTitel);
+  }
+
+  /**
    * Ersetzt die Zeilen von {@code von} bis {@code bis} durch die Angaben des Zitats (oder nichts).
    */
   private static AngewandteAenderung ersetzeZeilen(
@@ -308,23 +324,7 @@ final class InhaltsuebersichtAnwender {
           "Das Zitat der neuen Inhaltsübersicht enthält Befehlstext — vermutlich ist ein"
               + " Anführungszeichen unbalanciert; bitte manuell prüfen.");
     }
-    var zeilen = new ArrayList<String>();
-    for (var stueck : UEBERSICHT_MARKE.split(flach)) {
-      var s = stueck.strip();
-      if (s.isEmpty()) {
-        continue;
-      }
-      var m =
-          Pattern.compile(
-                  "^((?:Teil|Abschnitt|Unterabschnitt|Kapitel|Buch)\\s+\\d+[a-z]?|Anhang"
-                      + "|(?:§|Art\\.)\\s*\\d+[a-z]*)\\s*(.*)$")
-              .matcher(s);
-      if (m.matches() && !m.group(2).isEmpty()) {
-        zeilen.add(m.group(1) + " | " + m.group(2));
-      } else {
-        zeilen.add(s);
-      }
-    }
+    var zeilen = uebersichtsZeilen(flach, "");
     if (zeilen.size() < 2) {
       return manuell(
           befehl, Grund.ZITAT_UNBRAUCHBAR, "Das Zitat enthält keine erkennbare Inhaltsübersicht.");
@@ -348,40 +348,47 @@ final class InhaltsuebersichtAnwender {
               + "|(?<!\\S)Anhang(?!\\S))");
 
   /**
-   * Zerlegt das Zitat in Angabe-Zeilen: bei §-Angaben eine Zeile je Paragraph (im Zeilenformat der
-   * Inhaltsübersicht, „§ N | Titel“), sonst eine einzelne Zeile.
+   * Zerlegt das Zitat in Angabe-Zeilen im Zeilenmodell der Inhaltsübersicht („§ N | Titel“).
+   *
+   * <p>Getrennt wird an <em>allen</em> Zeilenanfängen, die eine Übersicht kennt — an §-Angaben wie
+   * an Gliederungsmarken. Beides ist nötig: Ein Zitat, das mit „Unterabschnitt 4 …“ beginnt und
+   * darauf zwanzig Paragraphen aufführt, bliebe sonst eine einzige Zeile, und jede spätere Angabe
+   * zu einem dieser Paragraphen fände sie nicht mehr. (Das GEG-Heft von 2023 tut genau das.)
    */
   private static List<String> angabenZeilen(String zitat, String einrueckung) {
-    var flach = zitat.strip().replaceAll("\\s+", " ");
-    var zeilen = new ArrayList<String>();
-    if (flach.startsWith("§") || flach.startsWith("Art.")) {
-      for (var stueck : PARAGRAPH_ANGABE.split(flach)) {
-        var s = stueck.strip();
-        if (s.isEmpty()) {
-          continue;
-        }
-        var m = Pattern.compile("^((?:§|Art\\.)\\s*\\d+[a-z]*)\\s*(.*)$").matcher(s);
-        if (m.matches() && !m.group(2).isEmpty()) {
-          zeilen.add(einrueckung + m.group(1) + " | " + m.group(2));
-        } else {
-          zeilen.add(einrueckung + s);
-        }
-      }
-    }
+    var zeilen = uebersichtsZeilen(zitat.strip().replaceAll("\\s+", " "), einrueckung);
     if (zeilen.isEmpty()) {
-      zeilen.add(einrueckung + flach);
+      zeilen.add(einrueckung + zitat.strip().replaceAll("\\s+", " "));
     }
     return zeilen;
   }
 
-  // Trennt einen Block mehrerer §-Angaben an den §-Anfängen; Querverweise („… zu § 3 Absatz 3“)
-  // trennen nicht (nach ihnen folgt ein Kleinwort oder eine Strukturangabe statt eines Titels).
-  private static final Pattern PARAGRAPH_ANGABE =
+  /** Der Kopf einer Übersichtszeile: die Bezeichnung, hinter der der Titel steht. */
+  private static final Pattern ZEILEN_KOPF =
       Pattern.compile(
-          "(?=(?:§|Art\\.)\\s*\\d+[a-z]?\\s+"
-              + "(?!Absatz|Absätze|Abs|Satz|Sätze|Nummer|Nummern|Nr|Buchstabe|Buchstaben"
-              + "|und|bis|oder|sowie|des|der|dieses)"
-              + "(?:\\(|\\p{Lu}))");
+          "^((?:Teil|Abschnitt|Unterabschnitt|Kapitel|Buch)\\s+\\d+[a-z]?|Anhang"
+              + "|(?:§|Art\\.)\\s*\\d+[a-z]*)\\s*(.*)$");
+
+  /**
+   * Der flache Zitattext, zerlegt in Übersichtszeilen. Die Trennung besorgt {@link
+   * #UEBERSICHT_MARKE}; wo eine Bezeichnung einen Titel bei sich führt, tritt der Strich zwischen
+   * beide.
+   */
+  private static List<String> uebersichtsZeilen(String flach, String einrueckung) {
+    var zeilen = new ArrayList<String>();
+    for (var stueck : UEBERSICHT_MARKE.split(flach)) {
+      var s = stueck.strip();
+      if (s.isEmpty()) {
+        continue;
+      }
+      var m = ZEILEN_KOPF.matcher(s);
+      zeilen.add(
+          m.matches() && !m.group(2).isEmpty()
+              ? einrueckung + m.group(1) + " | " + m.group(2)
+              : einrueckung + s);
+    }
+    return zeilen;
+  }
 
   private static List<String> zeilenVon(Norm norm, int absatzIndex) {
     return norm.absaetze().get(absatzIndex).text().lines().toList();
