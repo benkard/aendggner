@@ -116,6 +116,17 @@ Satzzeichen („das Satzzeichen „Punkt“ wird aufgehoben und folgendes angef�
 geschlossene Zitate in einem Abschnitt. Voller Belegfall; Vor- *und* Nachfassung stammen aus
 demselben offenen Portal (`transparenz.bremen.de`, Schaltfläche „Frühere Fassungen“).
 
+|Mecklenburg-Vorpommern
+|`MecklenburgVorpommern/GVOBl-MV-2026-21_Besoldungsanpassung-ua.pdf` — GVOBl. M-V 2026 Nr. 21 vom
+21.07.2026, S. 719, 740 (Artikel 44 des Besoldungsanpassungsgesetzes vom 08.07.2026)
+|*Mantelgesetz mit rund sechzig Artikeln*, von denen jeder ein anderes Werk ändert — der schärfste
+Prüfstein der Artikelwahl. Zweispaltiger Satz; Kolumnentitel *und* Seitenfuß stehen im
+Inhaltsstrom, mitten im Befehlstext, und zerschneiden Wörter. Der erste Befehl ändert die
+*Inhaltsübersicht* („die Angabe zu § 10 wird durch die folgende Angabe ersetzt“), der siebte die
+Überschrift des § 10 selbst. Dazu eine Bereichs-Streichung samt Bereichs-Umnummerierung („Die
+Nummern 4 bis 6 werden *zu* den Nummern 2 bis 4“). Belegfall bis zur Anwendung; eine Nachfassung
+gibt es nicht, weil die Änderung erst zum 01.09.2026 in Kraft tritt.
+
 |Hamburg
 |`Hamburg/HmbGVBl-2026-17_GutachterausschussVO-AendVO.pdf` — HmbGVBl. Teil I Nr. 17 vom
 26.05.2026, S. 147 (Verordnung zur Änderung der Verordnung über den Gutachterausschuss für
@@ -202,6 +213,13 @@ bleiben nur Abweichungen, in denen die amtliche Nachfassung selbst vom Befehlswo
 überzähliges Anführungszeichen aus dem Änderungsgesetz; § 93 LMG NRW: zusätzlich die Wörter
 „Film (“ gestrichen) — ÄndGgner wendet dort den Wortlaut an. Damit ist das Heft GV. NRW. 7/2026
 vollständig belegt.
+* *Mecklenburg-Vorpommern* ist umgesetzt (`EndToEndTest.apoAmtsTaMecklenburgVorpommern`): 24
+  Befehle gelesen, 20 angewandt. Liegen bleiben allein die vier, die die Anlagen betreffen — die
+  Stammfassung führt sie nicht mit (Tabellen und Vordrucke), und der letzte verweist auf einen
+  Anhang des ändernden Gesetzes. Der Fall hat zwei Muster für das Gesetzblatt gebracht
+  (`GVOBL_MV_KOPF`, `GVOBL_MV_FUSS`) und eine Nebenform der Inhaltsübersichts-Anweisung („durch die
+  folgende Angabe ersetzt“ neben „wie folgt gefasst“). Die Stammfassung ist gegen die
+  Gesamtausgabe des Portals geprüft, die zum Stichtag noch die Vorfassung ist.
 * *Bremen* ist umgesetzt (`EndToEndTest.berufsfachschulVOBremen`): 41 Befehle gelesen, 37
   angewandt; 26 von 29 Normen gleichen der amtlichen Nachfassung, eine fehlt. Der Fall hat sechs
   allgemeine Funde gebracht: Die *Aufzählungs-Zitatgrenze* darf nicht verlangen, dass der Rest des
@@ -335,7 +353,7 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
   Baden-Württemberg jede Fassung datierbar ausgeben, fehlt dort. Ohne Vorfassung ist kein
   Akzeptanzfall möglich, sondern nur die Prüfung bis zur Befehlserkennung. Ein Ausweg wäre, die
   Vorfassung aus den *Einzelnormen* mit ihren Stichtagen zusammenzusetzen.
-* Mecklenburg-Vorpommern, Saarland, Sachsen-Anhalt: noch nicht erfasst.
+* Saarland und Sachsen-Anhalt: noch nicht erfasst.
 
 == Wo weitermachen
 
@@ -346,22 +364,22 @@ gegen die amtliche Fassung, und `--neufassung` gibt die errechnete Fassung als k
 Klartext aus. Ein weiteres Land kostet damit Stammfassung, Heft und Nachfassung — keinen eigenen
 Prüfcode mehr. Nach absteigendem Nutzen:
 
-. *Weitere Länder erfassen* — Mecklenburg-Vorpommern, Saarland, Sachsen-Anhalt (Bremen ist seit
-  Welle 25 erfasst). Die Beschaffungswege sind für alle geprüft (26./27.08.2026):
+. *Weitere Länder erfassen* — Saarland und Sachsen-Anhalt (Bremen und Mecklenburg-Vorpommern sind
+  seit Welle 25 erfasst). Die Beschaffungswege sind für alle geprüft (26./27.08.2026):
 +
 --
-Mecklenburg-Vorpommern:: Das Gesetzblatt liegt *frei und skriptlesbar* unter
-`regierung-mv.de/static/Regierungsportal/Justizministerium/Inhalte/Rechtliches/GVOBI.M-V/GVOBl.%20Nr.%20<N>%20v.%20<T.M.JJJJ>.pdf`;
-ein Änderungsgesetz ist damit ohne Browsersteuerung zu haben. Das Portal `landesrecht-mv.de`
-dagegen ist eine juris-Einseitenanwendung (5,6 kB Hülle) und führt — wie Hamburg — *keine*
-Fassungsliste, sondern nur die aktuelle Gesamtausgabe nebst Änderungshistorie; die Adressform
-`…/document/<Kennung>@<JJJJMMTT>` weist es ab. Die Gesamtausgabe nennt immerhin ihren
-Geltungszeitraum („Gesamtausgabe in der Gültigkeit vom 12.06.2026 bis 31.08.2026“), sodass sich
-erkennen lässt, ob sie genau ein Heft trägt. Ein voller Belegfall verlangt deshalb dasselbe wie
-Hamburg: eine Vorschrift, die *genau einmal* geändert worden ist — dann ist die Vorfassung die
-Ursprungsfassung aus dem Gesetzblatt. Der geprüfte Fall (Gesetz zur Änderung der Landesbauordnung
-M-V und des Architekten- und Ingenieurgesetzes, GVOBl. Nr. 16 vom 11.06.2026) taugt dafür nicht:
-Beide Stammgesetze sind vielfach geändert.
+Mecklenburg-Vorpommern:: *Gegangen* (Welle 25). Das Gesetzblatt liegt vollständig und
+skriptlesbar; die Übersicht
+`regierung-mv.de/Landesregierung/jm/service_justizministerium/verkuendungsblaetter/gesetz-verordnungsblaetter/`
+führt die Jahrgänge 2014 bis heute (rund 440 Hefte). Adressform der neueren Hefte:
+`…/GVOBI.M-V/GVOBl.%20Nr.%20<N>%20v.%20<T.M.JJJJ>.pdf` — *Tag und Monat ohne führende Null*, mit
+Null antwortet der Wirt mit 404; die älteren liegen unter `…/GVOBI.M-V/Dateien/…` mit
+uneinheitlichen Namen. Das Portal `landesrecht-mv.de` bleibt eine juris-Einseitenanwendung *ohne*
+Fassungsliste; auch die Adressform `…/document/<Kennung>@<JJJJMMTT>` weist es ab, und selbst die
+Kennung ist nur über die Suche der Anwendung zu erreichen. Die Vorfassung kommt deshalb aus dem
+Gesetzblatt: Nennt der Einleitungssatz die Stammvorschrift *ohne* jede frühere Änderung, so ist die
+Ursprungsfassung beweisbar die Vorfassung. Die aktuelle Gesamtausgabe des Portals taugt dann als
+Gegenprobe — und, solange die Änderung noch nicht in Kraft ist, gerade nicht als Nachfassung.
 Bremen:: *Gegangen* (Welle 25). `transparenz.bremen.de` antwortet einer Skriptabfrage mit
 gewöhnlichem HTML und führt — als drittes offenes Portal nach BRAVORS und recht.nrw.de, und als
 erstes außerhalb Brandenburgs — jede *frühere* Gesamtausgabe einzeln adressierbar: Vorschrift über
@@ -454,5 +472,7 @@ Stammgesetze; für Berlin die vollständige Anwendung des Artikels 2, fünf von 
 Befehlen des Artikels 1 und die drei benannten Abweichungen von der Nachfassung; für
 Baden-Württemberg einunddreißig von siebenunddreißig Befehlen und die zwei benannten
 Abweichungen; für Bremen einundvierzig gelesene und siebenunddreißig angewandte Befehle, die
-fehlende Norm und die zwei benannten Abweichungen. Wer eine dieser Zahlen
+fehlende Norm und die zwei benannten Abweichungen; für Mecklenburg-Vorpommern die Wahl des
+vierundvierzigsten Artikels, vierundzwanzig gelesene und zwanzig angewandte Befehle sowie die vier
+namentlich aufgeführten Reste. Wer eine dieser Zahlen
 ändern muss, sollte den Grund im Test vermerken.

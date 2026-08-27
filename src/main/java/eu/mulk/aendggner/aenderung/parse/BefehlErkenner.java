@@ -424,10 +424,13 @@ final class BefehlErkenner {
           "^In der Inhaltsübersicht (?:wird|werden) die Angaben? "
               + "(?:zu den |zu der |zu |zur |zum |von )?(?!«)(.+?) gestrichen\\.$");
 
+  // Neben „wie folgt gefasst“ auch „durch die folgende Angabe ersetzt“ (GVOBl. M-V) — dieselbe
+  // Anweisung in der Wortwahl, die das Handbuch der Rechtsförmlichkeit für Ersetzungen vorsieht.
   private static final Pattern INHALTSUEBERSICHT_NEUFASSUNG =
       Pattern.compile(
           "^In der Inhaltsübersicht (?:wird|werden) die Angaben? "
-              + "(?:zu den |zu der |zu |zur |zum |von )?(?!«)(.+?) wie folgt gefasst: "
+              + "(?:zu den |zu der |zu |zur |zum |von )?(?!«)(.+?) "
+              + "(?:wie folgt gefasst|durch (?:die )?folgende[nrs]? Angaben? ersetzt): "
               + Z
               + "\\.?$");
 

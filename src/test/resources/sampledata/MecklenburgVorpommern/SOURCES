@@ -1,0 +1,88 @@
+Beispieldaten Mecklenburg-Vorpommern — Herkunft und Aufbereitung
+================================================================
+
+1. Änderungsdokument
+   GVOBl-MV-2026-21_Besoldungsanpassung-ua.pdf
+   Gesetz- und Verordnungsblatt für Mecklenburg-Vorpommern 2026 Nr. 21,
+   ausgegeben in Schwerin am 21. Juli 2026: Gesetz über die Anpassung von
+   Besoldungs- und Beamtenversorgungsbezügen und zur Änderung dienstrechtlicher
+   Vorschriften des Landes Mecklenburg-Vorpommern vom 8. Juli 2026 (S. 719).
+   Maßgeblich ist dessen **Artikel 44** (S. 740): Änderung der Ausbildungs- und
+   Prüfungsordnung amtstierärztlicher Dienst.
+   Bezogen über
+   https://www.regierung-mv.de/static/Regierungsportal/Justizministerium/Inhalte/
+   Rechtliches/GVOBI.M-V/GVOBl.%20Nr.%2021%20v.%2021.7.2026.pdf
+   (abgerufen am 27.08.2026).
+
+   Zum Blatt: Das Gesetzblatt liegt vollständig und ohne Anmeldung beim
+   Justizministerium; die Übersicht
+   https://www.regierung-mv.de/Landesregierung/jm/service_justizministerium/
+   verkuendungsblaetter/gesetz-verordnungsblaetter/ führt die Jahrgänge 2014 bis
+   heute (rund 440 Hefte). Die Adressform der neueren Hefte lautet
+   `…/GVOBI.M-V/GVOBl.%20Nr.%20<N>%20v.%20<T.M.JJJJ>.pdf` — **Tag und Monat ohne
+   führende Null**; mit Null antwortet der Wirt mit 404. Die älteren Jahrgänge
+   liegen unter `…/GVOBI.M-V/Dateien/…` mit uneinheitlichen Dateinamen; die
+   Übersichtsseite nennt sie.
+
+2. Stammfassung (vor der Änderung)
+   APOAmtsTA-MV-alt.txt
+   Verordnung über die Ausbildung und Prüfung für den amtstierärztlichen Dienst im
+   zweiten Einstiegsamt der Laufbahngruppe 2 in der Fachrichtung des Gesundheits-
+   und sozialen Dienstes in Mecklenburg-Vorpommern (APOAmtsTA M-V) vom 2. Juni
+   2016, GVOBl. M-V 2016 S. 491, in ihrer Ursprungsfassung.
+
+   Der Einleitungssatz des Artikels 44 nennt die Verordnung ohne jede frühere
+   Änderung („Die Ausbildungs- und Prüfungsordnung amtstierärztlicher Dienst vom
+   2. Juni 2016 (GVOBl. M-V S. 491) wird wie folgt geändert“). Die Vorfassung ist
+   damit beweisbar die Ursprungsfassung, und die steht im Gesetzblatt selbst:
+   GVOBl. M-V 2016 Nr. 12 vom 29. Juni 2016, S. 491
+   (…/GVOBI.M-V/Dateien/GVOBl_1245663.pdf).
+
+   Aufbereitet mit `--extract-only` des Erzeugnisses (der zweispaltige Satz des
+   Blattes verlangt dessen Lesereihenfolge) und mit dem Skript `clean_mv.py` in
+   die kanonische Form gebracht. Drei Eigenheiten waren dabei zu beachten:
+   - Die Lesereihenfolge setzt die *Inhaltsübersicht* (rechte Spalte der ersten
+     Seite) zwischen den Anfang des Textes (linke Spalte) und dessen Fortsetzung;
+     die drei Stücke sind einzeln zu entnehmen und neu zu ordnen.
+   - Kolumnentitel und Seitenfuß stehen im Inhaltsstrom und zerschneiden Wörter
+     („… alle Ausbildungsabschnitte ord-“ / Fußzeile / „nungsgemäß absolviert“);
+     nur an der Schnittstelle ist der Trennstrich eine Silbentrennung.
+   - Normkopf und Titel stehen auf getrennten Zeilen, der erste Absatz kann am
+     Titel kleben, und ein umbrochener Titel endet auf ein Komma.
+
+   Gegenprobe: Das Portal `landesrecht-mv.de` führt zum Stichtag dieser Welle
+   (27.08.2026) genau diese Fassung als *aktuelle* Gesamtausgabe („Gesamtausgabe
+   in der Gültigkeit vom 01.10.2016 bis 31.08.2026“). Ihr Wortlaut ist über die
+   Browsersteuerung Norm für Norm gegen die hier abgelegte Fassung gehalten
+   worden.
+
+3. Nachfassung — es gibt keine
+   Artikel 44 tritt erst am 1. September 2026 in Kraft. Das Portal führt allein
+   die geltende Gesamtausgabe; eine künftige Fassung gibt es dort nicht, und die
+   Adressform `…/document/<Kennung>@<JJJJMMTT>` weist es ab (geprüft). Der Fall
+   reicht deshalb — wie der thüringische — bis zur Anwendung, nicht bis zum
+   normweisen Abgleich.
+
+4. Was der Fall trägt
+   - Die *Artikelwahl* in einem Mantelgesetz mit rund sechzig Artikeln, von denen
+     jeder ein anderes Werk ändert. Kein anderer Belegfall prüft sie so scharf.
+   - Die *Inhaltsübersicht als eigene Norm*: Der erste Befehl ändert die Angabe zu
+     § 10, der siebte die Überschrift des § 10 selbst.
+   - Die Wortwahl „die Angabe zu § 10 wird durch die folgende Angabe ersetzt“
+     neben dem geläufigen „wie folgt gefasst“.
+   - Eine Bereichs-Streichung samt Bereichs-Umnummerierung („Die Nummern 2 und 3
+     werden gestrichen“, „Die Nummern 4 bis 6 werden zu den Nummern 2 bis 4“) —
+     mit „werden zu“ statt „werden“.
+   - Kolumnentitel *und* Seitenfuß im Inhaltsstrom, mitten im Befehlstext.
+   - Hochgestellte Fußnotenziffern an den Artikel-Überschriften des Mantelgesetzes
+     („Änderung der … amtstierärztlicher Dienst⁴⁴“).
+
+5. Benannte Grenzen
+   Vier der 24 Befehle bleiben liegen, sämtlich die *Anlagen* betreffend:
+   Nummer 10 Buchstaben a bis c ändern die Anlage 1 (Ausbildungsrahmenplan) über
+   deren „Ausbildungsabschnitte“, Nummer 11 ersetzt die Anlage 2 durch eine
+   Fassung, die im *Anhang des Änderungsgesetzes* steht. Die Anlagen sind
+   Tabellen und Vordrucke; der kanonische Klartext hat für sie keine Form, und
+   sie sind in der Stammfassung deshalb nicht mitgeführt. Der Verweis auf einen
+   Anhang des ändernden Gesetzes ist überdies eine Form, die das Erzeugnis nicht
+   auflöst.

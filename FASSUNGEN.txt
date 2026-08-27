@@ -21,6 +21,53 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 27. August 2026 (zweite Fassung des Tages),
+ zuletzt geändert durch die am 27. August 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Mecklenburg-Vorpommern tritt als sechzehntes Land hinzu. Sein Gesetzblatt liegt
+vollständig offen; das Portal dagegen ist eine Einseitenanwendung ohne
+Fassungsliste. Die Vorfassung kommt deshalb aus dem Gesetzblatt selbst: Nennt der
+Einleitungssatz die Stammvorschrift ohne jede frühere Änderung, so ist die
+Ursprungsfassung beweisbar die Vorfassung. Der Fall ist überdies der schärfste
+Prüfstein der Artikelwahl, den das Erzeugnis kennt: Das Heft trägt ein
+Mantelgesetz mit rund sechzig Artikeln, von denen jeder ein anderes Werk ändert.
+
+
+Artikel 1
+Aufbereitung und Erkennung
+
+(1) Der Textbereiniger (TextBereiniger) schneidet Kolumnentitel und Seitenfuß des
+    mecklenburgischen Gesetzblattes heraus. Beide stehen im Inhaltsstrom, und zwar
+    mitten im Befehlstext; die Seitenzahl klebt dabei an der Heftnummer.
+
+(2) Die Anweisung an die Inhaltsübersicht wird auch in der Wortwahl der Ersetzung
+    gelesen („die Angabe zu § 10 wird durch die folgende Angabe ersetzt“), nicht
+    nur in der der Neufassung („wie folgt gefasst“).
+
+
+Artikel 2
+Beispieldaten
+
+Unter „sampledata/MecklenburgVorpommern“ treten das Heft GVOBl. M-V 2026 Nr. 21
+und die Ursprungsfassung der Ausbildungs- und Prüfungsordnung amtstierärztlicher
+Dienst nebst Herkunftsnachweis hinzu; der Akzeptanzfall
+(EndToEndTest.apoAmtsTaMecklenburgVorpommern) pinnt die Wahl des vierundvierzigsten
+Artikels, vierundzwanzig gelesene und zwanzig angewandte Befehle. Die vier Reste
+betreffen sämtlich die Anlagen und sind in „MecklenburgVorpommern/SOURCES“
+benannt. Eine Nachfassung gibt es nicht: Der Artikel tritt erst am 1. September
+2026 in Kraft, weshalb die Gesamtausgabe des Portals noch die Vorfassung ist —
+und eben deshalb als deren Gegenprobe gedient hat.
+
+
+Schlussbestimmung
+
+Die vorstehenden Änderungen sind durch die vollständige Prüfung (mvnw verify,
+vierhundertdreißig Testfälle) und durch die Lizenzprüfung (reuse lint,
+zweihundertsieben von zweihundertsieben Dateien) bestätigt worden.
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 27. August 2026 (erste Fassung des Tages),
  zuletzt geändert durch die am 27. August 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

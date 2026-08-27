@@ -200,6 +200,11 @@ SPDX-FileCopyrightText = "Freie Hansestadt Bremen"
 SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
 
 [[annotations]]
+path = ["src/test/resources/sampledata/MecklenburgVorpommern/GVOBl-MV-2026-21_Besoldungsanpassung-ua.pdf"]
+SPDX-FileCopyrightText = "Land Mecklenburg-Vorpommern"
+SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
+
+[[annotations]]
 path = ["src/test/resources/sampledata/RheinlandPfalz/GVBl-2026-21_UKAPOGS-E3-AendVO.pdf"]
 SPDX-FileCopyrightText = "Land Rheinland-Pfalz"
 SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
@@ -223,6 +228,7 @@ path = [
   "src/test/resources/sampledata/Bremen/AssBerFSchulV-BR-alt.txt",
   "src/test/resources/sampledata/Bremen/AssBerFSchulV-BR-neu.txt",
   "src/test/resources/sampledata/Hamburg/GAusschV-HH-alt.txt",
+  "src/test/resources/sampledata/MecklenburgVorpommern/APOAmtsTA-MV-alt.txt",
   "src/test/resources/sampledata/Hamburg/GAusschV-HH-neu.txt",
   "src/test/resources/sampledata/RheinlandPfalz/UKAPOGS-E3-neu.txt",
   "src/test/resources/sampledata/Berlin/ASOG-Bln-neu.txt",
@@ -255,6 +261,7 @@ path = [
   "src/test/resources/sampledata/Brandenburg/SOURCES",
   "src/test/resources/sampledata/Bremen/SOURCES",
   "src/test/resources/sampledata/Hamburg/SOURCES",
+  "src/test/resources/sampledata/MecklenburgVorpommern/SOURCES",
   "src/test/resources/sampledata/RheinlandPfalz/SOURCES",
   "src/test/resources/sampledata/Hessen/SOURCES",
   "src/test/resources/sampledata/SchleswigHolstein/SOURCES",

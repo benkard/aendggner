@@ -1851,6 +1851,77 @@ class EndToEndTest {
         .containsExactly("§ 22", "§ 29");
   }
 
+  /**
+   * Mecklenburg-Vorpommern: Die Ausbildungs- und Prüfungsordnung amtstierärztlicher Dienst,
+   * geändert durch <em>Artikel 44</em> des Gesetzes über die Anpassung von Besoldungs- und
+   * Beamtenversorgungsbezügen … vom 8. Juli 2026 (GVOBl. M-V Nr. 21 vom 21. Juli 2026, S. 719,
+   * 740).
+   *
+   * <p>Der Fall prüft zweierlei, was bisher kein anderer prüfte. Erstens die <em>Artikelwahl</em>:
+   * Das Heft trägt ein Mantelgesetz mit rund sechzig Artikeln, von denen jeder ein anderes Werk
+   * ändert; gewählt werden muss der eine, der dieses trifft. Zweitens die <em>Inhaltsübersicht als
+   * eigene Norm</em>: Der erste Befehl ändert deren Angabe zu § 10, der siebte die Überschrift des
+   * § 10 selbst — beides muss zusammenpassen.
+   *
+   * <p>Eine Nachfassung gibt es nicht: Die Änderung tritt erst am 1. September 2026 in Kraft, und
+   * das Portal führt allein die geltende Gesamtausgabe. Sie ist eben deshalb die Vorfassung, gegen
+   * die {@code APOAmtsTA-MV-alt.txt} geprüft worden ist (siehe {@code
+   * MecklenburgVorpommern/SOURCES}).
+   */
+  @Test
+  void apoAmtsTaMecklenburgVorpommern() throws Exception {
+    var alt = SAMPLEDATA.resolve("MecklenburgVorpommern/APOAmtsTA-MV-alt.txt");
+    var pdf =
+        SAMPLEDATA.resolve("MecklenburgVorpommern/GVOBl-MV-2026-21_Besoldungsanpassung-ua.pdf");
+    assumeTrue(Files.exists(alt) && Files.exists(pdf), "Mecklenburger Beispieldaten fehlen");
+
+    var gesetz = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(alt);
+    assertThat(gesetz.jurabk()).isEqualTo("APOAmtsTA M-V");
+    // Die Inhaltsübersicht ist eine Norm gleichen Namens; dazu die 28 Paragraphen.
+    assertThat(gesetz.normen()).hasSize(29);
+
+    var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(pdf));
+    // Kolumnentitel und Seitenfuß stehen im Inhaltsstrom, und zwar mitten im Befehlstext.
+    assertThat(text).doesNotContain("Tag der Ausgabe: Schwerin, den 21. Juli 2026 741");
+
+    var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, null);
+    // Aus rund sechzig Artikeln des Mantelgesetzes wird der eine gewählt, der die Verordnung
+    // trifft.
+    assertThat(parseErgebnis.artikel()).containsExactly("44");
+    assertThat(parseErgebnis.befehle()).hasSize(24);
+
+    var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(20);
+
+    // Die Nummern 2 und 3 entfallen, die Nummern 4 bis 6 rücken auf 2 bis 4 — ohne Platzhalter,
+    // denn sie stehen am Ende ihres Blockes nicht.
+    var dritter = anwendung.neu().norm("§ 3").orElseThrow().absaetze().get(1).text();
+    assertThat(dritter)
+        .contains("\n  2. Zeugnisse über die tierärztliche Prüfung,")
+        .contains("\n  4. ein Nachweis über die in § 2 Satz 1 Nummer 5 geforderte Tätigkeit.")
+        .doesNotContain("ein aktuelles Lichtbild");
+
+    // Die Überschrift des § 10 und die Angabe zu § 10 in der Inhaltsübersicht gehen zusammen.
+    var zehnter = anwendung.neu().norm("§ 10").orElseThrow();
+    assertThat(zehnter.titel()).isEqualTo("Ausbildungsnachweise");
+    assertThat(zehnter.absaetze().get(0).text())
+        .contains(
+            "einen Ausbildungsnachweis nach Anlage 2 zu fertigen. Diese beinhalten die"
+                + " ausbildungsbegleitenden Leistungskontrollen nach § 8 Satz 2.");
+    assertThat(anwendung.neu().norm("Inhaltsübersicht").orElseThrow().absaetze().get(0).text())
+        .contains("§ 10 | Ausbildungsnachweise");
+
+    // Übrig bleiben allein die vier Befehle, die die Anlagen betreffen: Die Stammfassung führt sie
+    // nicht mit (Tabellen und Vordrucke), und der elfte Befehl verweist auf einen Anhang des
+    // Änderungsgesetzes.
+    var offen =
+        anwendung.protokoll().stream()
+            .filter(a -> a.status() == BefehlAnwender.Status.MANUELL_PRUEFEN)
+            .map(a -> a.befehl().provenienz().gliederungsPfad())
+            .toList();
+    assertThat(offen).containsExactly("10. a)", "10. b)", "10. c)", "11.");
+  }
+
   private static Aenderungsbefehl befehlZu(
       AenderungsgesetzParser.ParseErgebnis ergebnis, String gliederungsPfad) {
     return ergebnis.befehle().stream()

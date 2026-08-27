@@ -322,6 +322,19 @@ public final class TextBereiniger {
           "[ \\t]*Nr\\. \\d+ Gesetzblatt der Freien Hansestadt Bremen"
               + " vom \\d{1,2}\\. \\p{L}+ \\d{4}[ \\t]*\\d{0,4}[ \\t]*");
 
+  // GVOBl. M-V: Kolumnentitel und Seitenfuß stehen gleichfalls im Inhaltsstrom, und zwar mitten
+  // im Befehlstext („Die Überschrift wird durch die folgende Überschrift ersetzt: Tag der Ausgabe:
+  // Schwerin, den 21. Juli 2026 741Nr. 21 „§ 10 …““). Die Seitenzahl klebt dabei am „Nr.“ der
+  // Heftnummer.
+  private static final Pattern GVOBL_MV_KOPF =
+      Pattern.compile(
+          "[ \\t]*(?:Nr\\. \\d+[ \\t]+)?Tag der Ausgabe: \\p{L}+, den"
+              + " \\d{1,2}\\. \\p{L}+ \\d{4}[ \\t]*\\d{0,4}[ \\t]*(?:Nr\\. \\d+)?[ \\t]*");
+  private static final Pattern GVOBL_MV_FUSS =
+      Pattern.compile(
+          "[ \\t]*\\d{1,4}[ \\t]+Gesetz- und Verordnungsblatt für Mecklenburg-Vorpommern"
+              + " \\d{4}[ \\t]+Nr\\. \\d+[ \\t]*");
+
   // Die Blattzählung des GBl. BW („Seite 2 von 7“) steht im Inhaltsstrom mitunter für sich allein,
   // getrennt vom übrigen Seitenfuß, und zwar zwischen zwei Gliederungspunkten — sie hinge sonst dem
   // vorangehenden Befehl an und machte ihn unkenntlich.
@@ -378,6 +391,8 @@ public final class TextBereiniger {
     text = GBL_BW_FUSS.matcher(text).replaceAll("\n");
     text = GVBL_RP_FUSS.matcher(text).replaceAll("\n");
     text = GBL_HB_KOPF.matcher(text).replaceAll("\n");
+    text = GVOBL_MV_KOPF.matcher(text).replaceAll("\n");
+    text = GVOBL_MV_FUSS.matcher(text).replaceAll("\n");
     var zeilen = entferneKolumnentitel(zerlegeInZeilen(text));
     var verbunden = verbindeUmbrueche(zeilen);
     // Falsch-positive markerlose Zusammenzüge („durch“ + „die“ → „durchdie“) reparieren — die
