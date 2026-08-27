@@ -1778,6 +1778,79 @@ class EndToEndTest {
         .containsExactly("§ 3", "§ 4", "§ 6", "§ 9");
   }
 
+  /**
+   * Bremen: Die Änderung der Verordnung über die Berufsfachschule für technische und kaufmännische
+   * Assistentinnen und Assistenten (Brem.GBl. 2026 Nr. 87, S. 573).
+   *
+   * <p>Der Fall ist der erste, dessen Vor- <em>und</em> Nachfassung aus demselben offenen Portal
+   * stammen (siehe {@code Bremen/SOURCES}); er bringt sechs Idiome, die das übrige Landesrecht
+   * nicht führt: die Neufassung des <em>Namens</em> der Verordnung, die bloße Aufzählungsmarke als
+   * Stellenangabe („In e) …“, „f) wird gestrichen“), die Marke mit Schlusspunkt („Nummer 1. wird
+   * wie folgt gefasst“), „durch die Worte … <em>geändert</em>“ statt „ersetzt“, die Anfügung als
+   * „am Ende um Satz 2 ergänzt“ und das <em>benannte</em> Satzzeichen („das Satzzeichen „Punkt“
+   * wird aufgehoben und folgendes angefügt“).
+   *
+   * <p>Zwei Zitate des Heftes sind nicht geschlossen (Nummern 8 a und 13). Beide Satzfehler
+   * zusammen sind der Prüfstein der Aufzählungs-Zitatgrenze: Sie muss auch dann greifen, wenn der
+   * Rest des Abschnitts seinerseits noch ein Zitat offen lässt.
+   */
+  @Test
+  void berufsfachschulVOBremen() throws Exception {
+    var alt = SAMPLEDATA.resolve("Bremen/AssBerFSchulV-BR-alt.txt");
+    var pdf = SAMPLEDATA.resolve("Bremen/BremGBl-2026-87_BerufsfachschulVO-AendVO.pdf");
+    var neu = SAMPLEDATA.resolve("Bremen/AssBerFSchulV-BR-neu.txt");
+    assumeTrue(Files.exists(alt) && Files.exists(pdf), "Bremer Beispieldaten fehlen");
+
+    var gesetz = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(alt);
+    assertThat(gesetz.jurabk()).isEqualTo("AssBerFSchulV BR 2019");
+    assertThat(gesetz.normen()).hasSize(28);
+
+    var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(pdf));
+    // Der Kolumnentitel steht im Inhaltsstrom und klebt am Seitenumbruch hinter dem letzten Satz
+    // der Vorseite; bliebe er stehen, zerfiele die Gliederung des Heftes an ihm.
+    assertThat(text).doesNotContain("Gesetzblatt der Freien Hansestadt Bremen vom 20. August 2026");
+
+    var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, null);
+    assertThat(parseErgebnis.artikel()).containsExactly("1");
+    assertThat(parseErgebnis.befehle()).hasSize(41);
+
+    // Beide offenen Zitate werden am folgenden Aufzählungspunkt geschlossen — das erste vor
+    // „b)“, das zweite vor „14.“. Vor dieser Welle schloss nur das letzte, und die Nummern 9 bis
+    // 13 verschwanden im Zitat der Nummer 8 a).
+    assertThat(parseErgebnis.warnungen())
+        .anyMatch(w -> w.contains("vor dem Aufzählungspunkt „b)“"))
+        .anyMatch(w -> w.contains("vor dem Aufzählungspunkt „14.“"));
+
+    var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(37);
+
+    // Die Neufassung eines Vordersatzes lässt die Aufzählung stehen, die ihm folgt — und der
+    // gestrichene letzte Buchstabe der Nummer 1 hält keinen Platz für die Buchstaben der Nummer 2.
+    var dritter = anwendung.neu().norm("§ 3").orElseThrow().absaetze().get(1).text();
+    assertThat(dritter)
+        .startsWith("Mit Genehmigung der Senatorin oder des Senators für Kinder und Bildung")
+        .contains("Künstliche Intelligenz und Wirtschaftsinformatik")
+        .doesNotContain("(weggefallen)");
+
+    // „hinter dem Wort“ setzt die Wörter dahinter, nicht davor.
+    assertThat(anwendung.neu().norm("§ 23").orElseThrow().absaetze().get(0).text())
+        .contains("Die Senatorin oder der Senator für Kinder und Bildung kann auf Antrag");
+
+    assumeTrue(Files.exists(neu), "Bremer Nachfassung fehlt");
+    var soll = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(neu);
+    var abgleich = Nachfassungsabgleich.vergleiche(soll, anwendung.neu());
+    // § 26 fehlt, weil die Nummer 18 des Heftes ihr Zitat gar nicht erst öffnet: Sie verbindet
+    // eine Umnummerierung mit einer Neufassung, deren Wortlaut ohne Anführungszeichen dasteht.
+    // Geraten wird nicht.
+    assertThat(abgleich.fehlende()).containsExactly("§ 26");
+    assertThat(abgleich.ueberzaehlige()).isEmpty();
+    // § 22: „Im letzten Satz“ nennt keinen Absatz, und die Norm hat deren drei — der Befehl bleibt
+    // zu Recht mehrdeutig. § 29: die Nummer 21 verteilt den neuen Wortlaut auf zwei Unterpunkte,
+    // die je nur aus einem Zitat bestehen.
+    assertThat(abgleich.abweichungen().stream().map(a -> a.enbez()).toList())
+        .containsExactly("§ 22", "§ 29");
+  }
+
   private static Aenderungsbefehl befehlZu(
       AenderungsgesetzParser.ParseErgebnis ergebnis, String gliederungsPfad) {
     return ergebnis.befehle().stream()

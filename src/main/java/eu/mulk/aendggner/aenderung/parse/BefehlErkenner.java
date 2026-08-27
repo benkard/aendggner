@@ -50,6 +50,12 @@ final class BefehlErkenner {
       "(?:die (?:Wörter|Worte)|das Wort|die Angabe|die Zahl|die Verweisung|die Textstelle)";
   private static final String Z = "«(\\d+)»";
 
+  // Verb der Wortersetzung. Das Handbuch der Rechtsförmlichkeit kennt nur „ersetzt“; das bremische
+  // Gesetzblatt schreibt daneben „geändert“ („werden die Worte «1» durch die Worte «2» geändert“,
+  // Brem.GBl. 2026 Nr. 87 Nr. 5 a). Gemeint ist dasselbe. Die Rahmenform „wird wie folgt geändert“
+  // gerät dadurch nicht in Gefahr: Sie führt weder Zieltext noch „durch“.
+  private static final String ERSETZUNGS_VERB = "(?:ersetzt|geändert)";
+
   // Der Doppelpunkt fehlt gelegentlich (Seitenumbruch-Artefakt); für einen Punkt mit Unterpunkten
   // ist die Rahmenform trotzdem eindeutig.
   private static final Pattern KONTEXT =
@@ -133,7 +139,9 @@ final class BefehlErkenner {
               + WOERTER
               + " )?"
               + Z
-              + " ersetzt\\.$");
+              + " "
+              + ERSETZUNGS_VERB
+              + "\\.$");
 
   // Wie ERSETZUNG, nur ohne Fundstelle — die liefert der Kontextrahmen. Das Objekt nach „durch“
   // darf auch hier verkürzt sein („Die Angabe „X“ wird durch „Y“ ersetzt“, hessisches GVBl).
@@ -145,7 +153,9 @@ final class BefehlErkenner {
               + WOERTER
               + " )?"
               + Z
-              + " ersetzt\\.$");
+              + " "
+              + ERSETZUNGS_VERB
+              + "\\.$");
 
   // „In Nummer 2 werden nach den Wörtern «1» die Wörter «2» durch die Wörter «3» ersetzt.“ —
   // Ersetzung mit Positionsanker; der Anker präzisiert nur die Fundstelle, die Eindeutigkeits-
@@ -179,6 +189,22 @@ final class BefehlErkenner {
 
   // „In Absatz 1 Satz 2 wird der Punkt am Ende durch folgende Wörter / den folgenden Wortlaut
   // ersetzt: „…““ — der Ersatz steht als Zitatblock hinter dem Doppelpunkt.
+  // „In Absatz 2 Satz 1 wird am Textende nach dem Wort «1» das Satzzeichen «2» aufgehoben und
+  // folgendes angefügt: «3».“ (Brem.GBl. 2026 Nr. 87 Nr. 5 c) — der Sache nach die Ersetzung des
+  // Schlusszeichens durch den angefügten Wortlaut. Zweierlei ist neu: Das Satzzeichen wird
+  // *benannt* („Punkt“) statt gezeigt („.“), und es steht dabei selbst in Anführungszeichen, ist
+  // für den Zitat-Extraktor also ein Zitat wie jedes andere.
+  private static final Pattern SATZZEICHEN_AUFHEBUNG_MIT_ANFUEGUNG =
+      Pattern.compile(
+          "^(?:In )?(.+?) (?:wird|werden)(?: am (?:Text)?ende)?"
+              + "(?: nach (?:dem Wort|den (?:Wörtern|Worten)|der Angabe) "
+              + Z
+              + ")? das Satzzeichen "
+              + Z
+              + " aufgehoben und folgende[nrs]? (?:Wortlaut |Wörter )?angefügt: "
+              + Z
+              + "\\.?$");
+
   private static final Pattern PUNKT_DURCH_WORTLAUT =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (der Punkt|das Komma|das Semikolon|der Strichpunkt)"
@@ -306,6 +332,16 @@ final class BefehlErkenner {
               + Z
               + "\\.?$");
 
+  // „Absatz 1 wird am Ende um Satz 2 ergänzt: „…““ (Brem.GBl. 2026 Nr. 87 Nr. 11 a) — dieselbe
+  // Anfügung in anderer Wortwahl: „um … ergänzt“ statt „… angefügt“, wobei die angefügte Einheit
+  // ihre Bezeichnung gleich mitführt.
+  private static final Pattern STRUKTUR_ANFUEGUNG_ERGAENZUNG =
+      Pattern.compile(
+          "^(?:Dem |Der |In )?(.+?) (?:wird|werden)(?: am Ende)? um (.+?) ergänzt ?: "
+              + ENUM
+              + Z
+              + "\\.?$");
+
   private static final Pattern STRUKTUR_ANFUEGUNG =
       Pattern.compile(
           "^(?:Es (?:wird|werden) )?(?:Der |Die |Das )?[Ff]olgende[nrs]? (.+?) (?:(?:wird|werden) )?angefügt ?: "
@@ -398,6 +434,21 @@ final class BefehlErkenner {
   private static final Pattern STREICHUNG =
       Pattern.compile(
           "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?" + WOERTER + " " + Z + " gestrichen\\.$");
+
+  // „In Satz 2 werden nach dem Wort «1» die Worte «2» gestrichen.“ — Streichung mit Positionsanker.
+  // Wie bei ERSETZUNG_MIT_ANKER präzisiert der Anker allein die Fundstelle; die Eindeutigkeits-
+  // prüfung des Anwenders schützt vor Fehlgriffen.
+  private static final Pattern STREICHUNG_MIT_ANKER =
+      Pattern.compile(
+          "^(?:In )?(.+?) (?:wird|werden) (?:jeweils )?(?:nach|hinter|vor) "
+              + "(?:dem Wort|den (?:Wörtern|Worten)|der Angabe|der Zahl|der Verweisung"
+              + "|der Textstelle) "
+              + Z
+              + " "
+              + WOERTER
+              + " "
+              + Z
+              + " gestrichen\\.$");
 
   // „Die Angabe „X“ wird gestrichen.“ — ohne Stellenangabe (Kontext liefert das Ziel); tritt vor
   // allem als rechte Klausel eines Verbunds auf („… ersetzt und die Angabe „X“ wird gestrichen“).
@@ -1125,6 +1176,16 @@ final class BefehlErkenner {
           m.group(1), s -> new WoerterEinfuegung(kontext.plus(s), anker, woerter, provenienz));
     }
 
+    if ((m = SATZZEICHEN_AUFHEBUNG_MIT_ANFUEGUNG.matcher(text)).matches()) {
+      var zeichen = benanntesSatzzeichen(wortZitat(zitate, m.group(3)));
+      if (zeichen == null) {
+        return Optional.empty();
+      }
+      var neu = wortZitat(zitate, m.group(4));
+      return ausStellen(
+          m.group(1), s -> new Ersetzung(kontext.plus(s), zeichen, neu, false, true, provenienz));
+    }
+
     if ((m = PUNKT_DURCH_WORTLAUT.matcher(text)).matches()) {
       var alt = satzzeichen(m.group(2));
       var neu = wortZitat(zitate, m.group(3));
@@ -1177,7 +1238,7 @@ final class BefehlErkenner {
     if ((m = WOERTER_EINFUEGUNG.matcher(text)).matches()) {
       var ankerWoerter = wortZitat(zitate, m.group(3));
       var anker =
-          m.group(2).equals("nach")
+          nachAnker(m.group(2))
               ? new WortAnker.NachWoertern(ankerWoerter)
               : new WortAnker.VorWoertern(ankerWoerter);
       var woerter = wortZitat(zitate, m.group(4));
@@ -1197,7 +1258,7 @@ final class BefehlErkenner {
     if ((m = KOMMA_EINFUEGUNG.matcher(text)).matches()) {
       var ankerWoerter = wortZitat(zitate, m.group(3));
       var anker =
-          m.group(2).equals("nach")
+          nachAnker(m.group(2))
               ? new WortAnker.NachWoertern(ankerWoerter)
               : new WortAnker.VorWoertern(ankerWoerter);
       var woerter = satzzeichen(m.group(4));
@@ -1208,7 +1269,7 @@ final class BefehlErkenner {
     if ((m = KOMMA_UND_WOERTER_EINFUEGUNG.matcher(text)).matches()) {
       var ankerWoerter = wortZitat(zitate, m.group(3));
       var anker =
-          m.group(2).equals("nach")
+          nachAnker(m.group(2))
               ? new WortAnker.NachWoertern(ankerWoerter)
               : new WortAnker.VorWoertern(ankerWoerter);
       var woerter = ", " + wortZitat(zitate, m.group(4));
@@ -1426,6 +1487,26 @@ final class BefehlErkenner {
               provenienz));
     }
 
+    if ((m = STRUKTUR_ANFUEGUNG_ERGAENZUNG.matcher(text)).matches()) {
+      var stelle = StellenParser.parse(m.group(1));
+      var ebeneBez = ebeneUndBezeichnung(m.group(2));
+      if (stelle.isEmpty() || ebeneBez.isEmpty()) {
+        return Optional.empty();
+      }
+      var textInhalt =
+          mitEnumerator(
+              m.group(3),
+              labelFuer(ebeneBez.get().ebene(), ebeneBez.get().bezeichnung()),
+              zitat(zitate, m.group(4)));
+      return Optional.of(
+          new Anfuegung(
+              kontext.plus(stelle.get()),
+              ebeneBez.get().ebene(),
+              ebeneBez.get().bezeichnung(),
+              textInhalt,
+              provenienz));
+    }
+
     if ((m = STRUKTUR_ANFUEGUNG.matcher(text)).matches()) {
       var ebeneBez = ebeneUndBezeichnung(m.group(1));
       if (ebeneBez.isEmpty()) {
@@ -1477,6 +1558,11 @@ final class BefehlErkenner {
       var nummer = zitat(zitate, m.group(1)).replaceAll("[^0-9a-z]", "");
       var stelle = new Stelle(List.of(new Stelle.Absatzbezeichnung(nummer)));
       return Optional.of(new Aufhebung(kontext.plus(stelle), provenienz));
+    }
+
+    if ((m = STREICHUNG_MIT_ANKER.matcher(text)).matches()) {
+      var woerter = wortZitat(zitate, m.group(3));
+      return ausStellen(m.group(1), s -> new Streichung(kontext.plus(s), woerter, provenienz));
     }
 
     if ((m = STREICHUNG.matcher(text)).matches()) {
@@ -1626,7 +1712,7 @@ final class BefehlErkenner {
       }
       var ankerWoerter = wortZitat(zitate, pm.group(2));
       var anker =
-          pm.group(1).equals("nach")
+          nachAnker(pm.group(1))
               ? (WortAnker) new WortAnker.NachWoertern(ankerWoerter)
               : new WortAnker.VorWoertern(ankerWoerter);
       String woerter;
@@ -2385,6 +2471,30 @@ final class BefehlErkenner {
   }
 
   private static final Pattern AM_ENDE = Pattern.compile("\\bam Ende\\b");
+
+  /**
+   * Das benannte Satzzeichen („Punkt“, „Komma“) als Zeichen; {@code null}, wenn das Wort keines
+   * benennt. Anders als {@link #satzzeichen} steht der Name hier ohne Artikel und stammt aus einem
+   * Zitat des Änderungsgesetzes.
+   */
+  /**
+   * Ob das Richtungswort einer Einfügung hinter den Anker weist. „hinter“ ist die Nebenform von
+   * „nach“ (Hamburg, Bremen); wurde sie nur im Muster zugelassen, nicht aber hier geprüft, so fiel
+   * sie stillschweigend in den Vor-Zweig und die Wörter traten vor den Anker.
+   */
+  private static boolean nachAnker(String richtung) {
+    return richtung.equalsIgnoreCase("nach") || richtung.equalsIgnoreCase("hinter");
+  }
+
+  private static @Nullable String benanntesSatzzeichen(String wort) {
+    return switch (wort.strip()) {
+      case "Punkt" -> ".";
+      case "Komma" -> ",";
+      case "Semikolon", "Strichpunkt" -> ";";
+      case "Doppelpunkt" -> ":";
+      default -> null;
+    };
+  }
 
   private static String satzzeichen(String phrase) {
     // Am Satzanfang steht dieselbe Phrase großgeschrieben („Der Punkt am Ende wird …“).

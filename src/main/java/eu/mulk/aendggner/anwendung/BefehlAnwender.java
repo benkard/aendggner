@@ -1390,16 +1390,84 @@ public final class BefehlAnwender {
           (text, bereich) ->
               TextErgebnis.ok(
                   text.substring(0, bereich.von())
-                      + rueckeZitatEin(
-                          normalisiereZitatText(befehl.neuerText()),
-                          einrueckungVon(text, bereich.von()))
+                      + behalteUntergliederung(
+                          text.substring(bereich.von(), bereich.bis()),
+                          rueckeZitatEin(
+                              normalisiereZitatText(befehl.neuerText()),
+                              einrueckungVon(text, bereich.von())))
                       + text.substring(bereich.bis())));
     }
 
     // Neufassung eines Satzes / Halbsatzes: Bereich ersetzen. Eine Einrückung gibt es hier
     // nicht — der Bereich beginnt mitten in der Zeile.
-    return bearbeiteText(
-        normen, befehl, text -> TextErgebnis.ok(normalisiereZitatText(befehl.neuerText())));
+    return bearbeiteText(normen, befehl, text -> TextErgebnis.ok(neuerSatzWortlaut(befehl, text)));
+  }
+
+  /** Ob die Stelle den ersten Satz ihrer Einheit bezeichnet. */
+  private static boolean istErsterSatz(Stelle stelle) {
+    return stelle.komponenten().stream()
+        .anyMatch(k -> k instanceof Stelle.SatzNr s && s.nummer().equals("1"));
+  }
+
+  /** Eine Aufzählungszeile innerhalb eines Absatzes („1. …“, „b) …“), auch eingerückt. */
+  private static final Pattern EINGERUECKTE_AUFZAEHLUNGSZEILE =
+      Pattern.compile("(?m)^[ \\t]*(?:\\d+[a-z]?\\.|[a-z]{1,3}\\))\\s");
+
+  /**
+   * Der Wortlaut, der an die Stelle eines neugefassten Satzes tritt. Das Zitat des ersten Satzes
+   * trägt die Absatzbezeichnung mit („Satz 1 wird wie folgt gefasst: „(2) Mit Genehmigung …““). Sie
+   * gehört dem Absatz, nicht dem Satz; bliebe sie stehen, so führte der Absatz seine Nummer
+   * zweimal.
+   */
+  private static String neuerSatzWortlaut(Neufassung befehl, String alterSatz) {
+    var neu = normalisiereZitatText(befehl.neuerText());
+    if (istErsterSatz(befehl.stelle())) {
+      neu = neu.replaceFirst("^\\(\\d+[a-z]?\\)\\s+", "");
+    }
+    // Ein Satz steht im kanonischen Klartext auf einer Zeile. Die Umbrüche, die das Zitat aus dem
+    // Gesetzblattsatz mitbringt, sind Satzspiegel und kein Textbestand — anders als bei der
+    // Neufassung eines ganzen Absatzes, deren Aufzählungszeilen ihre Zeilen behalten müssen.
+    if (untergliederungsBeginn(neu) < 0) {
+      neu = neu.replaceAll("\\s*\\n\\s*", " ");
+    }
+    return behalteUntergliederung(alterSatz, neu);
+  }
+
+  /**
+   * Eine Neufassung, die unvollendet endet — auf Doppelpunkt oder Komma —, meint den Vordersatz
+   * allein und lässt die Untergliederung stehen, die ihm folgt. Das ist die Lesart des amtlichen
+   * Satzes: Wer die Glieder mitändern will, führt sie im Zitat mit auf, und wer sie einzeln ändert,
+   * tut es in den folgenden Punkten.
+   *
+   * <p>Brem.GBl. 2026 Nr. 87 Nr. 4 führt beides vor: a) fasst den Vordersatz des § 3 Abs. 2 neu („…
+   * eingerichtet werden:“), b) und e) je eine Nummer („1. Bildungsgänge …,“), und c) und d) greifen
+   * danach auf die Buchstaben e und f zu, die unter der Nummer 1 hängen. Ohne diese Regel nähme
+   * jede der Neufassungen ihrer Einheit die Glieder, und die folgenden Befehle fänden ihr Ziel
+   * nicht mehr.
+   */
+  private static String behalteUntergliederung(String alterBlock, String neuerText) {
+    var kern = neuerText.stripTrailing();
+    if (!kern.endsWith(":") && !kern.endsWith(",")) {
+      return neuerText;
+    }
+    if (untergliederungsBeginn(neuerText) >= 0) {
+      return neuerText; // der neue Wortlaut bringt seine Glieder selbst mit
+    }
+    int beginn = untergliederungsBeginn(alterBlock);
+    return beginn < 0 ? neuerText : kern + alterBlock.substring(beginn);
+  }
+
+  /**
+   * Die Stelle des Zeilenumbruchs, mit dem die Untergliederung eines Blockes beginnt — also des
+   * ersten Umbruchs, dem eine Aufzählungszeile folgt; sonst {@code -1}.
+   */
+  private static int untergliederungsBeginn(String block) {
+    int umbruch = block.indexOf('\n');
+    if (umbruch < 0) {
+      return -1;
+    }
+    var aufzaehlung = EINGERUECKTE_AUFZAEHLUNGSZEILE.matcher(block.substring(umbruch));
+    return aufzaehlung.find() && aufzaehlung.start() == 1 ? umbruch : -1;
   }
 
   /** Ein Ziel (Absatz, Satz, Nummer, Buchstabe) wird durch einen Block ersetzt (ggf. 1 → N). */
@@ -1892,6 +1960,26 @@ public final class BefehlAnwender {
     return gestutzt + "\n" + einrueckung + satz;
   }
 
+  /**
+   * Setzt den angefügten Satz an seinen Platz. Nennt der Befehl die Nummer des neuen Satzes und
+   * zählt der Zieltext schon so viele Sätze, so ist der genannte Platz gemeint und nicht das Ende:
+   * „Absatz 1 wird am Ende um Satz 2 ergänzt“ macht den neuen Satz zum zweiten und schiebt den
+   * bisherigen zweiten nach hinten (Brem.GBl. 2026 Nr. 87 Nr. 11 a; so führt es auch die amtliche
+   * Nachfassung). Reicht die Zählung nicht so weit, so ist das Ende gemeint — dort fallen beide
+   * Lesarten ohnehin zusammen.
+   */
+  private static String setzeSatzEin(String text, String satz, @Nullable String bezeichnung) {
+    if (bezeichnung != null && bezeichnung.matches("\\d+")) {
+      int nummer = Integer.parseInt(bezeichnung);
+      var saetze = SatzTeiler.teile(text);
+      if (nummer >= 1 && nummer <= saetze.size()) {
+        int von = saetze.get(nummer - 1).von();
+        return (text.substring(0, von) + satz + " " + text.substring(von)).stripTrailing();
+      }
+    }
+    return haengeSatzAn(text, satz);
+  }
+
   private static AngewandteAenderung wendeAnfuegungAn(List<Norm> normen, Anfuegung befehl) {
     return switch (befehl.ebene()) {
       case ABSATZ -> {
@@ -1907,7 +1995,10 @@ public final class BefehlAnwender {
       }
       case SATZ ->
           bearbeiteText(
-              normen, befehl, text -> TextErgebnis.ok(haengeSatzAn(text, befehl.text().strip())));
+              normen,
+              befehl,
+              text ->
+                  TextErgebnis.ok(setzeSatzEin(text, befehl.text().strip(), befehl.bezeichnung())));
       // Ein Halbsatz beginnt keinen neuen Satz, sondern setzt den bestehenden hinter dem
       // Strichpunkt fort. Angehängt wird deshalb wie beim Satz — aber nur, wenn der Zieltext
       // tatsächlich auf einen Strichpunkt endet: Sonst stünde der Halbsatz hinter einem Punkt und
@@ -2067,8 +2158,8 @@ public final class BefehlAnwender {
         befehl,
         (text, bereich) -> {
           var label = labelVon(stelle);
-          if (label != null && haeltPlatz(text, bereich.bis(), label)) {
-            var einrueckung = einrueckungVon(text, bereich.von());
+          var einrueckung = einrueckungVon(text, bereich.von());
+          if (label != null && haeltPlatz(text, bereich.bis(), label, einrueckung.length())) {
             return TextErgebnis.ok(
                 text.substring(0, bereich.von())
                     + einrueckung
@@ -2855,17 +2946,40 @@ public final class BefehlAnwender {
    * weitere Platzhalter folgen —, so ist kein Platz zu halten und sie entfällt ganz. So endet § 14
    * der hessischen Verkehrsrechts-Zuständigkeitsverordnung nach Aufhebung der Nrn. 9 bis 11 mit der
    * Nr. 6, wie es auch die amtliche Nachfassung tut.
+   *
+   * <p>Gesucht wird dabei nur innerhalb desselben Blockes: Die Aufzählung endet dort, wo eine Zeile
+   * flacher einrückt als die aufgehobene Einheit, denn dann beginnt die Untergliederung einer
+   * anderen Einheit. Ohne diese Schranke hielte der letzte Buchstabe der Nummer 1 einen Platz für
+   * die Buchstaben der Nummer 2 — die ihn nie brauchen (Brem.GBl. 2026 Nr. 87 Nr. 4 d).
    */
-  private static boolean haeltPlatz(String text, int ab, String label) {
+  private static boolean haeltPlatz(String text, int ab, String label, int einrueckung) {
     var art =
         label.endsWith(")")
-            ? Pattern.compile("^\\s*[a-zA-Z]{1,2}\\)\\s+(.*)$")
-            : Pattern.compile("^\\s*\\d+[a-z]?\\.\\s+(.*)$");
-    return text.substring(ab)
-        .lines()
-        .map(art::matcher)
-        .filter(java.util.regex.Matcher::matches)
-        .anyMatch(m -> !m.group(1).strip().equals("(weggefallen)"));
+            ? Pattern.compile("^(\\s*)[a-zA-Z]{1,2}\\)\\s+(.*)$")
+            : Pattern.compile("^(\\s*)\\d+[a-z]?\\.\\s+(.*)$");
+    for (var zeile : text.substring(ab).lines().toList()) {
+      if (zeile.isBlank()) {
+        continue;
+      }
+      if (fuehrendeBreite(zeile) < einrueckung) {
+        return false;
+      }
+      var m = art.matcher(zeile);
+      if (m.matches()
+          && m.group(1).length() == einrueckung
+          && !m.group(2).strip().equals("(weggefallen)")) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private static int fuehrendeBreite(String zeile) {
+    int i = 0;
+    while (i < zeile.length() && (zeile.charAt(i) == ' ' || zeile.charAt(i) == '\t')) {
+      i++;
+    }
+    return i;
   }
 
   private static String einrueckungVon(String text, int position) {
@@ -3135,6 +3249,27 @@ public final class BefehlAnwender {
   private static final Pattern MARKEN_ZWISCHENRAUM =
       Pattern.compile("^(\\d+[a-z]?\\.|[a-z]{1,3}\\))[ \\t]+");
 
+  /**
+   * Ob die Zeile den Satz der zuletzt geschriebenen Zeile offenkundig fortsetzt. Maßstab ist allein
+   * das Ende der vorigen Zeile: Wer auf ein Binde- oder Verhältniswort endet, ist nicht zu Ende
+   * ({@link #UNVOLLENDET}). Die bloße Kleinschreibung der Folgezeile genügt nicht — im Anhang zu §
+   * 3 Abs. 3 UWG folgt der Kurzüberschrift eines Aufzählungsgliedes regelmäßig eine
+   * kleingeschriebene Begriffsbestimmung („2. unerlaubte Verwendung von Gütezeichen“ / „die
+   * Verwendung von Gütezeichen …“), und die sind zwei Zeilen und nicht eine.
+   */
+  private static boolean setztSatzFort(StringBuilder bisher, String zeile) {
+    if (zeile.isEmpty() || bisher.length() == 0) {
+      return false;
+    }
+    int zeilenAnfang = bisher.lastIndexOf("\n") + 1;
+    var vorige = bisher.substring(zeilenAnfang).stripTrailing();
+    if (!UNVOLLENDET.matcher(vorige).find()) {
+      return false;
+    }
+    int erstes = zeile.codePointAt(0);
+    return Character.isLowerCase(erstes) || Character.isDigit(erstes);
+  }
+
   private static String normalisiereZitatText(String text) {
     var zeilen = text.split("\n");
     var sb = new StringBuilder();
@@ -3157,6 +3292,13 @@ public final class BefehlAnwender {
         // Aufzählungspunkt: eigene Zeile mit Einzug.
         sb.append("\n  ").append(gestutzt);
         fortsetzungsEinzug = "    ";
+      } else if (setztSatzFort(sb, gestutzt)) {
+        // Ein Umbruch mitten im Satz ist Satzspiegel, kein Textbestand: Das Gesetzblatt bricht die
+        // Zeile, wo die Spalte endet, und der geometrische Befund kann sie als hart ausweisen
+        // (kurze Schlusszeile eines eingerückten Zitats). Zusammengezogen wird nur dort, wo die
+        // Fortsetzung unverkennbar ist — die vorige Zeile schließt keinen Satz, und diese beginnt
+        // klein oder mit einer Ziffer.
+        sb.append(' ').append(gestutzt);
       } else {
         sb.append('\n').append(fortsetzungsEinzug).append(gestutzt);
       }

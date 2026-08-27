@@ -244,8 +244,13 @@ public final class ZitatExtraktor {
    *   <li>Der Marker der Folgezeile liegt auf derselben oder einer flacheren Ebene als der Marker,
    *       auf dessen Punkt das Zitat aufging („bb)“ → „cc)“, „c)“, „3.“).
    *   <li>Der Zeilenrest trägt Befehlssprache.
-   *   <li>Ein Schluss an dieser Stelle lässt den Rest des Abschnitts ausbalanciert zurück — die
-   *       Stelle behebt den Defekt also wirklich.
+   *   <li>Im Rest des Abschnitts steht kein schließendes Anführungszeichen ohne öffnendes. Das ist
+   *       die Probe darauf, dass hier wirklich ein Zitat endet und nicht mitten in einem gültigen
+   *       Zitat abgeschnitten wird: Wer mitten in einem ordentlich geschlossenen Zitat schnitte,
+   *       ließe dessen schließendes Zeichen ohne Gegenstück zurück. Ein Rest, der seinerseits ein
+   *       Zitat offen lässt, steht dem nicht entgegen — ein Abschnitt darf mehrere solcher
+   *       Satzfehler tragen (Brem.GBl. 2026 Nr. 87 trägt zwei), und jeder wird an seiner eigenen
+   *       Grenze geschlossen.
    * </ol>
    */
   private static @Nullable String aufzaehlungsGrenze(
@@ -260,7 +265,7 @@ public final class ZitatExtraktor {
     var marker = zeile.group(1);
     if (markerEbene(marker) > markerEbene(markerVorZitat)
         || !BEFEHLSSPRACHE.matcher(zeile.group(2)).find()
-        || offeneZitate(text, von, segment.bis()) != 0) {
+        || schlussOhneOeffnung(text, von, segment.bis())) {
       return null;
     }
     return marker;
@@ -322,6 +327,29 @@ public final class ZitatExtraktor {
       }
     }
     return tiefe;
+  }
+
+  /**
+   * Ob in {@code [von, bis)} ein schließendes Anführungszeichen ohne öffnendes steht — dieselbe
+   * Tiefenzählung wie {@link #offeneZitate}, nur auf die Gegenrichtung gesehen.
+   */
+  private static boolean schlussOhneOeffnung(String text, int von, int bis) {
+    int tiefe = 0;
+    for (int i = von; i < bis; i++) {
+      char c = text.charAt(i);
+      if (c == OEFFNEND) {
+        if (tiefe > 0 && istFortfuehrungszeichen(text, i)) {
+          continue;
+        }
+        tiefe++;
+      } else if (c == SCHLIESSEND) {
+        if (tiefe == 0) {
+          return true;
+        }
+        tiefe--;
+      }
+    }
+    return false;
   }
 
   /** Die bei {@code von} beginnende Zeile (ohne Zeilenumbruch). */

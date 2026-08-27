@@ -3,6 +3,7 @@
 package eu.mulk.aendggner.anwendung;
 
 import eu.mulk.aendggner.aenderung.Stelle;
+import eu.mulk.aendggner.aenderung.parse.StellenParser;
 import eu.mulk.aendggner.gesetz.Gesetz;
 import eu.mulk.aendggner.gesetz.Norm;
 import java.util.List;
@@ -220,8 +221,18 @@ final class StellenAufloeser {
    */
   private static SatzTeiler.@Nullable SatzBereich satzBereichIn(
       String text, SatzTeiler.SatzBereich rahmen, Stelle.SatzNr satz) {
-    int nummer = Integer.parseInt(satz.nummer().replaceAll("[a-z]$", ""));
     var ausschnitt = text.substring(rahmen.von(), rahmen.bis());
+    // Der Stellung nach benannter Satz („Im letzten Satz …“): Gezählt wird erst hier, weil die
+    // Zahl der Sätze erst am Text feststeht.
+    if (StellenParser.LETZTER_SATZ.equals(satz.nummer())) {
+      var saetze = SatzTeiler.teile(ausschnitt);
+      if (saetze.isEmpty()) {
+        return null;
+      }
+      var letzter = saetze.get(saetze.size() - 1);
+      return new SatzTeiler.SatzBereich(rahmen.von() + letzter.von(), rahmen.von() + letzter.bis());
+    }
+    int nummer = Integer.parseInt(satz.nummer().replaceAll("[a-z]$", ""));
     var innen = satzBereich(ausschnitt, nummer, SatzTeiler.teile(ausschnitt));
     return innen == null
         ? null

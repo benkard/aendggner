@@ -313,6 +313,15 @@ public final class TextBereiniger {
           "[ \\t]*Gesetz- und Verordnungsblatt für das Land Rheinland-Pfalz[ \\t\\n]*-[ \\t\\n]*"
               + "Nr\\.\\s*\\d+ vom \\d{1,2}\\. \\p{L}+ \\d{4}[ \\t]*");
 
+  // Brem.GBl.: Der Kolumnentitel („Nr. 87 Gesetzblatt der Freien Hansestadt Bremen vom
+  // 20. August 2026 574“) steht meist auf eigener Zeile, klebt aber am Seitenumbruch mitunter
+  // hinter dem letzten Satz der Vorseite. Deshalb herausschneiden statt als Kolumnentitel zu
+  // entfernen — sonst zerfällt die Gliederung des Heftes an ihm.
+  private static final Pattern GBL_HB_KOPF =
+      Pattern.compile(
+          "[ \\t]*Nr\\. \\d+ Gesetzblatt der Freien Hansestadt Bremen"
+              + " vom \\d{1,2}\\. \\p{L}+ \\d{4}[ \\t]*\\d{0,4}[ \\t]*");
+
   // Die Blattzählung des GBl. BW („Seite 2 von 7“) steht im Inhaltsstrom mitunter für sich allein,
   // getrennt vom übrigen Seitenfuß, und zwar zwischen zwei Gliederungspunkten — sie hinge sonst dem
   // vorangehenden Befehl an und machte ihn unkenntlich.
@@ -368,6 +377,7 @@ public final class TextBereiniger {
     text = GVBL_HH_KOPF.matcher(text).replaceAll("\n");
     text = GBL_BW_FUSS.matcher(text).replaceAll("\n");
     text = GVBL_RP_FUSS.matcher(text).replaceAll("\n");
+    text = GBL_HB_KOPF.matcher(text).replaceAll("\n");
     var zeilen = entferneKolumnentitel(zerlegeInZeilen(text));
     var verbunden = verbindeUmbrueche(zeilen);
     // Falsch-positive markerlose Zusammenzüge („durch“ + „die“ → „durchdie“) reparieren — die

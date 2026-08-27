@@ -42,12 +42,30 @@ public final class StellenParser {
           "bisherige",
           "bisherigen");
 
+  // „Der Name der Verordnung wird wie folgt gefasst“ (Brem.GBl. 2026 Nr. 87 Nr. 1): Gemeint ist
+  // die Überschrift des Werkes selbst. Der Anwender erkennt sie daran, dass die Stelle nichts
+  // weiter nennt, und setzt den Langtitel.
+  private static final Pattern NAME_DES_WERKES =
+      Pattern.compile(
+          "(?:Der Name|Die Bezeichnung|Die Überschrift) (?:des Gesetzes|der Verordnung)");
+
+  /** Bezeichnung des der Stellung nach benannten letzten Satzes („Im letzten Satz …“). */
+  public static final String LETZTER_SATZ = "letzter";
+
+  private static final Set<String> SATZ_WOERTER = Set.of("Satz", "Satzes", "Sätze", "Sätzen");
+
   private static final Pattern PARAGRAPH = Pattern.compile("§");
   // Gestufte Nummern („Nr. 1.29“) kommen in Listen vor, die ihre Glieder dezimal durchzählen —
   // etwa der Artenkatalog des BayJG. Der Punkt muss von einer Ziffer gefolgt sein, damit „Nummer
   // 1.“ mit bloßem Aufzählungspunkt weiterhin nicht als Wert durchgeht.
   private static final Pattern NUMMER_WERT = Pattern.compile("\\d+(?:\\.\\d+)*[a-z]?");
   private static final Pattern BUCHSTABE_WERT = Pattern.compile("[a-z]{1,3}");
+
+  // Die bloße Aufzählungsmarke als ganze Stellenangabe: „In e) wird das Wort … ersetzt“, „f) wird
+  // gestrichen“ (Brem.GBl. 2026 Nr. 87 Nr. 4 c und d). Sie gilt nur, wenn sie die *ganze* Angabe
+  // ausmacht — innerhalb einer längeren Angabe bliebe offen, worauf sie sich bezöge.
+  private static final Pattern BLOSSE_BUCHSTABENMARKE = Pattern.compile("([a-z]{1,3})\\)");
+  private static final Pattern BLOSSE_NUMMERNMARKE = Pattern.compile("(\\d+[a-z]?)\\.");
 
   private StellenParser() {}
 
@@ -79,6 +97,13 @@ public final class StellenParser {
 
   public static Optional<Stelle> parse(String phrase) {
     phrase = CHAPEAU_QUALIFIER.matcher(phrase).replaceAll(" ").strip();
+    if (NAME_DES_WERKES.matcher(phrase).matches()) {
+      return Optional.of(new Stelle(List.of(new Stelle.Ueberschrift())));
+    }
+    var marke = blosseMarke(phrase.strip());
+    if (marke != null) {
+      return Optional.of(new Stelle(List.of(marke)));
+    }
     var woerter = phrase.strip().split("\\s+");
     var komponenten = new ArrayList<Stelle.Komponente>();
 
@@ -130,7 +155,7 @@ public final class StellenParser {
           i++;
         }
         case "Nummer", "Nr.", "Nummern", "Nrn." -> {
-          var wert = naechstesWort(woerter, i);
+          var wert = wertOhneAufzaehlungspunkt(woerter, i);
           if (wert == null || !NUMMER_WERT.matcher(wert).matches()) {
             return Optional.empty();
           }
@@ -193,6 +218,17 @@ public final class StellenParser {
         case "Anhang" -> komponenten.add(new Stelle.Gliederungseinheit("Anhang", ""));
         case "Inhaltsübersicht" -> komponenten.add(new Stelle.Inhaltsuebersicht());
         case "Überschrift" -> komponenten.add(new Stelle.Ueberschrift());
+        case "letzte", "letzten", "letzter", "letztem", "letztes" -> {
+          // „Im letzten Satz werden …“ (Brem.GBl. 2026 Nr. 87 Nr. 15 f): der Satz ist nicht
+          // gezählt, sondern der Stellung nach bezeichnet. Die Auflösung nimmt dafür den letzten
+          // Satz des Bereichs, den die übrigen Glieder übriglassen.
+          var art = naechstesWort(woerter, i);
+          if (art == null || !SATZ_WOERTER.contains(art)) {
+            return Optional.empty();
+          }
+          komponenten.add(new Stelle.SatzNr(LETZTER_SATZ));
+          i++;
+        }
         default -> {
           // Ordinal vor der Gliederungsart: „zum zweiten Abschnitt“, „des 2. Abschnitts“.
           var ordinal = ordinalZahl(wort);
@@ -548,6 +584,33 @@ public final class StellenParser {
       case "Anlagen" -> "Anlage";
       default -> wort;
     };
+  }
+
+  /**
+   * Die Stellenangabe, die nur aus einer Aufzählungsmarke besteht („e)“, „3.“), als Komponente;
+   * sonst {@code null}.
+   */
+  private static Stelle.@Nullable Komponente blosseMarke(String phrase) {
+    if (BLOSSE_BUCHSTABENMARKE.matcher(phrase).matches()) {
+      return new Stelle.BuchstabeNr(phrase.substring(0, phrase.length() - 1));
+    }
+    if (BLOSSE_NUMMERNMARKE.matcher(phrase).matches()) {
+      return new Stelle.NummerNr(phrase.substring(0, phrase.length() - 1));
+    }
+    return null;
+  }
+
+  /**
+   * Der Wert hinter „Nummer“/„Buchstabe“, wobei ein Aufzählungspunkt am Ende der ganzen Angabe
+   * abgestreift wird: Das bremische Gesetzblatt schreibt „Nummer 1. wird wie folgt gefasst“ und
+   * meint die Nummer 1, nicht eine gestufte Nummer.
+   */
+  private static @Nullable String wertOhneAufzaehlungspunkt(String[] woerter, int i) {
+    var wert = naechstesWort(woerter, i);
+    if (wert != null && wert.endsWith(".") && i + 2 >= woerter.length) {
+      wert = wert.substring(0, wert.length() - 1);
+    }
+    return wert;
   }
 
   private static String naechstesWort(String[] woerter, int i) {

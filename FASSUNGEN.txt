@@ -21,6 +21,121 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 27. August 2026 (erste Fassung des Tages),
+ zuletzt geändert durch die am 27. August 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Bremen tritt als fünfzehntes Land hinzu. Sein Portal ist nach BRAVORS und
+recht.nrw.de das dritte, das einer Skriptabfrage gewöhnliches HTML liefert, und
+das erste außerhalb Brandenburgs, das jede frühere Gesamtausgabe einzeln
+adressierbar führt; Vor- und Nachfassung stammen daher aus derselben Quelle. Das
+Heft selbst ist einfach gesetzt, seine Befehlssprache dagegen eigen: Sie fasst
+den Namen der Verordnung neu, bezeichnet Stellen durch die bloße
+Aufzählungsmarke, ändert „durch die Worte“ statt zu ersetzen, ergänzt „um Satz 2“
+statt anzufügen und benennt ihr Satzzeichen, statt es zu zeigen. Zweimal versäumt
+sie es, ein Zitat zu schließen.
+
+
+Artikel 1
+Grenze eines nicht geschlossenen Zitats
+
+(1) Die Grenze am Aufzählungspunkt (ZitatExtraktor) verlangte bisher, dass der
+    Rest des Abschnitts nach dem Schluss ausbalanciert zurückbleibe. Diese
+    Bedingung ist zu eng: Ein Abschnitt kann mehrere nicht geschlossene Zitate
+    tragen, und jedes ist an seiner eigenen Grenze zu schließen. An ihre Stelle
+    tritt die Probe, dass im Rest kein schließendes Anführungszeichen ohne
+    öffnendes steht — wer mitten in einem ordentlich geschlossenen Zitat schnitte,
+    ließe dessen Schlusszeichen ohne Gegenstück zurück.
+
+(2) Im bremischen Heft öffnen die Nummern 8 Buchstabe a und 13 je ein Zitat, das
+    sie nicht schließen. Vor dieser Änderung verschlang das erste die Nummern 9
+    bis 13; das Heft gab 22 Befehle her, nunmehr gibt es 41.
+
+
+Artikel 2
+Aufbereitung und Befehlserkennung
+
+(1) Der Textbereiniger (TextBereiniger) schneidet den Kolumnentitel des bremischen
+    Gesetzblattes heraus. Er steht im Inhaltsstrom und klebt am Seitenumbruch
+    hinter dem letzten Satz der Vorseite.
+
+(2) Der Stellenparser (StellenParser) nimmt drei Bezeichnungsweisen an: die bloße
+    Aufzählungsmarke als ganze Stellenangabe („In e) …“, „f) wird gestrichen“) —
+    jedoch nur, wenn sie die ganze Angabe ausmacht —, den Aufzählungspunkt am Ende
+    einer Nummernangabe („Nummer 1. wird wie folgt gefasst“) und den der Stellung
+    nach bezeichneten letzten Satz („Im letzten Satz …“), dessen Zählung erst am
+    Text feststeht.
+
+(3) Der Name des Werkes („Der Name der Verordnung wird wie folgt gefasst“) gilt
+    als dessen Überschrift; der Anwender setzt daraufhin den Langtitel.
+
+(4) Der Befehlserkenner (BefehlErkenner) nimmt vier Nebenformen an: „geändert“
+    als Verb der Wortersetzung neben „ersetzt“; die Streichung mit Positionsanker
+    („In Satz 2 werden nach dem Wort „…“ die Worte „…“ gestrichen“); die Anfügung
+    in der Wortwahl „am Ende um Satz 2 ergänzt“; und die Aufhebung eines benannten
+    Satzzeichens samt Anfügung („das Satzzeichen „Punkt“ wird aufgehoben und
+    folgendes angefügt: „…““), die der Sache nach eine Ersetzung des
+    Schlusszeichens ist.
+
+
+Artikel 3
+Berichtigung der Einfügungsrichtung
+
+Das Richtungswort „hinter“ war in den Mustern der Wörter-Einfügung zwar
+zugelassen, wurde bei der Bildung des Ankers aber nirgends geprüft; die
+Einfügung fiel daher stets in den Vor-Zweig, und die Wörter traten vor den Anker
+statt dahinter. Betroffen waren sämtliche Einfügungen mit Wortanker. Die Prüfung
+erfolgt fortan an einer Stelle (nachAnker).
+
+
+Artikel 4
+Anwendung: was eine Neufassung stehen lässt
+
+(1) Eine Neufassung, die unvollendet endet — auf Doppelpunkt oder Komma —, meint
+    den Vordersatz allein und lässt die Untergliederung stehen, die ihm folgt.
+    Wer die Glieder mitändern will, führt sie im Zitat mit auf. Ohne diese Regel
+    verlöre § 3 Absatz 2 der bremischen Verordnung seine zwölf Glieder, und die
+    vier folgenden Befehle fänden ihr Ziel nicht mehr.
+
+(2) Das Zitat des ersten Satzes trägt die Absatzbezeichnung mit. Sie gehört dem
+    Absatz und nicht dem Satz; bliebe sie stehen, so führte der Absatz seine
+    Nummer zweimal.
+
+(3) Ein Umbruch mitten im Satz ist Satzspiegel und kein Textbestand. Endet die
+    vorige Zeile auf ein Binde- oder Verhältniswort und beginnt die folgende klein
+    oder mit einer Ziffer, so werden beide zusammengezogen. Die Kurzüberschrift
+    eines Aufzählungsgliedes und ihre Begriffsbestimmung (Anhang zu § 3 Abs. 3
+    UWG) bleiben davon unberührt — jene endet nicht auf ein solches Wort.
+
+(4) Ein Platzhalter („(weggefallen)“) hält nur Platz innerhalb desselben Blockes.
+    Die Aufzählung endet dort, wo eine Zeile flacher einrückt als die aufgehobene
+    Einheit; die Buchstaben einer anderen Nummer gehen sie nichts an.
+
+(5) Eine angefügte Einheit, die ihre Nummer nennt, tritt an den genannten Platz
+    und nicht ans Ende, sofern der Zieltext schon so weit zählt („Absatz 1 wird am
+    Ende um Satz 2 ergänzt“ macht den neuen Satz zum zweiten). Reicht die Zählung
+    nicht so weit, so fallen beide Lesarten ohnehin zusammen.
+
+
+Artikel 5
+Beispieldaten
+
+Unter „sampledata/Bremen“ treten das Heft Brem.GBl. 2026 Nr. 87, die Vorfassung
+und die amtliche Nachfassung der Berufsfachschulverordnung nebst Herkunftsnachweis
+hinzu; der Akzeptanzfall (EndToEndTest.berufsfachschulVOBremen) pinnt 41 gelesene
+und 37 angewandte Befehle sowie den Gleichlauf von 26 der 29 Normen mit der
+amtlichen Nachfassung. Die drei Reste liegen sämtlich an der Vorlage und sind in
+„Bremen/SOURCES“ benannt.
+
+
+Schlussbestimmung
+
+Die vorstehenden Änderungen sind durch die vollständige Prüfung (mvnw verify,
+vierhundertachtundzwanzig Testfälle) und durch die Lizenzprüfung (reuse lint,
+zweihundertvier von zweihundertvier Dateien) bestätigt worden.
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 26. August 2026 (vierte Fassung des Tages),
  zuletzt geändert durch die am 26. August 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

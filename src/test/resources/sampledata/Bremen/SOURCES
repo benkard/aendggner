@@ -1,0 +1,100 @@
+Beispieldaten Bremen — Herkunft und Aufbereitung
+================================================
+
+1. Änderungsdokument
+   BremGBl-2026-87_BerufsfachschulVO-AendVO.pdf
+   Gesetzblatt der Freien Hansestadt Bremen 2026 Nr. 87, verkündet am
+   20. August 2026, S. 573: Änderung der Verordnung über die Berufsfachschule
+   für technische und kaufmännische Assistentinnen und Assistenten vom
+   10. August 2026.
+   Bezogen über
+   https://www.gesetzblatt.bremen.de/fastmedia/218/2026_08_20_GBl_Nr_0087_signed.pdf
+   (abgerufen am 27.08.2026). Das Gesetzblatt liegt vollständig und ohne
+   Anmeldung unter https://www.gesetzblatt.bremen.de/; die Heftliste
+   (`?skip=<N>&max=100`) nennt zu jedem Heft einen Hinweistext, der das
+   geänderte Werk benennt. Das Heft trägt genau eine Verkündung.
+
+2. Stammfassung (vor der Änderung)
+   AssBerFSchulV-BR-alt.txt
+   Verordnung über die Berufsfachschule für Assistentinnen und Assistenten vom
+   24. April 2019 (Brem.GBl. 2019, S. 297 – 223-o-5a), Gesamtausgabe in der
+   Gültigkeit vom 01.03.2019 bis 20.08.2026.
+   Entnommen dem Transparenzportal Bremen:
+   https://www.transparenz.bremen.de/sixcms/detail.php?gsid=bremen2014_tp.c.130920.de
+   &asl=bremen203_tpgesetz.c.55340.de&template=20_gp_ifg_meta_detail_d
+   (abgerufen am 27.08.2026).
+
+   Zum Portal: transparenz.bremen.de ist — nach BRAVORS (Brandenburg) und
+   recht.nrw.de — das dritte Landesportal, das einer Skriptabfrage gewöhnliches,
+   serverseitig gesetztes HTML liefert, und das erste außerhalb Brandenburgs,
+   das jede *frühere* Gesamtausgabe einzeln adressierbar führt. Der Weg dahin:
+   die Vorschrift über `…/metainformationen/<Titel-Slug>-<Id>?asl=…&template=
+   20_gp_ifg_meta_detail_d` aufrufen, von dort die Schaltfläche „Frühere
+   Fassungen“ (`…&template=20_gp_ifg_meta_fassungen_d`); sie listet jede Fassung
+   mit ihrem Geltungszeitraum und einer eigenen `gsid`. Die Änderungshistorie
+   steht unter `…&template=20_gp_ifg_meta_historie_d`. Vor- und Nachfassung
+   stammen deshalb aus derselben Quelle.
+
+   Aufbereitung (Skript `clean_hb.py`, im Arbeitsverzeichnis der Welle): Der
+   Text steht je Einheit in einem `<div class="jgwsAiZDoc">`; `<h3>`/`<h4>` mit
+   `<br>` tragen Gliederung und Normkopf („Teil 1␣␣Ausbildung“, „§ 1␣␣Titel“),
+   `<p>` je Absatz, `<dl>/<dt>/<dd>` die Aufzählungen, die je Ebene um zwei
+   Stellen eingerückt werden. Der Kopf (Titel, Klammerzusatz mit der
+   juris-Abkürzung, Datumszeile, Fundstelle) ist von Hand gesetzt; die
+   Eingangsformel und das nichtamtliche Inhaltsverzeichnis des Portals sind
+   fortgelassen. Der Titel ist der *amtliche von 2019* — das Portal führt
+   Vorfassungen unter dem heutigen Namen, und der Einleitungssatz des Heftes
+   zitiert den alten.
+
+3. Nachfassung (nach der Änderung), nur als Prüfmaßstab
+   AssBerFSchulV-BR-neu.txt
+   Dieselbe Verordnung in der ab dem 21. August 2026 geltenden Fassung, aus der
+   aktuellen Gesamtausgabe desselben Portals
+   (https://www.transparenz.bremen.de/metainformationen/verordnung-ueber-die-
+   berufsfachschule-fuer-technische-und-kaufmaennische-assistentinnen-und-
+   assistenten-vom-24-april-2019-373512?asl=bremen203_tpgesetz.c.55340.de
+   &template=20_gp_ifg_meta_detail_d, Stand 27.08.2026), mit demselben Skript
+   aufbereitet.
+
+4. Was der Fall trägt
+   - Die Neufassung des *Namens* der Verordnung („Der Name der Verordnung wird
+     wie folgt gefasst“) — die Überschrift des Werkes selbst.
+   - Die bloße Aufzählungsmarke als ganze Stellenangabe („In e) wird das Wort …
+     ersetzt“, „f) wird gestrichen“) und die Marke mit Schlusspunkt („Nummer 1.
+     wird wie folgt gefasst“).
+   - „werden die Worte … durch die Worte … *geändert*“ statt „ersetzt“.
+   - Die Anfügung als „Absatz 1 wird am Ende *um Satz 2 ergänzt*“ — die
+     genannte Nummer bestimmt den Platz, nicht das Ende.
+   - Das *benannte* Satzzeichen: „das Satzzeichen „Punkt“ wird aufgehoben und
+     folgendes angefügt: „…““ — der Sache nach die Ersetzung des Schlusszeichens
+     durch den angefügten Wortlaut.
+   - Zwei nicht geschlossene Zitate in einem Abschnitt (Nummern 8 a und 13).
+     Beide zusammen sind der Prüfstein der Aufzählungs-Zitatgrenze: Sie muss
+     auch dann greifen, wenn der Rest des Abschnitts seinerseits noch ein Zitat
+     offen lässt.
+   - Der Kolumnentitel („Nr. 87 Gesetzblatt der Freien Hansestadt Bremen vom
+     20. August 2026 574“) steht im Inhaltsstrom und klebt am Seitenumbruch
+     hinter dem letzten Satz der Vorseite.
+
+5. Benannte Abweichungen von der amtlichen Nachfassung
+   § 26 fehlt: Die Nummer 18 des Heftes verbindet eine Umnummerierung mit einer
+     Neufassung — „Der bisherige § 25 wird § 26 und wie folgt neu gefasst:“ —,
+     öffnet deren Zitat aber gar nicht erst; der neue Wortlaut steht ohne
+     Anführungszeichen da. Der Befehl bleibt darum unerkannt und § 26 ungesetzt.
+     Geraten wird nicht.
+   § 22: Die Nummer 15 f schreibt „Im letzten Satz werden hinter dem Wort
+     „Senatorin“ die Worte „oder der Senator“ eingefügt“. Sie nennt keinen
+     Absatz; § 22 hat deren drei, und jeder hat einen letzten Satz. Gemeint ist
+     ersichtlich der Absatz 3, von dem die Buchstaben b bis e handeln — der
+     Befehl selbst sagt es nicht, und der laufende Zusammenhang eines
+     Nachbarpunktes ist keine Stellenangabe. Die Auflösung meldet Mehrdeutigkeit.
+   § 29: Die Nummer 21 verteilt den neuen Wortlaut auf zwei Unterpunkte, die je
+     nur aus einem Zitat bestehen („a) „(1) …““, „b) „(2) …““), ohne dass diese
+     ein Verb trügen. Die Umnummerierung des bisherigen § 28 zu § 29 wird
+     vollzogen, die Neufassung nicht.
+
+   Nicht mitgeführt sind die *Anlagen* (Stundentafeln). Sie sind Tabellen, für
+   die der kanonische Klartext keine Form hat; und das Heft setzt an die Stelle
+   der einen Anlage der Vorfassung zwei neue, ohne dass ein Änderungsbefehl das
+   anordnete — ein Mangel der Vorlage, der sich nicht anwenden lässt. Beide
+   Klartextfassungen enden deshalb mit dem letzten Paragraphen.

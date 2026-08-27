@@ -104,6 +104,18 @@ Kopfelement *vor* der Überschrift, die Aufzählungen sind echte `<ol>`-Listen, 
 Stilblatt erzeugt, und an ehemaligen Trennstellen führt das Portal vereinzelt *Steuerzeichen*
 (U+0002) mit. Voller Akzeptanzfall (4/4 Befehle, alle 24 Normen).
 
+|Bremen
+|`Bremen/BremGBl-2026-87_BerufsfachschulVO-AendVO.pdf` — Brem.GBl. 2026 Nr. 87 vom 20.08.2026,
+S. 573 (Änderung der Verordnung über die Berufsfachschule für technische und kaufmännische
+Assistentinnen und Assistenten vom 10.08.2026)
+|Einspaltiges, sauberes Blatt; die Eigenheiten liegen in der *Befehlssprache*: die Neufassung des
+*Namens* der Verordnung, die bloße Aufzählungsmarke als Stellenangabe („In e) …“, „f) wird
+gestrichen“), die Marke mit Schlusspunkt („Nummer 1. wird wie folgt gefasst“), „durch die Worte …
+*geändert*“ statt „ersetzt“, die Anfügung „am Ende um Satz 2 ergänzt“ und das *benannte*
+Satzzeichen („das Satzzeichen „Punkt“ wird aufgehoben und folgendes angefügt“). Dazu *zwei* nicht
+geschlossene Zitate in einem Abschnitt. Voller Belegfall; Vor- *und* Nachfassung stammen aus
+demselben offenen Portal (`transparenz.bremen.de`, Schaltfläche „Frühere Fassungen“).
+
 |Hamburg
 |`Hamburg/HmbGVBl-2026-17_GutachterausschussVO-AendVO.pdf` — HmbGVBl. Teil I Nr. 17 vom
 26.05.2026, S. 147 (Verordnung zur Änderung der Verordnung über den Gutachterausschuss für
@@ -190,6 +202,20 @@ bleiben nur Abweichungen, in denen die amtliche Nachfassung selbst vom Befehlswo
 überzähliges Anführungszeichen aus dem Änderungsgesetz; § 93 LMG NRW: zusätzlich die Wörter
 „Film (“ gestrichen) — ÄndGgner wendet dort den Wortlaut an. Damit ist das Heft GV. NRW. 7/2026
 vollständig belegt.
+* *Bremen* ist umgesetzt (`EndToEndTest.berufsfachschulVOBremen`): 41 Befehle gelesen, 37
+  angewandt; 26 von 29 Normen gleichen der amtlichen Nachfassung, eine fehlt. Der Fall hat sechs
+  allgemeine Funde gebracht: Die *Aufzählungs-Zitatgrenze* darf nicht verlangen, dass der Rest des
+  Abschnitts ausbalanciert zurückbleibt — ein Abschnitt kann mehrere offene Zitate tragen, und
+  jedes ist an seiner eigenen Grenze zu schließen; sie prüft nunmehr, dass kein schließendes
+  Anführungszeichen ohne öffnendes zurückbleibt. Eine *unvollendet endende Neufassung*
+  (Doppelpunkt, Komma) meint den Vordersatz allein und lässt die Untergliederung stehen. Das
+  Zitat des *ersten* Satzes trägt die Absatzbezeichnung mit, die dem Absatz gehört und nicht dem
+  Satz. Ein *Platzhalter* „(weggefallen)“ hält nur Platz innerhalb desselben Blockes — die
+  Buchstaben einer anderen Nummer gehen ihn nichts an. Eine angefügte Einheit, die ihre *Nummer*
+  nennt, tritt an den genannten Platz und nicht ans Ende. Und ein Umbruch mitten im Satz ist
+  Satzspiegel: Endet die vorige Zeile auf ein Binde- oder Verhältniswort, so wird
+  zusammengezogen. Dazu ein aufgedeckter stiller Mangel: „*hinter* dem Wort“ war zwar im Muster
+  zugelassen, wurde aber nirgends geprüft — die Wörter traten vor den Anker statt dahinter.
 * *Hamburg* ist umgesetzt (`EndToEndTest.gutachterausschussVOHamburg`): 21 Befehle gelesen,
   17 angewandt; zehn von vierzehn Normen gleichen der amtlichen Nachfassung. Der Fall hat sechs
   allgemeine Funde gebracht: die Dezimalgliederung der Befehle; die §-Teilung eines Heftes, das
@@ -309,7 +335,7 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
   Baden-Württemberg jede Fassung datierbar ausgeben, fehlt dort. Ohne Vorfassung ist kein
   Akzeptanzfall möglich, sondern nur die Prüfung bis zur Befehlserkennung. Ein Ausweg wäre, die
   Vorfassung aus den *Einzelnormen* mit ihren Stichtagen zusammenzusetzen.
-* Bremen, Mecklenburg-Vorpommern, Saarland, Sachsen-Anhalt: noch nicht erfasst.
+* Mecklenburg-Vorpommern, Saarland, Sachsen-Anhalt: noch nicht erfasst.
 
 == Wo weitermachen
 
@@ -320,8 +346,8 @@ gegen die amtliche Fassung, und `--neufassung` gibt die errechnete Fassung als k
 Klartext aus. Ein weiteres Land kostet damit Stammfassung, Heft und Nachfassung — keinen eigenen
 Prüfcode mehr. Nach absteigendem Nutzen:
 
-. *Weitere Länder erfassen* — Bremen, Mecklenburg-Vorpommern, Saarland, Sachsen-Anhalt. Die
-  Beschaffungswege sind für alle vier geprüft (26.08.2026):
+. *Weitere Länder erfassen* — Mecklenburg-Vorpommern, Saarland, Sachsen-Anhalt (Bremen ist seit
+  Welle 25 erfasst). Die Beschaffungswege sind für alle geprüft (26./27.08.2026):
 +
 --
 Mecklenburg-Vorpommern:: Das Gesetzblatt liegt *frei und skriptlesbar* unter
@@ -336,8 +362,15 @@ Hamburg: eine Vorschrift, die *genau einmal* geändert worden ist — dann ist d
 Ursprungsfassung aus dem Gesetzblatt. Der geprüfte Fall (Gesetz zur Änderung der Landesbauordnung
 M-V und des Architekten- und Ingenieurgesetzes, GVOBl. Nr. 16 vom 11.06.2026) taugt dafür nicht:
 Beide Stammgesetze sind vielfach geändert.
-Bremen:: `transparenz.bremen.de` antwortet einer Skriptabfrage mit gewöhnlichem HTML (Status 200,
-44 kB) — das zweite offene Portal nach BRAVORS. Der Weg ist damit frei; er ist nur noch zu gehen.
+Bremen:: *Gegangen* (Welle 25). `transparenz.bremen.de` antwortet einer Skriptabfrage mit
+gewöhnlichem HTML und führt — als drittes offenes Portal nach BRAVORS und recht.nrw.de, und als
+erstes außerhalb Brandenburgs — jede *frühere* Gesamtausgabe einzeln adressierbar: Vorschrift über
+`…/metainformationen/<Slug>-<Id>?asl=…&template=20_gp_ifg_meta_detail_d`, von dort „Frühere
+Fassungen“ (`…&template=20_gp_ifg_meta_fassungen_d`) und „Änderungshistorie“
+(`…&template=20_gp_ifg_meta_historie_d`). Die Hefte des Gesetzblatts liegen unter
+`gesetzblatt.bremen.de/fastmedia/218/<JJJJ_MM_TT>_GBl_Nr_<NNNN>_signed.pdf`, die Heftliste
+(`gesetzblatt.bremen.de/?skip=<N>&max=100`) nennt zu jedem den geänderten Gegenstand. Siehe
+`Bremen/SOURCES`.
 Saarland und Sachsen-Anhalt:: unverändert ohne Vorfassungen (siehe „Noch offen“); dort bleibt es
 bei der Prüfung bis zur Befehlserkennung, es sei denn, die Einzelnormen mit ihren Stichtagen
 tragen.
@@ -420,5 +453,6 @@ aller 52 Normen mit der amtlichen Nachfassung; für Schleswig-Holstein die volls
 Stammgesetze; für Berlin die vollständige Anwendung des Artikels 2, fünf von sechs
 Befehlen des Artikels 1 und die drei benannten Abweichungen von der Nachfassung; für
 Baden-Württemberg einunddreißig von siebenunddreißig Befehlen und die zwei benannten
-Abweichungen. Wer eine dieser Zahlen
+Abweichungen; für Bremen einundvierzig gelesene und siebenunddreißig angewandte Befehle, die
+fehlende Norm und die zwei benannten Abweichungen. Wer eine dieser Zahlen
 ändern muss, sollte den Grund im Test vermerken.
