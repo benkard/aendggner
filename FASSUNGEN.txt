@@ -21,7 +21,102 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
- Fassung vom 28. August 2026,
+ Fassung vom 28. August 2026 (zweite Fassung des Tages),
+ zuletzt geändert durch die am 28. August 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Der Befund über das Erzeugnis ruhte bislang auf handverlesenen Fällen. Rund drei
+Dutzend Akzeptanzprüfungen sagen, dass diese Hefte aufgehen; sie sagen nicht,
+woran die Reste im Ganzen liegen, und die Auszählung der Gründe blieb auf den
+einzelnen Lauf beschränkt. Der Massenlauf beantwortet das für den Korpus: eine
+Zeile Kennzahlen je Heft, und, eingecheckt, eine Grundlinie, hinter die kein
+späterer Lauf zurückfallen darf. Der Korpus umfasst einunddreißig Aufträge; er
+gibt 1413 Befehle her, von denen 1287 angewandt werden, und 632 von 641 mit der
+amtlichen Nachfassung verglichenen Normen gehen auf.
+
+
+Artikel 1
+Der Korpusbericht
+
+(1) Der Schalter „--korpus“ nimmt eine Auftragsliste entgegen und gibt statt einer
+    Synopse je Auftrag eine Zeile Kennzahlen aus (Korpusbericht). Die Liste ist
+    eine Tabulatortabelle mit den Spalten Bezeichnung, Stammfassung, Hefte,
+    Artikel, Nachfassung und Stichtag; es sind dieselben Angaben, die auch die
+    Befehlszeile entgegennimmt. Ein Auftrag ist nichts anderes als ein Lauf.
+
+(2) Der Bericht führt je Auftrag die erschlossenen, die angewandten, die liegen
+    gebliebenen und die am Stichtag zurückgestellten Befehle, sodann die gleichen,
+    geprüften, fehlenden, überzähligen und abweichenden Normen des Abgleichs und
+    zuletzt die Gründe nach Häufigkeit.
+
+(3) Der Schalter „--grundlinie“ hält den Lauf gegen einen früheren Bericht. Gerügt
+    wird allein, was fällt: weniger erschlossene oder angewandte Befehle, weniger
+    gleiche Normen, mehr liegengebliebene, fehlende, überzählige oder abweichende.
+    Ein Fortschritt ist kein Fehler, sondern der Zweck der Arbeit; er verlangt
+    allein, die Grundlinie fortzuschreiben. Der Rückschritt endet mit dem
+    Rückgabewert 3 wie ein nicht aufgehender Abgleich.
+
+(4) Der Schalter „--synopsen“ behält die Einzelsynopsen und legt eine
+    Übersichtsseite daneben, die auf jede von ihnen verweist. Ohne sie wäre der
+    Bericht eine Zahlenreihe, aus der niemand den Grund eines Restes erführe.
+
+(5) Ein Auftrag, der mit einem Fehler abbricht, hält den Lauf nicht an; seine
+    Zeile trägt den Fehlertext, und die Grundlinie rügt ihn. Der Grundsatz der
+    Nichtverwerfung gilt auch für den Massenlauf.
+
+(6) Die Auszählung der Gründe, die bisher in der Befehlszeilenfassung stand, ist
+    in die Pipeline gewandert (Pipeline.zaehleGruende) und wird von beiden
+    verwendet; das Ergebnis (Pipeline.Ergebnis) führt sie fortan mit.
+
+
+Artikel 2
+Der Beispielkorpus
+
+(1) Unter „sampledata/korpus.tsv“ treten einunddreißig Aufträge hinzu, nämlich
+    dieselben, die die Akzeptanzprüfungen fahren, nebst den Entwürfen, den beiden
+    Beschlussempfehlungen und einem Stichtagsfall.
+
+(2) Drei Aufträge tragen mit Absicht hohe Reste: Bei den Beschlussempfehlungen und
+    bei Rheinland-Pfalz schreibt die Vorlage eine ältere Fassung fort als die
+    eingesetzte Stammfassung, weshalb deren Zieltexte nicht vorkommen. Sie sind
+    gleichwohl Wächter — steigen ihre Reste, so hat sich etwas verschlechtert.
+
+(3) Die Grundlinie („sampledata/korpus-grundlinie.tsv“) hält den Stand dieses
+    Tages fest. Sie und die Auftragsliste sind eigene Arbeit; ihr Vermerk steht in
+    der Zuordnungsdatei (REUSE.toml) und nicht als Kopfzeile in der Datei, weil
+    eine neu gesetzte Grundlinie ihn sonst verlöre.
+
+(4) Das Skript „deploy/korpuslauf.sh“ stellt das Erzeugnis her, falls es fehlt,
+    fährt den Lauf und legt Bericht, Synopsen und Übersicht in „target/korpus“ ab.
+
+
+Artikel 3
+Prüfung
+
+(1) Der Korpuslauf wird mitgeprüft (KorpusberichtTest): Kein Auftrag darf
+    scheitern, und keine Kennzahl darf hinter die Grundlinie zurückfallen.
+
+(2) Die Rügeregel selbst wird für sich geprüft — dass der Fortschritt
+    ungerügt bleibt, der Rückschritt in jeder der vier Kennzahlen gerügt wird, ein
+    gescheiterter Auftrag auffällt und ein aus dem Lauf verschwundener ebenfalls.
+
+(3) Dass die Liste vollständig gelesen wird, ist eigens geprüft: Anmerkungszeilen
+    werden übergangen, „-“ heißt „nicht angegeben“, mehrere Hefte werden durch
+    Komma getrennt, und der Stichtag wird als Datum gelesen.
+
+
+Schlussbestimmung
+
+Die vorstehenden Änderungen sind durch die vollständige Prüfung (mvnw verify,
+vierhundertdreiundvierzig Testfälle) und durch die Lizenzprüfung (reuse lint,
+zweihundertvierzehn von zweihundertvierzehn Dateien) bestätigt worden. Die
+Rügeregel ist überdies am ganzen Korpus erprobt worden: Eine um eins verschärfte
+Grundlinie führt zur Rüge „UWG-BGBl: angewandte Befehle 19 statt 20“ und zum
+Rückgabewert 3.
+
+
+════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 28. August 2026 (erste Fassung des Tages),
  zuletzt geändert durch die am 28. August 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════
 

@@ -215,7 +215,10 @@ SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
 # Die *-alt.txt tragen amtlichen Wortlaut in selbst hergestellter Aufbereitung
 # (Einrückung, Superskript-Satznummern, Gliederungsüberschriften); der Wortlaut ist
 # gemeinfrei, die Aufbereitung eigene Arbeit. Die SOURCES-Dateien sind vollständig
-# eigener Text, stehen aber im selben Zusammenhang.
+# eigener Text, stehen aber im selben Zusammenhang. Ebenso die Auftragsliste des
+# Korpuslaufs und dessen Grundlinie: Sie werden vom Erzeugnis selbst geschrieben und
+# stehen deshalb hier und nicht als Kopfzeile in der Datei — sonst verlöre eine neu
+# gesetzte Grundlinie ihren Vermerk.
 
 [[annotations]]
 path = [
@@ -253,6 +256,8 @@ SPDX-License-Identifier = "AGPL-3.0-or-later AND LicenseRef-AmtlichesWerk"
 
 [[annotations]]
 path = [
+  "src/test/resources/sampledata/korpus.tsv",
+  "src/test/resources/sampledata/korpus-grundlinie.tsv",
   "src/test/resources/sampledata/AGG/SOURCES",
   "src/test/resources/sampledata/BadenWuerttemberg/SOURCES",
   "src/test/resources/sampledata/BayJG/SOURCES",

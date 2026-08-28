@@ -1,0 +1,44 @@
+# Grundlinie des Korpuslaufs (§ 6d des Handbuchs), Stand 28. August 2026.
+#
+# Jede Zeile hält fest, was ein Auftrag der Liste „korpus.tsv“ zu diesem Zeitpunkt hergegeben hat.
+# Der Lauf wird dagegen gehalten (KorpusberichtTest, „--grundlinie“): Gerügt wird allein, was
+# FÄLLT — weniger erschlossene oder angewandte Befehle, weniger gleiche Normen, mehr
+# liegengebliebene, fehlende, überzählige oder abweichende. Ein Fortschritt ist kein Fehler,
+# sondern der Zweck der Arbeit; er verlangt allein, diese Datei fortzuschreiben.
+#
+# Die hohen Reste bei GEG-Beschlussempfehlung, IfSG-Beschlussempfehlung und RP-UKAPOGS beruhen
+# darauf, dass die Vorlage eine ältere Fassung fortschreibt als die eingesetzte Stammfassung
+# („Zieltext nicht vorhanden“); sie sind kein Mangel des Erzeugnisses, wohl aber ein Wächter:
+# Steigen sie, hat sich etwas verschlechtert.
+# Bezeichnung	Befehle	angewandt	manuell	zurückgestellt	gleich	geprüft	fehlend	überzählig	abweichend	Gründe
+UWG-BGBl	19	19	0	0	-	-	-	-	-	-
+UWG-RegE	20	20	0	0	-	-	-	-	-	-
+AGG-RegE	24	23	1	0	-	-	-	-	-	Stelle nicht auffindbar:1
+ProdHaftG-RegE	1	1	0	0	-	-	-	-	-	-
+GEG-BGBl-zeitrichtig	119	119	0	0	-	-	-	-	-	-
+IfSG-BGBl-zeitrichtig	75	75	0	0	-	-	-	-	-	-
+BayJG-GVBl	154	154	0	0	-	-	-	-	-	-
+SN-SaechsBeamtVG	5	5	0	0	-	-	-	-	-	-
+NI-NEFG	7	7	0	0	-	-	-	-	-	-
+SH-Gemeindeordnung	1	1	0	0	167	167	0	0	0	-
+SH-Kreisordnung	1	1	0	0	86	86	0	0	0	-
+NRW-WDR-Gesetz	101	101	0	0	-	-	-	-	-	-
+NRW-LMG	18	18	0	0	-	-	-	-	-	-
+NRW-TMZ-Gesetz	4	4	0	0	-	-	-	-	-	-
+NRW-17-RAEStV-AusfG	1	1	0	0	-	-	-	-	-	-
+BE-ASOG	6	6	0	0	171	171	0	0	0	-
+BE-LAF-ErrG	2	2	0	0	5	5	0	0	0	-
+BW-KomWO	37	31	6	0	91	93	0	0	2	Befehl nicht erkannt:6
+HE-StVRZustV	21	21	0	0	52	52	0	0	0	-
+TH-KiGaFinVO	10	10	0	0	-	-	-	-	-	-
+BB-FraktG	4	4	0	0	24	24	0	0	0	-
+HH-GutachterausschussVO	21	17	4	0	10	14	0	0	4	Befehl nicht erkannt:2; Stelle nicht auffindbar:1; Zieltext nicht vorhanden:1
+HB-BerufsfachschulVO	41	37	4	0	26	29	1	0	2	Befehl nicht erkannt:3; Fundstelle mehrdeutig:1
+MV-APOAmtsTA	24	20	4	0	-	-	-	-	-	Befehl nicht erkannt:4
+RP-UKAPOGS	23	9	14	0	-	-	-	-	-	Stelle nicht auffindbar:2; Zieltext nicht vorhanden:10; Bestand widerspricht dem Befehl:2
+GEG-GModG-RegE	97	87	10	0	-	-	-	-	-	Befehl nicht erkannt:6; Stelle nicht auffindbar:2; Zieltext nicht vorhanden:2
+GEG-Beschlussempfehlung	119	70	49	0	-	-	-	-	-	Befehl nicht erkannt:1; Stelle nicht auffindbar:3; Zieltext nicht vorhanden:40; Fundstelle mehrdeutig:1; Bestand widerspricht dem Befehl:4
+IfSG-Beschlussempfehlung	75	51	24	0	-	-	-	-	-	Befehl nicht erkannt:1; Stelle nicht auffindbar:1; Zieltext nicht vorhanden:21; Bestand widerspricht dem Befehl:1
+BayJG-Landtagsentwurf	154	154	0	0	-	-	-	-	-	-
+BayJG-mit-Aenderungsantrag	154	154	0	0	-	-	-	-	-	-
+IfSG-Stichtag	75	65	0	10	-	-	-	-	-	-

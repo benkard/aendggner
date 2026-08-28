@@ -30,7 +30,9 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.jspecify.annotations.Nullable;
 
@@ -116,6 +118,11 @@ public final class Pipeline {
    * @param abgleich der normweise Vergleich mit der amtlichen Nachfassung; {@code null}, wenn der
    *     Auftrag keine nannte.
    */
+  /**
+   * @param gruende die Auszählung der Gründe, aus denen Befehle liegengeblieben sind. Sie steht
+   *     schon in der Synopse; als Zahl herausgegeben trägt sie überdies den Korpusbericht (§ 6d),
+   *     der über viele Hefte hinweg zeigt, woran die Reste liegen.
+   */
   public record Ergebnis(
       String html,
       long anzahlAngewandt,
@@ -123,7 +130,25 @@ public final class Pipeline {
       int anzahlGeaenderteNormen,
       int anzahlProtokollEintraege,
       String neufassung,
-      @Nullable Nachfassungsabgleich abgleich) {}
+      @Nullable Nachfassungsabgleich abgleich,
+      Map<Grund, Integer> gruende) {
+
+    public Ergebnis {
+      gruende = Map.copyOf(gruende);
+    }
+  }
+
+  /** Die Gründe der liegengebliebenen Befehle, nach Häufigkeit auszählbar. */
+  public static Map<Grund, Integer> zaehleGruende(
+      List<BefehlAnwender.AngewandteAenderung> protokoll) {
+    var haeufigkeit = new EnumMap<Grund, Integer>(Grund.class);
+    for (var eintrag : protokoll) {
+      if (eintrag.status() == BefehlAnwender.Status.MANUELL_PRUEFEN && eintrag.grund() != null) {
+        haeufigkeit.merge(eintrag.grund(), 1, Integer::sum);
+      }
+    }
+    return haeufigkeit;
+  }
 
   /**
    * Ein eingespeistes Änderungsdokument samt erkannter Art und aufbereitetem Text.
@@ -257,7 +282,8 @@ public final class Pipeline {
         synopse.eintraege().size(),
         protokoll.size(),
         LandesRechtTextAusgeber.ausgeben(gesetz),
-        abgleich);
+        abgleich,
+        zaehleGruende(protokoll));
   }
 
   /**

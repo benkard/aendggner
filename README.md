@@ -42,6 +42,7 @@ durchgerechneten Beispiele sind der kürzeste Weg zum ersten Ergebnis
 - [§ 6a Die fortgeschriebene Fassung; die Kette](#-6a-die-fortgeschriebene-fassung-die-kette)
 - [§ 6b Abgleich mit der amtlichen Nachfassung](#-6b-abgleich-mit-der-amtlichen-nachfassung)
 - [§ 6c Probe auf die Inhaltsübersicht](#-6c-probe-auf-die-inhaltsübersicht)
+- [§ 6d Der Massenlauf; der Korpusbericht](#-6d-der-massenlauf-der-korpusbericht)
 - [§ 7 Erkannte Änderungsbefehle](#-7-erkannte-änderungsbefehle)
 - [§ 8 Reihenfolge der Anwendung](#-8-reihenfolge-der-anwendung)
 - [§ 9 Aufbereitung der Druckwerke](#-9-aufbereitung-der-druckwerke)
@@ -269,6 +270,11 @@ java -jar target/aendggner-0.1.0-SNAPSHOT.jar \
   gelten dieselben Eingaben wie für das Stammgesetz, auch die Anschriften des § 5
   Absatz 4.
 
+**`--korpus <file>`**
+: Statt einer Synopse den Massenlauf über eine Auftragsliste fahren und einen
+  Bericht der Kennzahlen ausgeben (§ 6d); `--grundlinie` hält ihn gegen einen
+  früheren, `--synopsen` behält die Einzelsynopsen.
+
 **`--extract-only`**
 : Nur den bereinigten Lineartext des Änderungsdokuments ausgeben. Dies ist
   angezeigt, wenn die PDF-Aufbereitung (§ 9) fehlerhaft bleibt: Der Text ist zu
@@ -394,6 +400,55 @@ Befehl fortzuschreiben hieße, Recht zu erfinden.
 (4) Die Rüge nennt den Befund und nicht dessen Ursache. Es kommt nämlich vor, dass die
 amtliche Fassung selbst beides verschieden führt: Das Gebäudeenergiegesetz schreibt in
 der Überschrift des § 71k „Gas“ und in der Angabe dazu „Erdgas“.
+
+## § 6d Der Massenlauf; der Korpusbericht
+
+(1) Eine Synopse sagt, was aus *einem* Heft geworden ist. Sie sagt nicht, woran die
+Reste im Ganzen liegen — ob an der Befehlssprache eines Landes, an der Aufbereitung
+des Druckwerks oder am Alter der eingesetzten Stammfassung. Der Schalter `--korpus`
+arbeitet deshalb eine ganze Auftragsliste ab und gibt je Auftrag eine Zeile
+Kennzahlen aus:
+
+```shell
+java -jar target/aendggner-0.1.0-SNAPSHOT.jar \
+  --korpus src/test/resources/sampledata/korpus.tsv \
+  --grundlinie src/test/resources/sampledata/korpus-grundlinie.tsv \
+  --synopsen target/korpus/synopsen -o target/korpus/bericht.tsv
+# → 31 Aufträge, 1413 Befehle, 1287 angewandt, 116 manuell; 632 von 641 Normen gleich
+```
+
+Dasselbe fährt `deploy/korpuslauf.sh`; es stellt das Erzeugnis her, falls es fehlt,
+und behält die Einzelsynopsen nebst einer Übersichtsseite, die auf sie verweist.
+
+(2) Die Auftragsliste ist eine Tabulatortabelle mit den Spalten Bezeichnung,
+Stammfassung, Hefte (durch Komma), Artikel, Nachfassung und Stichtag; „`-`“ heißt
+„nicht angegeben“, Zeilen mit „`#`“ sind Anmerkungen. Die Pfade beziehen sich auf
+das Verzeichnis der Liste. Es sind dieselben Angaben, die auch die Befehlszeile
+entgegennimmt — ein Auftrag der Liste ist nichts anderes als ein Lauf.
+
+(3) Der Bericht führt je Auftrag die erschlossenen, die angewandten, die
+liegengebliebenen und die am Stichtag zurückgestellten Befehle, sodann die gleichen,
+geprüften, fehlenden, überzähligen und abweichenden Normen des Abgleichs und
+zuletzt die Gründe nach Häufigkeit (§ 1 Absatz 5).
+
+(4) Wird der Bericht eingecheckt, so ist er die **Grundlinie**. Der Schalter
+`--grundlinie` hält den Lauf dagegen und rügt jede Kennzahl, die *gefallen* ist:
+weniger erschlossene oder angewandte Befehle, weniger gleiche Normen, mehr
+liegengebliebene, fehlende, überzählige oder abweichende. Ein Fortschritt ist kein
+Fehler, sondern der Zweck der Arbeit; er verlangt allein, die Grundlinie
+fortzuschreiben. Ein Rückschritt endet mit dem Rückgabewert 3 wie ein nicht
+aufgehender Abgleich (§ 6b Absatz 3).
+
+(5) Ein Auftrag, der mit einem Fehler abbricht, hält den Lauf nicht an; seine Zeile
+trägt den Fehlertext, und die Grundlinie rügt ihn. Der Grundsatz der
+Nichtverwerfung (§ 1 Absatz 4) gilt auch hier.
+
+(6) Der mitgelieferte Korpus umfasst, was die Akzeptanzprüfungen fahren (§ 17
+Absatz 2), und wird von diesen mitgeprüft. Drei Aufträge tragen mit Absicht hohe
+Reste: Bei den beiden Beschlussempfehlungen und bei Rheinland-Pfalz schreibt die
+Vorlage eine ältere Fassung fort als die eingesetzte Stammfassung, weshalb deren
+Zieltexte nicht vorkommen. Sie sind gleichwohl Wächter — steigen ihre Reste, so hat
+sich etwas verschlechtert.
 
 ## § 7 Erkannte Änderungsbefehle
 
@@ -983,6 +1038,14 @@ Ergebnis gegen die amtliche Nachfassung stellen — mit demselben Abgleich, den
 `--nachfassung` fährt (§ 6b Absatz 4). Die hierfür verwendeten
 Beispieldaten nebst Herkunftsnachweis (`SOURCES`) liegen unter
 `src/test/resources/sampledata/`.
+
+(2a) Über die Einzelfälle hinaus wird der **Korpuslauf** (§ 6d) mitgeprüft: Er fährt
+sämtliche Aufträge der Liste `src/test/resources/sampledata/korpus.tsv` und hält das
+Ergebnis gegen die eingecheckte Grundlinie
+(`korpus-grundlinie.tsv`). Damit ist nicht nur gesichert, dass jedes einzelne Heft
+aufgeht, sondern auch, dass keines hinter das zurückfällt, was es einmal hergegeben
+hat — und zwar in einer Zahl, die sich fortschreiben lässt, statt in Dutzenden
+verstreuter Behauptungen.
 
 (3) Der Textausgeber (§ 6a) wird nicht am Augenschein geprüft, sondern am
 **Rundlauf**: Was er schreibt, muss der Lader wieder zu demselben Gesetz lesen.

@@ -8,6 +8,7 @@ import eu.mulk.aendggner.aenderung.parse.PatchTextExtraktor;
 import eu.mulk.aendggner.aenderung.parse.TextBereiniger;
 import eu.mulk.aendggner.anwendung.BefehlAnwender;
 import eu.mulk.aendggner.anwendung.Grund;
+import eu.mulk.aendggner.bericht.Korpusbericht;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -15,7 +16,6 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.LogManager;
@@ -36,6 +36,7 @@ public class AendGgner implements Callable<Integer> {
 
   @Parameters(
       index = "0",
+      arity = "0..1",
       paramLabel = "<base law>",
       description =
           "The base law: gii-norm XML from gesetze-im-internet.de, or — for state law — the"
@@ -134,6 +135,28 @@ public class AendGgner implements Callable<Integer> {
               + "exit code 3.")
   private String nachfassung;
 
+  @Option(
+      names = "--korpus",
+      paramLabel = "<file>",
+      description =
+          "Run every job of the given tab-separated job list and write a report of key figures "
+              + "instead of a synopsis. Paths in the list are relative to the list's directory.")
+  private String korpus;
+
+  @Option(
+      names = "--grundlinie",
+      paramLabel = "<file>",
+      description =
+          "With --korpus: hold the run against this earlier report and complain about every figure "
+              + "that has fallen. A regression yields exit code 3.")
+  private String grundlinie;
+
+  @Option(
+      names = "--synopsen",
+      paramLabel = "<dir>",
+      description = "With --korpus: also write each job's synopsis into this directory.")
+  private String synopsen;
+
   /** Die angegebenen Eingaben, jede über {@link Bezug} beschafft. */
   private static List<Quelle> hole(List<String> angaben) throws IOException, InterruptedException {
     var quellen = new ArrayList<Quelle>();
@@ -153,6 +176,15 @@ public class AendGgner implements Callable<Integer> {
     setupLogging();
 
     log.debugf("Logging configured.");
+
+    if (korpus != null) {
+      return fuehreKorpusAus();
+    }
+
+    if (baseFile == null) {
+      System.err.println("Fehler: das Stammgesetz muss angegeben werden.");
+      return 1;
+    }
 
     if (dumpGesetz) {
       var gesetz = Pipeline.ladeStammgesetz(Bezug.hole(baseFile));
@@ -305,12 +337,7 @@ public class AendGgner implements Callable<Integer> {
    * jedem Befehl darüber.
    */
   private static void haeufigkeitDerGruende(BefehlAnwender.AnwendungsErgebnis anwendung) {
-    var haeufigkeit = new EnumMap<Grund, Integer>(Grund.class);
-    for (var eintrag : anwendung.protokoll()) {
-      if (eintrag.status() == BefehlAnwender.Status.MANUELL_PRUEFEN && eintrag.grund() != null) {
-        haeufigkeit.merge(eintrag.grund(), 1, Integer::sum);
-      }
-    }
+    var haeufigkeit = Pipeline.zaehleGruende(anwendung.protokoll());
     if (haeufigkeit.isEmpty()) {
       return;
     }
@@ -318,6 +345,55 @@ public class AendGgner implements Callable<Integer> {
     haeufigkeit.entrySet().stream()
         .sorted(java.util.Map.Entry.<Grund, Integer>comparingByValue().reversed())
         .forEach(e -> System.out.printf("  %4d  %s%n", e.getValue(), e.getKey().bezeichnung()));
+  }
+
+  /**
+   * Der Massenlauf: die Aufträge der Liste nacheinander, eine Zeile Kennzahlen je Auftrag.
+   *
+   * <p>Der Bericht geht dahin, wohin sonst die Synopse ginge ({@code -o}). Ist eine Grundlinie
+   * angegeben, so wird der Lauf gegen sie gehalten; jede gefallene Kennzahl wird gerügt und der
+   * Lauf endet mit 3 — dieselbe Zahl, mit der ein nicht aufgehender Abgleich endet.
+   */
+  private Integer fuehreKorpusAus() throws IOException {
+    var liste = Path.of(korpus);
+    var wurzel = liste.toAbsolutePath().getParent();
+    var auftraege = Korpusbericht.liesListe(liste);
+    log.infof("Korpuslauf: %d Aufträge aus %s.", auftraege.size(), liste);
+
+    var zeilen =
+        Korpusbericht.fuehreAus(auftraege, wurzel, synopsen == null ? null : Path.of(synopsen));
+    var tsv = Korpusbericht.alsTsv(zeilen);
+    if (output == null || output.equals("-") || output.equals("synopse.html")) {
+      // Die Voreinstellung des Schalters meint die Synopse; ein Bericht gehört dann auf die
+      // Standardausgabe und nicht in eine Datei namens „synopse.html“.
+      System.out.print(tsv);
+    } else {
+      Files.writeString(Path.of(output), tsv, StandardCharsets.UTF_8);
+      System.out.println("Bericht geschrieben: " + output);
+    }
+    if (synopsen != null) {
+      var uebersicht = Path.of(synopsen).resolveSibling("uebersicht.html");
+      Files.writeString(
+          uebersicht,
+          Korpusbericht.alsHtml(zeilen, Path.of(synopsen).getFileName().toString()),
+          StandardCharsets.UTF_8);
+      System.out.println("Übersicht geschrieben: " + uebersicht);
+    }
+    System.out.println(Korpusbericht.summe(zeilen));
+
+    if (grundlinie == null) {
+      return zeilen.stream().anyMatch(z -> z.fehler() != null) ? 3 : 0;
+    }
+    var ruegen =
+        Korpusbericht.gegenGrundlinie(
+            zeilen, Files.readString(Path.of(grundlinie), StandardCharsets.UTF_8));
+    if (ruegen.isEmpty()) {
+      System.out.println("Die Grundlinie ist gehalten.");
+      return 0;
+    }
+    System.out.println("Rückschritte gegenüber der Grundlinie:");
+    ruegen.forEach(r -> System.out.println("  " + r));
+    return 3;
   }
 
   private static String kuerze(String text) {

@@ -1,0 +1,46 @@
+# Auftragsliste des Korpuslaufs (§ 6d des Handbuchs).
+#
+# Spalten, durch Tabulator getrennt:
+#   Bezeichnung | Stammfassung | Hefte (durch Komma) | Artikel | Nachfassung | Stichtag
+# „-“ heißt: nicht angegeben. Die Pfade beziehen sich auf das Verzeichnis dieser Datei.
+#
+# Aufgenommen ist, was die Akzeptanzprüfungen des EndToEndTest fahren. Deren Zahlen müssen hier
+# unverändert herauskommen; weichen sie ab, liegt der Fehler an der Liste und nicht am Erzeugnis.
+#
+# Bezeichnung	Stamm	Hefte	Artikel	Nachfassung	Stichtag
+UWG-BGBl	UWG/BJNR141400004.xml	UWG/bgbl126s0043_regelungstext.pdf	-	-	-
+UWG-RegE	UWG/BJNR141400004.xml	UWG/BT-Drs-21-1855_Regierungsentwurf.pdf	-	-	-
+AGG-RegE	AGG/BJNR189710006.xml	AGG/BT-Drs-21-6178_Regierungsentwurf.pdf	-	-	-
+ProdHaftG-RegE	ProdHaftG/BJNR021980989.xml	ProdHaftG/RegE_Produkthaftungsrecht_2025-12-17.pdf	-	-	-
+GEG-BGBl-zeitrichtig	GEG/BJNR172810020-2023.xml	GEG/bgbl123s0280_regelungstext.pdf	1	-	-
+IfSG-BGBl-zeitrichtig	IfSG/BJNR104510000-2020.xml	IfSG/bgbl120s2397_78991.pdf	-	-	-
+BayJG-GVBl	BayJG/BayJG-alt.txt	BayJG/gvbl-2026-06.pdf	-	-	-
+SN-SaechsBeamtVG	Sachsen/SaechsBeamtVG-alt.txt	Sachsen/SaechsGVBl-2026-S134_AendG-SaechsBeamtVG_revosax.pdf	-	-	-
+NI-NEFG	Niedersachsen/NEFG-alt.txt	Niedersachsen/Nds-GVBl-2026-10_ELER-Foerdergesetz-AendG.pdf	-	-	-
+SH-Gemeindeordnung	SchleswigHolstein/GO-SH-alt.txt	SchleswigHolstein/GVOBl-2026-27_Kommunalrecht-AendG.pdf	1	SchleswigHolstein/GO-SH-neu.txt	-
+SH-Kreisordnung	SchleswigHolstein/KrO-SH-alt.txt	SchleswigHolstein/GVOBl-2026-27_Kommunalrecht-AendG.pdf	2	SchleswigHolstein/KrO-SH-neu.txt	-
+NRW-WDR-Gesetz	NRW/WDR-Gesetz-alt.txt	NRW/GV-NRW-2026-S202_22-Rundfunkaenderungsgesetz.pdf	-	-	-
+NRW-LMG	NRW/LMG-NRW-alt.txt	NRW/GV-NRW-2026-S202_22-Rundfunkaenderungsgesetz.pdf	-	-	-
+NRW-TMZ-Gesetz	NRW/TMZ-Gesetz-alt.txt	NRW/GV-NRW-2026-S202_22-Rundfunkaenderungsgesetz.pdf	-	-	-
+NRW-17-RAEStV-AusfG	NRW/17-RAEStV-AusfG-alt.txt	NRW/GV-NRW-2026-S202_22-Rundfunkaenderungsgesetz.pdf	-	-	-
+BE-ASOG	Berlin/ASOG-Bln-alt.txt	Berlin/GVBl-2026-17_ASOG-LAF-AendG.pdf	1	Berlin/ASOG-Bln-neu.txt	-
+BE-LAF-ErrG	Berlin/LAF-ErrG-alt.txt	Berlin/GVBl-2026-17_ASOG-LAF-AendG.pdf	2	Berlin/LAF-ErrG-neu.txt	-
+BW-KomWO	BadenWuerttemberg/KomWO-BW-alt.txt	BadenWuerttemberg/GBl-2026-26_KommunalwahlO-AendVO.pdf	-	BadenWuerttemberg/KomWO-BW-neu.txt	-
+HE-StVRZustV	Hessen/StVRZustV-alt.txt	Hessen/GVBl-2026-05_11-AendVO-verkehrsrechtl-Zustaendigkeiten.pdf	-	Hessen/StVRZustV-neu.txt	-
+TH-KiGaFinVO	Thueringen/ThuerKigaFinVO-alt.txt	Thueringen/GVBl-TH-2026-02_KiGaFinanzVO-AendVO-ua.pdf	-	-	-
+BB-FraktG	Brandenburg/FraktG-alt.txt	Brandenburg/GVBl-I-2026-12_FraktG-AendG.pdf	-	Brandenburg/FraktG-neu.txt	-
+HH-GutachterausschussVO	Hamburg/GAusschV-HH-alt.txt	Hamburg/HmbGVBl-2026-17_GutachterausschussVO-AendVO.pdf	-	Hamburg/GAusschV-HH-neu.txt	-
+HB-BerufsfachschulVO	Bremen/AssBerFSchulV-BR-alt.txt	Bremen/BremGBl-2026-87_BerufsfachschulVO-AendVO.pdf	-	Bremen/AssBerFSchulV-BR-neu.txt	-
+MV-APOAmtsTA	MecklenburgVorpommern/APOAmtsTA-MV-alt.txt	MecklenburgVorpommern/GVOBl-MV-2026-21_Besoldungsanpassung-ua.pdf	44	-	-
+# Rheinland-Pfalz führt keine Vorfassungen; angewandt wird deshalb auf die Nachfassung, und
+# aussagekräftig ist allein die Zahl der erschlossenen Befehle (23). Die liegengebliebenen sind
+# die Folge des falschen Standes, nicht eines Mangels — siehe § 13 Absatz 4 des Handbuchs.
+RP-UKAPOGS	RheinlandPfalz/UKAPOGS-E3-neu.txt	RheinlandPfalz/GVBl-2026-21_UKAPOGS-E3-AendVO.pdf	-	-	-
+# Entwürfe und Zusammenstellungen: hier gibt es keine Nachfassung, wohl aber die Frage, wie viel
+# eine Vorlage hergibt.
+GEG-GModG-RegE	GEG/BJNR172810020.xml	GEG/Regierungsentwurf_GModG_2026-05-13.pdf	-	-	-
+GEG-Beschlussempfehlung	GEG/BJNR172810020.xml	GEG/BT-Drs-20-7619_Beschlussempfehlung.pdf	-	-	-
+IfSG-Beschlussempfehlung	IfSG/BJNR104510000.xml	IfSG/1924334.pdf	-	-	-
+BayJG-Landtagsentwurf	BayJG/BayJG-alt.txt	BayJG/Ltg-Drs-19-9707_Gesetzentwurf.pdf	-	-	-
+BayJG-mit-Aenderungsantrag	BayJG/BayJG-alt.txt	BayJG/Ltg-Drs-19-9707_Gesetzentwurf.pdf,BayJG/Ltg-Drs-19-10365_Aenderungsantrag-Gruene.pdf	-	-	-
+IfSG-Stichtag	IfSG/BJNR104510000-2020.xml	IfSG/bgbl120s2397_78991.pdf	-	-	2020-11-19
