@@ -197,8 +197,9 @@ public class AendGgner implements Callable<Integer> {
       var extraktor = new PatchTextExtraktor(Pipeline.superskriptModus(gesetz));
       var parser = new AenderungsgesetzParser();
       for (var quelle : hole(patches)) {
-        var text = TextBereiniger.bereinige(extraktor.extrahiere(quelle));
-        var ergebnis = parser.parse(text, gesetz, artikel);
+        var auszug = extraktor.extrahiereMitSeiten(quelle);
+        var text = TextBereiniger.bereinige(auszug.text());
+        var ergebnis = parser.parse(text, gesetz, artikel, false, auszug.seiten());
         System.out.printf(
             "%s: %d Befehle aus Artikel %s%n",
             quelle.name(), ergebnis.befehle().size(), ergebnis.artikel());

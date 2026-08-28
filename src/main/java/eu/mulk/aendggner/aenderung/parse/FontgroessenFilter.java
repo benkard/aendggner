@@ -138,6 +138,21 @@ final class FontgroessenFilter {
   }
 
   /**
+   * Der Auszug samt der Zuordnung seines Wortbestandes zu den Seiten.
+   *
+   * @param text der Auszug, wie ihn {@link #extrahiere} liefert.
+   * @param seiten die Konkordanz, aus denselben Zeilen erhoben — ein zweiter Lauf über das Dokument
+   *     (PDFBox braucht dafür zwei Pässe) wäre reine Verschwendung.
+   */
+  record Auszug(String text, Seitenkonkordanz seiten) {}
+
+  static Auszug extrahiereMitSeiten(PDDocument dokument, SuperskriptModus superskriptModus)
+      throws IOException {
+    var zeilen = extrahiereZeilen(dokument, superskriptModus, Spalte.GANZ);
+    return new Auszug(klassifiziereZeilenenden(zeilen), Seitenkonkordanz.aus(zeilen));
+  }
+
+  /**
    * Eine Ausgabezeile samt ihrer Herkunft im Satzbild.
    *
    * <p>Sonst verlässt keine Koordinate diese Klasse. Die Zusammenstellung einer Beschlussempfehlung

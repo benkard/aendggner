@@ -70,7 +70,24 @@ public final class AenderungsgesetzParser {
    */
   public ParseErgebnis parse(
       String text, Gesetz ziel, @Nullable String artikelFilter, boolean entwurfsGrenzen) {
+    return parse(text, ziel, artikelFilter, entwurfsGrenzen, Seitenkonkordanz.LEER);
+  }
+
+  /**
+   * @param konkordanz die Zuordnung des Wortbestandes zu den Seiten des Änderungsdokuments; jeder
+   *     Befehl erhält daraus seine Fundstelle. {@link Seitenkonkordanz#LEER} für Eingaben ohne
+   *     Satzbild — dann bleiben die Befehle ohne Seitenangabe.
+   */
+  public ParseErgebnis parse(
+      String text,
+      Gesetz ziel,
+      @Nullable String artikelFilter,
+      boolean entwurfsGrenzen,
+      Seitenkonkordanz konkordanz) {
     var zitate = ZitatExtraktor.extrahiere(text);
+    // Ein Leser je Lauf: Er schreitet mit der Erschließung durch das Dokument und darf deshalb
+    // nicht zwischen zwei Heften geteilt werden.
+    var seiten = konkordanz.leser();
     var artikelBloecke = teileInArtikel(zitate.text(), ARTIKEL_UEBERSCHRIFT, entwurfsGrenzen);
     boolean paragraphenModus = false;
     // Ein Sammelheft führt beide Gliederungen nebeneinander: Die eine Verkündung teilt sich in
@@ -121,16 +138,16 @@ public final class AenderungsgesetzParser {
         // Artikel ohne nummerierte Punkte: Der Text nach der Änderungsformel ist ein
         // einzelner Befehl (häufig bei kleinen Folgeänderungen, z.B. „§ 19 wird durch den
         // folgenden § 19 ersetzt: …“).
-        befehle.add(vorspannBefehl(scan.vorspann(), artikel.label, zitate));
+        befehle.add(vorspannBefehl(scan.vorspann(), artikel.label, zitate, seiten));
         continue;
       }
       // Der Vorspann kann nach der gesetzesweiten Änderungsformel einen Rahmenbefehl tragen, der
       // den Kontext aller Punkte setzt: „… wird wie folgt geändert: Art. 28 Abs. 1 wird wie folgt
       // geändert:“ (GVBl) bzw. mit eingebettetem Ziel „Art. 7 Abs. 2 des X-Gesetzes … wird wie
       // folgt geändert:“ (dann trägt die Formel das Ziel selbst).
-      var kontext = vorspannKontext(scan.vorspann(), artikel.label, zitate, befehle);
+      var kontext = vorspannKontext(scan.vorspann(), artikel.label, zitate, seiten, befehle);
       for (var punkt : scan.punkte()) {
-        verarbeitePunkt(punkt, kontext, artikel.label, "", zitate, befehle);
+        verarbeitePunkt(punkt, kontext, artikel.label, "", zitate, seiten, befehle);
       }
     }
 
@@ -190,6 +207,7 @@ public final class AenderungsgesetzParser {
       String vorspann,
       String artikelLabel,
       ZitatExtraktor.Ergebnis zitate,
+      Seitenkonkordanz.Leser seiten,
       List<Aenderungsbefehl> befehle) {
     var normalisiert = vorspann.replaceAll("\\s+", " ").strip();
     // Die erste Formel ist die gesetzesweite Einleitung; ein dahinter stehender Rahmenbefehl
@@ -203,7 +221,7 @@ public final class AenderungsgesetzParser {
     if (!rest.isEmpty()) {
       // Rahmenbefehl hinter der gesetzesweiten Formel („Art. 28 Abs. 1 wird wie folgt geändert:“,
       // auch als Umnummerierungs-Verbund).
-      var provenienz = new Provenienz(artikelLabel, "", zitate.stelleZitateWiederHer(rest));
+      var provenienz = provenienz(artikelLabel, "", zitate.stelleZitateWiederHer(rest), seiten);
       var rahmen = BefehlErkenner.rahmenMitBefehl(rest, Stelle.LEER, provenienz);
       if (rahmen.isPresent()) {
         if (rahmen.get().begleitbefehl() != null) {
@@ -224,9 +242,13 @@ public final class AenderungsgesetzParser {
 
   /** Versucht, den Vorspann-Rest nach der Änderungsformel als einzelnen Befehl zu erkennen. */
   private static Aenderungsbefehl vorspannBefehl(
-      String vorspann, String artikelLabel, ZitatExtraktor.Ergebnis zitate) {
+      String vorspann,
+      String artikelLabel,
+      ZitatExtraktor.Ergebnis zitate,
+      Seitenkonkordanz.Leser seiten) {
     var normalisiert = vorspann.replaceAll("\\s+", " ").strip();
-    var provenienz = new Provenienz(artikelLabel, "", zitate.stelleZitateWiederHer(normalisiert));
+    var provenienz =
+        provenienz(artikelLabel, "", zitate.stelleZitateWiederHer(normalisiert), seiten);
 
     int formel = normalisiert.indexOf("wird wie folgt geändert:");
     if (formel >= 0) {
@@ -234,7 +256,7 @@ public final class AenderungsgesetzParser {
           normalisiert.substring(formel + "wird wie folgt geändert:".length()).strip();
       if (!befehlsText.isEmpty()) {
         var befehlsProvenienz =
-            new Provenienz(artikelLabel, "", zitate.stelleZitateWiederHer(befehlsText));
+            provenienz(artikelLabel, "", zitate.stelleZitateWiederHer(befehlsText), seiten);
         var befehl = BefehlErkenner.erkenne(befehlsText, Stelle.LEER, zitate, befehlsProvenienz);
         if (befehl.isPresent()) {
           return befehl.get();
@@ -250,6 +272,7 @@ public final class AenderungsgesetzParser {
       String artikelLabel,
       String pfad,
       ZitatExtraktor.Ergebnis zitate,
+      Seitenkonkordanz.Leser seiten,
       List<Aenderungsbefehl> befehle) {
 
     // Die Dezimalgliederung trägt ihre Herkunft im Label selbst („6.“ → „6.1“); ihn dem Pfad des
@@ -259,7 +282,8 @@ public final class AenderungsgesetzParser {
             ? markerText(punkt)
             : pfad + " " + markerText(punkt);
     var text = punkt.text().replaceAll("\\s+", " ").strip();
-    var provenienz = new Provenienz(artikelLabel, eigenerPfad, zitate.stelleZitateWiederHer(text));
+    var provenienz =
+        provenienz(artikelLabel, eigenerPfad, zitate.stelleZitateWiederHer(text), seiten);
 
     if (!punkt.kinder().isEmpty()) {
       // Verb-Rahmen („Es werden ersetzt:“): die Unterpunkte tragen die Fundstelle, der Rahmen nur
@@ -268,7 +292,7 @@ public final class AenderungsgesetzParser {
       if (verb.isPresent()) {
         for (var kind : punkt.kinder()) {
           verarbeiteVerbRahmenPunkt(
-              kind, kontext, artikelLabel, eigenerPfad, verb.get(), zitate, befehle);
+              kind, kontext, artikelLabel, eigenerPfad, verb.get(), zitate, seiten, befehle);
         }
         return;
       }
@@ -295,7 +319,7 @@ public final class AenderungsgesetzParser {
         befehle.add(new UnbekannterBefehl(kontext, provenienz.originalText(), provenienz));
       }
       for (var kind : punkt.kinder()) {
-        verarbeitePunkt(kind, neuerKontext, artikelLabel, eigenerPfad, zitate, befehle);
+        verarbeitePunkt(kind, neuerKontext, artikelLabel, eigenerPfad, zitate, seiten, befehle);
       }
       return;
     }
@@ -315,11 +339,13 @@ public final class AenderungsgesetzParser {
       String pfad,
       String verb,
       ZitatExtraktor.Ergebnis zitate,
+      Seitenkonkordanz.Leser seiten,
       List<Aenderungsbefehl> befehle) {
 
     var eigenerPfad = pfad + " " + markerText(punkt);
     var text = punkt.text().replaceAll("\\s+", " ").strip();
-    var provenienz = new Provenienz(artikelLabel, eigenerPfad, zitate.stelleZitateWiederHer(text));
+    var provenienz =
+        provenienz(artikelLabel, eigenerPfad, zitate.stelleZitateWiederHer(text), seiten);
     var befehl =
         BefehlErkenner.vervollstaendigeVerbRahmenPunkt(text, verb)
             .flatMap(satz -> BefehlErkenner.erkenne(satz, kontext, zitate, provenienz));
@@ -335,6 +361,15 @@ public final class AenderungsgesetzParser {
       return punkt.label();
     }
     return punkt.label().matches("\\d+[a-z]?") ? punkt.label() + "." : punkt.label() + ")";
+  }
+
+  /**
+   * Die Herkunft eines Befehls samt seiner Seite im Heft. Die Seite wird am Wortlaut gesucht, nicht
+   * mitgezählt — siehe {@link Seitenkonkordanz}.
+   */
+  private static Provenienz provenienz(
+      String artikelLabel, String pfad, String originalText, Seitenkonkordanz.Leser seiten) {
+    return new Provenienz(artikelLabel, pfad, originalText, seiten.seiteVon(originalText));
   }
 
   private record ArtikelBlock(String label, List<String> zeilen) {}

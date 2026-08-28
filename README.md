@@ -87,6 +87,19 @@ ausformulierte Grund bleibt daneben stehen; gebündelt ist nur, was ohne Ordnung
 eine bloße Liste wäre. Dieselbe Auszählung gibt `--dump-befehle` unter der
 Aufschrift „Gründe nach Häufigkeit“ aus.
 
+(5a) Jeder Befehl nennt überdies die **Seite des Änderungsdokuments**, auf der er
+steht („Artikel 1 23. b) (S. 8)“). Wer einem Rest nachgehen will, findet ihn damit
+im Heft, statt achtzig Seiten zu durchsuchen. Die Seite wird nicht mitgezählt,
+sondern am Wortlaut wiedergefunden: Der Auszug hält seinen Wortbestand seitenweise
+fest, und der Befehlstext wird darin gesucht, beide heruntergebrochen auf
+Buchstaben und Ziffern — Silbentrennung, Anführungszeichen und Satzzeichen, also
+gerade das, woran die Aufbereitung (§ 9) arbeitet, stören den Vergleich dann nicht.
+Gesucht wird von der Stelle aus, bis zu der die Erschließung gediehen ist; derselbe
+kurze Wortlaut („Absatz 3 wird aufgehoben“) steht in einem Heft dutzendfach. Was
+sich nicht zweifelsfrei wiederfindet, bleibt ohne Seitenangabe — eine falsche Seite
+wäre schlimmer als keine. Klartexteingaben (§ 5 Absatz 2) haben kein Satzbild und
+tragen deshalb keine.
+
 (6) Gibt die Quelle des Stammgesetzes ihren Stand an und ist ihr Wortlaut jünger
 als die Fassung, die der Einleitungssatz des Änderungsgesetzes fortschreibt, so
 wird das eigens gerügt. Das ist die häufigste Ursache liegengebliebener Befehle

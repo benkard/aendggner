@@ -172,6 +172,60 @@ class EndToEndTest {
 
   /** Neues digitales BGBl-Format (recht.bund.de, ab 2023): 3. UWGÄndG 2026. */
   @Test
+  void fundstelleImHeft() throws Exception {
+    var xml = SAMPLEDATA.resolve("UWG/BJNR141400004.xml");
+    var pdf = SAMPLEDATA.resolve("UWG/bgbl126s0043_regelungstext.pdf");
+    assumeTrue(Files.exists(xml) && Files.exists(pdf), "UWG-Beispieldaten fehlen");
+
+    var gesetz = new GiiXmlLoader().load(xml);
+    var auszug = new PatchTextExtraktor().extrahiereMitSeiten(Quelle.lies(pdf));
+    var befehle =
+        new AenderungsgesetzParser()
+            .parse(TextBereiniger.bereinige(auszug.text()), gesetz, null, false, auszug.seiten())
+            .befehle();
+
+    // Jeder Befehl trägt seine Seite; das Heft hat fünf.
+    assertThat(befehle).allSatisfy(b -> assertThat(b.provenienz().seite()).isNotNull());
+    assertThat(befehle).allSatisfy(b -> assertThat(b.provenienz().seite()).isBetween(1, 5));
+
+    // Die Befehle stehen im Heft, wie sie erschlossen werden: Die Seiten steigen.
+    var seiten = befehle.stream().map(b -> b.provenienz().seite()).toList();
+    assertThat(seiten).isSorted();
+
+    // Gegenprobe am Druckwerk: Der erste Befehl steht auf Seite 1, „Nach § 5b Absatz 3 …“ auf
+    // Seite 3 (dort beginnt die Zeile „3. Nach § 5b Absatz 3 wird der folgende Absatz 3a
+    // eingefügt:“).
+    assertThat(befehle.get(0).provenienz().seite()).isEqualTo(1);
+    assertThat(
+            befehle.stream()
+                .filter(b -> b.provenienz().originalText().startsWith("Nach § 5b Absatz 3"))
+                .findFirst()
+                .orElseThrow()
+                .provenienz()
+                .seite())
+        .isEqualTo(3);
+
+    // Die Seite steht auch in der Anzeige — dort sucht sie, wer einen Rest von Hand prüft.
+    assertThat(befehle.get(0).provenienz().anzeigeText()).endsWith("(S. 1)");
+  }
+
+  @Test
+  void klartextTraegtKeineSeite() throws Exception {
+    // Eine Klartextdatei hat kein Satzbild; eine Seitenangabe wäre erfunden.
+    var xml = SAMPLEDATA.resolve("UWG/BJNR141400004.xml");
+    var pdf = SAMPLEDATA.resolve("UWG/bgbl126s0043_regelungstext.pdf");
+    assumeTrue(Files.exists(xml) && Files.exists(pdf), "UWG-Beispieldaten fehlen");
+
+    var gesetz = new GiiXmlLoader().load(xml);
+    var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(pdf));
+    var befehle = new AenderungsgesetzParser().parse(text, gesetz, null).befehle();
+
+    assertThat(befehle).isNotEmpty();
+    assertThat(befehle).allSatisfy(b -> assertThat(b.provenienz().seite()).isNull());
+    assertThat(befehle.get(0).provenienz().anzeigeText()).doesNotContain("(S.");
+  }
+
+  @Test
   void uwgNeuesBgblFormat() throws Exception {
     var xml = SAMPLEDATA.resolve("UWG/BJNR141400004.xml");
     var pdf = SAMPLEDATA.resolve("UWG/bgbl126s0043_regelungstext.pdf");

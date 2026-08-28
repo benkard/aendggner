@@ -40,12 +40,26 @@ public final class PatchTextExtraktor {
   }
 
   public String extrahiere(Quelle quelle) throws IOException {
+    return extrahiereMitSeiten(quelle).text();
+  }
+
+  /**
+   * Der Auszug samt Seitenkonkordanz.
+   *
+   * @param text der lineare Text, wie ihn {@link #extrahiere} liefert.
+   * @param seiten die Zuordnung des Wortbestandes zu den Seiten; für Klartexteingaben {@link
+   *     Seitenkonkordanz#LEER}, denn eine Klartextdatei hat kein Satzbild und keine Seiten.
+   */
+  public record Auszug(String text, Seitenkonkordanz seiten) {}
+
+  public Auszug extrahiereMitSeiten(Quelle quelle) throws IOException {
     var typ = DateiTyp.erkenne(quelle.inhalt());
     log.infof("Datei %s hat Typ %s.", quelle.name(), typ.anzeigeName());
 
     return switch (typ) {
       case PDF -> extrahierePdf(quelle.inhalt());
-      case KLARTEXT -> new String(quelle.inhalt(), StandardCharsets.UTF_8);
+      case KLARTEXT ->
+          new Auszug(new String(quelle.inhalt(), StandardCharsets.UTF_8), Seitenkonkordanz.LEER);
       case XML, ZIP ->
           throw new IOException(
               "Nicht unterstützter Dateityp %s für %s (unterstützt: PDF, Klartext)"
@@ -53,9 +67,10 @@ public final class PatchTextExtraktor {
     };
   }
 
-  private String extrahierePdf(byte[] inhalt) throws IOException {
+  private Auszug extrahierePdf(byte[] inhalt) throws IOException {
     try (var dokument = Loader.loadPDF(inhalt)) {
-      return FontgroessenFilter.extrahiere(dokument, superskriptModus);
+      var auszug = FontgroessenFilter.extrahiereMitSeiten(dokument, superskriptModus);
+      return new Auszug(auszug.text(), auszug.seiten());
     }
   }
 

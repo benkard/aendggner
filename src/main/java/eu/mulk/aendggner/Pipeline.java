@@ -11,6 +11,7 @@ import eu.mulk.aendggner.aenderung.parse.DeutschesDatum;
 import eu.mulk.aendggner.aenderung.parse.DokumentErkenner;
 import eu.mulk.aendggner.aenderung.parse.EntwurfsPatcher;
 import eu.mulk.aendggner.aenderung.parse.PatchTextExtraktor;
+import eu.mulk.aendggner.aenderung.parse.Seitenkonkordanz;
 import eu.mulk.aendggner.aenderung.parse.SuperskriptModus;
 import eu.mulk.aendggner.aenderung.parse.TextBereiniger;
 import eu.mulk.aendggner.anwendung.BefehlAnwender;
@@ -132,20 +133,28 @@ public final class Pipeline {
    *     Quellenzeile ein, denn die gezeigte Fassung ist ohne sie nicht nachvollziehbar.
    * @param fassung welche von mehreren Fassungen des Dokuments gilt, sofern es mehrere trägt — die
    *     Beschlussempfehlung stellt Entwurf und Ausschussfassung nebeneinander. Sonst {@code null}.
+   * @param seiten die Zuordnung des Wortbestandes zu den Seiten des Dokuments, aus der jeder Befehl
+   *     seine Fundstelle erhält.
    */
   record Quelldokument(
       Quelle quelle,
       DokumentKopf kopf,
       String text,
       List<String> eingearbeitet,
-      @Nullable String fassung) {
+      @Nullable String fassung,
+      Seitenkonkordanz seiten) {
 
     Quelldokument(Quelle quelle, DokumentKopf kopf, String text) {
-      this(quelle, kopf, text, List.of(), null);
+      this(quelle, kopf, text, List.of(), null, Seitenkonkordanz.LEER);
     }
 
-    Quelldokument(Quelle quelle, DokumentKopf kopf, String text, List<String> eingearbeitet) {
-      this(quelle, kopf, text, eingearbeitet, null);
+    Quelldokument(
+        Quelle quelle,
+        DokumentKopf kopf,
+        String text,
+        List<String> eingearbeitet,
+        Seitenkonkordanz seiten) {
+      this(quelle, kopf, text, eingearbeitet, null, seiten);
     }
 
     String quellenAngabe(List<String> artikel) {
@@ -187,7 +196,9 @@ public final class Pipeline {
       if (gesetz.traegt(heft)) {
         warnungen.add(doppelanwendungsRuege(dokument, heft));
       }
-      var parseErgebnis = parser.parse(dokument.text(), gesetz, artikel, entwurfsGrenzen(dokument));
+      var parseErgebnis =
+          parser.parse(
+              dokument.text(), gesetz, artikel, entwurfsGrenzen(dokument), dokument.seiten());
       if (parseErgebnis.befehle().isEmpty()) {
         warnungen.add(
             "In %s (%s) wurde kein auf %s anwendbarer Artikel gefunden."
@@ -384,7 +395,8 @@ public final class Pipeline {
       List<Quelle> patches, PatchTextExtraktor extraktor, List<String> warnungen) throws Exception {
     var dokumente = new ArrayList<Quelldokument>();
     for (var datei : patches) {
-      var rohText = extraktor.extrahiere(datei);
+      var auszug = extraktor.extrahiereMitSeiten(datei);
+      var rohText = auszug.text();
       // Die Erkennung arbeitet auf dem Rohtext: Der Bereiniger entfernt genau die
       // Drucksachenköpfe, aus denen Art und Nummer hervorgehen.
       var kopf = DokumentErkenner.erkenne(rohText);
@@ -419,10 +431,15 @@ public final class Pipeline {
                 kopf,
                 TextBereiniger.bereinige(fassung.text()),
                 List.of(),
-                "Ausschussfassung"));
+                "Ausschussfassung",
+                // Die beschlossene Fassung ist aus zwei Spalten zusammengesetzt und steht so auf
+                // keiner Seite des Heftes; eine Seitenangabe wäre erfunden.
+                Seitenkonkordanz.LEER));
         continue;
       }
-      dokumente.add(new Quelldokument(datei, kopf, TextBereiniger.bereinige(rohText)));
+      dokumente.add(
+          new Quelldokument(
+              datei, kopf, TextBereiniger.bereinige(rohText), List.of(), auszug.seiten()));
     }
     return dokumente;
   }
@@ -480,7 +497,10 @@ public final class Pipeline {
               ziel.kopf(),
               patch.text(),
               List.copyOf(eingearbeitet),
-              ziel.fassung()));
+              ziel.fassung(),
+              // Der Antrag ändert einzelne Stellen des Entwurfs; dessen Satzbild bleibt im
+              // Übrigen dasselbe, und die Fundstelle im Entwurf ist die, die gesucht wird.
+              ziel.seiten()));
     }
     return ergebnis;
   }
