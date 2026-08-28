@@ -2217,6 +2217,38 @@ public final class BefehlAnwender {
       return angewandt(befehl, enbezNeu);
     }
 
+    // „Der bisherige Ausbildungsabschnitt 5 wird zu Ausbildungsabschnitt 6.“ — die benannte
+    // Einheit einer Anlage ist eine eigene Norm; umnummeriert wird deren Bezeichnung. Der Befehl
+    // nennt nur die Einheit, die Norm heißt aber „Anlage 1 Ausbildungsabschnitt 6“: Die Anlage
+    // steht im Bestand und wird von dort übernommen, nicht aus dem Befehl erraten.
+    var altEinheit = befehl.stelle().anlagenEinheit();
+    var neuEinheit = befehl.neu().anlagenEinheit();
+    if (altEinheit.isPresent() && neuEinheit.isPresent()) {
+      var ergebnis = StellenAufloeser.aufloese(gesetzAus(normen), befehl.stelle());
+      if (ergebnis instanceof StellenAufloeser.Ergebnis.NichtGefunden nicht) {
+        return manuell(befehl, nicht.grund(), nicht.begruendung());
+      }
+      var idx = ((StellenAufloeser.Ergebnis.Gefunden) ergebnis).fundstelle().normIndex();
+      var enbezAlt = normen.get(idx).enbez();
+      var alteBezeichnung = altEinheit.get().bezeichnung();
+      if (!enbezAlt.endsWith(alteBezeichnung)) {
+        return manuell(
+            befehl,
+            Grund.BESTAND_WIDERSPRICHT,
+            "„" + enbezAlt + "“ trägt nicht die Bezeichnung „" + alteBezeichnung + "“.");
+      }
+      var enbezNeu =
+          enbezAlt.substring(0, enbezAlt.length() - alteBezeichnung.length())
+              + neuEinheit.get().bezeichnung();
+      if (!enbezNeu.equals(enbezAlt)
+          && StellenAufloeser.normIndex(gesetzAus(normen), enbezNeu) >= 0) {
+        return manuell(
+            befehl, Grund.BESTAND_WIDERSPRICHT, enbezNeu + " existiert bereits im Gesetz.");
+      }
+      normen.set(idx, normen.get(idx).mitEnbez(enbezNeu));
+      return angewandt(befehl, enbezNeu);
+    }
+
     var altAbsatz = befehl.stelle().absatz();
     var neuAbsatz = befehl.neu().absatz();
     // Nur wenn der Absatz selbst das Umnummerierungsziel ist — bei „Satz 5 wird Satz 4“ stammt

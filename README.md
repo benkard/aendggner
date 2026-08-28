@@ -815,6 +815,17 @@ Punkt desselben Artikels (§ 7 Absatz 2 Nummer 17) stammt von dort; sie wird
 gelesen und ausdrücklich als Grenze gerügt. Sämtliche 23 Befehle des Heftes sind
 damit erschlossen.
 
+(4a) Eine Anlage gliedert sich nach eigener Wahl. Neben den Nummern eines
+Zuständigkeitskatalogs („Anlage Nummer 6“, § 13 Absatz 3) kennt das Erzeugnis
+deshalb die **benannte Einheit**: den „Ausbildungsabschnitt 1“ eines
+Ausbildungsrahmenplans und was ihm gleicht. Erkannt wird sie an ihrem Bau und
+nicht an einer Wortliste — verlangt sind Buchstaben vor dem Wortstamm, sodass
+„Ausbildungsabschnitt“ trifft, „Abschnitt“ und „Unterabschnitt“ dagegen nicht;
+die gliedern das Gesetz und sind anderswo geregelt. Solche Einheiten werden wie
+die Nummern als eigene Normen geführt („Anlage 1 Ausbildungsabschnitt 1“), lassen
+sich adressieren und umnummerieren. Die Einfügung einer *ganzen* neuen Einheit
+innerhalb einer Anlage ist nicht umgesetzt und wird als solche gerügt.
+
 (5) Welche Konvention welches Land beisteuert, welche Stammfassungen woher
 stammen und was noch offen ist, verzeichnet
 `src/test/resources/sampledata/Landesrecht-Beispiele.adoc`.

@@ -484,7 +484,7 @@ final class BefehlErkenner {
       Pattern.compile(
           "^(?:Der bisherige |Die bisherige |Das bisherige )?(.+?) wird (?:zu )?(?:der |die |das )?"
               + "(§|Art\\.|Absatz|Abs\\.|Satz|Nummer|Nr\\.|Buchstabe|Buchst\\."
-              + "|Teil|Abschnitt|Unterabschnitt|Buch|Kapitel|Anlage) "
+              + "|Teil|Abschnitt|Unterabschnitt|Buch|Kapitel|Anlage|\\p{L}+abschnitt) "
               + "(\\d+[a-z]?)\\.$");
 
   // „Die bisherigen Absätze 2 bis 4 werden zu den Absätzen 3 bis 5.“ bzw. „Die bisherigen Nummern 4
@@ -722,7 +722,7 @@ final class BefehlErkenner {
       Pattern.compile(
           "^(?:Der bisherige |Die bisherige |Das bisherige )?(.+?) wird (?:zu )?"
               + "(§|Art\\.|Absatz|Abs\\.|Satz|Nummer|Nr\\.|Buchstabe|Buchst\\."
-              + "|Teil|Abschnitt|Unterabschnitt|Buch|Kapitel|Anlage)"
+              + "|Teil|Abschnitt|Unterabschnitt|Buch|Kapitel|Anlage|\\p{L}+abschnitt)"
               // Der Wächter „(?!wird |werden )“ ist nötig: ohne ihn verschlänge die Untereinheit
               // in der schlichten Form („Abs. 3 wird Abs. 2 und wird wie folgt geändert:“) das
               // Verb und wäre als Stelle unparsbar.
@@ -2194,7 +2194,15 @@ final class BefehlErkenner {
       case "Buchstabe", "Buchst." -> new Stelle.BuchstabeNr(nummer);
       case "Teil", "Abschnitt", "Unterabschnitt", "Buch", "Kapitel", "Anlage" ->
           new Stelle.Gliederungseinheit(ebene, nummer);
-      default -> throw new IllegalArgumentException("Unbekannte Ebene: " + ebene);
+      // Die benannte Einheit einer Anlage („Ausbildungsabschnitt 5“) — sie gliedert die Anlage,
+      // nicht das Gesetz, und wird wie deren Nummern als eigene Norm geführt.
+      default -> {
+        if (!ebene.regionMatches(true, Math.max(0, ebene.length() - 9), "abschnitt", 0, 9)
+            || ebene.length() <= 9) {
+          throw new IllegalArgumentException("Unbekannte Ebene: " + ebene);
+        }
+        yield new Stelle.Gliederungseinheit(ebene, nummer);
+      }
     };
   }
 

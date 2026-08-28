@@ -77,12 +77,39 @@ Beispieldaten Mecklenburg-Vorpommern — Herkunft und Aufbereitung
    - Hochgestellte Fußnotenziffern an den Artikel-Überschriften des Mantelgesetzes
      („Änderung der … amtstierärztlicher Dienst⁴⁴“).
 
-5. Benannte Grenzen
-   Vier der 24 Befehle bleiben liegen, sämtlich die *Anlagen* betreffend:
-   Nummer 10 Buchstaben a bis c ändern die Anlage 1 (Ausbildungsrahmenplan) über
-   deren „Ausbildungsabschnitte“, Nummer 11 ersetzt die Anlage 2 durch eine
-   Fassung, die im *Anhang des Änderungsgesetzes* steht. Die Anlagen sind
-   Tabellen und Vordrucke; der kanonische Klartext hat für sie keine Form, und
-   sie sind in der Stammfassung deshalb nicht mitgeführt. Der Verweis auf einen
-   Anhang des ändernden Gesetzes ist überdies eine Form, die das Erzeugnis nicht
-   auflöst.
+5. Die Anlage 1 (nachgetragen am 28.08.2026)
+   Die Stammfassung führt seither den Ausbildungsrahmenplan (Anlage 1) mit. Er
+   steht im Ursprungsheft GVOBl. M-V 2016 Nr. 12 auf den Seiten 498 bis 500 und
+   ist über das Internet-Archiv beschafft worden, weil der Wirt regierung-mv.de
+   einer Skriptabfrage nicht antwortet:
+   https://web.archive.org/web/20220302185826/https://www.regierung-mv.de/static/
+   Regierungsportal/Justizministerium/Inhalte/Rechtliches/GVOBI.M-V/Dateien/
+   GVOBl_1245663.pdf (abgerufen am 28.08.2026).
+
+   Der Befund dabei ist wichtiger als der Nachtrag selbst: **Die Anlage 1 ist
+   keine Tabelle.** Sie ist gegliederter Fließtext — je Ausbildungsabschnitt eine
+   Kopfzeile, die Ausbildungsstelle, die Dauer und eine Spiegelstrichliste der
+   Inhalte. Der kanonische Klartext trägt sie unverändert; die frühere Annahme,
+   die Anlagen ließen sich nur als Tabellen führen, trifft allein auf die Anlage 2
+   zu (Vordruck des Befähigungsberichts mit den Spalten Wertung, Wertigkeit,
+   Einzelergebnis).
+
+   Aufbereitet mit `--extract-only`: Kopfzeilen ohne Doppelpunkt, Spiegelstriche
+   als „  - “ eingerückt, der Kolumnentitel („Nr. 12 Tag der Ausgabe …“) entfernt.
+   Die fünf Ausbildungsabschnitte werden — wie die Nummern des Berliner
+   Zuständigkeitskatalogs — als eigene Normen geführt: „Anlage 1
+   Ausbildungsabschnitt 1“ bis „… 5“.
+
+6. Benannte Grenzen
+   Zwei der 24 Befehle bleiben liegen:
+   - Nummer 10 Buchstabe b fügt einen ganzen Ausbildungsabschnitt ein. Eine neue
+     Norm *innerhalb* einer Anlage setzt das Erzeugnis nicht; die Einfügung ganzer
+     Einheiten ist an den §-Kopf gebunden.
+   - Nummer 11 ersetzt die Anlage 2 durch eine Fassung, die im *Anhang des
+     Änderungsgesetzes* steht. Der Verweis auf einen Anhang des ändernden Gesetzes
+     wird nicht aufgelöst, und die neue Fassung liegt damit nicht vor. Was nicht
+     vorliegt, lässt sich nicht anwenden.
+
+   Die Anlage 2 selbst ist aus demselben Grund nicht nachgetragen: Sie ist ein
+   Vordruck, ihr einziger Befehl ersetzt sie ohnehin ganz, und ihre Form wäre die
+   einzige im ganzen Beispielkorpus, für die der kanonische Klartext keine hat.

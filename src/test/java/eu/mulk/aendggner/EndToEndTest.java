@@ -1931,8 +1931,12 @@ class EndToEndTest {
 
     var gesetz = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(alt);
     assertThat(gesetz.jurabk()).isEqualTo("APOAmtsTA M-V");
-    // Die Inhaltsübersicht ist eine Norm gleichen Namens; dazu die 28 Paragraphen.
-    assertThat(gesetz.normen()).hasSize(29);
+    // Die Inhaltsübersicht ist eine Norm gleichen Namens; dazu die 28 Paragraphen, die Anlage 1
+    // (Ausbildungsrahmenplan) und deren fünf Ausbildungsabschnitte, die das Portal wie die Nummern
+    // eines Zuständigkeitskatalogs als eigene Einheiten führt.
+    assertThat(gesetz.normen()).hasSize(35);
+    assertThat(gesetz.norm("Anlage 1 Ausbildungsabschnitt 1")).isPresent();
+    assertThat(gesetz.norm("Anlage 1 Ausbildungsabschnitt 5")).isPresent();
 
     var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(pdf));
     // Kolumnentitel und Seitenfuß stehen im Inhaltsstrom, und zwar mitten im Befehlstext.
@@ -1945,7 +1949,7 @@ class EndToEndTest {
     assertThat(parseErgebnis.befehle()).hasSize(24);
 
     var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
-    assertThat(anwendung.anzahlAngewandt()).isEqualTo(20);
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(22);
 
     // Die Nummern 2 und 3 entfallen, die Nummern 4 bis 6 rücken auf 2 bis 4 — ohne Platzhalter,
     // denn sie stehen am Ende ihres Blockes nicht.
@@ -1965,15 +1969,31 @@ class EndToEndTest {
     assertThat(anwendung.neu().norm("Inhaltsübersicht").orElseThrow().absaetze().get(0).text())
         .contains("§ 10 | Ausbildungsnachweise");
 
-    // Übrig bleiben allein die vier Befehle, die die Anlagen betreffen: Die Stammfassung führt sie
-    // nicht mit (Tabellen und Vordrucke), und der elfte Befehl verweist auf einen Anhang des
-    // Änderungsgesetzes.
+    // Die benannte Einheit der Anlage trägt die Wortersetzung …
+    assertThat(
+            anwendung
+                .neu()
+                .norm("Anlage 1 Ausbildungsabschnitt 1")
+                .orElseThrow()
+                .absaetze()
+                .get(0)
+                .text())
+        .startsWith("Das für das Veterinärwesen zuständige Ministerium")
+        .doesNotContain("Ministerium für Landwirtschaft, Umwelt und Verbraucherschutz");
+    // … und die Umnummerierung trifft ihre Bezeichnung, nicht ihren Wortlaut.
+    assertThat(anwendung.neu().norm("Anlage 1 Ausbildungsabschnitt 6")).isPresent();
+    assertThat(anwendung.neu().norm("Anlage 1 Ausbildungsabschnitt 5")).isEmpty();
+
+    // Übrig bleiben zwei Befehle, beide mit benanntem Grund: Nummer 10 Buchstabe b fügt einen
+    // ganzen Ausbildungsabschnitt ein — eine neue Norm innerhalb einer Anlage, die das Erzeugnis
+    // nicht setzt —, und Nummer 11 verweist auf einen Anhang des ändernden Gesetzes, der nicht
+    // vorliegt. Was nicht vorliegt, lässt sich nicht anwenden.
     var offen =
         anwendung.protokoll().stream()
             .filter(a -> a.status() == BefehlAnwender.Status.MANUELL_PRUEFEN)
             .map(a -> a.befehl().provenienz().gliederungsPfad())
             .toList();
-    assertThat(offen).containsExactly("10. a)", "10. b)", "10. c)", "11.");
+    assertThat(offen).containsExactly("10. b)", "11.");
   }
 
   private static Aenderungsbefehl befehlZu(

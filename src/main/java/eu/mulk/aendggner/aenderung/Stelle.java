@@ -144,7 +144,35 @@ public record Stelle(List<Komponente> komponenten) {
     return komponenten.stream()
         .filter(Gliederungseinheit.class::isInstance)
         .map(Gliederungseinheit.class::cast)
-        .anyMatch(g -> !istAnlagenArt(g.art()));
+        .anyMatch(g -> !istAnlagenArt(g.art()) && !istAnlagenEinheitsArt(g.art()));
+  }
+
+  /**
+   * Die benannte Einheit einer Anlage („Ausbildungsabschnitt 1“), falls vorhanden.
+   *
+   * <p>Sie gliedert nicht das Gesetz, sondern die Anlage, und wird — wie deren Nummern — als eigene
+   * Norm geführt, deren Bezeichnung die Anlage voranstellt („Anlage 1 Ausbildungsabschnitt 1“).
+   */
+  public Optional<Gliederungseinheit> anlagenEinheit() {
+    return komponenten.stream()
+        .filter(Gliederungseinheit.class::isInstance)
+        .map(Gliederungseinheit.class::cast)
+        .filter(g -> istAnlagenEinheitsArt(g.art()))
+        .findFirst();
+  }
+
+  /**
+   * Trägt die Art den Bau einer benannten Anlagen-Einheit? Buchstaben <em>vor</em> dem Wortstamm
+   * sind verlangt: „Ausbildungsabschnitt“ trifft, „Abschnitt“ nicht — der gliedert das Gesetz.
+   */
+  private static boolean istAnlagenEinheitsArt(String art) {
+    // „Unterabschnitt“ endet zwar auf den Wortstamm, gliedert aber das Gesetz und ist keine
+    // Einheit einer Anlage; ebenso der schlichte „Abschnitt“.
+    if (art.equalsIgnoreCase("Abschnitt") || art.equalsIgnoreCase("Unterabschnitt")) {
+      return false;
+    }
+    int stelle = art.length() - "abschnitt".length();
+    return stelle > 0 && art.regionMatches(true, stelle, "abschnitt", 0, "abschnitt".length());
   }
 
   /** Die enbez der adressierten Anhang-/Anlagen-Norm („Anhang“, „Anlage 2“), falls vorhanden. */

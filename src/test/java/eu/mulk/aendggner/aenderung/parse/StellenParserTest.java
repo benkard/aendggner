@@ -152,4 +152,24 @@ class StellenParserTest {
     // Ein Wort, das bloß so anfängt, ist keiner.
     assertThat(StellenParser.istNurChapeau("In der Einleitungsformel")).isFalse();
   }
+
+  @Test
+  void benannteEinheitEinerAnlage() {
+    // „Im Ausbildungsabschnitt 1 …“ — der Ausbildungsrahmenplan gliedert sich in benannte
+    // Einheiten, die das Portal wie eigene Normen führt.
+    var stelle = StellenParser.parse("Ausbildungsabschnitt 1").orElseThrow();
+    assertThat(stelle.anzeigeText()).isEqualTo("Ausbildungsabschnitt 1");
+    assertThat(stelle.anlagenEinheit()).isPresent();
+    assertThat(stelle.betrifftEchteGliederung()).isFalse();
+  }
+
+  @Test
+  void unterabschnittBleibtGliederungDesGesetzes() {
+    // Er endet auf denselben Wortstamm, gliedert aber das Gesetz und ist keine Einheit einer
+    // Anlage. Ohne diese Grenze fiele „Die Überschrift zu Unterabschnitt 4 wird gestrichen“ aus
+    // dem Gliederungszweig heraus.
+    var stelle = StellenParser.parse("Unterabschnitt 4").orElseThrow();
+    assertThat(stelle.anlagenEinheit()).isEmpty();
+    assertThat(stelle.betrifftEchteGliederung()).isTrue();
+  }
 }

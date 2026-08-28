@@ -40,7 +40,9 @@ public final class LandesRechtTextAusgeber {
    * Anlagen-Norm stellt den Bezug schon her.
    */
   private static final Pattern ANLAGEN_NUMMER =
-      Pattern.compile("^(?:Anlage|Anhang)(?:\\s+\\d+[a-z]?)?\\s+((?:Nummer|Nr\\.)\\s+\\d+[a-z]?)$");
+      Pattern.compile(
+          "^(?:Anlage|Anhang)(?:\\s+\\d+[a-z]?)?"
+              + "\\s+((?:Nummer|Nr\\.|\\p{L}+abschnitt)\\s+\\d+[a-z]?)$");
 
   private LandesRechtTextAusgeber() {}
 

@@ -21,6 +21,89 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 28. August 2026 (dritte Fassung des Tages),
+ zuletzt geändert durch die am 28. August 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Der Korpuslauf hat seine erste Frucht getragen, und zwar eine unerwartete: Unter
+den einhundertsechzehn liegengebliebenen Befehlen des Korpus ist kein einziger
+ein Tabellenproblem. Die Annahme, die Anlagen des mecklenburgischen Falles
+scheiterten an fehlender Tabellenunterstützung, war unrichtig. Beschafft man das
+Ursprungsheft, so zeigt sich: Der Ausbildungsrahmenplan (Anlage 1) ist keine
+Tabelle, sondern gegliederter Fließtext — je Abschnitt eine Kopfzeile, die
+Ausbildungsstelle, die Dauer und eine Spiegelstrichliste. Er fehlte in der
+Stammfassung, das war alles. Zwei der vier Reste sind damit erledigt.
+
+
+Artikel 1
+Die benannte Einheit einer Anlage
+
+(1) Eine Anlage gliedert sich nach eigener Wahl. Neben den Nummern eines
+    Zuständigkeitskatalogs erkennt der Leser (LandesRechtTextParser) fortan die
+    benannte Einheit und führt sie als eigene Norm, deren Bezeichnung die Anlage
+    voranstellt („Anlage 1 Ausbildungsabschnitt 1“). Der Ausgeber
+    (LandesRechtTextAusgeber) schreibt sie ebenso zurück; der Rundlauf geht auf.
+
+(2) Erkannt wird die Einheit an ihrem Bau und nicht an einer Wortliste: verlangt
+    sind Buchstaben vor dem Wortstamm. „Ausbildungsabschnitt“ trifft, „Abschnitt“
+    nicht — und „Unterabschnitt“ ebenso wenig, obwohl er auf denselben Stamm
+    endet; er gliedert das Gesetz.
+
+(3) Der Stellenparser (StellenParser) nimmt die Einheit als Stellenangabe („Im
+    Ausbildungsabschnitt 1 …“), die Stelle (Stelle) unterscheidet sie von der
+    echten Gliederung, und der Auflöser (StellenAufloeser) setzt sie mit der
+    Anlage zur Normbezeichnung zusammen — ebenso, wie er es mit deren Nummern
+    tut.
+
+(4) Der Anwender (BefehlAnwender) benennt eine solche Norm um („Der bisherige
+    Ausbildungsabschnitt 5 wird zu Ausbildungsabschnitt 6“). Die Anlage nimmt er
+    dabei aus dem Bestand und nicht aus dem Befehl: Dieser nennt nur die Einheit.
+    Zuvor lief die Umnummerierung in den Auffangzweig „keine Textänderung nötig“
+    und meldete Erfolg, ohne etwas zu tun — ein stiller Fehler, den erst der
+    Belegfall zutage gefördert hat.
+
+
+Artikel 2
+Die Beispieldaten
+
+(1) Die mecklenburgische Stammfassung führt fortan die Anlage 1. Sie stammt aus
+    dem Ursprungsheft GVOBl. M-V 2016 Nr. 12, das über das Internet-Archiv
+    beschafft worden ist; der Wirt regierung-mv.de antwortet einer Skriptabfrage
+    nicht. Die Herkunft ist in „MecklenburgVorpommern/SOURCES“ nachgewiesen.
+
+(2) Die Anlage 2 (Vordruck des Befähigungsberichts) bleibt fort. Sie ist der
+    einzige echte Tabellensatz des ganzen Beispielkorpus, und der einzige auf sie
+    zielende Befehl ersetzt sie ohnehin durch eine Fassung, die im Anhang des
+    ändernden Gesetzes steht und nicht vorliegt.
+
+(3) Der Akzeptanzfall pinnt fortan 35 statt 29 Normen und 22 statt 20 angewandte
+    Befehle. Von den beiden Resten fügt der eine einen ganzen
+    Ausbildungsabschnitt ein — eine neue Norm innerhalb einer Anlage setzt das
+    Erzeugnis nicht —, der andere verweist auf den fehlenden Anhang.
+
+
+Artikel 3
+Was die Grundlinie geleistet hat
+
+Die Erweiterung hat einen Befehl gekostet, der zuvor angewandt wurde: „Die
+Überschrift zu Unterabschnitt 4 wird gestrichen“ des GEG-Entwurfs fiel aus dem
+Gliederungszweig, weil auch „Unterabschnitt“ auf den Wortstamm endet. Der
+Korpuslauf hat das im selben Durchgang gerügt („angewandte Befehle 86 statt 87“),
+und zwar bevor eine Einzelprüfung davon etwas gemerkt hätte — keine hätte das,
+denn der Fall steht in einem anderen Land und einem anderen Dokument. Die Grenze
+ist gezogen und durch zwei Prüffälle (StellenParserTest) gepinnt.
+
+
+Schlussbestimmung
+
+Die vorstehenden Änderungen sind durch die vollständige Prüfung (mvnw verify,
+vierhundertfünfundvierzig Testfälle) und durch die Lizenzprüfung (reuse lint,
+zweihundertvierzehn von zweihundertvierzehn Dateien) bestätigt worden. Die
+Grundlinie des Korpuslaufs ist fortgeschrieben: 1289 statt 1287 angewandter
+Befehle.
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 28. August 2026 (zweite Fassung des Tages),
  zuletzt geändert durch die am 28. August 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

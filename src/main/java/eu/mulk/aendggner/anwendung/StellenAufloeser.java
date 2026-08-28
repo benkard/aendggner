@@ -64,6 +64,16 @@ final class StellenAufloeser {
           stelle = stelle.ohne(nummer.get());
         }
       }
+      // Ebenso die benannte Einheit einer Anlage („Anlage 1 Ausbildungsabschnitt 1“): Sie gliedert
+      // nicht das Gesetz, sondern die Anlage, und der Ausbildungsrahmenplan führt sie so.
+      var einheit = stelle.anlagenEinheit();
+      if (einheit.isPresent()) {
+        var alsNorm = enbez + " " + einheit.get().bezeichnung();
+        if (normIndex(gesetz, alsNorm) >= 0) {
+          enbez = alsNorm;
+          stelle = stelle.ohne(einheit.get());
+        }
+      }
     } else {
       return new Ergebnis.NichtGefunden(
           "Stelle nennt keinen Paragraphen: " + stelle.anzeigeText(),

@@ -149,6 +149,16 @@ final class LandesRechtTextParser {
           "^((?:\\(X+\\) )?(?:§§|Artt\\.) \\S.*?) {2}(\\((?:weggefallen|aufgehoben)\\))$");
 
   /**
+   * Eine benannte Einheit innerhalb einer Anlage: die Nummer eines Zuständigkeitskatalogs („Nummer
+   * 6“) ebenso wie der Abschnitt eines Ausbildungsrahmenplans („Ausbildungsabschnitt 1“).
+   *
+   * <p>Die zweite Form ist nicht als „Abschnitt“ zu lesen: Ein Abschnitt gliedert das Gesetz,
+   * innerhalb einer Anlage gliedert nichts mehr. Verlangt sind deshalb Buchstaben <em>vor</em> dem
+   * Wortstamm — „Ausbildungsabschnitt“ trifft, „Abschnitt“ nicht.
+   */
+  private static final String ANLAGEN_EINHEIT = "(?:Nummer|Nr\\.|\\p{L}+abschnitt)\\s+\\d+[a-z]?";
+
+  /**
    * Der Kopf einer Nummer innerhalb einer Anlage („Nummer 6“). Die Nummern eines
    * Zuständigkeitskatalogs sind keine Aufzählungsglieder, sondern eigene Einheiten mit eigener
    * Absatzzählung — das Landesrechtsportal führt jede als eigene Einzelnorm, und die
@@ -157,7 +167,7 @@ final class LandesRechtTextParser {
    * voranstellt: „Anlage Nummer 6“.
    */
   private static final Pattern ANLAGEN_NUMMER_KOPF =
-      Pattern.compile("^(?:Nummer|Nr\\.)\\s+(\\d+[a-z]?)\\s*$");
+      Pattern.compile("^(" + ANLAGEN_EINHEIT + ")\\s*$");
 
   private static final Pattern WEGGEFALLEN_TITEL =
       Pattern.compile("^\\((?:aufgehoben|weggefallen)\\)$");
@@ -331,8 +341,7 @@ final class LandesRechtTextParser {
         } else if (neueAnlagenNummer) {
           // „Anlage Nummer 6“ — die Anlage selbst bleibt als Norm vor ihnen stehen; trägt sie
           // keinen eigenen Wortlaut, so ist sie eben leer.
-          normEnbez =
-              (anlagenEnbez != null ? anlagenEnbez + " " : "") + "Nummer " + anlagenNummer.group(1);
+          normEnbez = (anlagenEnbez != null ? anlagenEnbez + " " : "") + anlagenNummer.group(1);
           normTitel = null;
         } else if (neueNorm) {
           normEnbez = normKopf.group(1) + " " + normKopf.group(2);

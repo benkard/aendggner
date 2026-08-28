@@ -230,6 +230,18 @@ public final class StellenParser {
           i++;
         }
         default -> {
+          // Die benannte Einheit einer Anlage: „Im Ausbildungsabschnitt 1 …“. Sie steht nicht in
+          // der Liste der Gliederungsarten, weil ihr Name der Anlage gehört und nicht dem Gesetz;
+          // erkannt wird sie an ihrem Bau (siehe istAnlagenEinheit).
+          if (istAnlagenEinheit(wort)) {
+            var wert = naechstesWort(woerter, i);
+            if (wert != null && NUMMER_WERT.matcher(wert).matches()) {
+              komponenten.add(new Stelle.Gliederungseinheit(anlagenEinheitsArt(wort), wert));
+              i++;
+              continue;
+            }
+            return Optional.empty();
+          }
           // Ordinal vor der Gliederungsart: „zum zweiten Abschnitt“, „des 2. Abschnitts“.
           var ordinal = ordinalZahl(wort);
           var art = ordinal != null ? naechstesWort(woerter, i) : null;
@@ -571,6 +583,29 @@ public final class StellenParser {
           true;
       default -> false;
     };
+  }
+
+  /**
+   * Die benannte Einheit einer Anlage („Ausbildungsabschnitt 1“ des Ausbildungsrahmenplans).
+   *
+   * <p>Erkannt wird sie an ihrem Bau und nicht an einer Wortliste: Jede Anlage darf ihre Einheiten
+   * nennen, wie sie will, und eine Liste wäre am nächsten Land wieder unvollständig. Verlangt sind
+   * Buchstaben <em>vor</em> dem Wortstamm — „Ausbildungsabschnitt“ trifft, „Abschnitt“ nicht, denn
+   * der gliedert das Gesetz und ist anderswo geregelt.
+   */
+  private static final Pattern ANLAGEN_EINHEIT =
+      Pattern.compile("^(\\p{L}+abschnitt)(?:s|e|es|en)?$", Pattern.CASE_INSENSITIVE);
+
+  private static boolean istAnlagenEinheit(String wort) {
+    // „Unterabschnitt“ endet auf den Wortstamm, gliedert aber das Gesetz; er ist oben abgehandelt
+    // und darf hier nicht noch einmal zugreifen.
+    return !istGliederungsArt(wort) && ANLAGEN_EINHEIT.matcher(wort).matches();
+  }
+
+  /** Der Nominativ Singular der benannten Einheit („Ausbildungsabschnitts“ → „…abschnitt“). */
+  private static String anlagenEinheitsArt(String wort) {
+    var treffer = ANLAGEN_EINHEIT.matcher(wort);
+    return treffer.matches() ? treffer.group(1) : wort;
   }
 
   /** Normalisiert Genitiv-/Pluralformen der Gliederungsart auf den Nominativ Singular. */
