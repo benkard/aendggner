@@ -10,9 +10,10 @@
 #   3. Der Quelltext der gebauten Fassung wird als Tarball beigelegt — AGPLv3 §13 verlangt
 #      beim Netzwerkbetrieb einen Quellcode-Zugang für die Nutzer:innen, und der Footer der
 #      Startseite verweist darauf.
-#   4. Nur die vom Bau erzeugten Dateien bleiben stehen; alles hier Liegende wird
+#   4. Die Startseite bekommt unter dem Titel das Datum des gebauten Commits.
+#   5. Nur die vom Bau erzeugten Dateien bleiben stehen; alles hier Liegende wird
 #      hochgeladen.
-#   5. Auf Wunsch (VORKOMPRIMIEREN=1) werden die großen Dateien vorkomprimiert.
+#   6. Auf Wunsch (VORKOMPRIMIEREN=1) werden die großen Dateien vorkomprimiert.
 #
 # Zielplattform ist Cloudflare Workers: dort gilt eine Grenze von 25 MiB je Datei
 # (unkomprimiert), und komprimiert wird beim Ausliefern ohnehin. Deshalb ist die
@@ -110,6 +111,7 @@ fi
   echo "ÄndGgner — Quelltext der ausgelieferten Fassung"
   echo
   echo "Commit:  $fassung"
+  echo "Fassung: $(git -C "$quelle" log -1 --format=%cs HEAD)"
   echo "Gebaut:  $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
   echo
   echo "Vollständig in aendggner-quelltext.tar.gz; Bauanleitung darin in README.md."
@@ -121,10 +123,54 @@ fi
   echo "Repository von der oben genannten Adresse, wo der Korpus vollständig liegt."
 } > "$ziel/quelltext-fassung.txt"
 
-# 4. Nur das Gebaute bleibt liegen — was hier steht, geht hoch.
+# 4. Fassungsdatum der Startseite.
+#
+# Unter dem Titel steht „in der Fassung vom …“. Im Quelltext trägt die Marke das Datum des
+# letzten Handanlegens; ausgeliefert wird das Datum des gebauten Commits, damit die Angabe
+# nicht stillschweigend veraltet. Das Datum kommt aus %cs (JJJJ-MM-TT); date(1) bleibt
+# außen vor, weil BSD und GNU sich über die Schalter nicht einig sind.
+fassungsdatum="$(git -C "$quelle" log -1 --format=%cs HEAD)"
+jahr="${fassungsdatum%%-*}"
+rest="${fassungsdatum#*-}"
+monat="${rest%%-*}"
+tag="${rest#*-}"
+
+case "$monat" in
+  01) monatsname="Januar" ;;   02) monatsname="Februar" ;;   03) monatsname="März" ;;
+  04) monatsname="April" ;;    05) monatsname="Mai" ;;       06) monatsname="Juni" ;;
+  07) monatsname="Juli" ;;     08) monatsname="August" ;;    09) monatsname="September" ;;
+  10) monatsname="Oktober" ;;  11) monatsname="November" ;;  12) monatsname="Dezember" ;;
+  *) echo "webpaket: unlesbares Commit-Datum „$fassungsdatum“." >&2; exit 1 ;;
+esac
+
+# Führende Null im Tag ist im deutschen Fließtext unüblich.
+tag="${tag#0}"
+fassungstext="$tag. $monatsname $jahr"
+
+startseite="$ziel/index.html"
+if [ ! -f "$startseite" ]; then
+  echo "webpaket: $startseite fehlt — die statischen Seiten sind nicht mitkopiert." >&2
+  exit 1
+fi
+
+sed -e "s|<time datetime=\"[0-9-]*\">[^<]*</time>|<time datetime=\"$fassungsdatum\">$fassungstext</time>|" \
+  "$startseite" > "$startseite.neu"
+
+# Greift die Ersetzung nicht, ist die Marke im Vordruck umgebaut worden. Dann lieber der
+# Bau ab als eine falsch datierte Fassung.
+if ! grep -q "<time datetime=\"$fassungsdatum\">$fassungstext</time>" "$startseite.neu"; then
+  rm -f "$startseite.neu"
+  echo "webpaket: In index.html ist keine <time>-Marke unter dem Titel zu finden; das" >&2
+  echo "          Fassungsdatum lässt sich nicht einsetzen." >&2
+  exit 1
+fi
+mv "$startseite.neu" "$startseite"
+echo "webpaket: Startseite trägt die Fassung vom $fassungstext."
+
+# 5. Nur das Gebaute bleibt liegen — was hier steht, geht hoch.
 rm -f "$ziel/.DS_Store"
 
-# 5. Vorkompression, nur auf Anforderung (siehe Kopf). Der Tarball ist bereits gepackt und
+# 6. Vorkompression, nur auf Anforderung (siehe Kopf). Der Tarball ist bereits gepackt und
 # bleibt außen vor.
 if [ "${VORKOMPRIMIEREN:-}" = 1 ]; then
   for datei in "$ziel"/*.wasm "$ziel"/*.js "$ziel"/*.css "$ziel"/*.html "$ziel"/*.svg \

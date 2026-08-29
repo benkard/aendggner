@@ -21,6 +21,78 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 29. August 2026,
+ zuletzt geändert durch die am 29. August 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Der Vordruck weist fortan aus, welchen Standes er ist, und nennt neben der
+bisherigen Bezugsquelle eine zweite. Beides betrifft allein die statischen Seiten
+der Browserfassung; an der Auswertung ändert sich nichts.
+
+
+Artikel 1
+Zweite Bezugsquelle des Quelltextes
+
+Die Fußzeile der Startseite und der Hinweis im Impressum verwiesen bislang allein
+auf die eigene Git-Stelle. Das Spiegelbild auf GitHub ist dem allgemeinen Publikum
+geläufiger und tritt neben sie.
+
+(1) In der Fußzeile der Startseite (index.html) folgt dem Git-Link, durch einen
+    Mittelpunkt getrennt, ein Link auf https://github.com/benkard/aendggner.
+
+(2) Im Impressum wird der Satz über den fortlaufenden Bezug entsprechend erweitert
+    („über Git oder GitHub“).
+
+(3) Die Datenschutzseite bleibt unberührt; sie führte keine solche Angabe.
+
+
+Artikel 2
+Die Startseite nennt ihren Stand
+
+Unter dem Titel des Vordrucks stand bisher nur die Bezeichnung der Stelle; welchen
+Standes die betriebene Fassung ist, war der Seite nicht zu entnehmen. Die
+handgeführte Ausgabebezeichnung in der Fußzeile („08.26“) trifft dazu keine
+tagesgenaue Aussage.
+
+(1) Zwischen Überschrift und Stellenangabe tritt die Zeile „in der Fassung vom …“
+    nebst einem <time>-Element, das das Datum sowohl maschinenlesbar als auch im
+    deutschen Fließtext führt. Das Stilblatt erhält dazu die Regel „.fassung“ nach
+    dem Vorbild von „.stelle“.
+
+(2) Das im Quelltext stehende Datum ist der Rückfall für den Fall, daß die Seite
+    ohne das Paketierskript angesehen wird; ausgeliefert wird stets das Datum des
+    gebauten Standes.
+
+
+Artikel 3
+Einsetzen des Datums beim Paketieren
+
+Damit die Angabe nicht stillschweigend veraltet, setzt sie das Paketierskript
+(deploy/webpaket.sh) beim Bau ein. Es läuft ohnehin nach dem Kopieren der
+statischen Seiten und kennt den gebauten Stand bereits.
+
+(1) Als vierter Schritt tritt das Fassungsdatum hinzu. Es stammt aus „git log -1
+    --format=%cs“ und wird ohne date(1) in die deutsche Langform gebracht: Jahr,
+    Monat und Tag werden durch Parameterexpansion zerlegt, der Monatsname über eine
+    Fallunterscheidung gewonnen, die führende Null des Tages gestrichen. Grund ist
+    die Uneinigkeit von BSD und GNU über die Schalter von date(1).
+
+(2) Ersetzt wird die gesamte <time>-Einheit; geschrieben wird in eine Nebendatei
+    und sodann umbenannt, weil „sed -i“ nicht überall gleich lautet.
+
+(3) Findet sich die Marke nicht, bricht der Bau ab. Eine falsch datierte Fassung
+    auszuliefern wäre schlimmer als ein fehlgeschlagener Bau.
+
+(4) Der Fassungsnachweis im Paket (quelltext-fassung.txt) führt das Datum künftig
+    neben dem Commit.
+
+Die Prüfung geht auf: „sh -n“ beanstandet nichts; ein Trockenlauf auf einer Kopie
+der Seiten setzt „28. August 2026“ ein, was dem Stand von HEAD entspricht; wird die
+Marke entfernt, bricht das Skript mit der vorgesehenen Meldung ab (Rückgabe 1);
+„reuse lint“ weist 214 von 214 Dateien als vollständig ausgezeichnet aus.
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 28. August 2026 (dritte Fassung des Tages),
  zuletzt geändert durch die am 28. August 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

@@ -80,6 +80,13 @@ h1 {
   line-height: 1.35;
 }
 
+/* Die Fassungsangabe unter dem Titel; das Datum setzt deploy/webpaket.sh beim Bau ein. */
+.fassung {
+  margin: 0 0 0.5rem;
+  font-size: 0.6875rem;
+  color: var(--muted);
+}
+
 .stelle {
   margin: 0 0 0.9rem;
   font-size: 0.6875rem;
