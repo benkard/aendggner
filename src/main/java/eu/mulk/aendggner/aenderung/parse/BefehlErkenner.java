@@ -65,16 +65,21 @@ final class BefehlErkenner {
   private static final String ENUM = "((?:\\d+[a-z]?\\.|[a-z]{1,3}\\))\\s*)?";
 
   // Verb der Neufassung. Neben „wird/werden wie folgt gefasst“ (Bund/Bayern) auch „erhält/erhalten
-  // folgende Fassung“ — die in mehreren Ländern (Schleswig-Holstein, Niedersachsen) übliche Form.
+  // folgende Fassung“ und die bestimmte Nebenform „erhält die Fassung“ (Ltg-Drs. 8/6357 des
+  // Landtags von Sachsen-Anhalt) — die in mehreren Ländern (Schleswig-Holstein, Niedersachsen)
+  // übliche Form.
   // Das pleonastische „neu“ („wird wie folgt neu gefasst“, NRW) und das im amtlichen Satz
   // gelegentlich fehlende „wird“ („Nummer 9 wie folgt gefasst: …“, GV. NRW. 2026 Nr. 7) sind
   // mitgefasst. Rein zusätzliche Alternationen ohne eigene Fanggruppe, damit die Gruppennummern
   // gleich bleiben.
   private static final String NEUFASSUNG_VERB =
-      "(?:(?:(?:wird|werden) )?wie folgt (?:neu )?gefasst|(?:erhält|erhalten) folgende Fassung)";
+      "(?:(?:(?:wird|werden) )?wie folgt (?:neu )?gefasst"
+          + "|(?:erhält|erhalten) (?:folgende|die|die folgende) Fassung)";
 
+  // Der Doppelpunkt vor dem Zitat ist wahlfrei: „Die Überschrift erhält die Fassung „…““ setzt
+  // ihn nicht (Ltg-Drs. 8/6357 des Landtags von Sachsen-Anhalt). Das Zitat selbst bleibt verlangt.
   private static final Pattern NEUFASSUNG =
-      Pattern.compile("^(.+?) " + NEUFASSUNG_VERB + ": " + ENUM + Z + "\\.?$");
+      Pattern.compile("^(.+?) " + NEUFASSUNG_VERB + ":? " + ENUM + Z + "\\.?$");
 
   // „In Absatz 2 wird Satz 1 wie folgt gefasst: „…““ — die Fundstelle steht geteilt: der Rahmen vor
   // dem Verb („In Absatz 2“), die adressierte Einheit dahinter („Satz 1“). Zusammengesetzt ergeben

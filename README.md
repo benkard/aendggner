@@ -826,6 +826,55 @@ die Nummern als eigene Normen geführt („Anlage 1 Ausbildungsabschnitt 1“), 
 sich adressieren und umnummerieren. Die Einfügung einer *ganzen* neuen Einheit
 innerhalb einer Anlage ist nicht umgesetzt und wird als solche gerügt.
 
+(4b) **Das Saarland** ist gleichwohl ein voller Fall geworden, weil die
+Änderungshistorie des Portals aushilft, wo die Fassungsliste fehlt: Weist sie für
+das fragliche Jahr genau eine Änderung aus, so ist die Vorfassung die
+Gesamtausgabe ohne diese eine Änderung. Für das Gesetz über den Saarlandpakt und
+die Verordnung zu seiner Ausführung (Gesetz Nr. 2211, Amtsbl. I 2026 Nr. 31
+S. 756) ist das so hergeleitet und aus den Gesetzblättern von 2019, 2020 und 2024
+Norm für Norm gegengeprüft worden — die Ursprungsfassung nebst den beiden
+zwischenzeitlichen Änderungen ergibt genau die heutige Gesamtausgabe. Beide
+Stammwerke stehen im Korpus: zehn von zehn Normen der Verordnung, neunzehn von
+zwanzig des Gesetzes stimmen zeichengenau. Die zwanzigste weicht an einer Stelle
+ab, und zwar aus einem benannten Grund (siehe Absatz 4c).
+
+Das Amtsblatt des Saarlandes selbst ist frei und skriptlesbar — sein Portal ist,
+anders als die Landesrechtsportale, kein juris-Einseitenprogramm. Der Fall hat
+zwei allgemeine Funde gebracht: den Kolumnentitel des Amtsblattes, der im
+Inhaltsstrom an der Seitenzahl klebt, und die Artikelwahl bei
+Ausführungsverordnungen — die Wendung „zur Ausführung des *X-Gesetzes*“ wird aus
+dem Vorspann gestrichen, damit ein solcher Artikel nicht für das Stammgesetz
+gehalten wird; ist das Ziel aber selbst eine solche Verordnung, so stünde nach dem
+Streichen ihr eigener Name nicht mehr da, und die Streichung unterbleibt.
+
+(4c) Die **Wortfuge am markerlosen Umbruch**: Im engen Zweispaltensatz des
+Amtsblattes verliert der Auszug an einer echten Wortgrenze den Zwischenraum
+(„zusätzlich“ + „jahresbezogene“). Entschieden wird das wie beim Trennstrich am
+Wortbestand des Dokuments — und zwar an demjenigen **ohne die zeilenletzten
+Wörter**, denn ein durch den Umbruch abgerissenes Bruchstück steht immer am
+Zeilenende, ein wirkliches Wort auch mitten in der Zeile. Die Schranke bleibt: Ein
+Kopf von weniger als vier Zeichen ist von einer Vorsilbe nicht zu unterscheiden
+(„aus“ + „geschlossen“ gegen „zu“ + „ergreifen“), und dort wird nicht geraten.
+Daran hängt die eine Abweichung des § 8a.
+
+(4d) **Sachsen-Anhalt** bleibt beim rheinland-pfälzischen Weg, und zwar aus zwei
+Gründen zugleich: Das Portal führt keine Vorfassung, und das Gesetz- und
+Verordnungsblatt des Landes ist überhaupt nicht frei — abrufbar sind nur die
+Inhaltsverzeichnisse der letzten Hefte. Frei ist dagegen die
+Parlamentsdokumentation des Landtags, weshalb hier die **Drucksache** das
+Änderungsdokument ist (Entwurf eines Zweiten Gesetzes zur Änderung des
+Fischereigesetzes, Drs. 8/6357; vierzehn Befehle erschlossen). Der Fund liegt in
+der Gliederung: Sachsen-Anhalt setzt unter die Nummern nicht „a)“ und „aa)“,
+sondern **„a.“ und kleine römische Zahlen** („i.“, „ii.“). Beide Formen sind den
+Klammerformen wesensgleich; nur das Satzzeichen unterscheidet sie. „i.“ ist dabei
+zweideutig — als Buchstabe die neunte, als Zahl die erste Marke —, und entschieden
+wird es aus dem Stand der Gliederung: Ist eine römisch gezählte dritte Ebene
+offen, so ist es römisch; sonst eröffnet allein „i.“ unter einer offenen zweiten
+Ebene die dritte. Dazu kommen die Nebenform „erhält die Fassung“ und der
+wahlfreie Doppelpunkt vor dem Zitat.
+
+Damit ist der Länderkreis geschlossen: Alle sechzehn Länder sind erfasst.
+
 (5) Welche Konvention welches Land beisteuert, welche Stammfassungen woher
 stammen und was noch offen ist, verzeichnet
 `src/test/resources/sampledata/Landesrecht-Beispiele.adoc`.

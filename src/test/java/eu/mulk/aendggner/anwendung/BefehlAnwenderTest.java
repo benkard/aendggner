@@ -90,6 +90,31 @@ class BefehlAnwenderTest {
     assertThat(ergebnis.protokoll().get(0).begruendung()).contains("mehrdeutig");
   }
 
+  /**
+   * Die Aufzählungsmarke am Anfang einer Einheit ist deren Kennzeichnung und nicht ihr Wortlaut:
+   * Wer „in Nummer 3 den Punkt durch ein Komma ersetzt“, meint den Schlusspunkt und nicht den Punkt
+   * der Marke. Ohne diese Schranke stünde der Punkt zweimal da und der Befehl bliebe als mehrdeutig
+   * liegen (Amtsbl. des Saarlandes 2020 S. 1339, Artikel 2 Nummer 1).
+   */
+  @Test
+  void zaehltDieAufzaehlungsmarkeNichtZumWortlaut() {
+    var befehl =
+        new Ersetzung(
+            stelle(new Stelle.Paragraph("1"), new Stelle.AbsatzNr("2"), new Stelle.NummerNr("3")),
+            ".",
+            ",",
+            false,
+            false,
+            PROV);
+
+    var ergebnis = BefehlAnwender.anwenden(gesetz(), List.of(befehl));
+
+    assertThat(ergebnis.protokoll().get(0).status()).isEqualTo(Status.ANGEWANDT);
+    assertThat(absatzText(ergebnis.neu(), "§ 1", 1))
+        .contains("3. die Ausgabe von Synopsen,")
+        .doesNotContain("3, die Ausgabe");
+  }
+
   @Test
   void wendetJeweilsErsetzungAufAlleVorkommenAn() {
     var befehl =

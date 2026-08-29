@@ -1,0 +1,85 @@
+Änderungsgesetz:
+- Gesetz Nr. 2211 zur Änderung des Gesetzes über den Saarlandpakt vom
+  24. Juni 2026, verkündet am 13. August 2026 (Amtsbl. des Saarlandes
+  Teil I Nr. 31 S. 756), in Kraft mit Wirkung vom 1. Januar 2026
+  (ABl-2026-31_Saarlandpakt-AendG.pdf)
+- Das Gesetz ändert zwei Stammwerke: Artikel 1 das Gesetz über den
+  Saarlandpakt (SPaktG), Artikel 2 die Verordnung zur Ausführung des
+  Gesetzes über den Saarlandpakt (AusfSPaktGVO). Artikel 3 regelt das
+  Inkrafttreten. Beide Werke sind deshalb als eigene Aufträge geführt.
+
+Bezugsweg des Heftes:
+- Das Verkündungsportal des Saarlandes (amtsblatt.saarland.de) ist —
+  anders als die Landesrechtsportale — kein juris-Einseitenprogramm,
+  sondern gewöhnliches, skriptlesbares HTML. Das kostenlose Amtsblatt
+  reicht zurück bis zur Ausgabe 48 vom 3. Dezember 2009.
+- Die fünf jüngsten Hefte hängen an der Startseite:
+  /jportal/portal/page/fpverksl.psml?nid=VB-SL-ABlI<Jahr><Seite>-G&cmsuri=…
+  Das PDF liegt darunter unter /jportal/docs/news_anlage/sl/pdf/VerkBl/ABl/
+  ads_<Nr>-<Jahr>_teil_I_signed.pdf.
+- Ältere Hefte tragen denselben Dateinamen, aber den Pfad
+  /jportal/docs/anlage/… und verlangen die Sitzungskennung, die die
+  Dokumentseite mitgibt (…pdf;jsessionid=…). Die Dokumentkennung ist
+  VB-SL-ABlI<Jahr><erste Seite des Heftes>; zu einer Fundstelle findet
+  man das Heft, indem man von der Seitenzahl abwärts zählt, bis eine
+  Dokumentseite antwortet.
+
+Stammfassungen:
+- SPaktG-neu.txt — Gesetz über den Saarlandpakt (SPaktG), Gesamtausgabe
+  vom 29. August 2026 (Stand: § 8a neu eingefügt durch Artikel 1 des
+  Gesetzes vom 24. Juni 2026), 20 Normen.
+- AusfSPaktGVO-neu.txt — Verordnung zur Ausführung des Gesetzes über
+  den Saarlandpakt (AusfSPaktGVO), Gesamtausgabe vom 29. August 2026,
+  10 Normen. Die Anlage zu § 2 (Tabelle der maßgeblichen strukturellen
+  Liquiditätskredite je Gemeinde) ist nicht mitgeführt; sie wird von
+  keinem Befehl berührt.
+- Bezugsweg: recht.saarland.de (juris-Kennung bssl), Dokumentkennungen
+  jlr-NNLSL00009E79 (SPaktG) und jlr-NNLSL00009E78 (AusfSPaktGVO).
+  Das Portal ist eine Einseitenanwendung; Skripten gibt es nur die
+  5,4-kB-Hülle, einem Browser den Volltext. Eine Fassungsliste führt es
+  nicht — nur „Aktuelle Gesamtausgabe“ und „Änderungshistorie“; die
+  Adressform …@JJJJMMTT wird abgewiesen. Vorfassungen sind daher nicht
+  unmittelbar zu beschaffen.
+
+Vorfassungen (SPaktG-alt.txt, AusfSPaktGVO-alt.txt):
+- Die Änderungshistorie des Portals weist für 2026 je genau eine
+  Änderung aus: beim SPaktG „§ 8a neu eingefügt“, bei der Verordnung
+  „zuletzt geändert durch Artikel 2 des Gesetzes vom 24. Juni 2026“
+  (§ 6 Absatz 4). Die Vorfassung ist daher die Gesamtausgabe ohne den
+  § 8a bzw. ohne den § 6 Absatz 4.
+- Gegenprobe aus den Gesetzblättern: Die Ursprungsfassung des SPaktG
+  (Artikel 1 des Gesetzes Nr. 1977 vom 30. Oktober 2019, Amtsbl. I
+  S. 1033, ads_47-2019) wurde mit den beiden zwischenzeitlichen
+  Änderungen fortgeschrieben — Artikel 2 des Gesetzes vom 11. November
+  2020 (Amtsbl. I S. 1339, ads_77-2020) und Artikel 4 des Gesetzes vom
+  4. Dezember 2024 (Amtsbl. I S. 1086, ads_49-2024). Der Unterschied
+  zwischen dieser Ursprungsfassung und der heutigen Gesamtausgabe ist
+  genau: § 7 Satz 1 Nummer 1 aufgehoben nebst Umnummerierung, § 11
+  Absatz 3 Sätze 2 bis 4 aufgehoben, § 14 Absatz 2 Satz 1 „Juli“ →
+  „Dezember“, § 14 Absatz 3 Satz 1 Nummer 1 aufgehoben nebst
+  Umnummerierung — und der neue § 8a. Damit ist die abgeleitete
+  Vorfassung Norm für Norm belegt.
+- Bei dieser Gegenprobe blieben drei Befehle des Heftes von 2024 stehen
+  und sind als Grenzen benannt: die Anfügung an die Überschrift des
+  Werkes selbst („In der Überschrift wird nach dem Wort „Saarlandpakt“
+  das Wort „(SPaktG)“ angefügt“), die an eine Nummer angefügte weitere
+  Nummer, die ans Ende des Absatzes statt hinter die genannte Nummer
+  tritt, und der Verbund aus Bereichsumnummerierung und Wortstreichung
+  („Die bisherigen Nummern 2 bis 8 werden die Nummern 1 bis 7 und in
+  der neuen Nummer 7 wird das Komma gestrichen“).
+
+Aufbereitung zum kanonischen Klartext:
+1. Volltext der Gesamtausgabe aus dem Browser (div.docLayoutText).
+2. Die Portalzutaten entfernt: „zur Einzelansicht …“, das nichtamtliche
+   Inhaltsverzeichnis, die Fußnotenblöcke und die Fußnotenzeichen.
+3. Normkopf und Titel auf eine Zeile mit doppeltem Leerzeichen
+   („§ 8a  Entlastungen in den Jahren 2026 und 2027“), ebenso die
+   Abschnittsüberschriften.
+4. Aufzählungsmarke und Text auf eine Zeile („1. die Gewerbesteuer,“).
+5. Kopfzeilen: Langtitel, Kurzbezeichnung in Klammern, Ausfertigungs-
+   datum, Fundstelle.
+
+Rechtsstellung:
+- Amtliche Werke im Sinne des § 5 UrhG; wiedergegeben werden einzelne
+  Vorschriften zu Prüfzwecken, kein Massenabzug, keine Anmeldeschranke
+  umgangen. Die Quellenangabe folgt § 63 UrhG.

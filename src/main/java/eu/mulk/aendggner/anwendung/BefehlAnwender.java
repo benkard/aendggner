@@ -2629,7 +2629,33 @@ public final class BefehlAnwender {
   // wieder angehängt (ihre eigene Aufhebung läuft über FussnotenAufhebung).
   private static final Pattern FUSSNOTEN_DEFINITION = Pattern.compile("(?m)^[⁰¹²³⁴⁵⁶⁷⁸⁹]+\\)");
 
-  private static TextOperation ohneFussnoten(TextOperation operation) {
+  /**
+   * Die Aufzählungsmarke am Anfang einer Einheit („8. “, „a) “) ist deren Kennzeichnung und nicht
+   * ihr Wortlaut. Wer „in Nummer 8 den Punkt durch ein Komma ersetzt“, meint den Schlusspunkt des
+   * Gliedes und nicht den Punkt der Marke; ohne diese Schranke stünde der Punkt zweimal da und der
+   * Befehl bliebe als mehrdeutig liegen (Amtsbl. des Saarlandes 2020 S. 1339, Artikel 2 Nummer 1).
+   * Die Absatzbezeichnung „(1)“ bleibt unangetastet — sie ist anderswo eigens geregelt.
+   */
+  private static TextOperation ohneAufzaehlungsmarke(TextOperation operation) {
+    return text -> {
+      var m = AUFZAEHLUNGSMARKE.matcher(text);
+      if (!m.lookingAt()) {
+        return operation.wende(text);
+      }
+      int grenze = m.end();
+      var ergebnis = operation.wende(text.substring(grenze));
+      if (ergebnis.fehler() != null) {
+        return ergebnis;
+      }
+      return TextErgebnis.ok(text.substring(0, grenze) + ergebnis.text());
+    };
+  }
+
+  private static final Pattern AUFZAEHLUNGSMARKE =
+      Pattern.compile("\\s*(?:\\d+[a-z]?\\.|[a-z]{1,3}\\))[ \\t]+");
+
+  private static TextOperation ohneFussnoten(TextOperation rohOperation) {
+    var operation = ohneAufzaehlungsmarke(rohOperation);
     return text -> {
       var m = FUSSNOTEN_DEFINITION.matcher(text);
       if (!m.find()) {

@@ -42,6 +42,14 @@ final class GliederungsScanner {
   private static final Pattern DREIFACHBUCHSTABE_MARKER =
       Pattern.compile("^(([a-z])\\2\\2\\d*)\\)\\s+(.*)$");
 
+  // Sachsen-Anhalt gliedert seine Änderungsbefehle mit Punkt statt Klammer und setzt darunter
+  // kleine römische Zahlen: „1.“ / „a.“ / „i.“ (Ltg-Drs. 8/6357). Beide Formen sind mit den
+  // Klammerformen wesensgleich; nur das Satzzeichen unterscheidet sie.
+  private static final Pattern BUCHSTABE_PUNKT_MARKER =
+      Pattern.compile("^([a-z]{1,4}\\d*)\\.\\s+(.*)$");
+  private static final Pattern ROEMISCH =
+      Pattern.compile("i|ii|iii|iv|v|vi|vii|viii|ix|x|xi|xii|xiii|xiv|xv");
+
   private GliederungsScanner() {}
 
   static ScanErgebnis scanne(List<String> zeilen) {
@@ -51,7 +59,7 @@ final class GliederungsScanner {
 
     for (var zeile : zeilen) {
       var gestutzt = zeile.strip();
-      var marker = erkenneMarker(gestutzt);
+      var marker = erkenneMarker(gestutzt, stapel);
 
       if (marker != null && istAkzeptabel(marker, stapel)) {
         // Tiefere offene Ebenen schließen.
@@ -79,7 +87,7 @@ final class GliederungsScanner {
 
   private record Marker(String label, int ebene, String rest) {}
 
-  private static Marker erkenneMarker(String zeile) {
+  private static Marker erkenneMarker(String zeile, ArrayDeque<MutablerPunkt> stapel) {
     var dezimal = DEZIMAL_MARKER.matcher(zeile);
     if (dezimal.matches()) {
       var label = dezimal.group(1);
@@ -101,7 +109,46 @@ final class GliederungsScanner {
     if (nummer.matches()) {
       return new Marker(nummer.group(1), 1, nummer.group(2));
     }
+    var buchstabePunkt = BUCHSTABE_PUNKT_MARKER.matcher(zeile);
+    if (buchstabePunkt.matches()) {
+      var label = buchstabePunkt.group(1);
+      // Mehrbuchstabige Marken mit Punkt gibt es nur als römische Zahl; „vgl.“ und dergleichen
+      // sind keine Gliederung.
+      if (label.length() > 1 && !ROEMISCH.matcher(label).matches()) {
+        return null;
+      }
+      return new Marker(label, istRoemisch(label, stapel) ? 3 : 2, buchstabePunkt.group(2));
+    }
     return null;
+  }
+
+  /**
+   * „i.“ ist als Buchstabe die neunte und als römische Zahl die erste Marke. Entschieden wird aus
+   * dem Stand der Gliederung: Ist eine dritte Ebene mit römischer Zählung offen und passt das Label
+   * als deren Nachfolger, so ist es römisch; sonst eröffnet allein „i.“ unter einer offenen zweiten
+   * Ebene die dritte. In jedem anderen Fall bleibt es ein Buchstabe.
+   */
+  private static boolean istRoemisch(String label, ArrayDeque<MutablerPunkt> stapel) {
+    if (!ROEMISCH.matcher(label).matches()) {
+      return false;
+    }
+    for (var offen : stapel) {
+      if (offen.ebene == 3 && ROEMISCH.matcher(offen.label).matches()) {
+        return istRoemischerNachfolger(offen.label, label);
+      }
+    }
+    return label.equals("i") && !stapel.isEmpty() && stapel.peekLast().ebene == 2;
+  }
+
+  private static final List<String> ROEMISCHE_FOLGE =
+      List.of(
+          "i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x", "xi", "xii", "xiii", "xiv",
+          "xv");
+
+  private static boolean istRoemischerNachfolger(String vorher, String nachher) {
+    int v = ROEMISCHE_FOLGE.indexOf(vorher);
+    int n = ROEMISCHE_FOLGE.indexOf(nachher);
+    return v >= 0 && n == v + 1;
   }
 
   private static boolean istAkzeptabel(Marker marker, ArrayDeque<MutablerPunkt> stapel) {
@@ -130,7 +177,7 @@ final class GliederungsScanner {
     return switch (marker.ebene) {
       case 1 -> marker.label.equals("1");
       case 2 -> marker.label.equals("a");
-      case 3 -> marker.label.equals("aa");
+      case 3 -> marker.label.equals("aa") || marker.label.equals("i");
       case 4 -> marker.label.equals("aaa");
       default -> false;
     };
@@ -161,6 +208,9 @@ final class GliederungsScanner {
               && (vorherSuffix.isEmpty()
                   ? nachherSuffix.equals("a")
                   : nachherSuffix.charAt(0) == vorherSuffix.charAt(0) + 1));
+    }
+    if (istRoemischerNachfolger(vorher, nachher)) {
+      return true;
     }
     if (vorher.matches("[a-z]+\\d*") && nachher.matches("[a-z]+\\d*")) {
       var vorherBasis = vorher.replaceAll("\\d+$", "");

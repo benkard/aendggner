@@ -156,6 +156,34 @@ Halbsatz-Anfügung („durch einen *Strichpunkt* ersetzt und folgender Halbsatz 
 *Einleitung*" als Ziel, und die Verweisung auf einen anderen Punkt („entsprechend der vorstehenden
 Nummer 8 Buchst. a").
 
+|Saarland
+|`Saarland/ABl-2026-31_Saarlandpakt-AendG.pdf` — Amtsbl. des Saarlandes Teil I Nr. 31 vom
+13.08.2026 (Gesetz Nr. 2211 zur Änderung des Gesetzes über den Saarlandpakt)
+|Voller Belegfall, und zwar für *zwei* Stammwerke aus einem Heft: Artikel 1 das Gesetz (SPaktG,
+19 → 20 Normen, 19 davon zeichengenau), Artikel 2 die Verordnung zu seiner Ausführung
+(AusfSPaktGVO, 10/10). Das Portal führt keine Fassungsliste; die Vorfassung ist der
+*Änderungshistorie* entnommen — sie weist für 2026 je genau eine Änderung aus — und aus den
+Gesetzblättern von 2019, 2020 und 2024 gegengeprüft. Das Amtsblatt selbst ist frei und
+skriptlesbar (`amtsblatt.saarland.de`, kein Einseitenprogramm), zurück bis Ausgabe 48/2009.
+Drei allgemeine Funde: der *Kolumnentitel* des Amtsblattes im Inhaltsstrom, die *Artikelwahl bei
+Ausführungsverordnungen* (die Genitiv-Streichung darf nicht greifen, wenn das Ziel selbst eine
+solche Verordnung ist) und die *Wortfuge am markerlosen Umbruch* (Wortbestand ohne die
+zeilenletzten Wörter). Offen bleibt der Kopf von weniger als vier Zeichen, der von einer Vorsilbe
+nicht zu unterscheiden ist — daran hängt die eine Abweichung in § 8a.
+
+|Sachsen-Anhalt
+|`SachsenAnhalt/Ltg-Drs-8-6357_Fischereigesetz-AendG-Entwurf.pdf` — Landtag von Sachsen-Anhalt,
+Drs. 8/6357 vom 11.12.2025 (Entwurf eines Zweiten Gesetzes zur Änderung des Fischereigesetzes)
+|Nur bis zur *Befehlserkennung* belegt (14 Befehle), und zwar doppelt begründet: Das Portal führt
+keine Vorfassung, und das GVBl. LSA ist überhaupt nicht frei — abrufbar sind nur die
+Inhaltsverzeichnisse der letzten Hefte. Frei ist die Parlamentsdokumentation
+(`padoka.landtag.sachsen-anhalt.de`), weshalb hier die *Drucksache* das Änderungsdokument ist.
+Fund: die *Buchstabengliederung mit Punkt* („a.“) und die *kleinen römischen Zahlen* („i.“, „ii.“)
+als dritte Ebene; „i.“ ist zweideutig und wird aus dem Stand der Gliederung entschieden. Dazu die
+Nebenform „erhält die Fassung“ und der wahlfreie Doppelpunkt vor dem Zitat. Offen: die auslassende
+Anfügung („Als Abs. 2 neu angefügt: …“) und, an der Vorlage, das fehlende Verb in „In § 31 Abs. 2
+wie folgt geändert:“.
+
 |Thüringen
 |`Thueringen/GVBl-TH-2026-02_KiGaFinanzVO-AendVO-ua.pdf` — GVBl. Freistaat Thüringen Nr. 2 vom
 13.02.2026 (u. a. Vierte Verordnung zur Änderung der Thüringer Kindergartenfinanzierungs-
@@ -350,10 +378,18 @@ Klartext-Zweig des Loaders normalisiert zur Sicherheit mit.
 * *Vorfassungen bei knapp gehaltenen juris-Portalen* — Rheinland-Pfalz, Saarland und
   Sachsen-Anhalt führen nur die aktuelle Gesamtausgabe nebst einer Aufzählung der Änderungen; die
   Schaltfläche „Gesamtausgaben-Liste", über die Hessen, Schleswig-Holstein, Berlin und
-  Baden-Württemberg jede Fassung datierbar ausgeben, fehlt dort. Ohne Vorfassung ist kein
-  Akzeptanzfall möglich, sondern nur die Prüfung bis zur Befehlserkennung. Ein Ausweg wäre, die
-  Vorfassung aus den *Einzelnormen* mit ihren Stichtagen zusammenzusetzen.
-* Saarland und Sachsen-Anhalt: noch nicht erfasst.
+  Baden-Württemberg jede Fassung datierbar ausgeben, fehlt dort. Für das Saarland hilft seit
+  Welle 27 die *Änderungshistorie* aus: Weist sie für das fragliche Jahr genau eine Änderung aus,
+  so ist die Vorfassung die Gesamtausgabe ohne diese eine — gegengeprüft an den Gesetzblättern.
+  Für Rheinland-Pfalz und Sachsen-Anhalt hat sich kein solcher Fall gefunden; dort bleibt es bei
+  der Prüfung bis zur Befehlserkennung. Ein weiterer Ausweg wäre, die Vorfassung aus den
+  *Einzelnormen* mit ihren Stichtagen zusammenzusetzen.
+* *Die kurze Wortfuge* — ein Kopf von weniger als vier Zeichen vor einem markerlosen Umbruch ist
+  von einer Vorsilbe nicht zu unterscheiden („aus" + „geschlossen" gegen „zu" + „ergreifen"). Ein
+  Wörterbuch fehlt, der Wortbestand des Dokuments trägt hier nicht, und geraten wird nicht.
+* *Zwei Befehlsformen Sachsen-Anhalts* — die auslassende Anfügung („Als Abs. 2 neu angefügt: …")
+  und, aus dem saarländischen Heft von 2024, die Anfügung an die Überschrift des Werkes selbst
+  sowie der Verbund aus Bereichsumnummerierung und Wortstreichung.
 
 == Wo weitermachen
 
@@ -364,8 +400,9 @@ gegen die amtliche Fassung, und `--neufassung` gibt die errechnete Fassung als k
 Klartext aus. Ein weiteres Land kostet damit Stammfassung, Heft und Nachfassung — keinen eigenen
 Prüfcode mehr. Nach absteigendem Nutzen:
 
-. *Weitere Länder erfassen* — Saarland und Sachsen-Anhalt (Bremen und Mecklenburg-Vorpommern sind
-  seit Welle 25 erfasst). Die Beschaffungswege sind für alle geprüft (26./27.08.2026):
+. *Weitere Länder erfassen* — **erledigt in Welle 27**: Mit dem Saarland und Sachsen-Anhalt ist
+  der Länderkreis geschlossen; alle sechzehn Länder sind erfasst. Die Beschaffungswege im
+  einzelnen:
 +
 --
 Mecklenburg-Vorpommern:: *Gegangen* (Welle 25). Das Gesetzblatt liegt vollständig und
@@ -389,9 +426,22 @@ Fassungen“ (`…&template=20_gp_ifg_meta_fassungen_d`) und „Änderungshistor
 `gesetzblatt.bremen.de/fastmedia/218/<JJJJ_MM_TT>_GBl_Nr_<NNNN>_signed.pdf`, die Heftliste
 (`gesetzblatt.bremen.de/?skip=<N>&max=100`) nennt zu jedem den geänderten Gegenstand. Siehe
 `Bremen/SOURCES`.
-Saarland und Sachsen-Anhalt:: unverändert ohne Vorfassungen (siehe „Noch offen“); dort bleibt es
-bei der Prüfung bis zur Befehlserkennung, es sei denn, die Einzelnormen mit ihren Stichtagen
-tragen.
+Saarland:: *Gegangen* (Welle 27). Das Verkündungsportal `amtsblatt.saarland.de` ist ein
+gewöhnliches, skriptlesbares jportal; die fünf jüngsten Hefte hängen an der Startseite
+(`/jportal/docs/news_anlage/sl/pdf/VerkBl/ABl/ads_<Nr>-<Jahr>_teil_I_signed.pdf`), die älteren
+liegen unter `/jportal/docs/anlage/…` und verlangen die Sitzungskennung, die die Dokumentseite
+mitgibt. Die Dokumentkennung ist `VB-SL-ABlI<Jahr><erste Seite des Heftes>`; zu einer Fundstelle
+findet man das Heft, indem man von der Seitenzahl abwärts zählt. Das Landesrechtsportal
+`recht.saarland.de` (`bssl`) bleibt eine Einseitenanwendung ohne Fassungsliste — die Vorfassung
+kommt aus der Änderungshistorie. Siehe `Saarland/SOURCES`.
+Sachsen-Anhalt:: *Gegangen* (Welle 27), aber nur bis zur Befehlserkennung. Das GVBl. LSA ist nicht
+frei: `landesrecht-sachsen-anhalt.info/down/aletztg.pdf` gibt allein die Inhaltsverzeichnisse der
+letzten vierunddreißig Hefte aus, und der Wirt verlangt dafür eine Browserkennung (sonst 403). Das
+Änderungsdokument ist deshalb die Drucksache des Landtags:
+`padoka.landtag.sachsen-anhalt.de/files/drs/wp<WP>/drs/d<Nummer><Kürzel>.pdf`, gefunden über
+`/portal/browse.tt.html` (die Suchmaske lädt ihre Ergebnisse verzögert nach). Das
+Landesrechtsportal `landesrecht.sachsen-anhalt.de` (`bsst`) führt gleichfalls keine
+Fassungsliste. Siehe `SachsenAnhalt/SOURCES`.
 --
 
 *Erledigt in Welle 23:* Die Frage nach den _Anlagen-Nummern im gii-XML_ war falsch gestellt. Eine

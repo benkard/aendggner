@@ -335,6 +335,16 @@ public final class TextBereiniger {
           "[ \\t]*\\d{1,4}[ \\t]+Gesetz- und Verordnungsblatt für Mecklenburg-Vorpommern"
               + " \\d{4}[ \\t]+Nr\\. \\d+[ \\t]*");
 
+  // Amtsbl. des Saarlandes: Der Kolumnentitel („Amtsblatt des Saarlandes Teil I vom 13. August
+  // 2026756“) steht im Inhaltsstrom und klebt an der Seitenzahl — mal ohne, mal mit Zwischenraum,
+  // und die Zahl steht ebenso gut davor wie dahinter. Er zerschnitte sonst den Befehlstext und das
+  // Zitat der eingefügten Vorschrift. Die Wendung „im Amtsblatt des Saarlandes bekannt gemacht“
+  // bleibt unberührt, weil das Muster „Teil I vom <Datum>“ verlangt.
+  private static final Pattern ABL_SL_KOPF =
+      Pattern.compile(
+          "[ \\t]*\\d{0,4}[ \\t]*Amtsblatt des Saarlandes Teil I{1,2} vom"
+              + " \\d{1,2}\\. \\p{L}+ \\d{4}[ \\t]*\\d{0,4}[ \\t]*");
+
   // Die Blattzählung des GBl. BW („Seite 2 von 7“) steht im Inhaltsstrom mitunter für sich allein,
   // getrennt vom übrigen Seitenfuß, und zwar zwischen zwei Gliederungspunkten — sie hinge sonst dem
   // vorangehenden Befehl an und machte ihn unkenntlich.
@@ -393,6 +403,7 @@ public final class TextBereiniger {
     text = GBL_HB_KOPF.matcher(text).replaceAll("\n");
     text = GVOBL_MV_KOPF.matcher(text).replaceAll("\n");
     text = GVOBL_MV_FUSS.matcher(text).replaceAll("\n");
+    text = ABL_SL_KOPF.matcher(text).replaceAll("\n");
     var zeilen = entferneKolumnentitel(zerlegeInZeilen(text));
     var verbunden = verbindeUmbrueche(zeilen);
     // Falsch-positive markerlose Zusammenzüge („durch“ + „die“ → „durchdie“) reparieren — die
@@ -616,6 +627,7 @@ public final class TextBereiniger {
     // Der Wortbestand des ganzen Dokuments entscheidet über Trennstriche vor Großbuchstaben
     // (siehe #warTrennung).
     var wortbestand = wortbestand(zeilen);
+    var ganzeWoerter = wortbestandOhneZeilenende(zeilen);
     // Markerlose Trennungen sind nur erkennbar, wenn die Quelle die Trailing-Space-Konvention
     // verwendet (PDF-Extraktion). Handgeschriebene Klartextdateien haben keine Trailing-Spaces —
     // dort würde die Heuristik reguläre Umbrüche verschmelzen, also bleibt sie aus.
@@ -678,7 +690,15 @@ public final class TextBereiniger {
           }
         } else {
           if (Character.isLowerCase(erstesZeichen) && !KONJUNKTION.matcher(naechste).matches()) {
-            zeile = zeile + naechste;
+            // Der markerlose Umbruch meint im Regelfall eine Trennung ohne Strich; im engen
+            // Zweispaltensatz des Amtsbl. des Saarlandes verliert der Auszug aber auch an einer
+            // echten Wortfuge den Zwischenraum („zusätzlich“ + „jahresbezogene“). Wieder
+            // entscheidet der Wortbestand des Dokuments: Steht das Wort vor dem Umbruch anderswo
+            // für sich, das Zusammengezogene dagegen nirgends, so war es eine Fuge.
+            zeile =
+                warFuge(zeile, naechste, wortbestand, ganzeWoerter)
+                    ? zeile + " " + naechste
+                    : zeile + naechste;
           } else {
             break;
           }
@@ -695,6 +715,25 @@ public final class TextBereiniger {
    * Sammelt die Wörter des Dokuments (ohne Satzzeichen), um Trennstriche vor Großbuchstaben zu
    * beurteilen.
    */
+  /**
+   * Der Wortbestand ohne die zeilenletzten Wörter. Ein durch den Umbruch abgerissenes Bruchstück
+   * („Schwel“ von „Schwellenwertes“) steht immer am Zeilenende; ein wirkliches Wort steht irgendwo
+   * auch mitten in einer Zeile. Nur dieser Bestand taugt darum als Beweis dafür, dass vor dem
+   * Umbruch ein ganzes Wort stand (siehe {@link #warFuge}).
+   */
+  private static java.util.Set<String> wortbestandOhneZeilenende(List<Zeile> zeilen) {
+    var woerter = new java.util.HashSet<String>();
+    for (var zeile : zeilen) {
+      var teile = WORTGRENZE.split(zeile.text().stripTrailing());
+      for (int i = 0; i + 1 < teile.length; i++) {
+        if (!teile[i].isEmpty()) {
+          woerter.add(teile[i]);
+        }
+      }
+    }
+    return woerter;
+  }
+
   private static java.util.Set<String> wortbestand(List<Zeile> zeilen) {
     var woerter = new java.util.HashSet<String>();
     for (var zeile : zeilen) {
@@ -714,6 +753,9 @@ public final class TextBereiniger {
     }
     return woerter;
   }
+
+  /** Kürzere Köpfe vor einem markerlosen Umbruch gelten nicht als eigenes Wort (Vorsilben). */
+  private static final int MINDESTLAENGE_FUGENKOPF = 4;
 
   private static final Pattern WORTGRENZE = Pattern.compile("[^\\p{L}\\p{N}.-]+");
 
@@ -737,6 +779,36 @@ public final class TextBereiniger {
       return false;
     }
     return wortbestand.contains(kopf + rumpf);
+  }
+
+  /**
+   * War der markerlose Umbruch eine Wortfuge statt einer Trennung? Beweis ist wieder der
+   * Wortbestand: Das Wort vor dem Umbruch kommt anderswo für sich vor, die zusammengezogene Form
+   * dagegen nicht. Fehlt einer der beiden Belege, bleibt es beim bisherigen Zusammenziehen —
+   * geraten wird nicht.
+   */
+  private static boolean warFuge(
+      String zeile,
+      String naechste,
+      java.util.Set<String> wortbestand,
+      java.util.Set<String> ganzeWoerter) {
+    int anfang = zeile.length();
+    while (anfang > 0 && Character.isLetterOrDigit(zeile.charAt(anfang - 1))) {
+      anfang--;
+    }
+    var kopf = zeile.substring(anfang);
+    if (kopf.isEmpty()) {
+      return false;
+    }
+    var rumpf = WORTGRENZE.split(naechste, 2)[0];
+    if (rumpf.isEmpty()) {
+      return false;
+    }
+    // Kurze Köpfe sind die deutschen Vorsilben („aus“ + „geschlossen“, „zu“ + „ergreifen“); ob
+    // sie ein eigenes Wort oder die erste Silbe sind, sagt kein Bestand — geraten wird nicht.
+    return kopf.length() >= MINDESTLAENGE_FUGENKOPF
+        && ganzeWoerter.contains(kopf)
+        && !wortbestand.contains(kopf + rumpf);
   }
 
   private static boolean endetMitSilbentrennung(String gestutzteZeile) {

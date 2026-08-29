@@ -26,8 +26,9 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 ════════════════════════════════════════════════════════════════════════════════
 
 Der Vordruck weist fortan aus, welchen Standes er ist, und nennt neben der
-bisherigen Bezugsquelle eine zweite. Beides betrifft allein die statischen Seiten
-der Browserfassung; an der Auswertung ändert sich nichts.
+bisherigen Bezugsquelle eine zweite (Artikel 1 bis 3). Ferner schließt sich der
+Länderkreis: Mit dem Saarland und mit Sachsen-Anhalt sind alle sechzehn Länder
+erfaßt (Artikel 4 und 5).
 
 
 Artikel 1
@@ -90,6 +91,91 @@ Die Prüfung geht auf: „sh -n“ beanstandet nichts; ein Trockenlauf auf einer
 der Seiten setzt „28. August 2026“ ein, was dem Stand von HEAD entspricht; wird die
 Marke entfernt, bricht das Skript mit der vorgesehenen Meldung ab (Rückgabe 1);
 „reuse lint“ weist 214 von 214 Dateien als vollständig ausgezeichnet aus.
+
+
+Artikel 4
+Der Länderkreis schließt sich
+
+Mit dem Saarland und mit Sachsen-Anhalt sind nunmehr alle sechzehn Länder erfaßt.
+Beide Landesrechtsportale führen keine Fassungsliste; für das Saarland hilft die
+Änderungshistorie aus, für Sachsen-Anhalt bleibt es beim rheinland-pfälzischen
+Weg.
+
+(1) Saarland (sampledata/Saarland/). Beigelegt sind das Gesetz Nr. 2211 zur
+    Änderung des Gesetzes über den Saarlandpakt (Amtsbl. I 2026 Nr. 31 S. 756)
+    sowie Vor- und Nachfassung beider Stammwerke — des Gesetzes (SPaktG) und der
+    Verordnung zu seiner Ausführung (AusfSPaktGVO). Ein Heft, zwei Stammwerke, je
+    ein Auftrag.
+
+(2) Die Vorfassungen sind der Änderungshistorie des Portals entnommen, die für das
+    Jahr 2026 je genau eine Änderung ausweist, und aus den Gesetzblättern von 2019,
+    2020 und 2024 Norm für Norm gegengeprüft: Die Ursprungsfassung nebst den beiden
+    zwischenzeitlichen Änderungen ergibt genau die heutige Gesamtausgabe. Das
+    Nähere liegt in Saarland/SOURCES nieder.
+
+(3) Sachsen-Anhalt (sampledata/SachsenAnhalt/). Das Gesetz- und Verordnungsblatt
+    des Landes ist nicht frei; abrufbar sind allein die Inhaltsverzeichnisse der
+    letzten Hefte. Das Änderungsdokument ist deshalb die Drucksache 8/6357 des
+    Landtags (Entwurf eines Zweiten Gesetzes zur Änderung des Fischereigesetzes),
+    der Stamm die aktuelle Gesamtausgabe des Fischereigesetzes. Aussagekräftig ist
+    allein die Zahl der erschlossenen Befehle.
+
+(4) Die Auftragsliste (korpus.tsv) erhält die drei Aufträge SL-SPaktG,
+    SL-AusfSPaktGVO und ST-FischG nebst den erläuternden Vorbemerkungen; die
+    Grundlinie ist fortgeschrieben. Das Handbuch (§ 13 Absätze 4b bis 4d) und die
+    Übersicht der Landesrecht-Beispiele sind entsprechend ergänzt.
+
+
+Artikel 5
+Fünf allgemeine Funde aus den beiden Ländern
+
+(1) Der Kolumnentitel des Amtsblattes des Saarlandes steht im Inhaltsstrom und
+    klebt an der Seitenzahl; er wird wie die Kolumnentitel der übrigen Blätter
+    herausgeschnitten (TextBereiniger.ABL_SL_KOPF).
+
+(2) Die Aufzählungsmarke am Anfang einer Einheit ist deren Kennzeichnung und nicht
+    ihr Wortlaut. Wer „in Nummer 8 den Punkt durch ein Komma ersetzt“, meint den
+    Schlußpunkt und nicht den Punkt der Marke; bislang stand der Punkt zweimal da
+    und der Befehl blieb als mehrdeutig liegen. Die Textoperationen sehen die Marke
+    nicht mehr (BefehlAnwender.ohneAufzaehlungsmarke). Die Absatzbezeichnung „(1)“
+    bleibt unangetastet; sie ist anderswo geregelt.
+
+(3) Die Artikelwahl streicht aus dem Vorspann die Wendung „zur Ausführung des
+    X-Gesetzes“, damit ein Ausführungstitel nicht für das Stammgesetz gehalten
+    wird. Ist das Ziel aber selbst eine solche Verordnung, so stünde nach dem
+    Streichen gerade ihr eigener Name nicht mehr da, und kein Artikel würde
+    gewählt. Die Streichung unterbleibt daher in diesem Fall
+    (AenderungsgesetzParser.betrifft).
+
+(4) Die Wortfuge am markerlosen Umbruch. Im engen Zweispaltensatz verliert der
+    Auszug auch an einer echten Wortgrenze den Zwischenraum („zusätzlich“ +
+    „jahresbezogene“). Entschieden wird das wie beim Trennstrich am Wortbestand des
+    Dokuments — und zwar an demjenigen ohne die zeilenletzten Wörter, denn ein
+    abgerissenes Bruchstück steht immer am Zeilenende, ein wirkliches Wort auch
+    mitten in der Zeile (TextBereiniger.warFuge). Ein Kopf von weniger als vier
+    Zeichen bleibt ausgenommen: Er ist von einer Vorsilbe nicht zu unterscheiden
+    („aus“ + „geschlossen“ gegen „zu“ + „ergreifen“), und geraten wird nicht.
+
+(5) Die Buchstabengliederung mit Punkt („a.“) und die kleinen römischen Zahlen
+    („i.“, „ii.“) treten neben die Klammerformen (GliederungsScanner). „i.“ ist
+    zweideutig — als Buchstabe die neunte, als Zahl die erste Marke — und wird aus
+    dem Stand der Gliederung entschieden. Mehrbuchstabige Marken mit Punkt gibt es
+    nur als römische Zahl; „vgl.“ und dergleichen sind keine Gliederung. Dazu
+    kommen die Nebenform „erhält die Fassung“ und der wahlfreie Doppelpunkt vor dem
+    Zitat (BefehlErkenner).
+
+
+Schlußbestimmung zu den Artikeln 4 und 5
+
+Die vorstehenden Änderungen sind durch die Prüfung sämtlicher Testfälle
+(vierhundertsechsundfünfzig an der Zahl) sowie durch die vollständige Erstellung
+(mvnw verify) bestätigt worden; „reuse lint“ weist 223 von 223 Dateien als
+vollständig ausgezeichnet aus. Der Korpuslauf umfaßt fortan vierunddreißig
+Aufträge mit 1429 Befehlen, davon 1295 angewandt, und 661 von 671 gleichen Normen.
+Nicht selbsttätig verarbeitbar bleiben die auslassende Anfügung („Als Abs. 2 neu
+angefügt“), die Anfügung an die Überschrift des Werkes selbst, der Verbund aus
+Bereichsumnummerierung und Wortstreichung sowie die kurze Wortfuge; sie sind im
+Handbuch und in den Herkunftsnachweisen als Grenzen benannt.
 
 
 ════════════════════════════════════════════════════════════════════════════════

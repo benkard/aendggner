@@ -136,6 +136,33 @@ class TextBereinigerTest {
         .isEqualTo("unterhalb eines Schwellenwertes von 50\nWohnungen.");
   }
 
+  /**
+   * Amtsbl. des Saarlandes: Im engen Zweispaltensatz verliert der Auszug auch an einer echten
+   * Wortfuge den Zwischenraum. Der Wortbestand entscheidet — und zwar derjenige <em>ohne</em> die
+   * zeilenletzten Wörter, denn ein durch den Umbruch abgerissenes Bruchstück steht immer am
+   * Zeilenende.
+   */
+  @Test
+  void setztAnDerWortfugeEinenZwischenraum() {
+    var roh =
+        "Abweichend werden zusätzlich Fehlbeträge in Höhe zugelassen. \n"
+            + "Bei jeder Gemeinde werden in Planung und Ausführung zusätzlich\n"
+            + "jahresbezogene Fehlbeträge in Höhe der Ergebnisse zugelassen. ";
+
+    assertThat(TextBereiniger.bereinige(roh)).contains("zusätzlich jahresbezogene Fehlbeträge");
+  }
+
+  /** Ein Kopf von weniger als vier Zeichen ist von einer Vorsilbe nicht zu unterscheiden. */
+  @Test
+  void laesstKurzeKoepfeAmUmbruchZusammengezogen() {
+    var roh =
+        "Als Gutachterin darf nicht bestellt werden, wer aus \n"
+            + "dem Amt des ehrenamtlichen Richters ist davon aus\n"
+            + "geschlossen und wird deshalb nicht berufen werden. ";
+
+    assertThat(TextBereiniger.bereinige(roh)).contains("ausgeschlossen und wird");
+  }
+
   @Test
   void ziehtOhneTrailingSpaceKonventionKeineMarkerlosenTrennungenZusammen() {
     // Handgeschriebene Klartextdateien: kein Trailing-Space-Signal → kein Join.

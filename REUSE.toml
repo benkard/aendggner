@@ -209,6 +209,19 @@ path = ["src/test/resources/sampledata/RheinlandPfalz/GVBl-2026-21_UKAPOGS-E3-Ae
 SPDX-FileCopyrightText = "Land Rheinland-Pfalz"
 SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
 
+[[annotations]]
+path = ["src/test/resources/sampledata/Saarland/ABl-2026-31_Saarlandpakt-AendG.pdf"]
+SPDX-FileCopyrightText = "Saarland"
+SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
+
+# Sachsen-Anhalt gibt sein Gesetz- und Verordnungsblatt nicht frei aus; das
+# Änderungsdokument ist deshalb die Drucksache des Landtags — gleichfalls ein
+# amtliches Werk (§ 5 Absatz 1 UrhG).
+[[annotations]]
+path = ["src/test/resources/sampledata/SachsenAnhalt/Ltg-Drs-8-6357_Fischereigesetz-AendG-Entwurf.pdf"]
+SPDX-FileCopyrightText = "Landtag von Sachsen-Anhalt"
+SPDX-License-Identifier = "LicenseRef-AmtlichesWerk"
+
 
 # ── 5. Selbst abgeleitete Textfassungen und Herkunftsnachweise ───────────────
 #
@@ -234,6 +247,11 @@ path = [
   "src/test/resources/sampledata/MecklenburgVorpommern/APOAmtsTA-MV-alt.txt",
   "src/test/resources/sampledata/Hamburg/GAusschV-HH-neu.txt",
   "src/test/resources/sampledata/RheinlandPfalz/UKAPOGS-E3-neu.txt",
+  "src/test/resources/sampledata/Saarland/SPaktG-alt.txt",
+  "src/test/resources/sampledata/Saarland/SPaktG-neu.txt",
+  "src/test/resources/sampledata/Saarland/AusfSPaktGVO-alt.txt",
+  "src/test/resources/sampledata/Saarland/AusfSPaktGVO-neu.txt",
+  "src/test/resources/sampledata/SachsenAnhalt/FischG-LSA-neu.txt",
   "src/test/resources/sampledata/Berlin/ASOG-Bln-neu.txt",
   "src/test/resources/sampledata/Berlin/LAF-ErrG-alt.txt",
   "src/test/resources/sampledata/Berlin/LAF-ErrG-neu.txt",
@@ -268,6 +286,8 @@ path = [
   "src/test/resources/sampledata/Hamburg/SOURCES",
   "src/test/resources/sampledata/MecklenburgVorpommern/SOURCES",
   "src/test/resources/sampledata/RheinlandPfalz/SOURCES",
+  "src/test/resources/sampledata/Saarland/SOURCES",
+  "src/test/resources/sampledata/SachsenAnhalt/SOURCES",
   "src/test/resources/sampledata/Hessen/SOURCES",
   "src/test/resources/sampledata/SchleswigHolstein/SOURCES",
   "src/test/resources/sampledata/IfSG/SOURCES",

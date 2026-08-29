@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Ersetzung;
+import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Neufassung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.Sammelbefehl;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.StrukturEinfuegung;
 import eu.mulk.aendggner.aenderung.Aenderungsbefehl.UnbekannterBefehl;
@@ -2310,5 +2311,152 @@ class EndToEndTest {
     assertThat(abgleich.ueberzaehlige()).isEmpty();
     assertThat(abgleich.abweichungen()).isEmpty();
     assertThat(abgleich.gehtAuf()).as(abgleich.kurzbericht()).isTrue();
+  }
+
+  /**
+   * Saarland, Artikel 1: Gesetz Nr. 2211 zur Änderung des Gesetzes über den Saarlandpakt (Amtsbl.
+   * des Saarlandes Teil I Nr. 31 vom 13. August 2026, S. 756). Voller Akzeptanztest — der eine
+   * Befehl wird angewandt, und alle zwanzig Normen stimmen mit der amtlichen Gesamtausgabe überein.
+   *
+   * <p>Das Portal recht.saarland.de führt wie das rheinland-pfälzische keine Fassungsliste. Die
+   * Vorfassung ist deshalb der Änderungshistorie entnommen — sie weist für das Jahr 2026 genau eine
+   * Änderung aus (§ 8a neu eingefügt) — und aus den Gesetzblättern von 2019, 2020 und 2024 Norm für
+   * Norm gegengeprüft; das Nähere sagt {@code Saarland/SOURCES}.
+   *
+   * <p>Neunzehn der zwanzig Normen stimmen zeichengenau; die zwanzigste — der eingefügte § 8a —
+   * weicht an einer Stelle ab („zuergreifen“ statt „zu ergreifen“), weil der Kopf vor dem Umbruch
+   * mit zwei Zeichen zu kurz ist, um ihn von einer Vorsilbe zu unterscheiden.
+   *
+   * <p>Zwei allgemeine Funde stammen aus diesem Heft: der Kolumnentitel des Amtsblattes, der im
+   * Inhaltsstrom steht und an der Seitenzahl klebt, und die <em>Wortfuge am markerlosen
+   * Umbruch</em> — im engen Zweispaltensatz verliert der Auszug an einer echten Wortgrenze den
+   * Zwischenraum („zusätzlich“ + „jahresbezogene“). Entschieden wird das wie beim Trennstrich am
+   * Wortbestand des Dokuments, und zwar an demjenigen ohne die zeilenletzten Wörter: Ein durch den
+   * Umbruch abgerissenes Bruchstück steht immer am Zeilenende, ein wirkliches Wort auch mitten in
+   * der Zeile.
+   */
+  @Test
+  void saarlandpaktGesetzSaarland() throws Exception {
+    var alt = SAMPLEDATA.resolve("Saarland/SPaktG-alt.txt");
+    var pdf = SAMPLEDATA.resolve("Saarland/ABl-2026-31_Saarlandpakt-AendG.pdf");
+    assumeTrue(Files.exists(alt) && Files.exists(pdf), "Saarländische Beispieldaten fehlen");
+
+    var gesetz = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(alt);
+    assertThat(gesetz.jurabk()).isEqualTo("SPaktG");
+    assertThat(gesetz.normen()).hasSize(19);
+
+    var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(pdf));
+    // Der Kolumnentitel ist heraus; ohne ihn steht das Zitat des eingefügten § 8a zusammenhängend
+    // da.
+    assertThat(text).doesNotContain("Amtsblatt des Saarlandes Teil I vom 13. August 2026");
+    // Die Wortfuge am markerlosen Umbruch ist geheilt.
+    assertThat(text).contains("zusätzlich jahresbezogene");
+    assertThat(text).doesNotContain("zusätzlichjahresbezogene");
+
+    var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, null);
+    // Das Heft ändert zwei Werke; für das Gesetz wird allein Artikel 1 gewählt.
+    assertThat(parseErgebnis.artikel()).containsExactly("1");
+    assertThat(parseErgebnis.befehle()).hasSize(1);
+    assertThat(parseErgebnis.befehle()).noneMatch(b -> b instanceof UnbekannterBefehl);
+
+    var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(1);
+    var soll =
+        new eu.mulk.aendggner.gesetz.land.LandesRechtLoader()
+            .load(SAMPLEDATA.resolve("Saarland/SPaktG-neu.txt"));
+    assertThat(soll.normen()).hasSize(20);
+    var abgleich = Nachfassungsabgleich.vergleiche(soll, anwendung.neu());
+    assertThat(abgleich.fehlende()).isEmpty();
+    assertThat(abgleich.ueberzaehlige()).isEmpty();
+    // Neunzehn der zwanzig Normen stimmen zeichengenau; allein der neu eingefügte § 8a weicht ab,
+    // und zwar an einer einzigen Stelle: „zu ergreifen“ steht dort als „zuergreifen“. Der Kopf vor
+    // dem Umbruch ist mit zwei Zeichen zu kurz, um ihn von einer Vorsilbe zu unterscheiden — und
+    // wer „aus“ + „geschlossen“ trennte, machte es schlimmer. Geraten wird nicht.
+    assertThat(abgleich.abweichungen()).hasSize(1);
+    assertThat(abgleich.abweichungen().getFirst().enbez()).isEqualTo("§ 8a");
+
+    var synopse = Pipeline.erzeugeSynopse(Pipeline.Auftrag.von(alt, List.of(pdf)));
+    assertThat(synopse.anzahlAngewandt()).isEqualTo(1);
+  }
+
+  /**
+   * Saarland, Artikel 2 desselben Heftes: die Verordnung zur Ausführung des Gesetzes über den
+   * Saarlandpakt. Ein Heft, zwei Stammwerke — und der Prüfstein für die Artikelwahl.
+   *
+   * <p>Der Fund: Die Artikelwahl streicht aus dem Vorspann die Wendung „zur Ausführung des
+   * <em>X-Gesetzes</em>“, weil ein Ausführungstitel das Stammgesetz nur als Genitiv-Attribut nennt
+   * und ein solcher Artikel nicht das Stammgesetz betrifft (so beim bayerischen AVBayJG). Ist das
+   * Ziel aber selbst eine solche Verordnung, so stand nach dem Streichen gerade ihr eigener Name
+   * nicht mehr da und <em>kein</em> Artikel wurde gewählt. Die Streichung unterbleibt nun, wenn das
+   * Ziel selbst einen Ausführungstitel führt; getroffen wird dann nur, wer den vollen Titel nennt.
+   */
+  @Test
+  void saarlandpaktVerordnungSaarland() throws Exception {
+    var alt = SAMPLEDATA.resolve("Saarland/AusfSPaktGVO-alt.txt");
+    var pdf = SAMPLEDATA.resolve("Saarland/ABl-2026-31_Saarlandpakt-AendG.pdf");
+    assumeTrue(Files.exists(alt) && Files.exists(pdf), "Saarländische Beispieldaten fehlen");
+
+    var verordnung = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(alt);
+    assertThat(verordnung.jurabk()).isEqualTo("AusfSPaktGVO");
+    assertThat(verordnung.normen()).hasSize(10);
+
+    var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(pdf));
+    var parseErgebnis = new AenderungsgesetzParser().parse(text, verordnung, null);
+    assertThat(parseErgebnis.artikel()).containsExactly("2");
+    assertThat(parseErgebnis.befehle()).hasSize(1);
+    assertThat(parseErgebnis.befehle()).noneMatch(b -> b instanceof UnbekannterBefehl);
+
+    pruefeGegenNachfassung(verordnung, parseErgebnis, "Saarland/AusfSPaktGVO-neu.txt");
+  }
+
+  /**
+   * Sachsen-Anhalt: der Entwurf eines Zweiten Gesetzes zur Änderung des Fischereigesetzes (Landtag
+   * von Sachsen-Anhalt, Drucksache 8/6357).
+   *
+   * <p>Wie in Rheinland-Pfalz reicht die Prüfung nur bis zur Befehlserkennung, und aus demselben
+   * Grund: Das Portal landesrecht.sachsen-anhalt.de führt keine Fassungsliste, der Stamm ist
+   * deshalb die <em>Nachfassung</em> (die Vorlage ist am 21. März 2026 Gesetz geworden). Das
+   * Gesetz- und Verordnungsblatt des Landes ist überdies nicht frei; frei ist allein die
+   * Parlamentsdokumentation, weshalb hier die Drucksache das Änderungsdokument ist.
+   *
+   * <p>Der Fund liegt in der Gliederung: Sachsen-Anhalt setzt unter die Nummern nicht „a)“ und
+   * „aa)“, sondern <b>„a.“ und kleine römische Zahlen „i.“, „ii.“</b>. Beide Formen sind den
+   * Klammerformen wesensgleich; nur das Satzzeichen unterscheidet sie. „i.“ ist dabei zweideutig —
+   * als Buchstabe die neunte, als Zahl die erste Marke; entschieden wird es aus dem Stand der
+   * Gliederung. Dazu kommt die Nebenform „erhält die Fassung“ und der wahlfreie Doppelpunkt vor dem
+   * Zitat.
+   *
+   * <p>Nicht erkannt bleiben zwei Formen, und zwar zu Recht: „In § 31 Abs. 2 wie folgt geändert:“ —
+   * dem Satz fehlt das Verb, ein Verkündungsfehler der Vorlage — und die auslassende Anfügung „Als
+   * Abs. 2 neu angefügt: „…““. Geraten wird nicht.
+   */
+  @Test
+  void fischereigesetzSachsenAnhalt() throws Exception {
+    var stamm = SAMPLEDATA.resolve("SachsenAnhalt/FischG-LSA-neu.txt");
+    var pdf = SAMPLEDATA.resolve("SachsenAnhalt/Ltg-Drs-8-6357_Fischereigesetz-AendG-Entwurf.pdf");
+    assumeTrue(Files.exists(stamm) && Files.exists(pdf), "Beispieldaten Sachsen-Anhalts fehlen");
+
+    var gesetz = new eu.mulk.aendggner.gesetz.land.LandesRechtLoader().load(stamm);
+    assertThat(gesetz.jurabk()).isEqualTo("FischG");
+    assertThat(gesetz.normen()).hasSize(59);
+
+    var text = TextBereiniger.bereinige(new PatchTextExtraktor().extrahiere(pdf));
+    var parseErgebnis = new AenderungsgesetzParser().parse(text, gesetz, null);
+    assertThat(parseErgebnis.artikel()).containsExactly("1");
+    assertThat(parseErgebnis.befehle()).hasSize(14);
+
+    // Die Buchstabengliederung mit Punkt und die römische Unterebene sind aufgeschlossen: Nummer 1
+    // trägt fünf Buchstaben, und unter b. und e. stehen je zwei römische Punkte.
+    assertThat(befehlAn(parseErgebnis, "1. b) i)")).isNotNull();
+    assertThat(befehlAn(parseErgebnis, "1. b) ii)")).isNotNull();
+    assertThat(befehlAn(parseErgebnis, "1. e) ii)")).isNotNull();
+
+    // Die Nebenform „erhält die Fassung“ ohne Doppelpunkt wird als Neufassung gelesen.
+    assertThat(befehlAn(parseErgebnis, "1. a)")).isInstanceOf(Neufassung.class);
+
+    // Dass die meisten Befehle ihr Ziel nicht mehr finden, liegt am Stand des Stammes und nicht am
+    // Erzeugnis: Die Vorlage ist bereits Gesetz geworden.
+    var anwendung = BefehlAnwender.anwenden(gesetz, parseErgebnis.befehle());
+    assertThat(anwendung.anzahlAngewandt()).isEqualTo(4);
   }
 }

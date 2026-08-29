@@ -32,6 +32,15 @@ BB-FraktG	Brandenburg/FraktG-alt.txt	Brandenburg/GVBl-I-2026-12_FraktG-AendG.pdf
 HH-GutachterausschussVO	Hamburg/GAusschV-HH-alt.txt	Hamburg/HmbGVBl-2026-17_GutachterausschussVO-AendVO.pdf	-	Hamburg/GAusschV-HH-neu.txt	-
 HB-BerufsfachschulVO	Bremen/AssBerFSchulV-BR-alt.txt	Bremen/BremGBl-2026-87_BerufsfachschulVO-AendVO.pdf	-	Bremen/AssBerFSchulV-BR-neu.txt	-
 MV-APOAmtsTA	MecklenburgVorpommern/APOAmtsTA-MV-alt.txt	MecklenburgVorpommern/GVOBl-MV-2026-21_Besoldungsanpassung-ua.pdf	44	-	-
+# Das Saarland führt gleichfalls keine Fassungsliste; die Vorfassungen sind der
+# Änderungshistorie entnommen und aus den Gesetzblättern von 2019, 2020 und 2024 gegengeprüft
+# (Saarland/SOURCES). Ein Heft, zwei Stammwerke: Artikel 1 das Gesetz, Artikel 2 die Verordnung.
+SL-SPaktG	Saarland/SPaktG-alt.txt	Saarland/ABl-2026-31_Saarlandpakt-AendG.pdf	1	Saarland/SPaktG-neu.txt	-
+SL-AusfSPaktGVO	Saarland/AusfSPaktGVO-alt.txt	Saarland/ABl-2026-31_Saarlandpakt-AendG.pdf	2	Saarland/AusfSPaktGVO-neu.txt	-
+# Sachsen-Anhalt wie Rheinland-Pfalz: keine Vorfassung, der Stamm ist die Nachfassung, und
+# aussagekräftig ist allein die Zahl der erschlossenen Befehle (14). Überdies ist das GVBl. LSA
+# nicht frei; das Änderungsdokument ist deshalb die Drucksache des Landtags.
+ST-FischG	SachsenAnhalt/FischG-LSA-neu.txt	SachsenAnhalt/Ltg-Drs-8-6357_Fischereigesetz-AendG-Entwurf.pdf	-	-	-
 # Rheinland-Pfalz führt keine Vorfassungen; angewandt wird deshalb auf die Nachfassung, und
 # aussagekräftig ist allein die Zahl der erschlossenen Befehle (23). Die liegengebliebenen sind
 # die Folge des falschen Standes, nicht eines Mangels — siehe § 13 Absatz 4 des Handbuchs.

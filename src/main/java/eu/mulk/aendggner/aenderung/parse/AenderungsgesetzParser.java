@@ -417,6 +417,12 @@ public final class AenderungsgesetzParser {
    * nennt. Der Vergleich ist deklinationstolerant („Das Allgemeine Gleichbehandlungsgesetz“ matcht
    * die amtliche Bezeichnung „Allgemeines Gleichbehandlungsgesetz“).
    */
+  private static final Pattern AUSFUEHRUNGS_TITEL =
+      Pattern.compile("\\b(?:zur Ausführung|zur Durchführung|zum Vollzug) des\\b");
+
+  private static final Pattern AUSFUEHRUNGS_TITEL_MIT_GENITIV =
+      Pattern.compile("\\b(?:zur Ausführung|zur Durchführung|zum Vollzug) des [^,()]*");
+
   private static boolean betrifft(
       ArtikelBlock artikel, Gesetz ziel, ZitatExtraktor.Ergebnis zitate) {
     var scan = GliederungsScanner.scanne(artikel.zeilen);
@@ -426,9 +432,14 @@ public final class AenderungsgesetzParser {
     }
     // Ausführungs-/Durchführungstitel nennen das Stammgesetz nur als Genitiv-Attribut („Die
     // Verordnung zur Ausführung des Bayerischen Jagdgesetzes (AVBayJG) … wird wie folgt
-    // geändert“) — solche Nennungen zählen nicht als Treffer.
-    vorspann =
-        vorspann.replaceAll("\\b(?:zur Ausführung|zur Durchführung|zum Vollzug) des [^,()]*", "");
+    // geändert“) — solche Nennungen zählen nicht als Treffer. Ist das Ziel aber selbst eine solche
+    // Verordnung (Verordnung zur Ausführung des Gesetzes über den Saarlandpakt, Amtsbl. I 2026
+    // S. 756 Artikel 2), so stünde nach dem Streichen gerade ihr eigener Name nicht mehr da und
+    // kein Artikel würde gewählt. Dann bleibt der Vorspann unangetastet; getroffen wird nur, wer
+    // den vollen Titel führt.
+    if (ziel.langue() == null || !AUSFUEHRUNGS_TITEL.matcher(ziel.langue()).find()) {
+      vorspann = AUSFUEHRUNGS_TITEL_MIT_GENITIV.matcher(vorspann).replaceAll("");
+    }
     var vorspannStamm = stammForm(vorspann);
     return (ziel.kurzue() != null && vorspannStamm.contains(stammForm(ziel.kurzue())))
         || (ziel.langue() != null && vorspannStamm.contains(stammForm(ziel.langue())))
