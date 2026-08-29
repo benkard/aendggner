@@ -38,10 +38,12 @@ function oeffne(inhalt, art, aufschrift) {
     meldung.append(" · ");
   }
   const verweis = document.createElement("a");
-  verweis.href = URL.createObjectURL(new Blob([inhalt], { type: art }));
+  const url = URL.createObjectURL(new Blob([inhalt], { type: art }));
+  verweis.href = url;
   verweis.target = "_blank";
   verweis.textContent = aufschrift;
   meldung.append(verweis);
+  return url;
 }
 
 formular.addEventListener("submit", async (ereignis) => {
@@ -94,16 +96,14 @@ formular.addEventListener("submit", async (ereignis) => {
       return;
     }
 
-    // Kein window.open: Der Aufruf käme nach dem Warten auf den Worker und gälte dem Browser
-    // nicht mehr als Nutzerhandlung — er würde als Popup blockiert. Stattdessen ein Link, der
-    // sich öffnen und ebenso gut speichern lässt.
     if (nurText) {
       zeige(
         `${ergebnis.text.length.toLocaleString("de-DE")} Zeichen gelesen; ` +
           `keine Synopse erstellt. `,
         "fertig",
       );
-      oeffne(ergebnis.text, "text/plain;charset=utf-8", "Gelesenen Text öffnen");
+      const url = oeffne(ergebnis.text, "text/plain;charset=utf-8", "Gelesenen Text öffnen");
+      window.open(url, "_blank");
       return;
     }
 
@@ -115,7 +115,8 @@ formular.addEventListener("submit", async (ereignis) => {
         (ergebnis.abgleich ? `Abgleich: ${ergebnis.abgleich}. ` : ""),
       "fertig",
     );
-    oeffne(ergebnis.html, "text/html;charset=utf-8", "Synopse öffnen");
+    const url = oeffne(ergebnis.html, "text/html;charset=utf-8", "Synopse öffnen");
+    window.open(url, "_blank");
     if (neufassungGewuenscht) {
       oeffne(
         ergebnis.neufassung,

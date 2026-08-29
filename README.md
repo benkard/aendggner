@@ -27,7 +27,7 @@ java -jar target/aendggner-0.1.0-SNAPSHOT.jar stammgesetz.xml aenderungsgesetz.p
 ```
 
 Ohne Einrichtung läuft dasselbe im Browser unter
-<https://aendggner.app.kellertomaten.de/>; die dort angebotenen zwei
+<https://aendggner.kellertomaten.de/>; die dort angebotenen zwei
 durchgerechneten Beispiele sind der kürzeste Weg zum ersten Ergebnis
 (§ 14).
 
@@ -147,7 +147,7 @@ Im Sinne dieses Handbuchs ist
 ## § 3 Bezugsquellen und Anschriften
 
 (1) Die Browserfassung wird betrieben unter
-<https://aendggner.app.kellertomaten.de/>.
+<https://aendggner.kellertomaten.de/>.
 
 (2) Fortlaufende Quelltextquelle ist
 <https://git.benkard.de/mulk/aendggner>. Die jeweils betriebene
@@ -1003,7 +1003,7 @@ Ziel `deploy:deploy` stillgelegt ist und die Phase allein der Auslieferung der
 Browserfassung dient.
 
 (2) Wer die Fassung stattdessen selbst ausliefert — unter einem Unterpfad einer
-bestehenden Domain, wie zuvor unter <https://aendggner.app.kellertomaten.de/> —,
+bestehenden Domain, wie zuvor unter <https://aendggner.kellertomaten.de/> —,
 braucht die Vorkompression und fordert sie beim Bau an:
 
 ```shell

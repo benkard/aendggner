@@ -21,6 +21,34 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 29. August 2026 (zweite Fassung des Tages),
+ zuletzt geändert durch die am 29. August 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Die kanonische Web-Adresse der Browserfassung lautet fortan
+aendggner.kellertomaten.de (Artikel 1). Das Ergebnis des Vordrucks öffnet sich
+beim Absenden unmittelbar in einem neuen Reiter (Artikel 2).
+
+
+Artikel 1
+Kanonische Web-Adresse
+
+Die Browserfassung wird unter der Domäne aendggner.kellertomaten.de betrieben.
+Die Angabe des kanonischen Verweises in index.html, das Handbuch (README.md) und
+die Konfigurationsvorlage (deploy/nginx-aendggner.conf) sind entsprechend
+angepasst.
+
+
+Artikel 2
+Unmittelbare Öffnung der Synopse
+
+Nach dem Absenden des Vordrucks und abgeschlossener Berechnung öffnet das Skript
+(app.js) das berechnete Ergebnis unmittelbar in einem neuen Browser-Reiter
+(window.open). Der Verweis unter „Verfügung der Zentralstelle“ bleibt als
+Hilfsmittel und für etwaige Zusatzdateien unverändert erhalten.
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 29. August 2026,
  zuletzt geändert durch die am 29. August 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════
