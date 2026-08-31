@@ -1,0 +1,109 @@
+# SPDX-FileCopyrightText: 2026 Matthias Andreas Benkard <code@mail.matthias.benkard.de>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# Selbsttätige Prüfung nach README § 17. Drei Läufe nebeneinander:
+#
+#   1. „pruefung“        — ./mvnw verify: Kompilat, sämtliche Tests (Akzeptanz- und
+#                          Korpuslauf eingeschlossen), Spotless und Enforcer.
+#   2. „browserfassung“  — der Wasm-Bau nach § 14 Abs. 5. Er braucht Oracle GraalVM,
+#                          nicht die Community Edition: Web Image ist nur dort enthalten.
+#   3. „lizenzauszeichnung“ — reuse lint nach § 16.
+#
+# Der Beispielkorpus (src/test/resources/sampledata) liegt im Repository; das
+# gewöhnliche checkout genügt, nachzuladen ist nichts.
+
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+
+  pruefung:
+    name: Bau und Prüfung (JDK 25)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Java einrichten
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: mvnw verify
+        run: ./mvnw --batch-mode --no-transfer-progress verify
+
+      - name: Ausführbare Archivdatei aufbewahren
+        uses: actions/upload-artifact@v4
+        with:
+          name: aendggner-jar
+          path: |
+            target/aendggner-*.jar
+            target/libs/
+          retention-days: 14
+
+      # Nur im Fehlerfall: sonst wäre bei jedem grünen Lauf ein Bericht abzulegen,
+      # den niemand ansieht.
+      - name: Testberichte im Fehlerfall aufbewahren
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-berichte
+          path: target/surefire-reports/
+          retention-days: 14
+
+  browserfassung:
+    name: Browserfassung (GraalVM Web Image)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Binaryen liefert wasm-opt. Fehlt es, bleibt das Modul unnachoptimiert
+      # (webpaket.sh warnt nur), und die Prüfung gegen die 25-MiB-Grenze von
+      # Cloudflare Workers misst nicht das, was ausgeliefert würde.
+      - name: Binaryen einrichten
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y binaryen
+
+      - name: Oracle GraalVM einrichten
+        uses: graalvm/setup-graalvm@v1
+        with:
+          distribution: graalvm
+          java-version: '25'
+          cache: maven
+
+      # Die Tests laufen im Job „pruefung“; hier geht es um den Übersetzungsweg
+      # (native-image --tool:svm-wasm) und um deploy/webpaket.sh.
+      - name: mvnw -Pwasm package
+        run: ./mvnw --batch-mode --no-transfer-progress -Pwasm package -DskipTests
+
+      - name: Webpaket aufbewahren
+        uses: actions/upload-artifact@v4
+        with:
+          name: aendggner-web
+          path: target/web/
+          retention-days: 14
+
+  lizenzauszeichnung:
+    name: Lizenzauszeichnung (REUSE)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: fsfe/reuse-action@v5

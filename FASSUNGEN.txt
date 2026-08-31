@@ -21,6 +21,58 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 31. August 2026,
+ zuletzt geändert durch die am 31. August 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Die Prüfung nach § 17 des Handbuchs läuft fortan selbsttätig: Ein Arbeitsablauf
+für GitHub Actions baut und prüft bei jedem Push und bei jedem Pull Request
+(Artikel 1). Das Handbuch weist dies aus (Artikel 2).
+
+
+Artikel 1
+Selbsttätige Prüfung
+
+Es wird der Arbeitsablauf „.github/workflows/ci.yml“ eingeführt. Er wird
+ausgelöst durch Push nach „master“, durch jeden Pull Request und auf Anforderung
+von Hand (workflow_dispatch); für denselben Verweis wird jeweils nur der jüngste
+Lauf zu Ende geführt (concurrency). Ihm sind allein Leserechte erteilt.
+
+(1) Der Lauf „pruefung“ baut und prüft auf einem Temurin-JDK der Fassung 25 mit
+    „./mvnw verify“. Damit sind neben den Einzel- und Akzeptanzprüfungen auch der
+    Korpuslauf (§ 6d), der Formatierer (Spotless) und die Mindestfassung des
+    Bauwerkzeugs (Enforcer) erfaßt, weil beide an die Phase „verify“ gebunden
+    sind. Die ausführbare Archivdatei nebst „target/libs“ wird als Artefakt
+    aufbewahrt, die Surefire-Berichte allein im Fehlerfall.
+
+(2) Der Lauf „browserfassung“ stellt die Browserfassung mit „./mvnw -Pwasm
+    package -DskipTests“ her. Er richtet hierfür Oracle GraalVM ein
+    (graalvm/setup-graalvm, „distribution: graalvm“); die Community Edition
+    trägt Web Image nicht (§ 14 Absatz 5). Vorab wird Binaryen eingerichtet,
+    damit „deploy/webpaket.sh“ die Nachoptimierung durch wasm-opt tatsächlich
+    vornimmt und die Grenze von 25 MiB an dem mißt, was ausgeliefert würde;
+    ohne Binaryen bliebe es bei einer bloßen Warnung. Das Verzeichnis
+    „target/web“ wird als Artefakt aufbewahrt. Die Tests bleiben hier
+    ausgesetzt; sie laufen im Lauf nach Absatz 1.
+
+(3) Der Lauf „lizenzauszeichnung“ prüft die Auszeichnung nach der
+    REUSE-Spezifikation (fsfe/reuse-action) und entspricht damit dem bisher von
+    Hand geführten „reuse lint“ (§ 16).
+
+Die drei Läufe hängen nicht voneinander ab. Nachzuladen ist nichts: Der
+Beispielkorpus liegt im Repository und ist nur von „git archive“ ausgenommen.
+
+
+Artikel 2
+Fortschreibung des Handbuchs
+
+§ 17 des Handbuchs (README.md) erhält die Absätze 4 und 5. Absatz 4 bezeichnet
+den Arbeitsablauf, seine drei Läufe und die Aufbewahrung der Artefakte; Absatz 5
+nennt die Voraussetzung des Wasm-Laufes (Oracle GraalVM) und stellt klar, daß der
+Beispielkorpus nicht nachzuladen ist.
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 29. August 2026 (zweite Fassung des Tages),
  zuletzt geändert durch die am 29. August 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

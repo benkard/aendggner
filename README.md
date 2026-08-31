@@ -1119,6 +1119,26 @@ Kopfzeile zuvor in den Wortlaut der Vornorm gefallen wäre. Der Rundlauf umfasst
 auch den Kopf: Standangabe und angewandte Hefte müssen ihn überstehen, sonst
 verlöre die Kette bei jedem Schritt ihr Gedächtnis (§ 6a Absatz 4).
 
+(4) Die Prüfung nach Absatz 1 läuft überdies selbsttätig: Bei jedem Push nach
+`master` und bei jedem Pull Request fährt GitHub den Arbeitsablauf
+`.github/workflows/ci.yml` in drei nebeneinanderlaufenden Läufen. Der erste baut
+und prüft auf einem JDK 25 (`./mvnw verify`), wobei Spotless und der Enforcer
+ohne weiteres Zutun mitlaufen, weil sie an die Phase `verify` gebunden sind. Der
+zweite stellt die Browserfassung nach § 14 Absatz 5 her
+(`./mvnw -Pwasm package`) und durchläuft damit auch `deploy/webpaket.sh` samt
+seiner Prüfungen — Nachoptimierung durch `wasm-opt`, Größe des Quelltextarchivs,
+25-MiB-Grenze je Datei (§ 15 Absatz 1). Der dritte prüft die Lizenzauszeichnung
+(`reuse lint`, § 16). Das Webpaket (`target/web/`) und die ausführbare
+Archivdatei bleiben als Artefakte des Laufes vierzehn Tage lang abrufbar; die
+Testberichte werden nur im Fehlerfall aufbewahrt.
+
+(5) Der Wasm-Lauf nach Absatz 4 verlangt dieselbe Voraussetzung wie die
+Herstellung von Hand, nämlich Oracle GraalVM und nicht die Community Edition
+(§ 14 Absatz 5); eingerichtet wird es mit `graalvm/setup-graalvm` unter der
+Angabe `distribution: graalvm`. Der Beispielkorpus ist dabei nichts
+Nachzuladendes: Er liegt im Repository, und `.gitattributes` nimmt ihn allein von
+`git archive` aus (§ 14 Absatz 8).
+
 ## Lizenz
 
 Der Quelltext steht unter der GNU Affero General Public License, Version 3 oder
