@@ -57,15 +57,37 @@ rm -f "$ziel/aendggner.js.wat"
 # was Web Image braucht: WasmGC samt Referenztypen, das Ausnahmen-Proposal, endständige
 # Aufrufe. Fehlt wasm-opt, bleibt das Modul, wie es ist — der Bau soll daran nicht
 # scheitern.
-wasm_merkmale="--enable-gc --enable-reference-types --enable-exception-handling
-               --enable-tail-call --enable-bulk-memory --enable-bulk-memory-opt
-               --enable-nontrapping-float-to-int --enable-sign-ext
-               --enable-mutable-globals --enable-multivalue --enable-extended-const
-               --enable-simd --enable-call-indirect-overlong"
+#
+# Jüngere Merkmale kennt nicht jedes Binaryen: „--enable-bulk-memory-opt“ etwa
+# fehlt den Paketfassungen der Linux-Verteilungen, und wasm-opt bricht dann mit
+# „Unknown option“ ab. Darum wird die Liste an der Hilfeausgabe gemessen und um
+# das gekürzt, was die vorgefundene Fassung nicht kennt: Was sie nicht kennt,
+# gibt sie auch nicht aus, das Ergebnis bleibt mithin gültig — nur womöglich um
+# ein paar Bytes größer.
+wasm_merkmale_alle="--enable-gc --enable-reference-types --enable-exception-handling
+                    --enable-tail-call --enable-bulk-memory --enable-bulk-memory-opt
+                    --enable-nontrapping-float-to-int --enable-sign-ext
+                    --enable-mutable-globals --enable-multivalue --enable-extended-const
+                    --enable-simd --enable-call-indirect-overlong"
 
 if [ -f "$ziel/aendggner.js.wasm" ]; then
   vorher="$(groesse "$ziel/aendggner.js.wasm")"
   if command -v wasm-opt >/dev/null 2>&1; then
+    wasm_hilfe="$(wasm-opt --help 2>&1)"
+    wasm_merkmale=""
+    wasm_fehlend=""
+    for merkmal in $wasm_merkmale_alle; do
+      if printf '%s\n' "$wasm_hilfe" \
+           | grep -qE -- "(^|[^A-Za-z0-9-])$merkmal([^A-Za-z0-9-]|\$)"; then
+        wasm_merkmale="$wasm_merkmale $merkmal"
+      else
+        wasm_fehlend="$wasm_fehlend $merkmal"
+      fi
+    done
+    if [ -n "$wasm_fehlend" ]; then
+      echo "webpaket: wasm-opt kennt diese Merkmale nicht und läuft ohne sie:" \
+           "$wasm_fehlend" >&2
+    fi
     # shellcheck disable=SC2086  # die Merkmalsliste soll in Wörter zerfallen
     wasm-opt $wasm_merkmale -Oz \
       -o "$ziel/aendggner.js.wasm.neu" "$ziel/aendggner.js.wasm"

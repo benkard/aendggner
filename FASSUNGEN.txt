@@ -27,7 +27,10 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 Die Sprachfassung des Bausatzes wird von 21 auf 25 angehoben (Artikel 1); der
 Wasm-Zweig folgt (Artikel 2). Der Enforcer wacht fortan über die vorausgesetzte
-Fassung (Artikel 3). Das Handbuch weist dies aus (Artikel 4).
+Fassung (Artikel 3). Das Handbuch weist dies aus (Artikel 4). Die Liste der dem
+Nachoptimierer zugelassenen Wasm-Merkmale wird fortan an der vorgefundenen
+Binaryen-Fassung gemessen, damit ein unbekannter Schalter den Bau nicht mehr
+abbricht (Artikel 5); auch dies weist das Handbuch aus (Artikel 6).
 
 
 Artikel 1
@@ -67,11 +70,44 @@ den Wasm-Bau ist weiterhin Oracle GraalVM 25.1 oder neuer erforderlich.
 
 
 Artikel 5
+Anpassung der Wasm-Merkmalsliste an die vorgefundene Binaryen-Fassung
+
+„deploy/webpaket.sh“ zählt die dem Nachoptimierer (wasm-opt) zugelassenen
+Wasm-Merkmale einzeln auf. Die selbsttätige Prüfung brach an dieser Stelle ab:
+„Unknown option '--enable-bulk-memory-opt'“. Das Merkmal ist erst in jüngeren
+Binaryen-Fassungen vorhanden; die Paketfassung der Verteilung (Ubuntu 26.04)
+kennt es nicht, und wasm-opt bricht bei einem unbekannten Schalter ab, statt ihn
+zu übergehen.
+
+(1) Vor dem Aufruf wird die Hilfeausgabe des vorgefundenen „wasm-opt“ erhoben.
+    Jedes Merkmal der Liste wird an ihr gemessen; die dort nicht aufgeführten
+    werden ausgesondert. Die Messung achtet auf Wortgrenzen, damit
+    „--enable-bulk-memory“ nicht schon durch „--enable-bulk-memory-opt“ als
+    vorhanden gilt.
+
+(2) Die Aussonderung bleibt unschädlich: Was eine Fassung nicht kennt, gibt sie
+    auch nicht aus; das Modul bleibt gültig und wird allenfalls um einige Bytes
+    größer. Die ausgesonderten Merkmale werden benannt.
+
+(3) Unberührt bleibt der Grundsatz, die Merkmale einzeln aufzuzählen und nicht
+    „--all-features“ zu erteilen (§ 14 Absatz 7 Nummer 4 des Handbuchs).
+
+
+Artikel 6
+Handbuch
+
+§ 14 Absatz 7 Nummer 4 des Handbuchs (README.md) weist die Messung an der
+Hilfeausgabe und ihren Anlass aus.
+
+
+Artikel 7
 Prüfung
 
 Der Bau geht auf einem Oracle GraalVM 25.0.4 auf: „./mvnw verify“ meldet BUILD
 SUCCESS mit 456 von 456 Tests, Spotless beanstandet nichts, und der Enforcer
 lässt die neue Regel durchgehen. Auch das Profil „wasm“ übersetzt („target 25“).
+Die Merkmalsmessung sondert auf dem hiesigen Binaryen 132 nichts aus; gegen eine
+verkürzte Hilfeausgabe geprüft, sondert sie genau die fehlenden Schalter aus.
 
 
 ════════════════════════════════════════════════════════════════════════════════

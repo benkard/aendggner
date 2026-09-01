@@ -956,7 +956,11 @@ handelt sich die Megabyte wieder ein:
 4. `wasm-opt -Oz` als Nachlauf. Die zugelassenen Wasm-Merkmale sind in
    `webpaket.sh` einzeln aufgezählt und nicht als `--all-features` erteilt: Sonst
    nutzt Binaryen auch Vorschläge, die noch kein Browser annimmt, und das Modul
-   scheitert erst beim Instanziieren.
+   scheitert erst beim Instanziieren. Die Liste wird vor dem Aufruf an der
+   Hilfeausgabe des vorgefundenen `wasm-opt` gemessen und um das gekürzt, was
+   ältere Fassungen nicht kennen — die Paketfassungen der Verteilungen kennen
+   etwa `--enable-bulk-memory-opt` nicht und brächen sonst mit „Unknown option“
+   ab.
 
 (8) Im Quelltextarchiv fehlt der Beispielkorpus; `.gitattributes` nimmt
 `src/test/resources/sampledata` von `git archive` aus. Es sind Gesetzes- und
