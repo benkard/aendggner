@@ -21,6 +21,60 @@ Vorbemerkung zur Führung dieses Verzeichnisses
 
 
 ════════════════════════════════════════════════════════════════════════════════
+ Fassung vom 1. September 2026,
+ zuletzt geändert durch die am 1. September 2026 vorgenommenen Änderungen
+════════════════════════════════════════════════════════════════════════════════
+
+Die Sprachfassung des Bausatzes wird von 21 auf 25 angehoben (Artikel 1); der
+Wasm-Zweig folgt (Artikel 2). Der Enforcer wacht fortan über die vorausgesetzte
+Fassung (Artikel 3). Das Handbuch weist dies aus (Artikel 4).
+
+
+Artikel 1
+Anhebung der Sprachfassung
+
+In „pom.xml“ wird die Eigenschaft „maven.compiler.release“ von „21“ auf „25“
+geändert. Die selbsttätige Prüfung baute schon bisher auf einem JDK 25; der
+Quellstand blieb hinter dieser Grundlage zurück. Fortan stehen die Sprachmittel
+der Fassungen 22 bis 25 zur Verfügung.
+
+
+Artikel 2
+Wasm-Zweig
+
+Im Profil „wasm“ werden „maven.compiler.source“ und „maven.compiler.target“
+gleichfalls auf „25“ gesetzt; der erläuternde Vermerk spricht entsprechend von
+der Option „release 25“. An der dortigen Abkehr von „release“ zugunsten von
+„source“/„target“ ändert sich nichts: Sie beruht darauf, dass die Web-Image-API
+des GraalVM außerhalb der dokumentierten JDK-API liegt.
+
+
+Artikel 3
+Überwachung der vorausgesetzten Fassung
+
+Der Regel „requireMavenVersion“ wird „requireJavaVersion“ zur Seite gestellt,
+gespeist aus der neuen Eigenschaft „enforced.java-version“ (Wert „25“). Ein zu
+alter Bausatz wird damit beim Enforcer benannt und nicht erst durch eine
+schwerer deutbare Meldung des Übersetzers.
+
+
+Artikel 4
+Handbuch
+
+§ 5 Absatz 3 des Handbuchs (README.md) setzt fortan einen Java-Entwicklungs-
+bausatz der Fassung 25 oder neuer voraus. § 14 Absatz 3 bleibt unberührt: Für
+den Wasm-Bau ist weiterhin Oracle GraalVM 25.1 oder neuer erforderlich.
+
+
+Artikel 5
+Prüfung
+
+Der Bau geht auf einem Oracle GraalVM 25.0.4 auf: „./mvnw verify“ meldet BUILD
+SUCCESS mit 456 von 456 Tests, Spotless beanstandet nichts, und der Enforcer
+lässt die neue Regel durchgehen. Auch das Profil „wasm“ übersetzt („target 25“).
+
+
+════════════════════════════════════════════════════════════════════════════════
  Fassung vom 31. August 2026,
  zuletzt geändert durch die am 31. August 2026 vorgenommenen Änderungen
 ════════════════════════════════════════════════════════════════════════════════

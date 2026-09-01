@@ -173,7 +173,7 @@ Fassungen (`FASSUNGEN.txt`) geführt.
 `0.1.0-SNAPSHOT`, soweit sie nicht durch Übergabe des Schalters `-Drevision` an
 `mvnw` abweichend bestimmt wird.
 
-(3) Vorausgesetzt wird ein Java-Entwicklungsbausatz der Fassung 21 oder neuer.
+(3) Vorausgesetzt wird ein Java-Entwicklungsbausatz der Fassung 25 oder neuer.
 Für die Herstellung der Browserfassung gilt abweichend § 14 Absatz 5.
 
 ## § 5 Zulässige Eingaben

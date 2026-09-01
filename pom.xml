@@ -23,12 +23,13 @@
 
   <properties>
     <maven.compiler.parameters>true</maven.compiler.parameters>
-    <maven.compiler.release>21</maven.compiler.release>
+    <maven.compiler.release>25</maven.compiler.release>
 
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <enforced.maven-version>3.9.0</enforced.maven-version>
+    <enforced.java-version>25</enforced.java-version>
 
     <build-helper-plugin.version>3.6.0</build-helper-plugin.version>
     <clean-plugin.version>3.3.2</clean-plugin.version>
@@ -254,6 +255,9 @@
                 <requireMavenVersion>
                   <version>${enforced.maven-version}</version>
                 </requireMavenVersion>
+                <requireJavaVersion>
+                  <version>${enforced.java-version}</version>
+                </requireJavaVersion>
               </rules>
             </configuration>
           </execution>
@@ -347,13 +351,13 @@
         <native-image.executable>${java.home}/bin/native-image</native-image.executable>
         <wasm.output.directory>${project.build.directory}/web</wasm.output.directory>
         <!--
-          Die Option „release 21“ beschränkte den Modulpfad auf die dokumentierte JDK-API; die
+          Die Option „release 25“ beschränkte den Modulpfad auf die dokumentierte JDK-API; die
           Web-Image-API des GraalVM wäre damit unsichtbar. Deshalb hier source/target statt
           release — übersetzt wird ohnehin nur mit dem GraalVM, gegen dessen eigene Klassen.
         -->
         <maven.compiler.release/>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
       </properties>
 
       <dependencies>
